@@ -72,10 +72,10 @@ module Erubis
       eval @src, binding, filename
     end
 
-    def evaluate(context={})
+    def evaluate(_context={})
       _evalstr = ''
-      context.keys.each do |key|
-        _evalstr << "#{key.to_s} = context[#{key.inspect}]\n"
+      _context.keys.each do |key|
+        _evalstr << "#{key.to_s} = _context[#{key.inspect}]\n"
       end
       eval _evalstr
       return result(binding())
@@ -105,7 +105,7 @@ module Erubis
         end
         add_src_text(src, tail_space) if !flag_trim && tail_space
       end
-      rest = $'
+      rest = $' || input
       add_src_text(src, rest)
       finalize_src(src)
       return src
@@ -118,6 +118,7 @@ module Erubis
     end
 
     def add_src_text(src, text)
+      #return if text.empty?
       text.each_line do |line|
         src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
       end
@@ -162,8 +163,11 @@ module Erubis
       when 2   # <%== %>
         super
       when 3   # <%=== %>
-        code.trim!
-        src << '$stdout.write("** debug: ' << code << ' = #{(' << code << ').inspect}"); '
+        code.strip!
+        s = code.dump
+        s.sub!(/\A"/, '')
+        s.sub!(/"\z/, '')
+        src << "$stdout.write(\"** debug: #{s} = \#{(#{code}).inspect}\"); "
       else
         # nothing
       end
@@ -173,11 +177,12 @@ module Erubis
 
 
   ##
-  ## make faster Eruby
+  ## make Eruby faster
   ##
-  module FastFixture
+  module FastEnhancer
 
     def add_src_text(src, text)
+      return if text.empty?
       #src << "_out << #{text.dump}" << (text[-1] == ?\n ? "\n" : "; ")
       src << "_out << #{text.dump}"
       n = text.count("\n")
@@ -191,7 +196,7 @@ module Erubis
   ##
   ## use $stdout instead of string
   ##
-  module StdoutFixture
+  module StdoutEnhancer
 
     def initialize_src(src)
       src << "_out = $stdout; "
@@ -205,22 +210,22 @@ module Erubis
 
 
   class FastEruby < Eruby
-    include FastFixture
+    include FastEnhancer
   end
 
 
   class StdoutEruby < Eruby
-    include StdoutFixture
+    include StdoutEnhancer
   end
 
 
   class FastXmlEruby < XmlEruby
-    include FastFixture
+    include FastEnhancer
   end
 
 
   class StdoutXmlEruby < XmlEruby
-    include StdoutFixture
+    include StdoutEnhancer
   end
 
 

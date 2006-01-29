@@ -52,7 +52,7 @@ class ErubisTest < Test::Unit::TestCase
     klass   = ydoc['class'] ? (eval "Erubis::#{ydoc['class']}") : Erubis::Eruby
     options = ydoc['options'] || {}
     testopt = ydoc['testopt']
-    #
+    
     if testopt != 'load_file'
       eruby = klass.new(input, options)
     else
@@ -65,6 +65,9 @@ class ErubisTest < Test::Unit::TestCase
       end
     end
     assert_equal_with_diff(src, eruby.src)
+    
+    return if testopt == 'skip_output'
+    
     context = {}
     context[:list] = ['<aaa>', 'b&b', '"ccc"']
     
@@ -259,6 +262,27 @@ output: |
     </pre>
 ##
 ---
+name:  xml2
+class: XmlEruby
+testopt:  skip_output
+input: |
+    <% for item in list %>
+      <%= item["var#{n}"] %>
+      <%== item["var#{n}"] %>
+      <%=== item["var#{n}"] %>
+      <%==== item["var#{n}"] %>
+    <% end %>
+src: |
+    _out = '';  for item in list 
+    _out << "  "; _out << Erubis::XmlEruby.escape( item["var#{n}"] ); _out << "\n"
+    _out << "  "; _out << ( item["var#{n}"] ).to_s; _out << "\n"
+    _out << "  "; $stdout.write("** debug: item[\"var\#{n}\"] = #{(item["var#{n}"]).inspect}"); _out << "\n"
+    _out << "  "; _out << "\n"
+     end 
+    _out
+output: |
+##
+---
 name:  fast1
 class: FastEruby
 input: |
@@ -341,6 +365,32 @@ output: |
     <ul><li>&lt;aaa&gt;</li><li>b&amp;b</li><li>&quot;ccc&quot;</li></ul>
 ##
 ---
+name:  fast3
+desc:  bug
+class: FastEruby
+input: |
+    user = <%= "Foo" %>
+    <% for item in list %>
+      <%= item %>
+    <% end %>
+src: |
+    _out = ''; _out << "user = "; _out << ( "Foo" ).to_s; _out << "\n"
+     for item in list 
+    _out << "  "; _out << ( item ).to_s; _out << "\n"
+     end 
+    _out
+#    _out = ''; _out << "user = "; _out << ( "Foo" ).to_s; _out << "\n"
+#    _out << "";  for item in list 
+#    _out << ""; _out << "  "; _out << ( item ).to_s; _out << "\n"
+#    _out << "";  end 
+#    _out << ""; _out
+output: |
+    user = Foo
+      <aaa>
+      b&b
+      "ccc"
+##
+---
 name:  stdout1
 class: StdoutEruby
 testopt: stdout
@@ -391,4 +441,21 @@ src:
 #    </ul>
 output: 
     "<ul>\r\n  <li><aaa></li>\r\n  <li>b&b</li>\r\n  <li>\"ccc\"</li>\r\n</ul>\r\n"
-
+##
+---
+name:  nomatch1
+desc:  bug
+input: |
+    <ul>
+      <li>foo</li>
+    </ul>
+src: |
+    _out = ''; _out << "<ul>\n"
+    _out << "  <li>foo</li>\n"
+    _out << "</ul>\n"
+    _out
+output: |
+    <ul>
+      <li>foo</li>
+    </ul>
+##

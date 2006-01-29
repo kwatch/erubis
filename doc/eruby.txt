@@ -48,7 +48,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     rest.each_line do |line|
       src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -66,13 +66,18 @@ end
 list = ['aaa', 'bbb', 'ccc']
 
 input = <<END
-<table>
+<ul>
  <% for item in list %>
-  <tr>
-    <td><%= item %></td>
-  </tr>
+  <li><%= item %></li>
  <% end %>
-</table>
+</ul>
+.#<table>
+.# <% for item in list %>
+.#  <tr>
+.#    <td><%= item %></td>
+.#  </tr>
+.# <% end %>
+.#</table>
 END
 
 require 'eruby1'
@@ -134,7 +139,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     {{*add_src_text(src, rest)*}}
 
     {{*finalize_src(src)*}}
@@ -148,6 +153,7 @@ class Eruby
   {{*end*}}
 
   {{*def add_src_text(src, text)*}}
+    {{*return if text.empty?*}}
     {{*text.each_line do |line|*}}
       {{*src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")*}}
     {{*end*}}
@@ -174,7 +180,7 @@ end
 .-------------------- stdout-eruby.rb
 ##
 ## 文字列ではなく標準出力を使う Eruby
-## (「<% print var %>」が問題なく使えるようになる)
+## (「<% print expr %>」が使えるようになる)
 ##
 class StdoutEruby < Eruby
 
@@ -198,6 +204,7 @@ end
 class FastEruby < Eruby
 
   def add_src_text(src, text)
+    return if text.empty?
     src << "_out << #{text.dump}" << "; "
     src << ("\n" * text.count("\n"))
   end
@@ -211,6 +218,11 @@ end
 list = ['aaa', 'bbb', 'ccc']
 
 input = <<END
+.#<ul>
+.# <% for item in list %>
+.#  <li><%= item %></li>
+.# <% end %>
+.#</ul>
 <table>
  <% for item in list %>
   <tr>
@@ -221,12 +233,14 @@ input = <<END
 END
 
 require 'eruby2'
-require 'fast-eruby'
-eruby = FastEruby.new(input)
-puts "--- source ---"
+eruby = Eruby.new(input)
+puts "--- source (Eruby) ---"
 puts eruby.src
-puts "--- result ---"
-puts eruby.result
+
+require 'fast-eruby'
+fasteruby = FastEruby.new(input)
+puts "--- source (FastEruby) ---"
+puts fasteruby.src
 .--------------------
 
 .? output
@@ -297,7 +311,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -311,6 +325,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -338,16 +353,22 @@ end
 list = ['aaa', 'bbb', 'ccc']
 
 input = <<END
-<table>
+<ul>
  <% for item in list %>
-  <tr>
-    <td>
-      <%= item %>
-    </td>
-  </tr>
+  <li>
+    <%= item %>
+  </li>
  <% end %>
-</table>
 </ul>
+.#<table>
+.# <% for item in list %>
+.#  <tr>
+.#    <td>
+.#      <%= item %>
+.#    </td>
+.#  </tr>
+.# <% end %>
+.#</table>
 END
 
 require 'eruby3'
@@ -426,7 +447,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -440,6 +461,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -499,14 +521,20 @@ end
 list = ['<aaa>', 'b&b', '"ccc"']
 
 input = <<END
-<table>
+<ul>
  <% for item in list %>
-  <tr>
-    <td><%= item %></td>
-    <td><%== item %></td>
-  </tr>
+  <li><%= item %></li>
+  <li><%== item %></li>
  <% end %>
-</table>
+</ul>
+.#<table>
+.# <% for item in list %>
+.#  <tr>
+.#    <td><%= item %></td>
+.#    <td><%== item %></td>
+.#  </tr>
+.# <% end %>
+.#</table>
 END
 
 require 'eruby4'
@@ -591,7 +619,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -605,6 +633,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -632,13 +661,18 @@ end
 list = ['aaa', 'bbb', 'ccc']
 
 input = <<END
-<table>
+<ul>
  <!--% for item in list %-->
-  <tr>
-    <td><!--%= item %--></td>
-  </tr>
+  <li><!--%= item %--></li>
  <!--% end %-->
-</table>
+</ul>
+.#<table>
+.# <!--% for item in list %-->
+.#  <tr>
+.#    <td><!--%= item %--></td>
+.#  </tr>
+.# <!--% end %-->
+.#</table>
 END
 
 require 'eruby5'
@@ -656,3 +690,147 @@ print eruby.result()
 .<<<:! ruby example5.rb
 .____________________
 
+
+
+
+●コンテキストを指定できるようにする
+
+.? eruby6.rb
+.-------------------- eruby6.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input, options={})
+    @input = input
+    @options = options
+    @pattern = options[:pattern] || '<% %>'
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+  
+  {{*## コンテキストを指定して result() を呼び出す*}}
+  {{*def evaluate(_context={})*}}
+    {{*_evalstr = ''*}}
+    {{*_context.keys.each do |key|*}}
+      {{*_evalstr << "#{key.to_s} = _context[#{key.inspect}]\n"*}}
+    {{*end*}}
+    {{*eval _evalstr*}}
+    {{*return result(binding())*}}
+  {{*end*}}
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = ""
+    initialize_src(src)
+    prefix, postfix = @pattern.split()   # 埋め込みパターン
+    regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
+    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+      ## * <%= %> のときは、何もしない
+      ## * <% %> のときは、
+      ##    * 前後が空白だけのときは、その空白を削除
+      ##    * そうでないときは、何もしない（空白を残す）
+      flag_trim = kind.empty? && head_space && tail_space
+
+      ## テキストを処理
+      add_src_text(src, text)
+
+      ## 前の空白を処理
+      unless flag_trim
+        add_src_text(src, head_space) if head_space
+      end
+
+      ## 埋め込み Ruby コードを処理
+      if !kind.empty?  # <%= %> の場合
+        add_src_expr(src, code, kind.length)
+      else             # <%  %> の場合
+        ## 改行を含めた前後の空白をコードに足す
+        code = "#{head_space}#{code}#{tail_space}" if flag_trim
+        add_src_code(src, code)
+      end
+
+      ## 後ろの空白を処理
+      unless flag_trim
+        add_src_text(src, tail_space) if tail_space
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $' || input
+    add_src_text(src, rest)
+
+    finalize_src(src)
+    return src
+  end
+
+  protected
+
+  def initialize_src(src)
+    src << "_out = ''; "
+  end
+
+  def add_src_text(src, text)
+    return if text.empty?
+    text.each_line do |line|
+      src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+    end
+  end
+
+  def add_src_expr(src, code, length)
+    src << "_out << (#{code}).to_s; "
+  end
+
+  def add_src_code(src, code)
+    code.each_line { |line| src << line }
+    src << "; " unless code[-1] == ?\n
+  end
+
+  def finalize_src(src)
+    src << "_out\n"
+  end
+
+end
+
+.--------------------
+
+
+.? example6.rb
+.-------------------- example6.rb
+## eRuby スクリプト
+input = <<END
+<h2><%= title %></h2>
+<ul>
+ <% for item in list %>
+  <li><%= item %></li>
+ <% end %>
+</ul>
+END
+
+## コンテキストオブジェクトを作成する。
+## 変数名は文字列または Symbol で指定する。
+## また YAML ファイルを読み込んでそれをコンテキストとして使ってもよい。
+context = {}
+context['title'] = "Context Example"
+context[:list]   = ['aaa', 'bbb', 'ccc']
+
+## eRuby を実行する
+require 'eruby6'
+eruby = Eruby.new(input)
+print eruby.evaluate(context)
+.--------------------
+
+
+.? output
+.____________________
+.<<<:! ruby example6.rb
+.____________________

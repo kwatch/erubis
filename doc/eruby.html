@@ -232,7 +232,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     rest.each_line do |line|
       src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -249,13 +249,11 @@ example1.rb</div>
 <pre class="program">list = ['aaa', 'bbb', 'ccc']
 
 input = &lt;&lt;END
-&lt;table&gt;
+&lt;ul&gt;
  &lt;% for item in list %&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
  &lt;% end %&gt;
-&lt;/table&gt;
+&lt;/ul&gt;
 END
 
 require 'eruby1'
@@ -268,30 +266,22 @@ puts eruby.result
 <div class="output_caption">
 output</div>
 <pre class="output">--- source ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
 _out &lt;&lt; " ";  for item in list ; _out &lt;&lt; "\n"
-_out &lt;&lt; "  &lt;tr&gt;\n"
-_out &lt;&lt; "    &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
-_out &lt;&lt; "  &lt;/tr&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
 _out &lt;&lt; " ";  end ; _out &lt;&lt; "\n"
-_out &lt;&lt; "&lt;/table&gt;\n"
+_out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
-&lt;table&gt;
+&lt;ul&gt;
  
-  &lt;tr&gt;
-    &lt;td&gt;aaa&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
  
-  &lt;tr&gt;
-    &lt;td&gt;bbb&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
  
-  &lt;tr&gt;
-    &lt;td&gt;ccc&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
  
-&lt;/table&gt;
+&lt;/ul&gt;
 </pre>
 <br>
 
@@ -339,7 +329,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     <strong>add_src_text(src, rest)</strong>
 
     <strong>finalize_src(src)</strong>
@@ -353,6 +343,7 @@ class Eruby
   <strong>end</strong>
 
   <strong>def add_src_text(src, text)</strong>
+    <strong>return if text.empty?</strong>
     <strong>text.each_line do |line|</strong>
       <strong>src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")</strong>
     <strong>end</strong>
@@ -401,6 +392,7 @@ fast-eruby.rb : 高速化した Eruby</div>
 class FastEruby &lt; Eruby
 
   def add_src_text(src, text)
+    return if text.empty?
     src &lt;&lt; "_out &lt;&lt; #{text.dump}" &lt;&lt; "; "
     src &lt;&lt; ("\n" * text.count("\n"))
   end
@@ -423,16 +415,27 @@ input = &lt;&lt;END
 END
 
 require 'eruby2'
-require 'fast-eruby'
-eruby = FastEruby.new(input)
-puts "--- source ---"
+eruby = Eruby.new(input)
+puts "--- source (Eruby) ---"
 puts eruby.src
-puts "--- result ---"
-puts eruby.result
+
+require 'fast-eruby'
+fasteruby = FastEruby.new(input)
+puts "--- source (FastEruby) ---"
+puts fasteruby.src
 </pre>
 <div class="output_caption">
 output</div>
-<pre class="output">--- source ---
+<pre class="output">--- source (Eruby) ---
+_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out &lt;&lt; " ";  for item in list ; _out &lt;&lt; "\n"
+_out &lt;&lt; "  &lt;tr&gt;\n"
+_out &lt;&lt; "    &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
+_out &lt;&lt; "  &lt;/tr&gt;\n"
+_out &lt;&lt; " ";  end ; _out &lt;&lt; "\n"
+_out &lt;&lt; "&lt;/table&gt;\n"
+_out
+--- source (FastEruby) ---
 _out = ''; _out &lt;&lt; "&lt;table&gt;\n "; 
  for item in list ; _out &lt;&lt; "\n  &lt;tr&gt;\n    &lt;td&gt;"; 
 
@@ -441,22 +444,6 @@ _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n  &lt;/tr&gt;\n ";
  end ; _out &lt;&lt; "\n&lt;/table&gt;\n"; 
 
 _out
---- result ---
-&lt;table&gt;
- 
-  &lt;tr&gt;
-    &lt;td&gt;aaa&lt;/td&gt;
-  &lt;/tr&gt;
- 
-  &lt;tr&gt;
-    &lt;td&gt;bbb&lt;/td&gt;
-  &lt;/tr&gt;
- 
-  &lt;tr&gt;
-    &lt;td&gt;ccc&lt;/td&gt;
-  &lt;/tr&gt;
- 
-&lt;/table&gt;
 </pre>
 <br>
 
@@ -522,7 +509,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -536,6 +523,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -562,15 +550,12 @@ example3.rb</div>
 <pre class="program">list = ['aaa', 'bbb', 'ccc']
 
 input = &lt;&lt;END
-&lt;table&gt;
+&lt;ul&gt;
  &lt;% for item in list %&gt;
-  &lt;tr&gt;
-    &lt;td&gt;
-      &lt;%= item %&gt;
-    &lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;
+    &lt;%= item %&gt;
+  &lt;/li&gt;
  &lt;% end %&gt;
-&lt;/table&gt;
 &lt;/ul&gt;
 END
 
@@ -584,35 +569,25 @@ puts eruby.result
 <div class="output_caption">
 output</div>
 <pre class="output">--- source ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
   for item in list 
-_out &lt;&lt; "  &lt;tr&gt;\n"
-_out &lt;&lt; "    &lt;td&gt;\n"
-_out &lt;&lt; "      "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
-_out &lt;&lt; "    &lt;/td&gt;\n"
-_out &lt;&lt; "  &lt;/tr&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;\n"
+_out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
+_out &lt;&lt; "  &lt;/li&gt;\n"
   end 
-_out &lt;&lt; "&lt;/table&gt;\n"
 _out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
-&lt;table&gt;
-  &lt;tr&gt;
-    &lt;td&gt;
-      aaa
-    &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;
-      bbb
-    &lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;
-      ccc
-    &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    aaa
+  &lt;/li&gt;
+  &lt;li&gt;
+    bbb
+  &lt;/li&gt;
+  &lt;li&gt;
+    ccc
+  &lt;/li&gt;
 &lt;/ul&gt;
 </pre>
 <br>
@@ -679,7 +654,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -693,6 +668,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -750,14 +726,12 @@ example4.rb</div>
 <pre class="program">list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']
 
 input = &lt;&lt;END
-&lt;table&gt;
+&lt;ul&gt;
  &lt;% for item in list %&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
-    &lt;td&gt;&lt;%== item %&gt;&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;%== item %&gt;&lt;/li&gt;
  &lt;% end %&gt;
-&lt;/table&gt;
+&lt;/ul&gt;
 END
 
 require 'eruby4'
@@ -771,30 +745,22 @@ puts eruby.result
 <div class="output_caption">
 output</div>
 <pre class="output">--- source ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
   for item in list 
-_out &lt;&lt; "  &lt;tr&gt;\n"
-_out &lt;&lt; "    &lt;td&gt;"; _out &lt;&lt; XmlEruby.escape( item ); _out &lt;&lt; "&lt;/td&gt;\n"
-_out &lt;&lt; "    &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
-_out &lt;&lt; "  &lt;/tr&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; XmlEruby.escape( item ); _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
   end 
-_out &lt;&lt; "&lt;/table&gt;\n"
+_out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
-&lt;table&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&amp;lt;aaa&amp;gt;&lt;/td&gt;
-    &lt;td&gt;&lt;aaa&gt;&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;b&amp;amp;b&lt;/td&gt;
-    &lt;td&gt;b&amp;b&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&amp;quot;ccc&amp;quot;&lt;/td&gt;
-    &lt;td&gt;"ccc"&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
+&lt;ul&gt;
+  &lt;li&gt;&amp;lt;aaa&amp;gt;&lt;/li&gt;
+  &lt;li&gt;&lt;aaa&gt;&lt;/li&gt;
+  &lt;li&gt;b&amp;amp;b&lt;/li&gt;
+  &lt;li&gt;b&amp;b&lt;/li&gt;
+  &lt;li&gt;&amp;quot;ccc&amp;quot;&lt;/li&gt;
+  &lt;li&gt;"ccc"&lt;/li&gt;
+&lt;/ul&gt;
 </pre>
 <br>
 
@@ -863,7 +829,7 @@ class Eruby
     end
 
     ## 残りのテキストを処理
-    rest = $'
+    rest = $' || input
     add_src_text(src, rest)
 
     finalize_src(src)
@@ -877,6 +843,7 @@ class Eruby
   end
 
   def add_src_text(src, text)
+    return if text.empty?
     text.each_line do |line|
       src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")
     end
@@ -903,13 +870,11 @@ example5.rb</div>
 <pre class="program">list = ['aaa', 'bbb', 'ccc']
 
 input = &lt;&lt;END
-&lt;table&gt;
+&lt;ul&gt;
  &lt;!--% for item in list %--&gt;
-  &lt;tr&gt;
-    &lt;td&gt;&lt;!--%= item %--&gt;&lt;/td&gt;
-  &lt;/tr&gt;
+  &lt;li&gt;&lt;!--%= item %--&gt;&lt;/li&gt;
  &lt;!--% end %--&gt;
-&lt;/table&gt;
+&lt;/ul&gt;
 END
 
 require 'eruby5'
@@ -923,26 +888,165 @@ print eruby.result()
 <div class="output_caption">
 output</div>
 <pre class="output">--- source ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
   for item in list 
-_out &lt;&lt; "  &lt;tr&gt;\n"
-_out &lt;&lt; "    &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
-_out &lt;&lt; "  &lt;/tr&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
   end 
-_out &lt;&lt; "&lt;/table&gt;\n"
+_out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
-&lt;table&gt;
-  &lt;tr&gt;
-    &lt;td&gt;aaa&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;bbb&lt;/td&gt;
-  &lt;/tr&gt;
-  &lt;tr&gt;
-    &lt;td&gt;ccc&lt;/td&gt;
-  &lt;/tr&gt;
-&lt;/table&gt;
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<br>
+
+
+<a name="コンテキストを指定できるようにする"></a>
+<h2 class="section1">コンテキストを指定できるようにする</h2>
+<a name="eruby6.rb"></a>
+<div class="program_caption">
+eruby6.rb</div>
+<pre class="program">##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input, options={})
+    @input = input
+    @options = options
+    @pattern = options[:pattern] || '&lt;% %&gt;'
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+  
+  <strong>## コンテキストを指定して result() を呼び出す</strong>
+  <strong>def evaluate(_context={})</strong>
+    <strong>_evalstr = ''</strong>
+    <strong>_context.keys.each do |key|</strong>
+      <strong>_evalstr &lt;&lt; "#{key.to_s} = _context[#{key.inspect}]\n"</strong>
+    <strong>end</strong>
+    <strong>eval _evalstr</strong>
+    <strong>return result(binding())</strong>
+  <strong>end</strong>
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = ""
+    initialize_src(src)
+    prefix, postfix = @pattern.split()   # 埋め込みパターン
+    regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
+    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+      ## * &lt;%= %&gt; のときは、何もしない
+      ## * &lt;% %&gt; のときは、
+      ##    * 前後が空白だけのときは、その空白を削除
+      ##    * そうでないときは、何もしない（空白を残す）
+      flag_trim = kind.empty? &amp;&amp; head_space &amp;&amp; tail_space
+
+      ## テキストを処理
+      add_src_text(src, text)
+
+      ## 前の空白を処理
+      unless flag_trim
+        add_src_text(src, head_space) if head_space
+      end
+
+      ## 埋め込み Ruby コードを処理
+      if !kind.empty?  # &lt;%= %&gt; の場合
+        add_src_expr(src, code, kind.length)
+      else             # &lt;%  %&gt; の場合
+        ## 改行を含めた前後の空白をコードに足す
+        code = "#{head_space}#{code}#{tail_space}" if flag_trim
+        add_src_code(src, code)
+      end
+
+      ## 後ろの空白を処理
+      unless flag_trim
+        add_src_text(src, tail_space) if tail_space
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $' || input
+    add_src_text(src, rest)
+
+    finalize_src(src)
+    return src
+  end
+
+  protected
+
+  def initialize_src(src)
+    src &lt;&lt; "_out = ''; "
+  end
+
+  def add_src_text(src, text)
+    return if text.empty?
+    text.each_line do |line|
+      src &lt;&lt; "_out &lt;&lt; #{line.dump}" &lt;&lt; (line[-1] == ?\n ? "\n" : "; ")
+    end
+  end
+
+  def add_src_expr(src, code, length)
+    src &lt;&lt; "_out &lt;&lt; (#{code}).to_s; "
+  end
+
+  def add_src_code(src, code)
+    code.each_line { |line| src &lt;&lt; line }
+    src &lt;&lt; "; " unless code[-1] == ?\n
+  end
+
+  def finalize_src(src)
+    src &lt;&lt; "_out\n"
+  end
+
+end
+
+</pre>
+<a name="example6.rb"></a>
+<div class="program_caption">
+example6.rb</div>
+<pre class="program">## eRuby スクリプト
+input = &lt;&lt;END
+&lt;h2&gt;&lt;%= title %&gt;&lt;/h2&gt;
+&lt;ul&gt;
+ &lt;% for item in list %&gt;
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+ &lt;% end %&gt;
+&lt;/ul&gt;
+END
+
+## コンテキストオブジェクトを作成する。
+## 変数名は文字列または Symbol で指定する。
+## また YAML ファイルを読み込んでそれをコンテキストとして使ってもよい。
+context = {}
+context['title'] = "Context Example"
+context[:list]   = ['aaa', 'bbb', 'ccc']
+
+## eRuby を実行する
+require 'eruby6'
+eruby = Eruby.new(input)
+print eruby.evaluate(context)
+</pre>
+<div class="output_caption">
+output</div>
+<pre class="output">&lt;h2&gt;Context Example&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
 </pre>
 <br>
 

@@ -1,0 +1,175 @@
+#!/usr/bin/ruby
+
+###
+### $Rev$
+### $Release$
+### $Copyright$
+###
+
+require 'yaml'
+require 'erubis'
+
+
+class CommandOptionError < StandardError
+  def initialize(message)
+    super(message)
+  end
+end
+
+
+class Main
+
+  def execute(argv=ARGV)
+    ## parse command-line options
+    options, context = parse_argv(argv, "hvsT", "pcfK")
+    filenames = argv
+    options[?h] = true if context[:help]
+
+    ## help, version
+    if options[?h] || options[?v]
+      puts version() if options[?v]
+      puts usage() if options[?h]
+      return
+    end
+
+    ## class name of Eruby
+    classname = options[?c] || 'Eruby'
+    begin
+      klass = Erubis.const_get(classname)
+    rescue NameError
+      klass = nil
+    end
+    unless klass && classname =~ /Eruby\z/
+      raise CommandOptionError.new("-c #{classname}: invalid class name.")
+    end
+
+    ## kanji code
+    $KCODE = options[?K] if options[?K]
+
+    ## read context values from yaml file
+    yamlfiles = options[?f]
+    if yamlfiles
+      hash = {}
+      yamlfiles.split(/,/).each do |yamlfile|
+        ydoc = yamlfile == '-' ? YAML.load($stdin.read()) : YAML.load_file(yamlfile)
+        unless ydoc.is_a?(Hash)
+          raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
+        end
+        hash.update(ydoc)
+      end
+      hash.update(context)
+      context = hash
+    end
+
+    ## options for Eruby
+    eruby_options = {}
+    eruby_options[:pattern] = options[?p] if options[?p]
+    eruby_options[:trim]    = false       if options[?T]
+
+    ## execute Eruby
+    flag_src = options[?s]
+    if filenames && !filenames.empty?
+      filenames.each do |filename|
+        eruby = klass.load_file(filename, eruby_options)
+        print flag_src ? eruby.src : eruby.evaluate(context)
+      end
+    else
+      input = ARGF.read()
+      eruby = klass.new(input, eruby_options)
+      print flag_src ? eruby.src : eruby.evaluate(context)
+    end
+
+  end
+
+  private
+
+  def usage
+    command = File.basename($0)
+    s = <<END
+Usage: #{command} [-hvsT] [-p pattern] [-c class] [-K kanji] [-f file] [file ...]
+  -h, --help    : help
+  -v            : version
+  -s            : script source
+  -T            : no trimming
+  -p pattern    : embedded pattern (default '<% %>')
+  -c class      : class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby)
+  -K kanji      : kanji code (euc, sjis, utf8, none) (default none)
+  -f file.yaml  : YAML file for context values (read stdin if filename is '-')
+  --name=value  : context name and value
+END
+    return s
+  end
+
+  def version
+    release = ('$Release: 0.0.0 $' =~ /([.\d]+)/) && $1
+    return release
+  end
+
+  def parse_argv(argv, arg_none='', arg_required='', arg_optional='')
+    options = {}
+    context = {}
+    while argv[0] && argv[0][0] == ?-
+      optstr = argv.shift
+      optstr = optstr[1, optstr.length-1]
+      #
+      if optstr[0] == ?-    # context
+        unless optstr =~ /\A\-([-\w]+)(?:=(.*))?/
+          raise CommandOptionError.new("-#{optstr}: invalid context value.")
+        end
+        name = $1;  value = $2
+        name  = name.gsub(/-/, '_').intern
+        value = value == nil ? true : to_value(value)
+        context[name] = value
+      #
+      else                  # options
+        while optstr && !optstr.empty?
+          optchar = optstr[0]
+          optstr[0,1] = ""
+          if arg_none.include?(optchar)
+            options[optchar] = true
+          elsif arg_required.include?(optchar)
+            arg = optstr.empty? ? argv.shift : optstr
+            raise CommandOptionError.new("-#{optchar.chr}: argument required.") unless arg
+            options[optchar] = arg
+            optstr = nil
+          elsif arg_optional.include?(optchar)
+            arg = optstr.empty? ? true : optstr
+            options[optchar] = arg
+            optstr = nil
+          else
+            raise CommandOptionError.new("-#{optchar.chr}: unknown option.")
+          end
+        end
+      end
+      #
+    end  # end of while
+
+    return options, context
+  end
+
+  def to_value(str)
+    case str
+    when nil, "null", "nil"         ;   return nil
+    when "true", "yes"              ;   return true
+    when "false", "no"              ;   return false
+    when /\A\d+\z/                  ;   return str.to_i
+    when /\A\d+\.\d+\z/             ;   return str.to_f
+    when /\/(.*)\//                 ;   return Regexp.new($1)
+    when /\A'.*'\z/, /\A".*"\z/     ;   return eval(str)
+    else                            ;   return str
+    end
+  end
+
+end
+
+
+if __FILE__ == $0
+  status = 0
+  begin
+    Main.new.execute(ARGV)
+  rescue CommandOptionError => ex
+    $stderr.puts ex.message
+    status = 1
+  end
+  exit(status)
+end

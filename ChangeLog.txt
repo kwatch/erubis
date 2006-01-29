@@ -2,6 +2,14 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+
+.: Rev.2 (2005-01-29)
+	.- [bugfix] FastEruby prints empty text
+	.- [bugfix] error occurs when input has no embedded pattern
+	.- [enhance] add bin/erubis
+	.- [enhance] add test/test-bin.rb
+	.- [change] rename XxxFixture to XxxEnhancer
+
 .: Rev.1 (2005-01-29)
 	.- initial commit
 
