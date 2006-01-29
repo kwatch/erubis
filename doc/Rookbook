@@ -1,0 +1,25 @@
+
+tagfile = 'html-css_i,euc'
+textfile = 'eruby.txt'
+testscript = 'test-eruby.rb'
+
+recipe :test	do |r|
+	cmd "retrieve #{textfile}"
+	(1..5).each do |i|
+	  cmd "ruby -s #{testscript} -target=eruby#{i}"
+	end
+    end
+
+grecipe '*.html'	, '{1}.txt'		do |r|
+	cmd "retrieve {1}.txt"
+	cmd "kwaser -t #{tagfile} -T {1}.txt > {1}.toc.html"
+	cmd "kwaser -t #{tagfile}    {1}.txt > {1}.html"
+	rm "{1}.toc.html"
+    end
+
+recipe :html,	textfile.sub(/\.txt/, '.html')
+
+recipe :clean	do |r|
+	list = `retrieve -l #{textfile}`
+	rm_rf list.split
+    end

@@ -1,0 +1,658 @@
+.=title:	プログラマーのための eRuby 入門 (車輪の再発明編)
+.?lastupdate:	$Date$
+
+.# (setq ed::*ruby-indent-column* 2)
+
+
+●最初の実装
+
+.? eruby1.rb
+.-------------------- eruby1.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input)
+    @input = input
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = "_out = ''; "
+    regexp = /(.*?)<%(=?)(.*?)%>/m
+    input.scan(regexp) do |text, kind, code|
+      ## テキストを処理
+      text.each_line do |line|
+        src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+      end
+
+      ## 埋め込み Ruby コードを処理
+      if kind == '='  # <%= %> の場合
+        src << "_out << (#{code}).to_s; "
+      else            # <%  %> の場合
+        code.each_line { |line| src << line }
+        src << "; " unless code[-1] == ?\n
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $'
+    rest.each_line do |line|
+      src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+    end
+
+    src << "_out\n"
+    return src
+  end
+
+end
+.--------------------
+
+
+.? example1.rb
+.-------------------- example1.rb
+list = ['aaa', 'bbb', 'ccc']
+
+input = <<END
+<table>
+ <% for item in list %>
+  <tr>
+    <td><%= item %></td>
+  </tr>
+ <% end %>
+</table>
+END
+
+require 'eruby1'
+eruby = Eruby.new(input)
+puts "--- source ---"
+puts eruby.src
+puts "--- result ---"
+puts eruby.result
+.--------------------
+
+
+.? output
+.____________________
+.<<<:! ruby example1.rb
+.____________________
+
+
+
+
+●子クラスでの拡張をしやすくする
+
+.? eruby2.rb
+.-------------------- eruby2.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input)
+    @input = input
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    {{*src = ""*}}
+    {{*initialize_src(src)*}}
+    regexp = /(.*?)<%(=?)(.*?)%>/m
+    input.scan(regexp) do |text, kind, code|
+      ## テキストを処理
+      {{*add_src_text(src, text)*}}
+
+      ## 埋め込み Ruby コードを処理
+      if kind == '='  # <%= %> の場合
+        {{*add_src_expr(src, code)*}}
+      else            # <%  %> の場合
+        {{*add_src_code(src, code)*}}
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $'
+    {{*add_src_text(src, rest)*}}
+
+    {{*finalize_src(src)*}}
+    return src
+  end
+
+  {{*protected*}}
+
+  {{*def initialize_src(src)*}}
+    {{*src << "_out = ''; "*}}
+  {{*end*}}
+
+  {{*def add_src_text(src, text)*}}
+    {{*text.each_line do |line|*}}
+      {{*src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")*}}
+    {{*end*}}
+  {{*end*}}
+
+  {{*def add_src_expr(src, code)*}}
+    {{*src << "_out << (#{code}).to_s; "*}}
+  {{*end*}}
+
+  {{*def add_src_code(src, code)*}}
+    {{*code.each_line { |line| src << line }*}}
+    {{*src << "; " unless code[-1] == ?\n*}}
+  {{*end*}}
+
+  {{*def finalize_src(src)*}}
+    {{*src << "_out\n"*}}
+  {{*end*}}
+
+end
+.--------------------
+
+
+.? stdout-eruby.rb : 標準出力を使う Eruby
+.-------------------- stdout-eruby.rb
+##
+## 文字列ではなく標準出力を使う Eruby
+## (「<% print var %>」が問題なく使えるようになる)
+##
+class StdoutEruby < Eruby
+
+  def initialize_src(src)
+    src << "_out = $stdout; "   ## 文字列のかわりに標準出力を使う
+  end
+
+  def finalize_src(src)
+    src << "nil\n"
+  end
+
+end
+.--------------------
+
+
+.? fast-eruby.rb : 高速化した Eruby
+.-------------------- fast-eruby.rb
+##
+## 実行速度を高速化した Eruby
+##
+class FastEruby < Eruby
+
+  def add_src_text(src, text)
+    src << "_out << #{text.dump}" << "; "
+    src << ("\n" * text.count("\n"))
+  end
+
+end
+.--------------------
+
+
+.? example2.rb
+.-------------------- example2.rb
+list = ['aaa', 'bbb', 'ccc']
+
+input = <<END
+<table>
+ <% for item in list %>
+  <tr>
+    <td><%= item %></td>
+  </tr>
+ <% end %>
+</table>
+END
+
+require 'eruby2'
+require 'fast-eruby'
+eruby = FastEruby.new(input)
+puts "--- source ---"
+puts eruby.src
+puts "--- result ---"
+puts eruby.result
+.--------------------
+
+.? output
+.____________________
+.<<<:! ruby example2.rb
+.____________________
+
+
+
+
+●余分な空白を出力しない
+
+.? eruby3.rb
+.-------------------- eruby3.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input)
+    @input = input
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = ""
+    initialize_src(src)
+    regexp = /(.*?){{*(^[ \t]*)?*}}<%(=?)(.*?)%>{{*([ \t]*\r?\n)?*}}/m
+    input.scan(regexp) do |text, {{*head_space,*}} kind, code{{*, tail_space*}}|
+      {{*## * <%= %> のときは、何もしない*}}
+      {{*## * <% %> のときは、*}}
+      {{*##    * 前後が空白だけのときは、その空白を削除*}}
+      {{*##    * そうでないときは、何もしない（空白を残す）*}}
+      {{*flag_trim = kind != '=' && head_space && tail_space*}}
+
+      ## テキストを処理
+      add_src_text(src, text)
+
+      {{*## 前の空白を処理*}}
+      {{*unless flag_trim*}}
+        {{*add_src_text(src, head_space) if head_space*}}
+      {{*end*}}
+
+      ## 埋め込み Ruby コードを処理
+      if kind == '='  # <%= %> の場合
+        add_src_expr(src, code)
+      else            # <%  %> の場合
+        {{*## 改行を含めた前後の空白をコードに足す*}}
+        {{*code = "#{head_space}#{code}#{tail_space}" if flag_trim*}}
+        add_src_code(src, code)
+      end
+
+      {{*## 後ろの空白を処理*}}
+      {{*unless flag_trim*}}
+        {{*add_src_text(src, tail_space) if tail_space*}}
+      {{*end*}}
+    end
+
+    ## 残りのテキストを処理
+    rest = $'
+    add_src_text(src, rest)
+
+    finalize_src(src)
+    return src
+  end
+
+  protected
+
+  def initialize_src(src)
+    src << "_out = ''; "
+  end
+
+  def add_src_text(src, text)
+    text.each_line do |line|
+      src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+    end
+  end
+
+  def add_src_expr(src, code)
+    src << "_out << (#{code}).to_s; "
+  end
+
+  def add_src_code(src, code)
+    code.each_line { |line| src << line }
+    src << "; " unless code[-1] == ?\n
+  end
+
+  def finalize_src(src)
+    src << "_out\n"
+  end
+
+end
+.--------------------
+
+
+.? example3.rb
+.-------------------- example3.rb
+list = ['aaa', 'bbb', 'ccc']
+
+input = <<END
+<table>
+ <% for item in list %>
+  <tr>
+    <td>
+      <%= item %>
+    </td>
+  </tr>
+ <% end %>
+</table>
+</ul>
+END
+
+require 'eruby3'
+eruby = Eruby.new(input)
+puts "--- source ---"
+puts eruby.src
+puts "--- result ---"
+puts eruby.result
+.--------------------
+
+.? output
+.____________________
+.<<<:! ruby example3.rb
+.____________________
+
+
+
+
+●文字列をエスケープする
+
+.? eruby4.rb
+.-------------------- eruby4.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input)
+    @input = input
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = ""
+    initialize_src(src)
+    regexp = /(.*?)(^[ \t]*)?<%({{*=**}})(.*?)%>([ \t]*\r?\n)?/m
+    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+      ## * <%= %> のときは、何もしない
+      ## * <% %> のときは、
+      ##    * 前後が空白だけのときは、その空白を削除
+      ##    * そうでないときは、何もしない（空白を残す）
+      flag_trim = {{*kind.empty?*}} && head_space && tail_space
+
+      ## テキストを処理
+      add_src_text(src, text)
+
+      ## 前の空白を処理
+      unless flag_trim
+        add_src_text(src, head_space) if head_space
+      end
+
+      ## 埋め込み Ruby コードを処理
+      if {{*!kind.empty?*}}  # <%= %> の場合
+        add_src_expr(src, code{{*, kind.length*}})
+      else             # <%  %> の場合
+        ## 改行を含めた前後の空白をコードに足す
+        code = "#{head_space}#{code}#{tail_space}" if flag_trim
+        add_src_code(src, code)
+      end
+
+      ## 後ろの空白を処理
+      unless flag_trim
+        add_src_text(src, tail_space) if tail_space
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $'
+    add_src_text(src, rest)
+
+    finalize_src(src)
+    return src
+  end
+
+  protected
+
+  def initialize_src(src)
+    src << "_out = ''; "
+  end
+
+  def add_src_text(src, text)
+    text.each_line do |line|
+      src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+    end
+  end
+
+  def add_src_expr(src, code, length)
+    src << "_out << (#{code}).to_s; "
+  end
+
+  def add_src_code(src, code)
+    code.each_line { |line| src << line }
+    src << "; " unless code[-1] == ?\n
+  end
+
+  def finalize_src(src)
+    src << "_out\n"
+  end
+
+end
+.--------------------
+
+
+.? xml-eruby.rb
+.-------------------- xml-eruby.rb
+##
+## サニタイズを行う Eruby
+## * <%= %>  はサニタイズして出力
+## * <%== %> はサニタイズせずそのまま出力
+##
+class XmlEruby < Eruby
+
+  def self.escape(obj)
+    str = obj.to_s.dup
+    #str = obj.to_s
+    #str = str.dup if obj.__id__ == str.__id__
+    str.gsub!(/&/, '&amp;')
+    str.gsub!(/</, '&lt;')
+    str.gsub!(/>/, '&gt;')
+    str.gsub!(/"/, '&quot;')
+    return str
+  end
+
+  {{*def add_src_expr(src, code, length)*}}
+    {{*if length == 1*}}
+      {{*src << "_out << XmlEruby.escape(#{code}); "*}}
+    {{*else*}}
+      {{*super*}}
+    {{*end*}}
+  {{*end*}}
+
+end
+.--------------------
+
+
+.? example4.rb
+.-------------------- example4.rb
+list = ['<aaa>', 'b&b', '"ccc"']
+
+input = <<END
+<table>
+ <% for item in list %>
+  <tr>
+    <td><%= item %></td>
+    <td><%== item %></td>
+  </tr>
+ <% end %>
+</table>
+END
+
+require 'eruby4'
+require 'xml-eruby'
+eruby = XmlEruby.new(input)
+puts "--- source ---"
+puts eruby.src
+puts "--- result ---"
+puts eruby.result
+.--------------------
+
+
+.? output
+.____________________
+.<<<:! ruby example4.rb
+.____________________
+
+
+
+
+●埋め込み用パターンを変更可能にする
+
+
+.? eruby5.rb
+.-------------------- eruby5.rb
+##
+## eRuby の実装
+##
+class Eruby
+
+  ## eRuby 形式の文字列を受け取る
+  def initialize(input{{*, options={}*}})
+    @input = input
+    {{*@options = options*}}
+    {{*@pattern = options[:pattern] || '<% %>'*}}
+    @src = compile(@input)
+  end
+  attr_reader :src
+
+  ## 実行した結果 (文字列) を返す
+  def result(binding=TOPLEVEL_BINDING)
+    filename = '(eruby)'
+    eval @src, binding, filename
+  end
+
+  private
+
+  ## eRuby 形式の文字列を Ruby コードに変換する
+  def compile(input=@input)
+    src = ""
+    initialize_src(src)
+    {{*prefix, postfix = @pattern.split()   # 埋め込みパターン*}}
+    regexp = /(.*?)(^[ \t]*)?{{*#{prefix}*}}(=*)(.*?){{*#{postfix}*}}([ \t]*\r?\n)?/m
+    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+      ## * <%= %> のときは、何もしない
+      ## * <% %> のときは、
+      ##    * 前後が空白だけのときは、その空白を削除
+      ##    * そうでないときは、何もしない（空白を残す）
+      flag_trim = kind.empty? && head_space && tail_space
+
+      ## テキストを処理
+      add_src_text(src, text)
+
+      ## 前の空白を処理
+      unless flag_trim
+        add_src_text(src, head_space) if head_space
+      end
+
+      ## 埋め込み Ruby コードを処理
+      if !kind.empty?  # <%= %> の場合
+        add_src_expr(src, code, kind.length)
+      else             # <%  %> の場合
+        ## 改行を含めた前後の空白をコードに足す
+        code = "#{head_space}#{code}#{tail_space}" if flag_trim
+        add_src_code(src, code)
+      end
+
+      ## 後ろの空白を処理
+      unless flag_trim
+        add_src_text(src, tail_space) if tail_space
+      end
+    end
+
+    ## 残りのテキストを処理
+    rest = $'
+    add_src_text(src, rest)
+
+    finalize_src(src)
+    return src
+  end
+
+  protected
+
+  def initialize_src(src)
+    src << "_out = ''; "
+  end
+
+  def add_src_text(src, text)
+    text.each_line do |line|
+      src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
+    end
+  end
+
+  def add_src_expr(src, code, length)
+    src << "_out << (#{code}).to_s; "
+  end
+
+  def add_src_code(src, code)
+    code.each_line { |line| src << line }
+    src << "; " unless code[-1] == ?\n
+  end
+
+  def finalize_src(src)
+    src << "_out\n"
+  end
+
+end
+.--------------------
+
+
+.? example5.rb
+.-------------------- example5.rb
+list = ['aaa', 'bbb', 'ccc']
+
+input = <<END
+<table>
+ <!--% for item in list %-->
+  <tr>
+    <td><!--%= item %--></td>
+  </tr>
+ <!--% end %-->
+</table>
+END
+
+require 'eruby5'
+eruby = Eruby.new(input, :pattern=>'<!--% %-->')
+                              # or '<(?:!--)% %(?:--)>'
+puts "--- source ---"
+print eruby.src
+puts "--- result ---"
+print eruby.result()
+.--------------------
+
+
+.? output
+.____________________
+.<<<:! ruby example5.rb
+.____________________
+

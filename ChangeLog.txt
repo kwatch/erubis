@@ -1,0 +1,7 @@
+.=title:	ChangeLog
+.?lastupdate:	$Date$
+.?version:	$Rev$
+
+.: Rev.1 (2005-01-29)
+	.- initial commit
+
