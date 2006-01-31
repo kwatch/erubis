@@ -21,7 +21,7 @@ class Main
 
   def execute(argv=ARGV)
     ## parse command-line options
-    options, context = parse_argv(argv, "hvsT", "pcfK")
+    options, context = parse_argv(argv, "hvsT", "pcrfKI")
     filenames = argv
     options[?h] = true if context[:help]
 
@@ -31,6 +31,16 @@ class Main
       puts usage() if options[?h]
       return
     end
+
+    ## include path
+    options[?I].split(/,/).each do |path|
+      $: << path
+    end if options[?I]
+
+    ## require library
+    options[?r].split(/,/).each do |library|
+      require library
+    end if options[?r]
 
     ## class name of Eruby
     classname = options[?c] || 'Eruby'
@@ -86,17 +96,19 @@ class Main
   def usage
     command = File.basename($0)
     s = <<END
-Usage: #{command} [-hvsT] [-p pattern] [-c class] [-K kanji] [-f file] [file ...]
+Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
   -s            : script source
   -T            : no trimming
   -p pattern    : embedded pattern (default '<% %>')
   -c class      : class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby)
+  -I path       : library include path
   -K kanji      : kanji code (euc, sjis, utf8, none) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   --name=value  : context name and value
 END
+#  -r library    : require library
     return s
   end
 

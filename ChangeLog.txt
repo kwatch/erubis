@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.3 (2005-01-31)
+	.- [bufix] XmlEruby outs <%=== expr %> to $stdout, it changed to $stderr
+	.- [change] rename var name 'kind' to 'indicator' in Eruby#compile()
+	.- [enhance] add doc/users-guide.txt
+	.- [enhance] add command-line option '-I lib'
 
 .: Rev.2 (2005-01-29)
 	.- [bugfix] FastEruby prints empty text

@@ -58,7 +58,8 @@ module Erubis
       @trim     = options[:trim] != false
       @src      = compile(input)
     end
-    attr_reader :src, :filename
+    attr_reader :src
+    attr_accessor :filename
 
     def self.load_file(filename, options={})
       input = File.open(filename, 'rb') { |f| f.read }
@@ -88,20 +89,20 @@ module Erubis
       initialize_src(src)
       prefix, postfix = @pattern.split()
       regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
-      input.scan(regexp) do |text, head_space, kind, code, tail_space|
+      input.scan(regexp) do |text, head_space, indicator, code, tail_space|
         ## * when <%= %>, do nothing
         ## * when <% %>,
         ##    - if before/after string is spaces then delete those spaces
         ##    - else do nothing
-        flag_trim = @trim && kind.empty? && head_space && tail_space
+        flag_trim = @trim && indicator.empty? && head_space && tail_space
         add_src_text(src, text)
         add_src_text(src, head_space) if !flag_trim && head_space
-        if kind.empty?   # <% %>
+        if indicator.empty?   # <% %>
           code = "#{head_space}#{code}#{tail_space}" if flag_trim
           #code = "#{head_space}#{code}#\n" if flag_trim
           add_src_code(src, code)
-        else             # <%=  %>
-          add_src_expr(src, code, kind.length)
+        else                  # <%=  %>
+          add_src_expr(src, code, indicator)
         end
         add_src_text(src, tail_space) if !flag_trim && tail_space
       end
@@ -124,7 +125,7 @@ module Erubis
       end
     end
 
-    def add_src_expr(src, code, length)
+    def add_src_expr(src, code, indicator)
       src << "_out << (#{code}).to_s; "
     end
 
@@ -156,18 +157,18 @@ module Erubis
       return str
     end
 
-    def add_src_expr(src, code, length)
-      case length
-      when 1   # <%= %>
+    def add_src_expr(src, code, indicator)
+      case indicator
+      when '='    # <%= %>
         src << "_out << Erubis::XmlEruby.escape(#{code}); "
-      when 2   # <%== %>
+      when '=='   # <%== %>
         super
-      when 3   # <%=== %>
+      when '==='  # <%=== %>
         code.strip!
         s = code.dump
         s.sub!(/\A"/, '')
         s.sub!(/"\z/, '')
-        src << "$stdout.write(\"** debug: #{s} = \#{(#{code}).inspect}\"); "
+        src << "$stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\"); "
       else
         # nothing
       end

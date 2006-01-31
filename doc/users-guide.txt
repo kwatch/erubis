@@ -1,0 +1,501 @@
+.=title:	Erubis Users' Guide
+.?version:	$Release$
+.?lastupdate:	$Date$
+.?stylesheet:	docstyle.css
+
+
+
+.$ Preface		| preface*
+
+Erubis is an implementation of eRuby.
+It has the following features.
+.* Auto trimming spaces around '<% %>'
+.* Auto sanitizing
+.* Change embedded pattern (default '<% %>')
+.* Context object available
+.* Easy to expand in subclass
+
+Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+
+
+
+.$$ Table of Contents	| toc*
+
+.<<< users-guide.toc
+
+
+
+.$ Installation		| install
+
+.* If you have installed RubyGems, just type {{,gem install --remote erubis,}}.
+	.====================
+	$ sudo gem install --remote erubis
+	.====================
+
+.* Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
+	.====================
+	$ tar xjf erubis-X.X.X.tar.bz2
+	$ cd erubis_X.X.X/
+	$ ruby setup.rb
+	.#$ ruby setup.rb config
+	.#$ ruby setup.rb setup
+	.#$ sudo ruby setup.rb install
+	.====================
+
+.* Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
+	.====================
+	$ tar xjf erubis-X.X.X.tar.bz2
+	$ cd erubis_X.X.X/
+	$ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
+	$ cp bin/erubis /usr/local/bin
+	.====================
+
+.* (Optional) 'contrib/inline-require' enables you to merge 'lib/erubis.rb' into 'bin/erubis'.
+	.====================
+	$ tar xjf erubis-X.X.X.tar.bz2
+	$ cd erubis_X.X.X/
+	$ unset RUBYLIB
+	$ contrib/inline-require -I lib bin/erubis > contrib/erubis
+	.====================
+
+
+
+.$ Tutorial		| tutorial
+
+
+
+.$$ Basic Example	| tut-basic
+
+Here is a most basic example of Erubis.
+
+.? example1.eruby
+.-------------------- example1.eruby
+<ul>
+  {{*<% for item in list %>*}}
+  <li>
+    {{*<%= item %>*}}
+  </li>
+  {{*<% end %>*}}
+</ul>
+.--------------------
+
+.? example1.rb
+.-------------------- example1.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example1.eruby')
+eruby = {{*Erubis::Eruby.new(input)*}}
+
+## print script source
+puts "--- script source ---"
+puts {{*eruby.src*}}
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts {{*eruby.result(binding())*}}
+.--------------------
+
+.? output
+.====================
+$ ruby example1.rb
+.<<<:! (cd guide.d; ruby example1.rb)
+.====================
+
+
+
+.$$ Trimming Spaces	| tut-trim
+
+Erubis deletes spaces around '<% %>' automatically, while it leaves spaces around '<%= %>'.
+If you want leave spaces around '<% %>', add {{,:trim=>false,}} option to Erubis::Eruby.new().
+
+.? example2.eruby
+.-------------------- example2.eruby
+<ul>
+  <% for item in list %>
+  <li>
+    <%= item %>
+  </li>
+  <% end %>
+</ul>
+.--------------------
+
+.? example2.rb
+.-------------------- example2.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example2.eruby')
+eruby = Erubis::Eruby.new(input{{*, :trim=>false*}})
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts eruby.result(binding())
+.--------------------
+
+.? output
+.====================
+$ ruby example2.rb
+.#.<<<:! (cd guide.d; ruby example2.rb)
+--- script source ---
+_out = ''; _out << "<ul>\n"
+{{*_out << "  ";*}}  for item in list {{*; _out << "\n"*}}
+_out << "  <li>\n"
+_out << "    "; _out << ( item ).to_s; _out << "\n"
+_out << "  </li>\n"
+{{*_out << "  ";*}}  end {{*; _out << "\n"*}}
+_out << "</ul>\n"
+_out
+--- result ---
+<ul>
+  
+  <li>
+    aaa
+  </li>
+  
+  <li>
+    bbb
+  </li>
+  
+  <li>
+    ccc
+  </li>
+  
+</ul>
+.====================
+
+
+
+.$$ Auto Sanitizing	| tut-xml
+
+If you use Erubis::XmlEruby instead of Erubis::Eruby, output is sanitized automatically.
+
+Erubis::XmlEruby acts the following:
+.* {{,<%= {{/expr/}} %>,}} will be sanitized.
+.* {{,<%== {{/expr/}} %>,}} will be out as it is.
+.* {{,<%=== {{/expr/}} %>,}} will be out to $stderr.
+.* {{,<%==== {{/expr/}} %>,}} will be ignored.
+
+.? example3.eruby
+.-------------------- example3.eruby
+<ul>
+  <% for item in list %>
+  <li>{{*<%=*}} item {{*%>*}}</li>
+  <li>{{*<%==*}} item {{*%>*}}</li>
+  <li>{{*<%===*}} item {{*%>*}}</li>
+
+  <% end %>
+</ul>
+.--------------------
+
+.? example3.rb
+.-------------------- example3.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example3.eruby')
+eruby = Erubis::{{*XmlEruby*}}.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+{{*list = ['<aaa>', 'b&b', '"ccc"']*}}
+puts eruby.result(binding())
+.--------------------
+
+.? output
+.====================
+$ ruby example3.rb 2> stderr.log
+.#.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)
+--- script source ---
+_out = ''; _out << "<ul>\n"
+   for item in list 
+_out << "  <li>"; {{*_out << Erubis::XmlEruby.escape( item )*}}; _out << "</li>\n"
+_out << "  <li>"; _out << ( item ).to_s; _out << "</li>\n"
+_out << "  <li>"; {{*$stderr.puts("** erubis: item = #{(item).inspect}")*}}; _out << "</li>\n"
+_out << "\n"
+   end 
+_out << "</ul>\n"
+_out
+--- result ---
+<ul>
+  <li>{{*&lt;aaa&gt;*}}</li>
+  <li><aaa></li>
+  <li></li>
+
+  <li>{{*b&amp;b*}}</li>
+  <li>b&b</li>
+  <li></li>
+
+  <li>{{*&quot;ccc&quot;*}}</li>
+  <li>"ccc"</li>
+  <li></li>
+
+</ul>
+$ cat stderr.log
+.#.<<<! guide.d/stderr.log
+** erubis: item = "<aaa>"
+** erubis: item = "b&b"
+** erubis: item = "\"ccc\""
+.====================
+
+
+
+.$$ Embedded Pattern	| tut-pattern
+
+You can change embedded pattern '{{,<% %>,}}' to another.
+
+.? example4.eruby
+.-------------------- example4.eruby
+<ul>
+ {{*<!--%*}} for item in list {{*%-->*}}
+  <li>{{*<!--%=*}} item {{*%-->*}}</li>
+ {{*<!--%*}} end {{*%-->*}}
+</ul>
+.--------------------
+
+.? example4.rb
+.-------------------- example4.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example4.eruby')
+eruby = Erubis::Eruby.new(input{{*, :pattern=>'<!--% %-->'*}})
+                                      # or '<(?:!--)?% %(?:--)?>'
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts eruby.result(binding())
+.--------------------
+
+.? output
+.====================
+$ ruby example4.rb
+.<<<:! (cd guide.d; ruby example4.rb)
+.====================
+
+It is able to specify regular expression with :pattern option.
+Notice that you must use '{{,(?: ),}}' instead of '{{,( ),}}' for grouping.
+For example, '{{,<(!--)?% %(--)?>,}}' will not work and '{{,<(?:!--)?% %(?:--)?>,}}' will work.
+
+
+
+.$$ Context Object	| tut-context
+
+Context object is a set of data which are used in eRuby script.
+Using context object makes clear which data to be used.
+
+In Erubis, Hash object is used as context object.
+Hash key means variable name and it can be string or symbol.
+
+.? example5.eruby
+.-------------------- example5.eruby
+<span><%= val %></span>
+<ul>
+ <% for item in list %>
+  <li><%= item %></li>
+ <% end %>
+</ul>
+.--------------------
+
+.? example5.rb
+.-------------------- example5.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example5.eruby')
+eruby = Erubis::Eruby.new(input)
+
+## create context object
+## (key means var name, which may be string or symbol.)
+{{*context = {}*}}
+{{*context[:val]   = 'Erubis Example'*}}
+{{*context['list'] = ['aaa', 'bbb', 'ccc']*}}
+
+## get result
+puts "--- result ---"
+puts {{*eruby.evaluate(context)*}}
+.--------------------
+
+.? output
+.====================
+$ ruby example5.rb
+.<<<:! (cd guide.d; ruby example5.rb)
+.====================
+
+It is very useful to import YAML document data into context object.
+
+.? example6.yaml
+.-------------------- example6.yaml
+title: Users List
+users:
+  - name:  foo
+    mail:  foo@mail.com
+  - name:  bar
+    mail:  bar@mail.net
+  - name:  baz
+    mail:  baz@mail.org
+.--------------------
+
+.? example6.eruby
+.-------------------- example6.eruby
+<h1><%= title %></h1>
+<ul>
+ <% for user in users %>
+  <li>
+    <a href="mailto:<%= user['mail']%>"><%= user['name'] %></a>
+  </li>
+ <% end %>
+</ul>
+.--------------------
+
+.? example6.rb
+.-------------------- example6.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example6.eruby')
+eruby = Erubis::Eruby.new(input)
+
+## load YAML document as context object
+{{*require 'yaml'*}}
+{{*context = YAML.load_file('example6.yaml')*}}
+
+## get result
+puts {{*eruby.evaluate(context)*}}
+.--------------------
+
+.? output
+.====================
+$ ruby example6.rb
+.<<<:! (cd guide.d; ruby example6.rb)
+.====================
+
+
+
+.$$ Faster Eruby	| tut-fast
+
+Erubis::FastEruby and Erubis::FastXmlEruby make faster Erubis::Eruby and Erubis::XmlEruby
+to combine several strings into a string.
+
+.? example7.eruby
+.-------------------- example7.eruby
+<table>
+  <tbody>
+   <% for item in list %>
+    <tr>
+      <td><%= item %></td>
+    </tr>
+   <% end %>
+  </tbody>
+</table>
+.--------------------
+
+.? example7.rb
+.-------------------- example7.rb
+## print script source with Eruby
+require 'erubis'
+input = File.read('example7.eruby')
+eruby = Erubis::Eruby.new(input)
+puts "--- script source (Eruby) ---"
+puts eruby.src
+
+## print script source with FastEruby
+eruby = Erubis::{{*FastEruby*}}.new(input)
+puts "--- script source (FastEruby) ---"
+puts eruby.src
+.--------------------
+
+.? output
+.====================
+$ ruby example7.rb
+.<<<:! (cd guide.d; ruby example7.rb)
+.====================
+
+
+
+.$$ Stdout Eruby	| tut-stdout
+
+Erubis::StdoutEruby and Erubis::StdoutXmlEruby use $stdout instead of string object.
+Therefore, you can use 'print' statement in embedded ruby code.
+
+.? example8.eruby
+.-------------------- example8.eruby
+<ul>
+ <% for item in list %>
+  <li>{{*<% print item %>*}}</li>
+ <% end %>
+</ul>
+.--------------------
+
+.? example8.rb
+.-------------------- example8.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example8.eruby')
+eruby = Erubis::{{*StdoutEruby*}}.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+#puts eruby.result(binding())
+{{*eruby.result(binding())*}}  # returns nil
+.--------------------
+
+.? output
+.====================
+$ ruby example8.rb
+.#.<<<:! (cd guide.d; ruby example8.rb)
+--- script source ---
+{{*_out = $stdout*}}; _out << "<ul>\n"
+  for item in list 
+_out << "  <li>";  {{*print item*}} ; _out << "</li>\n"
+  end 
+_out << "</ul>\n"
+nil
+--- result ---
+<ul>
+  <li>aaa</li>
+  <li>bbb</li>
+  <li>ccc</li>
+</ul>
+.====================
+
+
+
+
+.$ Command Reference	| command
+
+
+.$$ Usage		| command-usage
+
+erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.yaml/}}] [{{/file/}} ...]
+
+
+.$$ Options		| command-options
+
+  .[ -h, --help    ]	Help.
+  .[ -v            ]	Release version.
+  .[ -s            ]	Show script source.
+  .[ -T            ]	No trimming spaces around '<% %>'.
+  .[ -p pattern    ]	Embedded pattern (default '<% %>').
+  .[ -c class      ]	Class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby).
+  .[ -I path       ]	Require library path ($:).
+			It is able to specify several paths separating with ',' (ex. -f path1,path2,path3).
+  .[ -K kanji      ]	Kanji code (euc, sjis, utf8, or none) (default none).
+  .[ -f file.yaml  ]	YAML file for context values (read stdin if filename is '-').
+			It is able to specify several filenames separating with ',' (ex. -f file1,file2,file3).
+  .[ --name=value  ]	Variable name and value
+

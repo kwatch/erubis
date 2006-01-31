@@ -174,4 +174,56 @@ END
   end
 
 
+  def test_include1
+    dir = 'foo'
+    lib = 'bar'
+    Dir.mkdir dir unless test(?d, dir)
+    filename = "#{dir}/#{lib}.rb"
+    File.open(filename, 'w') do |f|
+      f.write <<-'END'
+        def escape(str)
+          return "<#{str.upcase}>"
+        end
+      END
+    end
+    #
+    @input    = "<% require '#{lib}' %>\n" + INPUT.gsub(/<%= item %>/, '<%= escape(item) %>')
+    @expected = OUTPUT.gsub(/<aaa>/, '<<AAA>>').gsub(/b\&b/, '<B&B>').gsub(/"ccc"/, '<"CCC">')
+    @options  = "-I #{dir}"
+    #
+    begin
+      _test()
+    ensure
+      File.unlink filename if test(?f, filename)
+      Dir.rmdir dir if test(?d, dir)
+    end
+  end
+
+
+  def test_require1
+    dir = 'foo'
+    lib = 'bar'
+    Dir.mkdir dir unless test(?d, dir)
+    filename = "#{dir}/#{lib}.rb"
+    File.open(filename, 'w') do |f|
+      f.write <<-'END'
+        def escape(str)
+          return "<#{str.upcase}>"
+        end
+      END
+    end
+    #
+    @input    = INPUT.gsub(/<%= item %>/, '<%= escape(item) %>')
+    @expected = OUTPUT.gsub(/<aaa>/, '<<AAA>>').gsub(/b\&b/, '<B&B>').gsub(/"ccc"/, '<"CCC">')
+    @options  = "-I #{dir} -r #{lib}"
+    #
+    begin
+      _test()
+    ensure
+      File.unlink filename if test(?f, filename)
+      Dir.rmdir dir if test(?d, dir)
+    end
+  end
+
+
 end

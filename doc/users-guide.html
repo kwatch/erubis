@@ -1,0 +1,676 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html">
+  <title>Erubis Users' Guide</title>
+  <meta name="generator" content="kwaser">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="stylesheet" href="docstyle.css" type="text/css">
+ </head>
+ <body>
+
+  <blockquote>
+   <div class="mainbody">
+
+    <div align="left"><h1>Erubis Users' Guide</h1></div>
+    <div align="left">
+      last update: $Date$<br>
+    </div>
+
+<a name="preface"></a>
+<h2 class="section1">Preface</h2>
+<p>Erubis is an implementation of eRuby.
+It has the following features.
+</p>
+<ul type="disc">
+<li>Auto trimming spaces around '&lt;% %&gt;'
+</li>
+<li>Auto sanitizing
+</li>
+<li>Change embedded pattern (default '&lt;% %&gt;')
+</li>
+<li>Context object available
+</li>
+<li>Easy to expand in subclass
+</li>
+</ul>
+<p>Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+</p>
+<a name="toc"></a>
+<h3 class="section2">Table of Contents</h3>
+<ul>
+  <li><a href="#preface">Preface</a>
+  <ul>
+    <li><a href="#toc">Table of Contents</a>
+    </li>
+  </ul>
+  </li>
+  <li><a href="#install">Installation</a>
+  </li>
+  <li><a href="#tutorial">Tutorial</a>
+  <ul>
+    <li><a href="#tut-basic">Basic Example</a>
+    </li>
+    <li><a href="#tut-trim">Trimming Spaces</a>
+    </li>
+    <li><a href="#tut-xml">Auto Sanitizing</a>
+    </li>
+    <li><a href="#tut-pattern">Embedded Pattern</a>
+    </li>
+    <li><a href="#tut-context">Context Object</a>
+    </li>
+    <li><a href="#tut-fast">Faster Eruby</a>
+    </li>
+    <li><a href="#tut-stdout">Stdout Eruby</a>
+    </li>
+  </ul>
+  </li>
+  <li><a href="#command">Command Reference</a>
+  <ul>
+    <li><a href="#command-usage">Usage</a>
+    </li>
+    <li><a href="#command-options">Options</a>
+    </li>
+  </ul>
+  </li>
+</ul>
+<br>
+
+
+<br>
+
+
+<a name="install"></a>
+<h2 class="section1">Installation</h2>
+<ul type="disc">
+<li>If you have installed RubyGems, just type <code>gem install --remote erubis</code>.
+<pre class="terminal">$ sudo gem install --remote erubis
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
+<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
+$ cd erubis-X.X.X/
+$ ruby setup.rb config
+$ ruby setup.rb setup
+$ sudo ruby setup.rb install
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
+<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
+$ cd erubis-X.X.X/
+$ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
+$ cp bin/erubis /usr/local/bin
+</pre>
+</li>
+</ul>
+<br>
+
+
+<a name="tutorial"></a>
+<h2 class="section1">Tutorial</h2>
+<a name="tut-basic"></a>
+<h3 class="section2">Basic Example</h3>
+<p>Here is a most basic example of Erubis.
+</p>
+<a name="example1.eruby"></a>
+<div class="program_caption">
+example1.eruby</div>
+<pre class="program">&lt;ul&gt;
+  <strong>&lt;% for item in list %&gt;</strong>
+  &lt;li&gt;
+    <strong>&lt;%= item %&gt;</strong>
+  &lt;/li&gt;
+  <strong>&lt;% end %&gt;</strong>
+&lt;/ul&gt;
+</pre>
+<a name="example1.rb"></a>
+<div class="program_caption">
+example1.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example1.eruby')
+eruby = <strong>Erubis::Eruby.new(input)</strong>
+
+## print script source
+puts "--- script source ---"
+puts <strong>eruby.src</strong>
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts <strong>eruby.result(binding())</strong>
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example1.rb
+--- script source ---
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
+   for item in list 
+_out &lt;&lt; "  &lt;li&gt;\n"
+_out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
+_out &lt;&lt; "  &lt;/li&gt;\n"
+   end 
+_out &lt;&lt; "&lt;/ul&gt;\n"
+_out
+--- result ---
+&lt;ul&gt;
+  &lt;li&gt;
+    aaa
+  &lt;/li&gt;
+  &lt;li&gt;
+    bbb
+  &lt;/li&gt;
+  &lt;li&gt;
+    ccc
+  &lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<br>
+
+
+<a name="tut-trim"></a>
+<h3 class="section2">Trimming Spaces</h3>
+<p>Erubis deletes spaces around '&lt;% %&gt;' automatically, while it leaves spaces around '&lt;%= %&gt;'.
+If you want leave spaces around '&lt;% %&gt;', add <code>:trim=&gt;false</code> option to Erubis::Eruby.new().
+</p>
+<a name="example2.eruby"></a>
+<div class="program_caption">
+example2.eruby</div>
+<pre class="program">&lt;ul&gt;
+  &lt;% for item in list %&gt;
+  &lt;li&gt;
+    &lt;%= item %&gt;
+  &lt;/li&gt;
+  &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example2.rb"></a>
+<div class="program_caption">
+example2.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example2.eruby')
+eruby = Erubis::Eruby.new(input<strong>, :trim=&gt;false</strong>)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts eruby.result(binding())
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example2.rb
+--- script source ---
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
+<strong>_out &lt;&lt; "  ";</strong>  for item in list <strong>; _out &lt;&lt; "\n"</strong>
+_out &lt;&lt; "  &lt;li&gt;\n"
+_out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
+_out &lt;&lt; "  &lt;/li&gt;\n"
+<strong>_out &lt;&lt; "  ";</strong>  end <strong>; _out &lt;&lt; "\n"</strong>
+_out &lt;&lt; "&lt;/ul&gt;\n"
+_out
+--- result ---
+&lt;ul&gt;
+  
+  &lt;li&gt;
+    aaa
+  &lt;/li&gt;
+  
+  &lt;li&gt;
+    bbb
+  &lt;/li&gt;
+  
+  &lt;li&gt;
+    ccc
+  &lt;/li&gt;
+  
+&lt;/ul&gt;
+</pre>
+<br>
+
+
+<a name="tut-xml"></a>
+<h3 class="section2">Auto Sanitizing</h3>
+<p>If you use Erubis::XmlEruby instead of Erubis::Eruby, output is sanitized automatically.
+</p>
+<p>Erubis::XmlEruby acts the following:
+</p>
+<ul type="disc">
+<li><code>&lt;%= <em>expr</em> %&gt;</code> will be sanitized.
+</li>
+<li><code>&lt;%== <em>expr</em> %&gt;</code> will be out as it is.
+</li>
+<li><code>&lt;%=== <em>expr</em> %&gt;</code> will be out to $stderr.
+</li>
+<li><code>&lt;%==== <em>expr</em> %&gt;</code> will be ignored.
+</li>
+</ul>
+<a name="example3.eruby"></a>
+<div class="program_caption">
+example3.eruby</div>
+<pre class="program">&lt;ul&gt;
+  &lt;% for item in list %&gt;
+  &lt;li&gt;<strong>&lt;%=</strong> item <strong>%&gt;</strong>&lt;/li&gt;
+  &lt;li&gt;<strong>&lt;%==</strong> item <strong>%&gt;</strong>&lt;/li&gt;
+  &lt;li&gt;<strong>&lt;%===</strong> item <strong>%&gt;</strong>&lt;/li&gt;
+
+  &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example3.rb"></a>
+<div class="program_caption">
+example3.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example3.eruby')
+eruby = Erubis::<strong>XmlEruby</strong>.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+<strong>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</strong>
+puts eruby.result(binding())
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example3.rb 2&gt; stderr.log
+--- script source ---
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
+   for item in list 
+_out &lt;&lt; "  &lt;li&gt;"; <strong>_out &lt;&lt; Erubis::XmlEruby.escape( item )</strong>; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; <strong>$stderr.puts("** erubis: item = #{(item).inspect}")</strong>; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "\n"
+   end 
+_out &lt;&lt; "&lt;/ul&gt;\n"
+_out
+--- result ---
+&lt;ul&gt;
+  &lt;li&gt;<strong>&amp;lt;aaa&amp;gt;</strong>&lt;/li&gt;
+  &lt;li&gt;&lt;aaa&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;/li&gt;
+
+  &lt;li&gt;<strong>b&amp;amp;b</strong>&lt;/li&gt;
+  &lt;li&gt;b&amp;b&lt;/li&gt;
+  &lt;li&gt;&lt;/li&gt;
+
+  &lt;li&gt;<strong>&amp;quot;ccc&amp;quot;</strong>&lt;/li&gt;
+  &lt;li&gt;"ccc"&lt;/li&gt;
+  &lt;li&gt;&lt;/li&gt;
+
+&lt;/ul&gt;
+$ cat stderr.log
+** erubis: item = "&lt;aaa&gt;"
+** erubis: item = "b&amp;b"
+** erubis: item = "\"ccc\""
+</pre>
+<br>
+
+
+<a name="tut-pattern"></a>
+<h3 class="section2">Embedded Pattern</h3>
+<p>You can change embedded pattern '<code>&lt;% %&gt;</code>' to another.
+</p>
+<a name="example4.eruby"></a>
+<div class="program_caption">
+example4.eruby</div>
+<pre class="program">&lt;ul&gt;
+ <strong>&lt;!--%</strong> for item in list <strong>%--&gt;</strong>
+  &lt;li&gt;<strong>&lt;!--%=</strong> item <strong>%--&gt;</strong>&lt;/li&gt;
+ <strong>&lt;!--%</strong> end <strong>%--&gt;</strong>
+&lt;/ul&gt;
+</pre>
+<a name="example4.rb"></a>
+<div class="program_caption">
+example4.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example4.eruby')
+eruby = Erubis::Eruby.new(input<strong>, :pattern=&gt;'&lt;!--% %--&gt;'</strong>)
+                                      # or '&lt;(?:!--)?% %(?:--)?&gt;'
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts eruby.result(binding())
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example4.rb
+--- script source ---
+_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
+  for item in list 
+_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
+  end 
+_out &lt;&lt; "&lt;/ul&gt;\n"
+_out
+--- result ---
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<p>It is able to specify regular expression with :pattern option.
+Notice that you must use '<code>(?: )</code>' instead of '<code>( )</code>' for grouping.
+For example, '<code>&lt;(!--)?% %(--)?&gt;</code>' will not work and '<code>&lt;(?:!--)?% %(?:--)?&gt;</code>' will work.
+</p>
+<br>
+
+
+<a name="tut-context"></a>
+<h3 class="section2">Context Object</h3>
+<p>Context object is a set of data which are used in eRuby script.
+Using context object makes clear which data to be used.
+</p>
+<p>In Erubis, Hash object is used as context object.
+Hash key means variable name and it can be string or symbol.
+</p>
+<a name="example5.eruby"></a>
+<div class="program_caption">
+example5.eruby</div>
+<pre class="program">&lt;span&gt;&lt;%= val %&gt;&lt;/span&gt;
+&lt;ul&gt;
+ &lt;% for item in list %&gt;
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+ &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example5.rb"></a>
+<div class="program_caption">
+example5.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example5.eruby')
+eruby = Erubis::Eruby.new(input)
+
+## create context object
+## (key means var name, which may be string or symbol.)
+<strong>context = {}</strong>
+<strong>context[:val]   = 'Erubis Example'</strong>
+<strong>context['list'] = ['aaa', 'bbb', 'ccc']</strong>
+
+## get result
+puts "--- result ---"
+puts <strong>eruby.evaluate(context)</strong>
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example5.rb
+--- result ---
+&lt;span&gt;Erubis Example&lt;/span&gt;
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<p>It is very useful to import YAML document data into context object.
+</p>
+<a name="example6.yaml"></a>
+<div class="program_caption">
+example6.yaml</div>
+<pre class="program">title: Users List
+users:
+  - name:  foo
+    mail:  foo@mail.com
+  - name:  bar
+    mail:  bar@mail.net
+  - name:  baz
+    mail:  baz@mail.org
+</pre>
+<a name="example6.eruby"></a>
+<div class="program_caption">
+example6.eruby</div>
+<pre class="program">&lt;h1&gt;&lt;%= title %&gt;&lt;/h1&gt;
+&lt;ul&gt;
+ &lt;% for user in users %&gt;
+  &lt;li&gt;
+    &lt;a href="mailto:&lt;%= user['mail']%&gt;"&gt;&lt;%= user['name'] %&gt;&lt;/a&gt;
+  &lt;/li&gt;
+ &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example6.rb"></a>
+<div class="program_caption">
+example6.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example6.eruby')
+eruby = Erubis::Eruby.new(input)
+
+## load YAML document as context object
+<strong>require 'yaml'</strong>
+<strong>context = YAML.load_file('example6.yaml')</strong>
+
+## get result
+puts <strong>eruby.evaluate(context)</strong>
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example6.rb
+&lt;h1&gt;Users List&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;a href="mailto:foo@mail.com"&gt;foo&lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;a href="mailto:bar@mail.net"&gt;bar&lt;/a&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;a href="mailto:baz@mail.org"&gt;baz&lt;/a&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<br>
+
+
+<a name="tut-fast"></a>
+<h3 class="section2">Faster Eruby</h3>
+<p>Erubis::FastEruby and Erubis::FastXmlEruby make faster Erubis::Eruby and Erubis::XmlEruby
+to combine several strings into a string.
+</p>
+<a name="example7.eruby"></a>
+<div class="program_caption">
+example7.eruby</div>
+<pre class="program">&lt;table&gt;
+  &lt;tbody&gt;
+   &lt;% for item in list %&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+   &lt;% end %&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+</pre>
+<a name="example7.rb"></a>
+<div class="program_caption">
+example7.rb</div>
+<pre class="program">## print script source with Eruby
+require 'erubis'
+input = File.read('example7.eruby')
+eruby = Erubis::Eruby.new(input)
+puts "--- script source (Eruby) ---"
+puts eruby.src
+
+## print script source with FastEruby
+eruby = Erubis::<strong>FastEruby</strong>.new(input)
+puts "--- script source (FastEruby) ---"
+puts eruby.src
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example7.rb
+--- script source (Eruby) ---
+_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
+_out &lt;&lt; "  &lt;tbody&gt;\n"
+    for item in list 
+_out &lt;&lt; "    &lt;tr&gt;\n"
+_out &lt;&lt; "      &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
+_out &lt;&lt; "    &lt;/tr&gt;\n"
+    end 
+_out &lt;&lt; "  &lt;/tbody&gt;\n"
+_out &lt;&lt; "&lt;/table&gt;\n"
+_out
+--- script source (FastEruby) ---
+_out = ''; _out &lt;&lt; "&lt;table&gt;\n  &lt;tbody&gt;\n"
+
+    for item in list 
+_out &lt;&lt; "    &lt;tr&gt;\n      &lt;td&gt;"
+_out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n    &lt;/tr&gt;\n"
+
+    end 
+_out &lt;&lt; "  &lt;/tbody&gt;\n&lt;/table&gt;\n"
+
+_out
+</pre>
+<br>
+
+
+<a name="tut-stdout"></a>
+<h3 class="section2">Stdout Eruby</h3>
+<p>Erubis::StdoutEruby and Erubis::StdoutXmlEruby use $stdout instead of string object.
+Therefore, you can use 'print' statement in embedded ruby code.
+</p>
+<a name="example8.eruby"></a>
+<div class="program_caption">
+example8.eruby</div>
+<pre class="program">&lt;ul&gt;
+ &lt;% for item in list %&gt;
+  &lt;li&gt;<strong>&lt;% print item %&gt;</strong>&lt;/li&gt;
+ &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example8.rb"></a>
+<div class="program_caption">
+example8.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example8.eruby')
+eruby = Erubis::<strong>StdoutEruby</strong>.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+#puts eruby.result(binding())
+<strong>eruby.result(binding())</strong>  # returns nil
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example8.rb
+--- script source ---
+<strong>_out = $stdout</strong>; _out &lt;&lt; "&lt;ul&gt;\n"
+  for item in list 
+_out &lt;&lt; "  &lt;li&gt;";  <strong>print item</strong> ; _out &lt;&lt; "&lt;/li&gt;\n"
+  end 
+_out &lt;&lt; "&lt;/ul&gt;\n"
+nil
+--- result ---
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<br>
+
+
+<br>
+
+
+<a name="command"></a>
+<h2 class="section1">Command Reference</h2>
+<a name="command-usage"></a>
+<h3 class="section2">Usage</h3>
+<p>erubis [-hvsT] [-p <em>pattern</em>] [-c <em>class</em>] [-K <em>kanji</em>] [-f <em>file.yaml</em>] [<em>file</em> ...]
+</p>
+<br>
+
+
+<a name="command-options"></a>
+<h3 class="section2">Options</h3>
+  <dl class="dl3" compact>
+  <dt class="dt3"><b>
+-h, --help    </b></dt>
+  <dd class="dd3">
+  	Help.
+  </dd>
+  <dt class="dt3"><b>
+-v            </b></dt>
+  <dd class="dd3">
+  	Release version.
+  </dd>
+  <dt class="dt3"><b>
+-s            </b></dt>
+  <dd class="dd3">
+  	Show script source.
+  </dd>
+  <dt class="dt3"><b>
+-T            </b></dt>
+  <dd class="dd3">
+  	No trimming spaces around '&lt;% %&gt;'.
+  </dd>
+  <dt class="dt3"><b>
+-p pattern    </b></dt>
+  <dd class="dd3">
+  	Embedded pattern (default '&lt;% %&gt;').
+  </dd>
+  <dt class="dt3"><b>
+-c class      </b></dt>
+  <dd class="dd3">
+  	Class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby).
+  </dd>
+  <dt class="dt3"><b>
+-I path       </b></dt>
+  <dd class="dd3">
+  	Require library path ($:).
+			It is able to specify several paths separating with ',' (ex. -f path1,path2,path3).
+  </dd>
+  <dt class="dt3"><b>
+-K kanji      </b></dt>
+  <dd class="dd3">
+  	Kanji code (euc, sjis, utf8, or none) (default none).
+  </dd>
+  <dt class="dt3"><b>
+-f file.yaml  </b></dt>
+  <dd class="dd3">
+  	YAML file for context values (read stdin if filename is '-').
+			It is able to specify several filenames separating with ',' (ex. -f file1,file2,file3).
+  </dd>
+  <dt class="dt3"><b>
+--name=value  </b></dt>
+  <dd class="dd3">
+  	Variable name and value
+  </dd>
+  </dl>
+<br>
+
+
+<br>
+
+
+
+   </div>
+  </blockquote>
+
+ </body>
+</html>

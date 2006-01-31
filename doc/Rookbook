@@ -17,9 +17,24 @@ grecipe '*.html'	, '{1}.txt'		do |r|
 	rm "{1}.toc.html"
     end
 
+
+u = 'users-guide'
+tagfile = 'html-css'
+grecipe "#{u}.html"	, "#{u}.txt"		do |r|
+	rm_rf "guide.d"
+	mkdir_p "guide.d"
+	cmd "retrieve -d guide.d #{u}.txt"
+	cmd "kwaser -t #{tagfile} -T #{u}.txt > #{u}.toc.html"
+	cmd "kwaser -t #{tagfile}    #{u}.txt > #{u}.html"
+	rm "#{u}.toc.html"
+    end
+
+
 recipe :html,	textfile.sub(/\.txt/, '.html')
 
 recipe :clean	do |r|
 	list = `retrieve -l #{textfile}`
 	rm_rf list.split
     end
+
+

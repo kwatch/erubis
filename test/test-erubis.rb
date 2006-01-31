@@ -276,7 +276,7 @@ src: |
     _out = '';  for item in list 
     _out << "  "; _out << Erubis::XmlEruby.escape( item["var#{n}"] ); _out << "\n"
     _out << "  "; _out << ( item["var#{n}"] ).to_s; _out << "\n"
-    _out << "  "; $stdout.write("** debug: item[\"var\#{n}\"] = #{(item["var#{n}"]).inspect}"); _out << "\n"
+    _out << "  "; $stderr.puts("** erubis: item[\"var\#{n}\"] = #{(item["var#{n}"]).inspect}"); _out << "\n"
     _out << "  "; _out << "\n"
      end 
     _out

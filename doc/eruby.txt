@@ -32,16 +32,16 @@ class Eruby
   def compile(input=@input)
     src = "_out = ''; "
     regexp = /(.*?)<%(=?)(.*?)%>/m
-    input.scan(regexp) do |text, kind, code|
+    input.scan(regexp) do |text, indicator, code|
       ## テキストを処理
       text.each_line do |line|
         src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
       end
 
       ## 埋め込み Ruby コードを処理
-      if kind == '='  # <%= %> の場合
+      if indicator == '='  # <%= %> の場合
         src << "_out << (#{code}).to_s; "
-      else            # <%  %> の場合
+      else                 # <%  %> の場合
         code.each_line { |line| src << line }
         src << "; " unless code[-1] == ?\n
       end
@@ -126,14 +126,14 @@ class Eruby
     {{*src = ""*}}
     {{*initialize_src(src)*}}
     regexp = /(.*?)<%(=?)(.*?)%>/m
-    input.scan(regexp) do |text, kind, code|
+    input.scan(regexp) do |text, indicator, code|
       ## テキストを処理
       {{*add_src_text(src, text)*}}
 
       ## 埋め込み Ruby コードを処理
-      if kind == '='  # <%= %> の場合
+      if indicator == '='  # <%= %> の場合
         {{*add_src_expr(src, code)*}}
-      else            # <%  %> の場合
+      else                 # <%  %> の場合
         {{*add_src_code(src, code)*}}
       end
     end
@@ -280,12 +280,12 @@ class Eruby
     src = ""
     initialize_src(src)
     regexp = /(.*?){{*(^[ \t]*)?*}}<%(=?)(.*?)%>{{*([ \t]*\r?\n)?*}}/m
-    input.scan(regexp) do |text, {{*head_space,*}} kind, code{{*, tail_space*}}|
+    input.scan(regexp) do |text, {{*head_space,*}} indicator, code{{*, tail_space*}}|
       {{*## * <%= %> のときは、何もしない*}}
       {{*## * <% %> のときは、*}}
       {{*##    * 前後が空白だけのときは、その空白を削除*}}
       {{*##    * そうでないときは、何もしない（空白を残す）*}}
-      {{*flag_trim = kind != '=' && head_space && tail_space*}}
+      {{*flag_trim = indicator != '=' && head_space && tail_space*}}
 
       ## テキストを処理
       add_src_text(src, text)
@@ -296,9 +296,9 @@ class Eruby
       {{*end*}}
 
       ## 埋め込み Ruby コードを処理
-      if kind == '='  # <%= %> の場合
+      if indicator == '='  # <%= %> の場合
         add_src_expr(src, code)
-      else            # <%  %> の場合
+      else                 # <%  %> の場合
         {{*## 改行を含めた前後の空白をコードに足す*}}
         {{*code = "#{head_space}#{code}#{tail_space}" if flag_trim*}}
         add_src_code(src, code)
@@ -416,12 +416,12 @@ class Eruby
     src = ""
     initialize_src(src)
     regexp = /(.*?)(^[ \t]*)?<%({{*=**}})(.*?)%>([ \t]*\r?\n)?/m
-    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+    input.scan(regexp) do |text, head_space, indicator, code, tail_space|
       ## * <%= %> のときは、何もしない
       ## * <% %> のときは、
       ##    * 前後が空白だけのときは、その空白を削除
       ##    * そうでないときは、何もしない（空白を残す）
-      flag_trim = {{*kind.empty?*}} && head_space && tail_space
+      flag_trim = {{*indicator.empty?*}} && head_space && tail_space
 
       ## テキストを処理
       add_src_text(src, text)
@@ -432,9 +432,9 @@ class Eruby
       end
 
       ## 埋め込み Ruby コードを処理
-      if {{*!kind.empty?*}}  # <%= %> の場合
-        add_src_expr(src, code{{*, kind.length*}})
-      else             # <%  %> の場合
+      if {{*!indicator.empty?*}}  # <%= %> の場合
+        add_src_expr(src, code{{*, indicator*}})
+      else                  # <%  %> の場合
         ## 改行を含めた前後の空白をコードに足す
         code = "#{head_space}#{code}#{tail_space}" if flag_trim
         add_src_code(src, code)
@@ -467,7 +467,7 @@ class Eruby
     end
   end
 
-  def add_src_expr(src, code, length)
+  def add_src_expr(src, code, indicator)
     src << "_out << (#{code}).to_s; "
   end
 
@@ -504,8 +504,8 @@ class XmlEruby < Eruby
     return str
   end
 
-  {{*def add_src_expr(src, code, length)*}}
-    {{*if length == 1*}}
+  {{*def add_src_expr(src, code, indicator)*}}
+    {{*if indicator == '='*}}
       {{*src << "_out << XmlEruby.escape(#{code}); "*}}
     {{*else*}}
       {{*super*}}
@@ -588,12 +588,12 @@ class Eruby
     initialize_src(src)
     {{*prefix, postfix = @pattern.split()   # 埋め込みパターン*}}
     regexp = /(.*?)(^[ \t]*)?{{*#{prefix}*}}(=*)(.*?){{*#{postfix}*}}([ \t]*\r?\n)?/m
-    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+    input.scan(regexp) do |text, head_space, indicator, code, tail_space|
       ## * <%= %> のときは、何もしない
       ## * <% %> のときは、
       ##    * 前後が空白だけのときは、その空白を削除
       ##    * そうでないときは、何もしない（空白を残す）
-      flag_trim = kind.empty? && head_space && tail_space
+      flag_trim = indicator.empty? && head_space && tail_space
 
       ## テキストを処理
       add_src_text(src, text)
@@ -604,9 +604,9 @@ class Eruby
       end
 
       ## 埋め込み Ruby コードを処理
-      if !kind.empty?  # <%= %> の場合
-        add_src_expr(src, code, kind.length)
-      else             # <%  %> の場合
+      if !indicator.empty?  # <%= %> の場合
+        add_src_expr(src, code, indicator)
+      else                  # <%  %> の場合
         ## 改行を含めた前後の空白をコードに足す
         code = "#{head_space}#{code}#{tail_space}" if flag_trim
         add_src_code(src, code)
@@ -639,7 +639,7 @@ class Eruby
     end
   end
 
-  def add_src_expr(src, code, length)
+  def add_src_expr(src, code, indicator)
     src << "_out << (#{code}).to_s; "
   end
 
@@ -735,12 +735,12 @@ class Eruby
     initialize_src(src)
     prefix, postfix = @pattern.split()   # 埋め込みパターン
     regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
-    input.scan(regexp) do |text, head_space, kind, code, tail_space|
+    input.scan(regexp) do |text, head_space, indicator, code, tail_space|
       ## * <%= %> のときは、何もしない
       ## * <% %> のときは、
       ##    * 前後が空白だけのときは、その空白を削除
       ##    * そうでないときは、何もしない（空白を残す）
-      flag_trim = kind.empty? && head_space && tail_space
+      flag_trim = indicator.empty? && head_space && tail_space
 
       ## テキストを処理
       add_src_text(src, text)
@@ -751,9 +751,9 @@ class Eruby
       end
 
       ## 埋め込み Ruby コードを処理
-      if !kind.empty?  # <%= %> の場合
-        add_src_expr(src, code, kind.length)
-      else             # <%  %> の場合
+      if !indicator.empty?  # <%= %> の場合
+        add_src_expr(src, code, indicator)
+      else                  # <%  %> の場合
         ## 改行を含めた前後の空白をコードに足す
         code = "#{head_space}#{code}#{tail_space}" if flag_trim
         add_src_code(src, code)
@@ -786,7 +786,7 @@ class Eruby
     end
   end
 
-  def add_src_expr(src, code, length)
+  def add_src_expr(src, code, indicator)
     src << "_out << (#{code}).to_s; "
   end
 
@@ -800,7 +800,6 @@ class Eruby
   end
 
 end
-
 .--------------------
 
 

@@ -1,0 +1,50 @@
+.=title:	README
+.?release:	$Release$
+.?copyright:	$Copyright$
+
+
+.$ About Erubis
+
+  Erubis is an implementation of eRuby. It has the following features.
+  .* Auto trimming spaces around '<% %>'
+  .* Auto sanitizing
+  .* Change embedded pattern (default '<% %>')
+  .* Context object available
+  .* Easy to expand in subclass
+
+  Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+
+  See doc/users-guide.html for detail.
+
+
+
+.$ Installation
+
+  .* If you have installed RubyGems, just type {{,gem install --remote erubis,}}.
+	.====================
+	$ sudo gem install --remote erubis
+	.====================
+
+  .* Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
+	.====================
+	$ tar xjf erubis-X.X.X.tar.bz2
+	$ cd erubis-X.X.X/
+	$ ruby setup.rb config
+	$ ruby setup.rb setup
+	$ sudo ruby setup.rb install
+	.====================
+
+  .* Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
+	.====================
+	$ tar xjf erubis-X.X.X.tar.bz2
+	$ cd erubis-X.X.X/
+	$ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
+	$ cp bin/erubis /usr/local/bin
+	.====================
+
+
+
+.$ License
+
+  GPL ver.2
+
