@@ -175,7 +175,7 @@ END
 end
 
 
-if __FILE__ == $0
+#if __FILE__ == $0
   status = 0
   begin
     Main.new.execute(ARGV)
@@ -184,4 +184,4 @@ if __FILE__ == $0
     status = 1
   end
   exit(status)
-end
+#end

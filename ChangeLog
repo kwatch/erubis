@@ -2,7 +2,16 @@
 # $Release$
 # $Copyright$
 
-- release: 1.0
-  date: 2005-02-01
-  desc: first release
+- release:   1.0.1
+  date:      2005-02-01
+  desc:
+    - tag:   bugfix
+      text:  bin/erubis is available with RubyGems
+
+- release:   1.0.0
+  date:      2005-02-01
+  desc:
+    - tag:   note
+      text:  first release
+
 

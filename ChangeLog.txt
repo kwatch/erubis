@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.4 (2005-02-01)
+	.- [bugifx] bin/erubis run with RubyGems
+
 .: Rev.3 (2005-01-31)
 	.- [bufix] XmlEruby outs <%=== expr %> to $stdout, it changed to $stderr
 	.- [change] rename var name 'kind' to 'indicator' in Eruby#compile()

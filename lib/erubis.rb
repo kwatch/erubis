@@ -82,7 +82,7 @@ module Erubis
       return result(binding())
     end
 
-    private
+    #private
 
     def compile(input)
       src = ""
@@ -90,10 +90,8 @@ module Erubis
       prefix, postfix = @pattern.split()
       regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
       input.scan(regexp) do |text, head_space, indicator, code, tail_space|
-        ## * when <%= %>, do nothing
-        ## * when <% %>,
-        ##    - if before/after string is spaces then delete those spaces
-        ##    - else do nothing
+        ## * when '<%= %>', do nothing
+        ## * when '<% %>', delete spaces iff only spaces are around '<% %>'
         flag_trim = @trim && indicator.empty? && head_space && tail_space
         add_src_text(src, text)
         add_src_text(src, head_space) if !flag_trim && head_space
