@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.5
+	.- [enhance] add PrintEnhancer, PrintEruby, and PrintXmlEruby
+
 .: Rev.4 (2005-02-01)
 	.- [bugifx] bin/erubis run with RubyGems
 

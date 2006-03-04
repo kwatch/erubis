@@ -22,7 +22,7 @@ class ErubisTest < Test::Unit::TestCase
   #str = DATA.read()
   str = File.read(__FILE__)
   str.gsub!(/.*^__END__$/m, '')
-  
+
   @@ydocs = {}
   YAML.load_documents(str) do |ydoc|
     name = ydoc['name']
@@ -47,12 +47,12 @@ class ErubisTest < Test::Unit::TestCase
   def _test()
     ydoc = @@ydocs[@name]
     input   = ydoc['input']
-    src     = ydoc['src'].gsub(/@/, ' ')
-    output  = ydoc['output'].gsub(/@/, ' ')
+    src     = ydoc['src'].gsub(/\^/, ' ')
+    output  = ydoc['output'].gsub(/\^/, ' ')
     klass   = ydoc['class'] ? (eval "Erubis::#{ydoc['class']}") : Erubis::Eruby
     options = ydoc['options'] || {}
     testopt = ydoc['testopt']
-    
+
     if testopt != 'load_file'
       eruby = klass.new(input, options)
     else
@@ -65,12 +65,12 @@ class ErubisTest < Test::Unit::TestCase
       end
     end
     assert_equal_with_diff(src, eruby.src)
-    
+
     return if testopt == 'skip_output'
-    
+
     context = {}
     context[:list] = ['<aaa>', 'b&b', '"ccc"']
-    
+
     if testopt != 'stdout'
       actual = eruby.evaluate(context)
       assert_equal_with_diff(output, actual)
@@ -128,7 +128,7 @@ src: |
       i = 0
         for item in list
           i += 1
-    @@
+    ^^
     _out << "  <li>"; _out << ( item ).to_s; _out << "</li>\n"
       end 
     _out << "</ul>\n"
@@ -224,13 +224,13 @@ src: |
     _out
 output: |
     <ul>
-    @
+    ^
       <li><aaa></li>
-    @
+    ^
       <li>b&b</li>
-    @
+    ^
       <li>"ccc"</li>
-    @
+    ^
     </ul>
 ##
 ---
@@ -301,7 +301,7 @@ src: |
     _out << "  <tr>\n    <td>"
     _out << ( item ).to_s; _out << "</td>\n    <td>"
     _out << ( item ).to_s; _out << "</td>\n  </tr>\n"
-    
+
       end 
     _out << "</table>\n<ul>"
      for item in list ; _out << "<li>"; _out << ( item ).to_s; _out << "</li>";  end ; _out << "</ul>\n"
@@ -342,7 +342,7 @@ src: |
     _out << "  <tr>\n    <td>"
     _out << Erubis::XmlEruby.escape( item ); _out << "</td>\n    <td>"
     _out << ( item ).to_s; _out << "</td>\n  </tr>\n"
-    
+
       end 
     _out << "</table>\n<ul>"
      for item in list ; _out << "<li>"; _out << Erubis::XmlEruby.escape( item ); _out << "</li>";  end ; _out << "</ul>\n"
@@ -380,9 +380,9 @@ src: |
      end 
     _out
 #    _out = ''; _out << "user = "; _out << ( "Foo" ).to_s; _out << "\n"
-#    _out << "";  for item in list 
+#    _out << "";  for item in list
 #    _out << ""; _out << "  "; _out << ( item ).to_s; _out << "\n"
-#    _out << "";  end 
+#    _out << "";  end
 #    _out << ""; _out
 output: |
     user = Foo
@@ -414,6 +414,50 @@ output: |
       <li>"ccc"</li>
     </ul>
 ---
+name:  print1
+class: PrintEruby
+input: |
+    <ul>
+     <% for item in list %>
+      <li><% print item %></li>
+     <% end %>
+    </ul>
+src: |
+    @_out = _out = ''; _out << "<ul>\n"
+      for item in list 
+    _out << "  <li>";  print item ; _out << "</li>\n"
+      end 
+    _out << "</ul>\n"
+    _out
+output: |
+    <ul>
+      <li><aaa></li>
+      <li>b&b</li>
+      <li>"ccc"</li>
+    </ul>
+---
+name:  print2
+class: PrintXmlEruby
+input: |
+    <ul>
+     <% for item in list %>
+      <li><% print item %></li>
+     <% end %>
+    </ul>
+src: |
+    @_out = _out = ''; _out << "<ul>\n"
+      for item in list 
+    _out << "  <li>";  print item ; _out << "</li>\n"
+      end 
+    _out << "</ul>\n"
+    _out
+output: |
+    <ul>
+      <li><aaa></li>
+      <li>b&b</li>
+      <li>"ccc"</li>
+    </ul>
+---
 name:  loadfile1
 testopt: load_file
 #input: |
@@ -422,13 +466,13 @@ testopt: load_file
 #      <li><%= item %></li>
 #     <% end %>
 #    </ul>
-input: 
+input:
     "<ul>\r\n <% for item in list %>\r\n  <li><%= item %></li>\r\n <% end %>\r\n</ul>\r\n"
 #src: |
 #    _out = ''; _out << "<ul>\n"
-#      for item in list 
+#      for item in list
 #    _out << "  <li>"; _out << ( item ).to_s; _out << "</li>\n"
-#      end 
+#      end
 #    _out << "</ul>\n"
 #    _out
 src:
@@ -439,7 +483,7 @@ src:
 #      <li>b&b</li>
 #      <li>"ccc"</li>
 #    </ul>
-output: 
+output:
     "<ul>\r\n  <li><aaa></li>\r\n  <li>b&b</li>\r\n  <li>\"ccc\"</li>\r\n</ul>\r\n"
 ##
 ---

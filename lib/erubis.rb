@@ -7,6 +7,12 @@
 ##
 ## an implementation of eRuby
 ##
+## * class Eruby - normal eRuby class
+## * class XmlEruby - eRuby class which escape '&<>"' into '&amp;&lt;&gt;&quot;'
+## * module FastEnhancer - make eRuby faster
+## * module StdoutEnhance - use $stdout instead of String as output
+## * module PrintEnhance - enable to write print statement in <% ... %>
+##
 ## example:
 ##   list = ['<aaa>', 'b&b', '"ccc"']
 ##   input = <<-END
@@ -22,6 +28,7 @@
 ##   puts eruby.src
 ##   puts "--- result ---"
 ##   puts eruby.result(binding())
+##   # or puts eruby.evaluate(:list=>list)
 ##
 ## result:
 ##   --- source ---
@@ -208,6 +215,30 @@ module Erubis
   end
 
 
+  ##
+  ## print function is available.
+  ## 
+  ## Notice: use Eruby#evaluate() and don't use Eruby#result()
+  ## to be enable print function.
+  ##
+  module PrintEnhancer
+
+    def initialize_src(src)
+      src << "@_out = _out = ''; "
+    end
+
+    def print(arg)
+      @_out << arg.to_s
+    end
+
+    def result(binding=TOPLEVEL_BINDING)
+      filename = @filename || '(erubis)'
+      eval @src, binding, filename
+    end
+
+  end
+
+
   class FastEruby < Eruby
     include FastEnhancer
   end
@@ -218,6 +249,11 @@ module Erubis
   end
 
 
+  class PrintEruby < Eruby
+    include PrintEnhancer
+  end
+
+
   class FastXmlEruby < XmlEruby
     include FastEnhancer
   end
@@ -225,6 +261,11 @@ module Erubis
 
   class StdoutXmlEruby < XmlEruby
     include StdoutEnhancer
+  end
+
+
+  class PrintXmlEruby < XmlEruby
+    include PrintEnhancer
   end
 
 
@@ -247,6 +288,7 @@ END
   puts "--- source ---"
   puts eruby.src
   puts "--- result ---"
-  puts eruby.result(binding())
+  #puts eruby.result(binding())
+  puts eruby.evaluate(:list=>list)
 
 end
