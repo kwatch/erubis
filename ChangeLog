@@ -2,6 +2,14 @@
 # $Release$
 # $Copyright$
 
+- release:   1.1
+  date:      205-03-05
+  desc:
+    - tag:   enhance
+      text:  '<%# ... %>' is supported
+    - tag:   enhance
+      text:  PrintEnhancer, PrintEruby, and PrintXmlEruby added
+
 - release:   1.0.1
   date:      2005-02-01
   desc:

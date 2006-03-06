@@ -20,7 +20,7 @@ end
 
 require 'test/unit'
 #require 'test/unit/ui/console/testrunner'
-require 'assert-diff'
+require 'assert-text-equal'
 require 'yaml'
 require 'tempfile'
 
@@ -69,7 +69,7 @@ END
     ensure
       File.unlink(@filename) if @filename && test(?f, @filename)
     end
-    assert_equal_with_diff(@expected, output)
+    assert_text_equal(@expected, output)
   end
 
 
@@ -93,6 +93,14 @@ END
     @input    = INPUT
     @expected = SRC
     @options  = '-s'
+    _test()
+  end
+
+
+  def test_source2
+    @input    = INPUT
+    @expected = SRC.sub(/^_out\s*\z/, '')
+    @options  = '-x'
     _test()
   end
 

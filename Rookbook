@@ -16,6 +16,12 @@ inline_require_script = "#{ENV['HOME']}/src/inline-require/trunk/bin/inline-requ
 
 recipe  :all		, text_files, doc_files
 
+desc  "do test"
+recipe  :test	do |r|
+	cmd "ruby test/test-erubis.rb"
+	cmd "ruby test/test-bin.rb"
+    end
+
 
 recipe  :clear							do |r|
 	files = []

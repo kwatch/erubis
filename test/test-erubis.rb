@@ -11,7 +11,7 @@ $: << libdir
 
 require 'test/unit'
 #require 'test/unit/ui/console/testrunner'
-require 'assert-diff'
+require 'assert-text-equal'
 require 'yaml'
 require 'stringio'
 
@@ -64,7 +64,7 @@ class ErubisTest < Test::Unit::TestCase
         File.unlink(filename) if test(?f, filename)
       end
     end
-    assert_equal_with_diff(src, eruby.src)
+    assert_text_equal(src, eruby.src)
 
     return if testopt == 'skip_output'
 
@@ -73,7 +73,7 @@ class ErubisTest < Test::Unit::TestCase
 
     if testopt != 'stdout'
       actual = eruby.evaluate(context)
-      assert_equal_with_diff(output, actual)
+      assert_text_equal(output, actual)
     else
       begin
         orig = $stdout
@@ -83,7 +83,7 @@ class ErubisTest < Test::Unit::TestCase
         $stdout = orig if orig
       end
       assert_nil(actual)
-      assert_equal_with_diff(output, stringio.string)
+      assert_text_equal(output, stringio.string)
     end
   end
 
@@ -231,6 +231,38 @@ output: |
     ^
       <li>"ccc"</li>
     ^
+    </ul>
+##
+---
+name:  ignore1
+input: |
+    <ul>
+     <%# i = 0 %>
+     <% for item in list %>
+      <%#
+         i += 1
+         color = i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'
+       %>
+      <li>  <%#= i %>  :  <%= item %>  </li>
+     <% end %>
+    </ul>
+src: |
+    _out = ''; _out << "<ul>\n"
+    
+      for item in list 
+    
+    
+    
+    
+    _out << "  <li>  "; ; _out << "  :  "; _out << ( item ).to_s; _out << "  </li>\n"
+      end 
+    _out << "</ul>\n"
+    _out
+output: |
+    <ul>
+      <li>    :  <aaa>  </li>
+      <li>    :  b&b  </li>
+      <li>    :  "ccc"  </li>
     </ul>
 ##
 ---

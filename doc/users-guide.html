@@ -23,13 +23,15 @@
 It has the following features.
 </p>
 <ul type="disc">
+<li>Auto sanitizing support
+</li>
 <li>Auto trimming spaces around '&lt;% %&gt;'
 </li>
-<li>Auto sanitizing
-</li>
-<li>Change embedded pattern (default '&lt;% %&gt;')
+<li>Embedded pattern changeable (default '&lt;% %&gt;')
 </li>
 <li>Context object available
+</li>
+<li>Print statement available
 </li>
 <li>Easy to expand in subclass
 </li>
@@ -63,6 +65,8 @@ It has the following features.
     </li>
     <li><a href="#tut-stdout">Stdout Eruby</a>
     </li>
+    <li><a href="#tut-print">Print Avairable Eruby</a>
+    </li>
   </ul>
   </li>
   <li><a href="#command">Command Reference</a>
@@ -91,19 +95,26 @@ It has the following features.
 <ul type="disc">
 <li>Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
 <pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
-$ cd erubis-X.X.X/
-$ ruby setup.rb config
-$ ruby setup.rb setup
-$ sudo ruby setup.rb install
+$ cd erubis_X.X.X/
+$ ruby setup.rb
 </pre>
 </li>
 </ul>
 <ul type="disc">
 <li>Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
 <pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
-$ cd erubis-X.X.X/
+$ cd erubis_X.X.X/
 $ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
 $ cp bin/erubis /usr/local/bin
+</pre>
+</li>
+</ul>
+<ul type="disc">
+<li>(Optional) 'contrib/inline-require' enables you to merge 'lib/erubis.rb' into 'bin/erubis'.
+<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
+$ cd erubis_X.X.X/
+$ unset RUBYLIB
+$ contrib/inline-require -I lib bin/erubis &gt; contrib/erubis
 </pre>
 </li>
 </ul>
@@ -120,11 +131,12 @@ $ cp bin/erubis /usr/local/bin
 <div class="program_caption">
 example1.eruby</div>
 <pre class="program">&lt;ul&gt;
-  <strong>&lt;% for item in list %&gt;</strong>
+  <b>&lt;% for item in list %&gt;</b>
   &lt;li&gt;
-    <strong>&lt;%= item %&gt;</strong>
+    <b>&lt;%= item %&gt;</b>
   &lt;/li&gt;
-  <strong>&lt;% end %&gt;</strong>
+  <b>&lt;% end %&gt;</b>
+  <b>&lt;%# here is ignored because starting with '#' %&gt;</b>
 &lt;/ul&gt;
 </pre>
 <a name="example1.rb"></a>
@@ -133,16 +145,16 @@ example1.rb</div>
 <pre class="program">## create Eruby object
 require 'erubis'
 input = File.read('example1.eruby')
-eruby = <strong>Erubis::Eruby.new(input)</strong>
+eruby = <b>Erubis::Eruby.new(input)</b>
 
 ## print script source
 puts "--- script source ---"
-puts <strong>eruby.src</strong>
+puts <b>eruby.src</b>
 
 ## get result
 puts "--- result ---"
 list = ['aaa', 'bbb', 'ccc']
-puts <strong>eruby.result(binding())</strong>
+puts <b>eruby.result(binding())</b>
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -154,6 +166,7 @@ _out &lt;&lt; "  &lt;li&gt;\n"
 _out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
 _out &lt;&lt; "  &lt;/li&gt;\n"
    end 
+
 _out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
@@ -194,7 +207,7 @@ example2.rb</div>
 <pre class="program">## create Eruby object
 require 'erubis'
 input = File.read('example2.eruby')
-eruby = Erubis::Eruby.new(input<strong>, :trim=&gt;false</strong>)
+eruby = Erubis::Eruby.new(input<b>, :trim=&gt;false</b>)
 
 ## print script source
 puts "--- script source ---"
@@ -210,11 +223,11 @@ output</div>
 <pre class="terminal">$ ruby example2.rb
 --- script source ---
 _out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-<strong>_out &lt;&lt; "  ";</strong>  for item in list <strong>; _out &lt;&lt; "\n"</strong>
+<b>_out &lt;&lt; "  ";</b>  for item in list <b>; _out &lt;&lt; "\n"</b>
 _out &lt;&lt; "  &lt;li&gt;\n"
 _out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
 _out &lt;&lt; "  &lt;/li&gt;\n"
-<strong>_out &lt;&lt; "  ";</strong>  end <strong>; _out &lt;&lt; "\n"</strong>
+<b>_out &lt;&lt; "  ";</b>  end <b>; _out &lt;&lt; "\n"</b>
 _out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
@@ -244,13 +257,13 @@ _out
 <p>Erubis::XmlEruby acts the following:
 </p>
 <ul type="disc">
-<li><code>&lt;%= <em>expr</em> %&gt;</code> will be sanitized.
+<li><code>&lt;%= <i>expr</i> %&gt;</code> will be sanitized.
 </li>
-<li><code>&lt;%== <em>expr</em> %&gt;</code> will be out as it is.
+<li><code>&lt;%== <i>expr</i> %&gt;</code> will be out as it is.
 </li>
-<li><code>&lt;%=== <em>expr</em> %&gt;</code> will be out to $stderr.
+<li><code>&lt;%=== <i>expr</i> %&gt;</code> will be out to $stderr.
 </li>
-<li><code>&lt;%==== <em>expr</em> %&gt;</code> will be ignored.
+<li><code>&lt;%==== <i>expr</i> %&gt;</code> will be ignored.
 </li>
 </ul>
 <a name="example3.eruby"></a>
@@ -258,9 +271,9 @@ _out
 example3.eruby</div>
 <pre class="program">&lt;ul&gt;
   &lt;% for item in list %&gt;
-  &lt;li&gt;<strong>&lt;%=</strong> item <strong>%&gt;</strong>&lt;/li&gt;
-  &lt;li&gt;<strong>&lt;%==</strong> item <strong>%&gt;</strong>&lt;/li&gt;
-  &lt;li&gt;<strong>&lt;%===</strong> item <strong>%&gt;</strong>&lt;/li&gt;
+  &lt;li&gt;<b>&lt;%=</b> item <b>%&gt;</b>&lt;/li&gt;
+  &lt;li&gt;<b>&lt;%==</b> item <b>%&gt;</b>&lt;/li&gt;
+  &lt;li&gt;<b>&lt;%===</b> item <b>%&gt;</b>&lt;/li&gt;
 
   &lt;% end %&gt;
 &lt;/ul&gt;
@@ -271,7 +284,7 @@ example3.rb</div>
 <pre class="program">## create Eruby object
 require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::<strong>XmlEruby</strong>.new(input)
+eruby = Erubis::<b>XmlEruby</b>.new(input)
 
 ## print script source
 puts "--- script source ---"
@@ -279,7 +292,7 @@ puts eruby.src
 
 ## get result
 puts "--- result ---"
-<strong>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</strong>
+<b>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</b>
 puts eruby.result(binding())
 </pre>
 <div class="terminal_caption">
@@ -288,24 +301,24 @@ output</div>
 --- script source ---
 _out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
    for item in list 
-_out &lt;&lt; "  &lt;li&gt;"; <strong>_out &lt;&lt; Erubis::XmlEruby.escape( item )</strong>; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; <b>_out &lt;&lt; Erubis::XmlEruby.escape( item )</b>; _out &lt;&lt; "&lt;/li&gt;\n"
 _out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
-_out &lt;&lt; "  &lt;li&gt;"; <strong>$stderr.puts("** erubis: item = #{(item).inspect}")</strong>; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;"; <b>$stderr.puts("** erubis: item = #{(item).inspect}")</b>; _out &lt;&lt; "&lt;/li&gt;\n"
 _out &lt;&lt; "\n"
    end 
 _out &lt;&lt; "&lt;/ul&gt;\n"
 _out
 --- result ---
 &lt;ul&gt;
-  &lt;li&gt;<strong>&amp;lt;aaa&amp;gt;</strong>&lt;/li&gt;
+  &lt;li&gt;<b>&amp;lt;aaa&amp;gt;</b>&lt;/li&gt;
   &lt;li&gt;&lt;aaa&gt;&lt;/li&gt;
   &lt;li&gt;&lt;/li&gt;
 
-  &lt;li&gt;<strong>b&amp;amp;b</strong>&lt;/li&gt;
+  &lt;li&gt;<b>b&amp;amp;b</b>&lt;/li&gt;
   &lt;li&gt;b&amp;b&lt;/li&gt;
   &lt;li&gt;&lt;/li&gt;
 
-  &lt;li&gt;<strong>&amp;quot;ccc&amp;quot;</strong>&lt;/li&gt;
+  &lt;li&gt;<b>&amp;quot;ccc&amp;quot;</b>&lt;/li&gt;
   &lt;li&gt;"ccc"&lt;/li&gt;
   &lt;li&gt;&lt;/li&gt;
 
@@ -326,9 +339,9 @@ $ cat stderr.log
 <div class="program_caption">
 example4.eruby</div>
 <pre class="program">&lt;ul&gt;
- <strong>&lt;!--%</strong> for item in list <strong>%--&gt;</strong>
-  &lt;li&gt;<strong>&lt;!--%=</strong> item <strong>%--&gt;</strong>&lt;/li&gt;
- <strong>&lt;!--%</strong> end <strong>%--&gt;</strong>
+ <b>&lt;!--%</b> for item in list <b>%--&gt;</b>
+  &lt;li&gt;<b>&lt;!--%=</b> item <b>%--&gt;</b>&lt;/li&gt;
+ <b>&lt;!--%</b> end <b>%--&gt;</b>
 &lt;/ul&gt;
 </pre>
 <a name="example4.rb"></a>
@@ -337,7 +350,7 @@ example4.rb</div>
 <pre class="program">## create Eruby object
 require 'erubis'
 input = File.read('example4.eruby')
-eruby = Erubis::Eruby.new(input<strong>, :pattern=&gt;'&lt;!--% %--&gt;'</strong>)
+eruby = Erubis::Eruby.new(input<b>, :pattern=&gt;'&lt;!--% %--&gt;'</b>)
                                       # or '&lt;(?:!--)?% %(?:--)?&gt;'
 
 ## print script source
@@ -368,7 +381,7 @@ _out
 </pre>
 <p>It is able to specify regular expression with :pattern option.
 Notice that you must use '<code>(?: )</code>' instead of '<code>( )</code>' for grouping.
-For example, '<code>&lt;(!--)?% %(--)?&gt;</code>' will not work and '<code>&lt;(?:!--)?% %(?:--)?&gt;</code>' will work.
+For example, '<code>&lt;(!--)?% %(--)?&gt;</code>' will not work while '<code>&lt;(?:!--)?% %(?:--)?&gt;</code>' will work.
 </p>
 <br>
 
@@ -401,13 +414,13 @@ eruby = Erubis::Eruby.new(input)
 
 ## create context object
 ## (key means var name, which may be string or symbol.)
-<strong>context = {}</strong>
-<strong>context[:val]   = 'Erubis Example'</strong>
-<strong>context['list'] = ['aaa', 'bbb', 'ccc']</strong>
+<b>context = {}</b>
+<b>context[:val]   = 'Erubis Example'</b>
+<b>context['list'] = ['aaa', 'bbb', 'ccc']</b>
 
 ## get result
 puts "--- result ---"
-puts <strong>eruby.evaluate(context)</strong>
+puts <b>eruby.evaluate(context)</b>
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -455,11 +468,11 @@ input = File.read('example6.eruby')
 eruby = Erubis::Eruby.new(input)
 
 ## load YAML document as context object
-<strong>require 'yaml'</strong>
-<strong>context = YAML.load_file('example6.yaml')</strong>
+<b>require 'yaml'</b>
+<b>context = YAML.load_file('example6.yaml')</b>
 
 ## get result
-puts <strong>eruby.evaluate(context)</strong>
+puts <b>eruby.evaluate(context)</b>
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -509,7 +522,7 @@ puts "--- script source (Eruby) ---"
 puts eruby.src
 
 ## print script source with FastEruby
-eruby = Erubis::<strong>FastEruby</strong>.new(input)
+eruby = Erubis::<b>FastEruby</b>.new(input)
 puts "--- script source (FastEruby) ---"
 puts eruby.src
 </pre>
@@ -539,6 +552,21 @@ _out &lt;&lt; "  &lt;/tbody&gt;\n&lt;/table&gt;\n"
 
 _out
 </pre>
+<p>Here is the definition of FastEruby or FastXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include FastEnhancer module.
+It shows that Erubis is extensible.
+</p>
+<div class="program_caption">
+definition of FastEruby and FastXmlEruby</div>
+<pre class="program">module Erubis
+  class FastEruby &lt; Eruby
+    <b>include FastEnhancer</b>
+  end
+  class FastXmlEruby &lt; XmlEruby
+    <b>include FastEnhancer</b>
+  end
+end
+</pre>
 <br>
 
 
@@ -552,7 +580,7 @@ Therefore, you can use 'print' statement in embedded ruby code.
 example8.eruby</div>
 <pre class="program">&lt;ul&gt;
  &lt;% for item in list %&gt;
-  &lt;li&gt;<strong>&lt;% print item %&gt;</strong>&lt;/li&gt;
+  &lt;li&gt;<b>&lt;% print item %&gt;</b>&lt;/li&gt;
  &lt;% end %&gt;
 &lt;/ul&gt;
 </pre>
@@ -562,7 +590,7 @@ example8.rb</div>
 <pre class="program">## create Eruby object
 require 'erubis'
 input = File.read('example8.eruby')
-eruby = Erubis::<strong>StdoutEruby</strong>.new(input)
+eruby = Erubis::<b>StdoutEruby</b>.new(input)
 
 ## print script source
 puts "--- script source ---"
@@ -572,24 +600,119 @@ puts eruby.src
 puts "--- result ---"
 list = ['aaa', 'bbb', 'ccc']
 #puts eruby.result(binding())
-<strong>eruby.result(binding())</strong>  # returns nil
+<b>eruby.result(binding())</b>  # returns nil
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example8.rb
 --- script source ---
-<strong>_out = $stdout</strong>; _out &lt;&lt; "&lt;ul&gt;\n"
+<b>_out = $stdout</b>; _out &lt;&lt; "&lt;ul&gt;\n"
   for item in list 
-_out &lt;&lt; "  &lt;li&gt;";  <strong>print item</strong> ; _out &lt;&lt; "&lt;/li&gt;\n"
+_out &lt;&lt; "  &lt;li&gt;";  <b>print item</b> ; _out &lt;&lt; "&lt;/li&gt;\n"
   end 
 _out &lt;&lt; "&lt;/ul&gt;\n"
-nil
+<b>nil</b>
 --- result ---
 &lt;ul&gt;
   &lt;li&gt;aaa&lt;/li&gt;
   &lt;li&gt;bbb&lt;/li&gt;
   &lt;li&gt;ccc&lt;/li&gt;
 &lt;/ul&gt;
+</pre>
+<p>Here is the definition of StdoutEruby or StdoutXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include StdoutEnhancer module.
+It shows that Erubis is extensible.
+</p>
+<div class="program_caption">
+definition of StdoutEruby and StdoutXmlEruby</div>
+<pre class="program">module Erubis
+  class StdoutEruby &lt; Eruby
+    <b>include StdoutEnhancer</b>
+  end
+  class StdoutXmlEruby &lt; XmlEruby
+    <b>include StdoutEnhancer</b>
+  end
+end
+</pre>
+<br>
+
+
+<a name="tut-print"></a>
+<h3 class="section2">Print Avairable Eruby</h3>
+<p>Erubis::PrintEruby and Erubis::PrintXmlEruby enables you to use print statement.
+You can get output as String because Erubis::PrintEruby and Erubis::PrintXmlEruby doesn't use $stdout.
+</p>
+<p>Notice:
+</p>
+ <ul type="disc">
+ <li>Use evaluate() and don't use result().
+ </li>
+ <li>Only print() is available, put() or p() are not available.
+ </li>
+ <li>PrintEruby and PrintXmlEruby has instance method 'print()'.
+    It means that print statement invokes PrintEruby#print() or PrintXmlEruby#print(),
+    and Kernel#print() is not invoked.
+ </li>
+ <li>PrintEruby#print() and PrintXmlEruby#print() can take just an argument.
+ </li>
+ </ul>
+<a name="example9.eruby"></a>
+<div class="program_caption">
+example9.eruby</div>
+<pre class="program">&lt;ul&gt;
+ &lt;% for item in list %&gt;
+  &lt;li&gt;<b>&lt;% print item %&gt;</b>&lt;/li&gt;
+ &lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<a name="example9.rb"></a>
+<div class="program_caption">
+example9.rb</div>
+<pre class="program">## create Eruby object
+require 'erubis'
+input = File.read('example9.eruby')
+eruby = Erubis::<b>PrintEruby</b>.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts <b>eruby.evaluate(:list =&gt; list)</b>   # don't use result()!
+</pre>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ ruby example9.rb
+--- script source ---
+<b>@_out =</b> _out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
+  for item in list 
+_out &lt;&lt; "  &lt;li&gt;";  <b>print item</b> ; _out &lt;&lt; "&lt;/li&gt;\n"
+  end 
+_out &lt;&lt; "&lt;/ul&gt;\n"
+_out
+--- result ---
+&lt;ul&gt;
+  &lt;li&gt;aaa&lt;/li&gt;
+  &lt;li&gt;bbb&lt;/li&gt;
+  &lt;li&gt;ccc&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+<p>Here is the definition of PrintEruby or PrintXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include PrintEnhancer module.
+It shows that Erubis is extensible.
+</p>
+<div class="program_caption">
+definition of PrintEruby and PrintXmlEruby</div>
+<pre class="program">module Erubis
+  class PrintEruby &lt; Eruby
+    <b>include PrintEnhancer</b>
+  end
+  class PrintXmlEruby &lt; XmlEruby
+    <b>include PrintEnhancer</b>
+  end
+end
 </pre>
 <br>
 
@@ -601,7 +724,7 @@ nil
 <h2 class="section1">Command Reference</h2>
 <a name="command-usage"></a>
 <h3 class="section2">Usage</h3>
-<p>erubis [-hvsT] [-p <em>pattern</em>] [-c <em>class</em>] [-K <em>kanji</em>] [-f <em>file.yaml</em>] [<em>file</em> ...]
+<p>erubis [-hvsT] [-p <i>pattern</i>] [-c <i>class</i>] [-K <i>kanji</i>] [-f <i>file.yaml</i>] [<i>file</i> ...]
 </p>
 <br>
 

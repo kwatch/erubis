@@ -95,19 +95,27 @@ module Erubis
       src = ""
       initialize_src(src)
       prefix, postfix = @pattern.split()
-      regexp = /(.*?)(^[ \t]*)?#{prefix}(=*)(.*?)#{postfix}([ \t]*\r?\n)?/m
+      regexp = /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)#{postfix}([ \t]*\r?\n)?/m
       input.scan(regexp) do |text, head_space, indicator, code, tail_space|
         ## * when '<%= %>', do nothing
-        ## * when '<% %>', delete spaces iff only spaces are around '<% %>'
-        flag_trim = @trim && indicator.empty? && head_space && tail_space
+        ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
+        if indicator && indicator[0] == ?=
+          flag_trim = false
+        else
+          flag_trim = @trim && head_space && tail_space
+        end
+        #flag_trim = @trim && !(indicator && indicator[0]==?=) && head_space && tail_space
         add_src_text(src, text)
         add_src_text(src, head_space) if !flag_trim && head_space
-        if indicator.empty?   # <% %>
+        if !indicator             # <% %>
           code = "#{head_space}#{code}#{tail_space}" if flag_trim
-          #code = "#{head_space}#{code}#\n" if flag_trim
           add_src_code(src, code)
-        else                  # <%=  %>
+        elsif indicator[0] == ?=  # <%= %>
           add_src_expr(src, code, indicator)
+        else                      # <%# %>
+          n = code.count("\n")
+          n += tail_space.count("\n") if tail_space
+          add_src_code(src, "\n" * n)
         end
         add_src_text(src, tail_space) if !flag_trim && tail_space
       end

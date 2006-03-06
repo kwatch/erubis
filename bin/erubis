@@ -11,17 +11,33 @@ require 'erubis'
 
 
 class CommandOptionError < StandardError
+
   def initialize(message)
     super(message)
   end
+
 end
+
 
 
 class Main
 
+
+  def self.main(argv=ARGV)
+    status = 0
+    begin
+      Main.new.execute(ARGV)
+    rescue CommandOptionError => ex
+      $stderr.puts ex.message
+      status = 1
+    end
+    exit(status)
+  end
+
+
   def execute(argv=ARGV)
     ## parse command-line options
-    options, context = parse_argv(argv, "hvsT", "pcrfKI")
+    options, context = parse_argv(argv, "hvsxT", "pcrfKI")
     filenames = argv
     options[?h] = true if context[:help]
 
@@ -77,21 +93,35 @@ class Main
     eruby_options[:trim]    = false       if options[?T]
 
     ## execute Eruby
-    flag_src = options[?s]
     if filenames && !filenames.empty?
       filenames.each do |filename|
         eruby = klass.load_file(filename, eruby_options)
-        print flag_src ? eruby.src : eruby.evaluate(context)
+        print get_result(eruby, context, options)
       end
     else
-      input = ARGF.read()
+      input = $stdin.read()
       eruby = klass.new(input, eruby_options)
-      print flag_src ? eruby.src : eruby.evaluate(context)
+      print get_result(eruby, context, options)
     end
 
   end
 
+
   private
+
+
+  def get_result(eruby, context, options)
+    if options[?x]
+      s = eruby.src
+      s.sub!(/^.+\s*\z/, '')
+    elsif options[?s]
+      s = eruby.src
+    else
+      s = eruby.evaluate(context)
+    end
+    return s
+  end
+
 
   def usage
     command = File.basename($0)
@@ -100,6 +130,7 @@ Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
   -s            : script source
+  -x            : script source (removed the last '_out' line)
   -T            : no trimming
   -p pattern    : embedded pattern (default '<% %>')
   -c class      : class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby)
@@ -112,10 +143,12 @@ END
     return s
   end
 
+
   def version
     release = ('$Release: 0.0.0 $' =~ /([.\d]+)/) && $1
     return release
   end
+
 
   def parse_argv(argv, arg_none='', arg_required='', arg_optional='')
     options = {}
@@ -159,6 +192,7 @@ END
     return options, context
   end
 
+
   def to_value(str)
     case str
     when nil, "null", "nil"         ;   return nil
@@ -172,16 +206,10 @@ END
     end
   end
 
+
 end
 
 
 #if __FILE__ == $0
-  status = 0
-  begin
-    Main.new.execute(ARGV)
-  rescue CommandOptionError => ex
-    $stderr.puts ex.message
-    status = 1
-  end
-  exit(status)
+  Main.main(ARGV)
 #end

@@ -1,0 +1,62 @@
+
+$ Release 1.1.0 (2006-03-05)
+
+I have released Erubis 1.1.0.
+http://rubyforge.org/projects/erubis/
+
+Erubis is an implementation of eRuby.
+It has the following features:
+
+* Auto sanitizing support
+* Auto trimming spaces around '<% %>'
+* Embedded pattern changeable (default '<% %>')
+* Context object available
+* Print statement available
+* Easy to expand in subclass
+
+Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+
+See doc/users-guide.html in archive for details.
+
+
+: Enhancement from 1.0.1
+
+  * '<%# .. %>' support.  Erubis ignores '<%#  %>'.
+  
+  * New class PrintEruby and PrintXmlEruby available.
+    These class enables you to embed print statement in eRuby
+    (this feature is not supported in ERB).
+  
+    ex.  example.eb
+    --------------------
+    ## data
+    list = ['aaa', 'bbb', 'ccc']
+    context = { :list => list }
+  
+    ## eRuby script
+    ## (use print statement instead of <%= item %>)
+    input = <<-END
+    <ul>
+     <% for item in list %>
+      <li><% print item %></li> 
+     <% end %>
+    </ul>
+    END
+  
+    ## create eruby and get result as string
+    require 'erubis'
+    eruby = Erubis::PrintEruby.new(input)
+    str = eruby.evaluate(context)    # don't use result()!
+    print str
+    --------------------
+  
+    result:
+    ====================
+    $ ruby example.rb
+    <ul>
+      <li>aaa</li>
+      <li>bbb</li>
+      <li>ccc</li>
+    </ul>
+    ====================
+  

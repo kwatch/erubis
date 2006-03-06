@@ -18,8 +18,12 @@ grecipe '*.html'	, '{1}.txt'		do |r|
     end
 
 
+
 u = 'users-guide'
 tagfile = 'html-css'
+
+recipe  :all	, "#{u}.html"
+
 grecipe "#{u}.html"	, "#{u}.txt"		do |r|
 	rm_rf "guide.d"
 	mkdir_p "guide.d"

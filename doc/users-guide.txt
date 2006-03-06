@@ -9,10 +9,11 @@
 
 Erubis is an implementation of eRuby.
 It has the following features.
+.* Auto sanitizing support
 .* Auto trimming spaces around '<% %>'
-.* Auto sanitizing
-.* Change embedded pattern (default '<% %>')
+.* Embedded pattern changeable (default '<% %>')
 .* Context object available
+.* Print statement available
 .* Easy to expand in subclass
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
@@ -76,6 +77,7 @@ Here is a most basic example of Erubis.
     {{*<%= item %>*}}
   </li>
   {{*<% end %>*}}
+  {{*<%# here is ignored because starting with '#' %>*}}
 </ul>
 .--------------------
 
@@ -286,7 +288,7 @@ $ ruby example4.rb
 
 It is able to specify regular expression with :pattern option.
 Notice that you must use '{{,(?: ),}}' instead of '{{,( ),}}' for grouping.
-For example, '{{,<(!--)?% %(--)?>,}}' will not work and '{{,<(?:!--)?% %(?:--)?>,}}' will work.
+For example, '{{,<(!--)?% %(--)?>,}}' will not work while '{{,<(?:!--)?% %(?:--)?>,}}' will work.
 
 
 
@@ -420,6 +422,22 @@ $ ruby example7.rb
 .<<<:! (cd guide.d; ruby example7.rb)
 .====================
 
+Here is the definition of FastEruby or FastXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include FastEnhancer module.
+It shows that Erubis is extensible.
+
+.? definition of FastEruby and FastXmlEruby
+.--------------------
+module Erubis
+  class FastEruby < Eruby
+    {{*include FastEnhancer*}}
+  end
+  class FastXmlEruby < XmlEruby
+    {{*include FastEnhancer*}}
+  end
+end
+.--------------------
+
 
 
 .$$ Stdout Eruby	| tut-stdout
@@ -464,7 +482,7 @@ $ ruby example8.rb
 _out << "  <li>";  {{*print item*}} ; _out << "</li>\n"
   end 
 _out << "</ul>\n"
-nil
+{{*nil*}}
 --- result ---
 <ul>
   <li>aaa</li>
@@ -473,6 +491,97 @@ nil
 </ul>
 .====================
 
+Here is the definition of StdoutEruby or StdoutXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include StdoutEnhancer module.
+It shows that Erubis is extensible.
+
+.? definition of StdoutEruby and StdoutXmlEruby
+.--------------------
+module Erubis
+  class StdoutEruby < Eruby
+    {{*include StdoutEnhancer*}}
+  end
+  class StdoutXmlEruby < XmlEruby
+    {{*include StdoutEnhancer*}}
+  end
+end
+.--------------------
+
+
+
+.$$ Print Avairable Eruby	| tut-print
+
+Erubis::PrintEruby and Erubis::PrintXmlEruby enables you to use print statement.
+You can get output as String because Erubis::PrintEruby and Erubis::PrintXmlEruby doesn't use $stdout.
+
+Notice:
+ .* Use evaluate() and don't use result().
+ .* Only print() is available, put() or p() are not available.
+ .* PrintEruby and PrintXmlEruby has instance method 'print()'.
+    It means that print statement invokes PrintEruby#print() or PrintXmlEruby#print(),
+    and Kernel#print() is not invoked.
+ .* PrintEruby#print() and PrintXmlEruby#print() can take just an argument.
+
+.? example9.eruby
+.-------------------- example9.eruby
+<ul>
+ <% for item in list %>
+  <li>{{*<% print item %>*}}</li>
+ <% end %>
+</ul>
+.--------------------
+
+.? example9.rb
+.-------------------- example9.rb
+## create Eruby object
+require 'erubis'
+input = File.read('example9.eruby')
+eruby = Erubis::{{*PrintEruby*}}.new(input)
+
+## print script source
+puts "--- script source ---"
+puts eruby.src
+
+## get result
+puts "--- result ---"
+list = ['aaa', 'bbb', 'ccc']
+puts {{*eruby.evaluate(:list => list)*}}   # don't use result()!
+.--------------------
+
+.? output
+.====================
+$ ruby example9.rb
+.#.<<<:! (cd guide.d; ruby example9.rb)
+--- script source ---
+{{*@_out =*}} _out = ''; _out << "<ul>\n"
+  for item in list 
+_out << "  <li>";  {{*print item*}} ; _out << "</li>\n"
+  end 
+_out << "</ul>\n"
+_out
+--- result ---
+<ul>
+  <li>aaa</li>
+  <li>bbb</li>
+  <li>ccc</li>
+</ul>
+.====================
+
+Here is the definition of PrintEruby or PrintXmlEruby.
+They are subclass of Eruby and XmlEruby respectively and only include PrintEnhancer module.
+It shows that Erubis is extensible.
+
+.? definition of PrintEruby and PrintXmlEruby
+.--------------------
+module Erubis
+  class PrintEruby < Eruby
+    {{*include PrintEnhancer*}}
+  end
+  class PrintXmlEruby < XmlEruby
+    {{*include PrintEnhancer*}}
+  end
+end
+.--------------------
 
 
 
@@ -489,6 +598,7 @@ erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.
   .[ -h, --help    ]	Help.
   .[ -v            ]	Release version.
   .[ -s            ]	Show script source.
+  .[ -x            ]	Show script source, removing the last '_out' line.
   .[ -T            ]	No trimming spaces around '<% %>'.
   .[ -p pattern    ]	Embedded pattern (default '<% %>').
   .[ -c class      ]	Class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby).
