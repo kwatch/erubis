@@ -12,10 +12,14 @@
 ## * module FastEnhancer - make eRuby faster
 ## * module StdoutEnhance - use $stdout instead of String as output
 ## * module PrintEnhance - enable to write print statement in <% ... %>
+## * class FastEruby - FastEnhancer imported Eruby class
+## * class FastXmlEruby - FastEnhancer imported XmlEruby class
+## * class LightweightEruby - lightweight Eruby class faster than FastEruby
+## * class LightweightXmlEruby - lightweight XmlEruby class faster than FastXmlEruby
 ##
 ## example:
 ##   list = ['<aaa>', 'b&b', '"ccc"']
-##   input = <<-END
+##   input = <<'END'
 ##    <ul>
 ##     <% for item in list %>
 ##      <li><%= item %>
@@ -23,7 +27,7 @@
 ##     <% end %>
 ##    </ul>
 ##   END
-##   eruby = Erubis::XmlEruby.new(input)
+##   eruby = Erubis::XmlEruby.new(input)  # or try LightweightXmlEruby
 ##   puts "--- source ---"
 ##   puts eruby.src
 ##   puts "--- result ---"
@@ -51,6 +55,45 @@
 ##
 
 module Erubis
+
+
+  ##
+  ## helper for xml
+  ##
+  module XmlHelper
+
+    module_function
+
+    def escape_xml(obj)
+      str = obj.to_s.dup
+      #str = obj.to_s
+      #str = str.dup if obj.__id__ == str.__id__
+      str.gsub!(/&/, '&amp;')
+      str.gsub!(/</, '&lt;')
+      str.gsub!(/>/, '&gt;')
+      str.gsub!(/"/, '&quot;')   #"
+      return str
+    end
+
+    alias h escape_xml
+    alias html_escape escape_xml
+
+  end
+
+
+  module PrivateHelper  # :nodoc:
+
+    module_function
+
+    def report_code(code, src)
+      code.strip!
+      s = code.dump
+      s.sub!(/\A"/, '')
+      s.sub!(/"\z/, '')
+      src << "$stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\"); "
+    end
+
+  end
 
 
   ##
@@ -143,7 +186,7 @@ module Erubis
     end
 
     def add_src_code(src, code)
-      code.each_line { |line| src << line }
+      src << code
       src << "; " unless code[-1] == ?\n
     end
 
@@ -155,36 +198,42 @@ module Erubis
 
 
   ##
-  ## do sanitizing of <%= %>
+  ## abstract base class to escape expression (<%= ... %>)
   ##
-  class XmlEruby < Eruby
+  class EscapedEruby < Eruby
 
-    def self.escape(obj)
-      str = obj.to_s.dup
-      #str = obj.to_s
-      #str = str.dup if obj.__id__ == str.__id__
-      str.gsub!(/&/, '&amp;')
-      str.gsub!(/</, '&lt;')
-      str.gsub!(/>/, '&gt;')
-      str.gsub!(/"/, '&quot;')   #"
-      return str
+    protected
+  
+    ## abstract method
+    def escaped_expr(code)
+      raise NotImplementedError.new("#{self.class.name}#escaped_expr() is not implemented.")
     end
 
     def add_src_expr(src, code, indicator)
       case indicator
       when '='    # <%= %>
-        src << "_out << Erubis::XmlEruby.escape(#{code}); "
+        src << "_out << " << escaped_expr(code) << "; "
       when '=='   # <%== %>
         super
       when '==='  # <%=== %>
-        code.strip!
-        s = code.dump
-        s.sub!(/\A"/, '')
-        s.sub!(/"\z/, '')
-        src << "$stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\"); "
+        PrivateHelper.report_code(code, src)
       else
         # nothing
       end
+    end
+  
+  end
+
+
+  ##
+  ## sanitize expression (<%= ... %>)
+  ##
+  class XmlEruby < EscapedEruby
+
+    protected
+
+    def escaped_expr(code)
+      return "Erubis::XmlHelper.escape_xml(#{code})"
     end
 
   end  # end of class XmlEruby
@@ -225,7 +274,7 @@ module Erubis
 
   ##
   ## print function is available.
-  ## 
+  ##
   ## Notice: use Eruby#evaluate() and don't use Eruby#result()
   ## to be enable print function.
   ##
@@ -235,13 +284,10 @@ module Erubis
       src << "@_out = _out = ''; "
     end
 
-    def print(arg)
-      @_out << arg.to_s
-    end
-
-    def result(binding=TOPLEVEL_BINDING)
-      filename = @filename || '(erubis)'
-      eval @src, binding, filename
+    def print(*args)
+      args.each do |arg|
+        @_out << arg.to_s
+      end
     end
 
   end
@@ -275,6 +321,111 @@ module Erubis
   class PrintXmlEruby < XmlEruby
     include PrintEnhancer
   end
+
+
+  ##
+  ## lightweight Eruby class, which is faster than FastEruby class.
+  ##
+  ## this class runs faster but is less extensible than Eruby class.
+  ## notice that this class can't import any Enhancer.
+  ##
+  class LightweightEruby < Eruby
+
+    protected
+
+    def switch_to_expr(src)
+      return unless @prev_is_stmt
+      @prev_is_stmt = false
+      src << " _out"
+    end
+
+    def switch_to_stmt(src)
+      return if @prev_is_stmt
+      @prev_is_stmt = true
+      src << "; "
+    end
+
+    def initialize_src(src)
+      #super
+      #@prev_is_stmt = true
+      src << "_out = ''"
+      switch_to_stmt(src)
+    end
+
+    def add_src_text(src, text)
+      return if text.empty?
+      text.gsub!(/\\/, '\\\\\\\\')
+      text.gsub!(/'/, '\\\\\'')
+      switch_to_expr(src)
+      src << " << '" << text << "'"
+    end
+
+    def add_src_expr(src, code, indicator)
+      switch_to_expr(src)
+      src << " << (" << code << ").to_s"
+    end
+
+    def add_src_code(src, code)
+      switch_to_stmt(src)
+      src << code
+      src << "; " unless src[-1] == ?\n
+    end
+
+    def finalize_src(src)
+      #switch_to_stmt(src)
+      #super
+      src << "\n" unless src[-1] == ?\n
+      src << "_out\n"
+    end
+
+  end  # end of class LightweightEruby
+
+
+  ##
+  ## abstract base class to escape expression (<%= ... %>)
+  ##
+  class LightweightEscapedEruby < LightweightEruby
+
+    protected
+
+    ## abstract method
+    def escaped_expr(code)
+      raise NotImplementedError.new("#{self.class.name}#escaped_expr() is not implemented.")
+    end
+
+    def add_src_expr(src, code, indicator)
+      case indicator
+      when '='    # <%= %>
+        switch_to_expr(src)
+        src << " << " << escaped_expr(code)
+      when '=='   # <%== %>
+        super
+      when '==='  # <%=== %>
+        switch_to_stmt(src)
+	PrivateHelper.report_code(code, src)
+      else
+        # nothing
+      end
+    end
+
+  end
+
+
+  ##
+  ## lightweight XmlEruby class, which is faster than FastXmlEruby
+  ##
+  ## this class runs faster but is less extensible than Eruby class.
+  ## notice that this class can't import any Enhancer.
+  ##
+  class LightweightXmlEruby < LightweightEscapedEruby
+
+    protected
+
+    def escaped_expr(code)
+      return "Erubis::XmlHelper.escape_xml(#{code})"
+    end
+
+  end  # end of class LightweightXmlEruby
 
 
 end

@@ -1,0 +1,117 @@
+###
+### $Rev$
+### $Release$
+### $Copyright$
+###
+
+properties:
+  - release    :  0.0.0
+
+
+variables:
+  - project    :  erubis
+  - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
+  - text_files :  [ChangeLog, README, COPYING, setup.rb, erubis.gemspec]
+  - doc_files  :  [doc/users-guide.html, doc/docstyle.css]
+  - apidocdir  :  doc-api
+  - home*      :  ENV['HOME']
+  - inline_require_script :  $(home)/src/inline-require/trunk/bin/inline-require
+  - base       :  $(project)_$(release)
+  - base2      :  $(project)-$(release)
+  - libfiles*  :  Dir.glob("lib/**/*")
+
+
+recipes:
+
+  - product:	:all
+    ingreds:	[ $(text_files), $(doc_files) ]
+
+  - product:	:packages
+    ingreds:	[ $(base).tar.gz, $(base).tar.bz2, $(base).zip, $(base2).gem ]
+
+  - product:	:test
+    method: |
+	sys "ruby test/test-erubis.rb"
+	sys "ruby test/test-bin.rb"
+
+  - product:	:clear
+    method: |
+	rm_rf '$(project)_*.*', '$(project)-*.gem'
+
+  - product:	:apidoc
+    desc:	create api document by RDoc
+    ingreds:	[ $(apidocdir)/index.html ]
+
+  - product:	$(apidocdir)/index.html
+    ingreds:	[ $(libfiles) ]
+    method: |
+        rm_rf '$(apidocdir)'
+	chdir 'lib' do
+          sys "rdoc -o ../$(apidocdir)"
+        end
+
+  - product:	:chmod
+    desc:	chmod files
+    method: |
+        chmod 0644, '**/*', :filetype=>'file'
+	chmod 0755, 'bin/*'
+
+
+  - product:    $(project)_*.tar.bz2
+    desc:	create *.tar.bz2
+    ingreds:    [ $(project)_$(1) ]
+    method: |
+        rm_f @product if test(?f, @product)
+        tar_cjf @product, @ingred
+
+  - product:	$(project)_*.tar.gz
+    desc:	create *.tar.gz
+    ingreds:	[ $(project)_$(1) ]
+    method: |
+        rm_f @product if test(?f, @product)
+        tar_cjf @product, @ingred
+
+  - product:	$(project)_*.zip
+    desc:	create *.zip
+    ingreds:	[ $(project)_$(1) ]
+    method: |
+        rm_f @product if test(?f, @product)
+        zip_r @product, @ingred
+
+
+  - product:    $(project)-*.gem
+    desc:	create *.gem
+    ingreds:	[ $(project)_$(1) ]
+    method: |
+        dir = @ingred
+	cd dir do
+          Gem.manage_gems
+          Gem::GemRunner.new.run ['build', '$(project).gemspec']
+	end
+	mv "#{dir}/#{@product}", "."
+
+  - product:    $(project)_*
+    ingreds:	[ $(text_files), $(doc_files), :apidoc ]
+    method: |
+        comment 'delete and create directory'
+	release = '$(1)'      # @matches[1]
+	dir = "$(project)_#{release}"
+	rm_rf dir if test(?d, dir)
+	mkdir_p dir
+	#
+	store 'lib/**/*', 'bin/*', 'test/**/*', $text_files, dir
+	#chdir 'examples' do cmd 'rook :clean' end
+	#store 'examples/**/*', dir
+	store '$(apidocdir)/**/*', dir
+	mkdir_p "#{dir}/doc"
+	cp_r $doc_files, "#{dir}/doc"
+	mkdir_p "#{dir}/contrib"
+	cp_r '$(inline_require_script)', "#{dir}/contrib"
+	#
+	edit "#{dir}/**/*" do |content|
+	  content.gsub!(/\$Release.*?\$/, "$Release: $(1) $")
+	  content.gsub!(/\$Copyright.*?\$/, $copyright)
+	end
+	#
+	chmod 0644, "#{dir}/**/*", :filetype=>'file'
+	chmod 0755, "#{dir}/{bin,contrib}/*", :filetype=>'file'

@@ -3,6 +3,11 @@
 .?version:	$Rev$
 
 
+.: Rev.7 (2006-04-23)
+	.- [enhance] new classes LightweightEruby and LightweightXmlEruby added
+	.- [enhance] new classes EscapedEruby and LightweightEscapedEruby added
+	.- [change] XmlEruby.escape_xml() is moved to XmlHelper.escape_xml()
+
 .: Rev.6 (2006-03-06)
 	.- [enhance] '<%# ... %>' support
 	.- [update] users-guide updated

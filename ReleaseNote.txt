@@ -1,5 +1,5 @@
 
-$ Release 1.1.0 (2006-03-05)
+$ Release 1.1.1 (2006-03-06)
 
 I have released Erubis 1.1.0.
 http://rubyforge.org/projects/erubis/
@@ -12,6 +12,7 @@ It has the following features:
 * Embedded pattern changeable (default '<% %>')
 * Context object available
 * Print statement available
+* Faster mode support
 * Easy to expand in subclass
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
@@ -19,9 +20,97 @@ Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 See doc/users-guide.html in archive for details.
 
 
+: Enhancement from 1.1.0
+
+  * New command-line option '-x' supported.
+    This option prints Ruby source code of eRuby script coverted
+    and remove the last '_out' line.
+    This is more convenient than '-s' when validating with 'ruby -wc'.
+
+    example:
+    ====================
+    $ cat foo.eruby
+    <% (1..3).each do |i| %>
+     i = <%= i %>
+    <% end %>
+
+    $ eruby -x foo.eruby
+    _out = '';  (1..3).each do |i| 
+    _out << " i = "; _out << ( i ).to_s; _out << "¡Àn"
+     end
+    $ eruby -x foo.eruby | ruby -wc
+    Syntax OK
+
+    $ eruby -s foo.eruby
+    _out = '';  (1..3).each do |i| 
+    _out << " i = "; _out << ( i ).to_s; _out << "¡Àn"
+     end
+    _out
+    $ erubis -s foo.rhtml | ruby -wc
+    -:4: warning: useless use of a variable in void context
+    Syntax OK
+    ====================
+
+
+$ Release 1.1.0 (2006-03-05)
+
+I have released Erubis 1.1.0.
+http://rubyforge.org/projects/erubis/
+
+Erubis is an implementation of eRuby.
+It has the following features:
+
+* Auto sanitizing support
+* Embedded pattern changeable (default '<% %>')
+* Auto trimming spaces around '<% %>'
+* Context object available
+* Print statement available
+* Faster mode support
+* Easy to expand in subclass
+
+Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+
+Sample code (example.rb):
+--------------------
+## eRuby script
+## ('<%= %>' is escaped and '<%== %>' is not escaped when using XmlEruby class)
+input = <<END
+<ul>
+  <% for item in list %>
+  <li><%= item %>
+      <%== item %></li>
+  <% end %>
+</ul>
+END
+
+## create Eruby object
+require 'erubis'
+eruby = Erubis::XmlEruby.new(input)     # or Erubis::Eruby.new(input)
+
+## get result
+list = ['<aaa>', 'b&b', '"ccc"']
+puts eruby.result(binding())
+--------------------
+
+result:
+====================
+$ ruby example.rb
+<ul>
+  <li>&lt;aaa&gt;
+      <aaa></li>
+  <li>b&amp;b
+      b&b</li>
+  <li>&quot;ccc&quot;
+      "ccc"</li>
+</ul>
+====================
+
+See doc/users-guide.html in archive for details.
+
+
 : Enhancement from 1.0.1
 
-  * '<%# .. %>' support.  Erubis ignores '<%#  %>'.
+  * '<%# .. %>' supported.  Erubis ignores '<%#  %>'.
   
   * New class PrintEruby and PrintXmlEruby available.
     These class enables you to embed print statement in eRuby
@@ -60,3 +149,8 @@ See doc/users-guide.html in archive for details.
     </ul>
     ====================
   
+Have fun!
+
+--
+regards,
+kwatch
