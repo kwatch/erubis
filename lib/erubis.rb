@@ -9,13 +9,10 @@
 ##
 ## * class Eruby - normal eRuby class
 ## * class XmlEruby - eRuby class which escape '&<>"' into '&amp;&lt;&gt;&quot;'
-## * module FastEnhancer - make eRuby faster
-## * module StdoutEnhance - use $stdout instead of String as output
-## * module PrintEnhance - enable to write print statement in <% ... %>
-## * class FastEruby - FastEnhancer imported Eruby class
-## * class FastXmlEruby - FastEnhancer imported XmlEruby class
-## * class LightweightEruby - lightweight Eruby class faster than FastEruby
-## * class LightweightXmlEruby - lightweight XmlEruby class faster than FastXmlEruby
+## * module StdoutEnhancer - use $stdout instead of String as output
+## * module PrintEnhancer - enable to write print statement in <% ... %>
+## * class OptimizedEruby - optimized Eruby class faster than FastEruby
+## * class OptimizedXmlEruby - optimized XmlEruby class faster than FastXmlEruby
 ##
 ## example:
 ##   list = ['<aaa>', 'b&b', '"ccc"']
@@ -27,7 +24,7 @@
 ##     <% end %>
 ##    </ul>
 ##   END
-##   eruby = Erubis::XmlEruby.new(input)  # or try LightweightXmlEruby
+##   eruby = Erubis::XmlEruby.new(input)  # or try OptimizedXmlEruby
 ##   puts "--- source ---"
 ##   puts eruby.src
 ##   puts "--- result ---"
@@ -90,7 +87,7 @@ module Erubis
       s = code.dump
       s.sub!(/\A"/, '')
       s.sub!(/"\z/, '')
-      src << "$stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\"); "
+      src << " $stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\");"
     end
 
   end
@@ -138,7 +135,7 @@ module Erubis
       src = ""
       initialize_src(src)
       prefix, postfix = @pattern.split()
-      regexp = /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)#{postfix}([ \t]*\r?\n)?/m
+      regexp = /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       input.scan(regexp) do |text, head_space, indicator, code, tail_space|
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
@@ -171,27 +168,25 @@ module Erubis
     protected
 
     def initialize_src(src)
-      src << "_out = ''; "
+      src << "_out = '';"
     end
 
     def add_src_text(src, text)
-      #return if text.empty?
-      text.each_line do |line|
-        src << "_out << #{line.dump}" << (line[-1] == ?\n ? "\n" : "; ")
-      end
+      return if text.empty?
+      text.gsub!(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
+      src << " _out << '" << text << "';"
     end
 
     def add_src_expr(src, code, indicator)
-      src << "_out << (#{code}).to_s; "
+      src << ' _out << (' << code << ').to_s;'
     end
 
     def add_src_code(src, code)
-      src << code
-      src << "; " unless code[-1] == ?\n
+      src << code << ';'
     end
 
     def finalize_src(src)
-      src << "_out\n"
+      src << "\n_out\n"
     end
 
   end  # end of class Eruby
@@ -212,7 +207,7 @@ module Erubis
     def add_src_expr(src, code, indicator)
       case indicator
       when '='    # <%= %>
-        src << "_out << " << escaped_expr(code) << "; "
+        src << " _out << " << escaped_expr(code) << ";"
       when '=='   # <%== %>
         super
       when '==='  # <%=== %>
@@ -239,20 +234,8 @@ module Erubis
   end  # end of class XmlEruby
 
 
-  ##
-  ## make Eruby faster
-  ##
+  ## (obsolete)
   module FastEnhancer
-
-    def add_src_text(src, text)
-      return if text.empty?
-      #src << "_out << #{text.dump}" << (text[-1] == ?\n ? "\n" : "; ")
-      src << "_out << #{text.dump}"
-      n = text.count("\n")
-      src << ("\n" * n)
-      src << "; " if n == 0
-    end
-
   end
 
 
@@ -262,11 +245,11 @@ module Erubis
   module StdoutEnhancer
 
     def initialize_src(src)
-      src << "_out = $stdout; "
+      src << "_out = $stdout;"
     end
 
     def finalize_src(src)
-      src << "nil\n"
+      src << "\nnil\n"
     end
 
   end
@@ -281,7 +264,7 @@ module Erubis
   module PrintEnhancer
 
     def initialize_src(src)
-      src << "@_out = _out = ''; "
+      src << "@_out = _out = '';"
     end
 
     def print(*args)
@@ -293,6 +276,7 @@ module Erubis
   end
 
 
+  ## (obsolete)
   class FastEruby < Eruby
     include FastEnhancer
   end
@@ -308,6 +292,7 @@ module Erubis
   end
 
 
+  ## (obsolete)
   class FastXmlEruby < XmlEruby
     include FastEnhancer
   end
@@ -324,67 +309,74 @@ module Erubis
 
 
   ##
-  ## lightweight Eruby class, which is faster than FastEruby class.
+  ## optimized Eruby class, which is faster than FastEruby class.
   ##
   ## this class runs faster but is less extensible than Eruby class.
   ## notice that this class can't import any Enhancer.
   ##
-  class LightweightEruby < Eruby
+  class OptimizedEruby < Eruby
 
     protected
 
     def switch_to_expr(src)
-      return unless @prev_is_stmt
-      @prev_is_stmt = false
-      src << " _out"
+      return if @prev_is_expr
+      @prev_is_expr = true
+      src << ' _out'
     end
 
     def switch_to_stmt(src)
-      return if @prev_is_stmt
-      @prev_is_stmt = true
-      src << "; "
+      return unless @prev_is_expr
+      @prev_is_expr = false
+      src << ';'
     end
 
     def initialize_src(src)
-      #super
-      #@prev_is_stmt = true
-      src << "_out = ''"
-      switch_to_stmt(src)
+      @initialized = false
+      @prev_is_expr = false
     end
 
     def add_src_text(src, text)
       return if text.empty?
-      text.gsub!(/\\/, '\\\\\\\\')
-      text.gsub!(/'/, '\\\\\'')
-      switch_to_expr(src)
-      src << " << '" << text << "'"
+      text.gsub!(/['\\]/, '\\\\\&')
+      if @initialized
+        switch_to_expr(src)
+        src << " << '" << text << "'"
+      else
+        src << "_out = '" << text << "';"
+        @initialized = true
+      end
+    end
+
+    def expr_code(code)
+      return "(#{code}).to_s"
     end
 
     def add_src_expr(src, code, indicator)
+      unless @initialized
+        src << "_out = ''"
+	@initialized = true
+      end
+      #@initialized ||= ((src << "_out = ''") && true)
       switch_to_expr(src)
-      src << " << (" << code << ").to_s"
+      src << ' << (' << code << ').to_s'
     end
 
     def add_src_code(src, code)
-      switch_to_stmt(src)
-      src << code
-      src << "; " unless src[-1] == ?\n
+      switch_to_stmt(src) if @initialized
+      src << code << ";"
     end
 
     def finalize_src(src)
-      #switch_to_stmt(src)
-      #super
-      src << "\n" unless src[-1] == ?\n
-      src << "_out\n"
+      src << "\n_out\n" if @initialized
     end
 
-  end  # end of class LightweightEruby
+  end  # end of class OptimizedEruby
 
 
   ##
   ## abstract base class to escape expression (<%= ... %>)
   ##
-  class LightweightEscapedEruby < LightweightEruby
+  class OptimizedEscapedEruby < OptimizedEruby
 
     protected
 
@@ -396,12 +388,17 @@ module Erubis
     def add_src_expr(src, code, indicator)
       case indicator
       when '='    # <%= %>
+        unless @initialized
+          src << "_out = ''"
+          @initialized = true
+        end
+	#@initialized ||= ((src << "_out = ''") && true)
         switch_to_expr(src)
         src << " << " << escaped_expr(code)
       when '=='   # <%== %>
         super
       when '==='  # <%=== %>
-        switch_to_stmt(src)
+        switch_to_stmt(src) unless @initialized
 	PrivateHelper.report_code(code, src)
       else
         # nothing
@@ -412,12 +409,12 @@ module Erubis
 
 
   ##
-  ## lightweight XmlEruby class, which is faster than FastXmlEruby
+  ## optimized XmlEruby class, which is faster than FastXmlEruby
   ##
   ## this class runs faster but is less extensible than Eruby class.
   ## notice that this class can't import any Enhancer.
   ##
-  class LightweightXmlEruby < LightweightEscapedEruby
+  class OptimizedXmlEruby < OptimizedEscapedEruby
 
     protected
 
@@ -425,7 +422,7 @@ module Erubis
       return "Erubis::XmlHelper.escape_xml(#{code})"
     end
 
-  end  # end of class LightweightXmlEruby
+  end  # end of class OptimizedXmlEruby
 
 
 end

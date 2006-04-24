@@ -3,6 +3,12 @@
 .?version:	$Rev$
 
 
+.: Rev.8 (2006-04-24)
+	.- [change] Eruby class adopt LightweightEruby method
+	.- [change] FastEnhancer, FastEruby, FastXmlEruby are changed to obsoleted
+	.- [change] LightweightEruby is renamed to OptimizedEruby
+	.- [enhance] OptimizedEruby outs "_out = '<html>...'" instead of "_out = ''; _out = '<html>...'"
+
 .: Rev.7 (2006-04-23)
 	.- [enhance] new classes LightweightEruby and LightweightXmlEruby added
 	.- [enhance] new classes EscapedEruby and LightweightEscapedEruby added
