@@ -38,13 +38,23 @@ list:
 user: <%= defined?(user) ? user : "(none)" %>
 END
 
+#  SRC = <<'END'
+#_out = ''; _out << "list:\n"
+# list = ['<aaa>', 'b&b', '"ccc"']
+#   for item in list 
+#_out << "  - "; _out << ( item ).to_s; _out << "\n"
+# end 
+#_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
+#_out
+#END
   SRC = <<'END'
-_out = ''; _out << "list:\n"
- list = ['<aaa>', 'b&b', '"ccc"']
+_out = ''; _out << 'list:
+'; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list 
-_out << "  - "; _out << ( item ).to_s; _out << "\n"
- end 
-_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
+; _out << '  - '; _out << ( item ).to_s; _out << '
+'; end 
+; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
+';
 _out
 END
 
@@ -141,13 +151,23 @@ END
 
   def test_notrim2
     @input    = INPUT
+#    @expected = <<'END'
+#_out = ''; _out << "list:\n"
+# list = ['<aaa>', 'b&b', '"ccc"']
+#   for item in list ; _out << "\n"
+#_out << "  - "; _out << ( item ).to_s; _out << "\n"
+# end ; _out << "\n"
+#_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
+#_out
+#END
     @expected = <<'END'
-_out = ''; _out << "list:\n"
- list = ['<aaa>', 'b&b', '"ccc"']
-   for item in list ; _out << "\n"
-_out << "  - "; _out << ( item ).to_s; _out << "\n"
- end ; _out << "\n"
-_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
+_out = ''; _out << 'list:
+'; list = ['<aaa>', 'b&b', '"ccc"']
+   for item in list ; _out << '
+'; _out << '  - '; _out << ( item ).to_s; _out << '
+'; end ; _out << '
+'; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
+';
 _out
 END
     @options = "-sT"
@@ -172,6 +192,25 @@ END
     yaml = <<-END
     user:  Hello
     password:  world
+    END
+    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    begin
+      _test()
+    ensure
+      File.unlink(yamlfile) if test(?f, yamlfile)
+    end
+  end
+
+
+  def test_untabify1
+    yamlfile = "test.context2.yaml"
+    @input    = INPUT
+    @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
+    @options  = "-tf #{yamlfile}"
+    #
+    yaml = <<-END
+    user:	Hello
+    password:	world
     END
     File.open(yamlfile, 'w') { |f| f.write(yaml) }
     begin

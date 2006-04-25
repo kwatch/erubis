@@ -1,0 +1,61 @@
+data:
+  - name:       Apple Computer Inc.
+    url:        http://www.apple.com
+    code:       AAPL
+  - name:       Amazon.com Inc
+    url:        http://www.amazon.com
+    code:       AMZN
+  - name:       Sun Microsystems Inc.
+    url:        http://www.sun.com
+    code:       SUNW
+  - name:       Microsoft Corp
+    url:        http://www.microsoft.com
+    code:       MSFT
+  - name:       Adobe Systems Inc.
+    url:        http://www.adobe.com
+    code:       ADBE
+  - name:       Intel Corp.
+    url:        http://www.intel.com
+    code:       INTC
+  - name:       Oracle Corp.
+    url:        http://www.oracle.com
+    code:       ORCL
+  - name:       International Business Machines Corp.
+    url:        http://www.ibm.com
+    code:       IBM
+  - name:       BEA Systems Inc.
+    url:        http://www.bea.com
+    code:       BEAS
+  - name:       eBay Inc.
+    url:        http://www.ebay.com
+    code:       EBAY
+  - name:       Yahoo! Inc.
+    url:        http://www.yahoo.com
+    code:       YHOO
+  - name:       Google Inc.
+    url:        http://www.google.com
+    code:       GOOG
+  - name:       Hewlett-Packard Co.
+    url:        http://www.hp.com
+    code:       HPQ
+  - name:       SAP AG
+    url:        http://www.sap.com
+    code:       SAP
+  - name:       Cisco Systems Inc.
+    url:        http://www.cisco.com
+    code:       CSCO
+  - name:       Juniper Networks, Inc
+    url:        http://www.juniper.net/
+    code:       JNPR
+  - name:       Advanced Micro Devices Inc.
+    url:        http://www.amd.com
+    code:       AMD
+  - name:       Red Hat Inc.
+    url:        http://www.redhat.com
+    code:       RHAT
+  - name:       CA, Inc.
+    url:        http://www.ca.com
+    code:       CA
+  - name:       Seagate Technology
+    url:        http://www.seagate.com/
+    code:       STX

@@ -2,6 +2,14 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+
+.: Rev.10 (2006-04-24)
+	.- [enhance] new method Eruby#pattern_regexp() to customize regexp for scanning
+	.- [change] 'lib/erubis.rb' is divided into eruby.rb, enhancer.rb, and optimized.rb
+	.- [change] command 'bin/erubis' is moved to 'lib/erubis/main.rb'
+	.- [change] benchmark/erubybench.rb updated
+	.- [enhance] new command-line option '-k' (convert map key to Symbol) added
+
 .: Rev.9 (2006-04-24)
 	.- [enhance] add misc/erubybench.rb
 	.- [change] Eruby.load_file() calls untaint()
