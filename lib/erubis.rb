@@ -110,6 +110,7 @@ module Erubis
 
     def self.load_file(filename, options={})
       input = File.open(filename, 'rb') { |f| f.read }
+      input.untaint   # is it ok?
       options[:filename] = filename
       eruby = self.new(input, options)
       return eruby

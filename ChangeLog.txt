@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.9 (2006-04-24)
+	.- [enhance] add misc/erubybench.rb
+	.- [change] Eruby.load_file() calls untaint()
 
 .: Rev.8 (2006-04-24)
 	.- [change] Eruby class adopt LightweightEruby method
