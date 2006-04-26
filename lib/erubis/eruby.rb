@@ -8,46 +8,10 @@
 module Erubis
 
 
+  ##
+  ## base exception class
+  ##
   class ErubisError < StandardError
-  end
-
-
-  ##
-  ## helper for xml
-  ##
-  module XmlHelper
-
-    module_function
-
-    def escape_xml(obj)
-      str = obj.to_s.dup
-      #str = obj.to_s
-      #str = str.dup if obj.__id__ == str.__id__
-      str.gsub!(/&/, '&amp;')
-      str.gsub!(/</, '&lt;')
-      str.gsub!(/>/, '&gt;')
-      str.gsub!(/"/, '&quot;')   #"
-      return str
-    end
-
-    alias h escape_xml
-    alias html_escape escape_xml
-
-  end
-
-
-  module PrivateHelper  # :nodoc:
-
-    module_function
-
-    def report_code(code, src)
-      code.strip!
-      s = code.dump
-      s.sub!(/\A"/, '')
-      s.sub!(/"\z/, '')
-      src << " $stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\");"
-    end
-
   end
 
 
@@ -157,48 +121,6 @@ module Erubis
     end
 
   end  # end of class Eruby
-
-
-  ##
-  ## abstract base class to escape expression (<%= ... %>)
-  ##
-  class EscapedEruby < Eruby
-
-    protected
-
-    ## abstract method
-    def escaped_expr(code)
-      raise NotImplementedError.new("#{self.class.name}#escaped_expr() is not implemented.")
-    end
-
-    def add_src_expr(src, code, indicator)
-      case indicator
-      when '='    # <%= %>
-        src << " _out << " << escaped_expr(code) << ";"
-      when '=='   # <%== %>
-        super
-      when '==='  # <%=== %>
-        PrivateHelper.report_code(code, src)
-      else
-        # nothing
-      end
-    end
-
-  end
-
-
-  ##
-  ## sanitize expression (<%= ... %>)
-  ##
-  class XmlEruby < EscapedEruby
-
-    protected
-
-    def escaped_expr(code)
-      return "Erubis::XmlHelper.escape_xml(#{code})"
-    end
-
-  end  # end of class XmlEruby
 
 
 end

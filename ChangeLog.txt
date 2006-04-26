@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.11 (2006-04-25)
+	.- [change] class EscapedEruby is removed and add EscapeEnhancer
+	.- [change] XmlEruby includes EscapeEnhancer
 
 .: Rev.10 (2006-04-24)
 	.- [enhance] new method Eruby#pattern_regexp() to customize regexp for scanning

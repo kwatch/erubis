@@ -6,16 +6,14 @@
 
 
 require 'erubis/eruby'
+require 'erubis/enhancer'
 
 
 module Erubis
 
 
   ##
-  ## optimized Eruby class, which is faster than FastEruby class.
-  ##
-  ## this class runs faster but is less extensible than Eruby class.
-  ## notice that this class can't import any Enhancer.
+  ## Eruby class which generates optimized code
   ##
   class OptimizedEruby < Eruby
 
@@ -73,15 +71,13 @@ module Erubis
 
 
   ##
-  ## abstract base class to escape expression (<%= ... %>)
+  ## XmlEruby class which generates optimized code
   ##
-  class OptimizedEscapedEruby < OptimizedEruby
+  class OptimizedXmlEruby < OptimizedEruby
+    #include EscapeEnhancer
 
-    protected
-
-    ## abstract method
     def escaped_expr(code)
-      raise NotImplementedError.new("#{self.class.name}#escaped_expr() is not implemented.")
+      return "Erubis::XmlHelper.escape_xml(#{code})"
     end
 
     def add_src_expr(src, code, indicator)
@@ -91,6 +87,7 @@ module Erubis
           src << "_out = ''"
           @initialized = true
         end
+        #unless @initialized; src << "_out = ''"; @initialized = true; end
         #@initialized ||= ((src << "_out = ''") && true)
         switch_to_expr(src)
         src << " << " << escaped_expr(code)
@@ -98,27 +95,10 @@ module Erubis
         super
       when '==='  # <%=== %>
         switch_to_stmt(src) unless @initialized
-        PrivateHelper.report_code(code, src)
+        PrivateHelper.report_expr(src, code)
       else
         # nothing
       end
-    end
-
-  end
-
-
-  ##
-  ## optimized XmlEruby class, which is faster than FastXmlEruby
-  ##
-  ## this class runs faster but is less extensible than Eruby class.
-  ## notice that this class can't import any Enhancer.
-  ##
-  class OptimizedXmlEruby < OptimizedEscapedEruby
-
-    protected
-
-    def escaped_expr(code)
-      return "Erubis::XmlHelper.escape_xml(#{code})"
     end
 
   end  # end of class OptimizedXmlEruby
