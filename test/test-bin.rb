@@ -175,12 +175,14 @@ END
   end
 
 
-  def test_context1
-    @input    = INPUT
-    @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
-    @options  = '--user=Hello'
-    _test()
-  end
+  #--
+  #def test_context1
+  #  @input    = INPUT
+  #  @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
+  #  @options  = '--user=Hello'
+  #  _test()
+  #end
+  #++
 
 
   def test_yaml1
@@ -212,6 +214,41 @@ END
     user:	Hello
     password:	world
     END
+    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    begin
+      _test()
+    ensure
+      File.unlink(yamlfile) if test(?f, yamlfile)
+    end
+  end
+
+
+  def test_symbolify1
+    yamlfile = "test.context3.yaml"
+    @input    = <<END
+<% for h in list %>
+<tr>
+ <td><%= h[:name] %></td><td><%= h[:mail] %></td>
+</tr>
+<% end %>
+END
+    @expected = <<END
+<tr>
+ <td>foo</td><td>foo@mail.com</td>
+</tr>
+<tr>
+ <td>bar</td><td>bar@mail.org</td>
+</tr>
+END
+    @options  = "-f #{yamlfile} -S"
+    #
+    yaml = <<-END
+list:
+  - name:  foo
+    mail:  foo@mail.com
+  - name:  bar
+    mail:  bar@mail.org
+END
     File.open(yamlfile, 'w') { |f| f.write(yaml) }
     begin
       _test()

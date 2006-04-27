@@ -7,8 +7,10 @@
 require 'eruby'
 require 'erb'
 require 'erubis'
+require 'erubis/engine/optimized'
 
-## default value
+
+## default values
 base = __FILE__.sub(/\.rb$/, '')
 filename = base + '.rhtml'
 datafile = base + '.yaml'
@@ -124,8 +126,6 @@ testdefs_str = <<END
   class:  Erubis::OptimizedEruby
   code: |
     print Erubis::OptimizedEruby.new(File.read(filename)).result(binding())
-#    eruby = Erubis::OptimizedEruby.new(File.read(filename))
-#    print eruby.result(binding())
   compile: |
     Erubis::OptimizedEruby.new(str).src
   return: str
@@ -135,11 +135,18 @@ testdefs_str = <<END
   class:  Erubis::StdoutEruby
   code: |
     Erubis::StdoutEruby.new(File.read(filename)).result(binding())
-#    eruby = Erubis::StdoutEruby.new(File.read(filename))
-#    eruby.result(binding())
   compile: |
     Erubis::StdoutEruby.new(str).src
   return: null
+  skip:   yes
+
+- name:   ErubisArrayBuffer
+  class:  Erubis::ArrayBufferEruby
+  code: |
+    Erubis::ArrayBufferEruby.new(File.read(filename)).result(binding())
+  compile: |
+    Erubis::ArrayBufferEruby.new(str).src
+  return: str
   skip:   yes
 
 - name:    load

@@ -5,99 +5,29 @@
 ##
 
 
-require 'erubis/eruby'
+require 'erubis/engine'
 
 
 module Erubis
 
 
   ##
-  ## helper for xml
-  ##
-  module XmlHelper
-
-    module_function
-
-    def escape_xml(obj)
-      str = obj.to_s.dup
-      #str = obj.to_s
-      #str = str.dup if obj.__id__ == str.__id__
-      str.gsub!(/&/, '&amp;')
-      str.gsub!(/</, '&lt;')
-      str.gsub!(/>/, '&gt;')
-      str.gsub!(/"/, '&quot;')   #"
-      return str
-    end
-
-    alias h escape_xml
-    alias html_escape escape_xml
-
-  end
-
-
-  module PrivateHelper  # :nodoc:
-
-    module_function
-
-    def report_expr(src, code)
-      code.strip!
-      s = code.dump
-      s.sub!(/\A"/, '')
-      s.sub!(/"\z/, '')
-      src << " $stderr.puts(\"** erubis: #{s} = \#{(#{code}).inspect}\");"
-    end
-
-  end
-
-
-  ##
-  ## convenient module to escape expression value ('<%= ... %>') by default
+  ## switch '<%= ... %>' to escaped and '<%== ... %>' to non-escaped
   ##
   ## ex.
-  ##   class LatexEruby < Eruby
-  ##     def self.escape(str)
-  ##       return str.gsub(/[%\\]/, '\\\1')
-  ##     end
-  ##     def escaped_expr(expr_code)
-  ##       return "LatexEruby.escape(#{expr_code})"
-  ##     end
+  ##   class XmlEruby < Eruby
+  ##     include EscapeEnhancer
   ##   end
   ##
   module EscapeEnhancer
 
-    protected
-
-    ##
-    ## abstract method to convert expression code into escaped
-    ##
-    ## ex.
-    ##   def escaped_expr(code)
-    ##     return "CGI.escapeHTML(#{code})"
-    ##   end
-    ##
-    def escaped_expr(code)
-      raise NotImplementedError.new("#{self.class.name}#escaped_expr() is not implemented.")
-    end
-
-
-    ##
-    ## escape expression code ('<%= .... %>')
-    ##
-    ## * '<%= ... %>'  => escaped
-    ## * '<%== ... %>' => not escaped
-    ## * '<%=== ... %>' => report expression value into $stderr
-    ##
-    def add_src_expr(src, code, indicator)
-      case indicator
-      when '='    # <%= %>
-        src << " _out << " << escaped_expr(code) << ";"
-      when '=='   # <%== %>
-        super
-      when '==='  # <%=== %>
-        PrivateHelper.report_expr(src, code)
-      else
-        # nothing
-      end
+    def self.included(klass)
+      klass.class_eval <<-END
+        alias _add_expr_literal add_expr_literal
+        alias _add_expr_escaped add_expr_escaped
+        alias add_expr_literal _add_expr_escaped
+        alias add_expr_escaped _add_expr_literal
+      END
     end
 
   end
@@ -113,11 +43,11 @@ module Erubis
   ##
   module StdoutEnhancer
 
-    def initialize_src(src)
+    def init_src(src)
       src << "_out = $stdout;"
     end
 
-    def finalize_src(src)
+    def finish_src(src)
       src << "\nnil\n"
     end
 
@@ -132,7 +62,7 @@ module Erubis
   ##
   module PrintEnhancer
 
-    def initialize_src(src)
+    def init_src(src)
       src << "@_out = _out = '';"
     end
 
@@ -146,47 +76,36 @@ module Erubis
 
 
   ##
-  ## sanitize expression (<%= ... %>) by default
+  ## return Array instead of String
   ##
-  class XmlEruby < Eruby
-    include EscapeEnhancer
+  module ArrayEnhancer
 
-    def escaped_expr(code)
-      return "Erubis::XmlHelper.escape_xml(#{code})"
+    def init_src(src)
+      src << "_out = [];"
+    end
+
+    def finish_src(src)
+      src << "\n" unless src[-1] == ?\n
+      src << "_out\n"
     end
 
   end
 
 
-  ## (obsolete)
-  class FastEruby < Eruby
-    include FastEnhancer
-  end
+  ##
+  ## use Array instead of String as buffer
+  ##
+  module ArrayBufferEnhancer
 
+    def init_src(src)
+      src << "_out = [];"
+    end
 
-  class StdoutEruby < Eruby
-    include StdoutEnhancer
-  end
+    def finish_src(src)
+      src << "\n" unless src[-1] == ?\n
+      src << "_out.join()\n"
+    end
 
-
-  class PrintEruby < Eruby
-    include PrintEnhancer
-  end
-
-
-  ## (obsolete)
-  class FastXmlEruby < XmlEruby
-    include FastEnhancer
-  end
-
-
-  class StdoutXmlEruby < XmlEruby
-    include StdoutEnhancer
-  end
-
-
-  class PrintXmlEruby < XmlEruby
-    include PrintEnhancer
   end
 
 

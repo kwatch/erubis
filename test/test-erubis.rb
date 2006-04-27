@@ -1,7 +1,7 @@
 ##
 ## $Rev$
 ## $Release$
-## $Date$
+## $Copyright$
 ##
 
 testdir = File.dirname(__FILE__)
@@ -16,6 +16,8 @@ require 'yaml'
 require 'stringio'
 
 require 'erubis'
+require 'erubis/engine/optimized'
+
 
 class ErubisTest < Test::Unit::TestCase
 
@@ -335,7 +337,7 @@ src: |
     _out = ''; for item in list 
     ; _out << '  '; _out << Erubis::XmlHelper.escape_xml( item["var#{n}"] ); _out << '
     '; _out << '  '; _out << ( item["var#{n}"] ).to_s; _out << '
-    '; _out << '  '; $stderr.puts("** erubis: item[\"var\#{n}\"] = #{(item["var#{n}"]).inspect}"); _out << '
+    '; _out << '  '; $stderr.puts("*** debug: item[\"var\#{n}\"]=#{(item["var#{n}"]).inspect}"); _out << '
     '; _out << '  '; _out << '
     '; end 
     ;
@@ -481,7 +483,7 @@ src: |
     ';  for item in list 
     ; _out << '  <tr>
         <td>' << ( item ).to_s << '</td>
-        <td>' << ( item ).to_s << '</td>
+        <td>' << Erubis::XmlHelper.escape_xml( item ) << '</td>
       </tr>
     ';  end 
     ; _out << '</table>
@@ -492,15 +494,15 @@ output: |
     <table>
       <tr>
         <td><aaa></td>
-        <td><aaa></td>
+        <td>&lt;aaa&gt;</td>
       </tr>
       <tr>
         <td>b&b</td>
-        <td>b&b</td>
+        <td>b&amp;b</td>
       </tr>
       <tr>
         <td>"ccc"</td>
-        <td>"ccc"</td>
+        <td>&quot;ccc&quot;</td>
       </tr>
     </table>
     <ul><li><aaa></li><li>b&b</li><li>"ccc"</li></ul>

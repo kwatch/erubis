@@ -51,10 +51,13 @@
 ##    </ul>
 ##
 
-module Erubis
-end
 
-
-require 'erubis/eruby'
+require 'erubis/engine'
+require 'erubis/helper'
 require 'erubis/enhancer'
-require 'erubis/optimized'
+require 'erubis/engine/ruby'
+require 'erubis/engine/optimized'
+#require 'erubis/engine/php'
+#require 'erubis/engine/c'
+#require 'erubis/engine/java'
+#require 'erubis/engine/scheme'

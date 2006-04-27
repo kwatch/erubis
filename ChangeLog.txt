@@ -2,6 +2,14 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.12 (2006-04-26)
+	.- [enhance] PHP, C, Java, and Scheme support
+	.- [enhance] new class Engine is splitted from Eruby
+	.- [enhance] Eruby now escapes '<%== ... %>'
+	.- [change] method names are changed in Engine class ('add_src_code'=>'add_stmt', etc)
+	.- [enhance] new module ArrayEnhancer and ArrayBufferEnhander
+	.- [enhance] add test/test-engines.rb
+
 .: Rev.11 (2006-04-25)
 	.- [change] class EscapedEruby is removed and add EscapeEnhancer
 	.- [change] XmlEruby includes EscapeEnhancer

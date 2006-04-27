@@ -1,11 +1,16 @@
 ###
-### $Rev: 6 $
+### $Rev$
 ### $Release$
 ### $Copyright$
 ###
 
 require 'yaml'
 require 'erubis'
+require 'erubis/engine/ruby'
+require 'erubis/engine/php'
+require 'erubis/engine/c'
+require 'erubis/engine/java'
+require 'erubis/engine/scheme'
 
 
 module Erubis
@@ -36,9 +41,9 @@ module Erubis
 
     def execute(argv=ARGV)
       ## parse command-line options
-      options, context = parse_argv(argv, "hvsxTtk", "pcrfKI")
+      options, properties = parse_argv(argv, "hvsxTtS", "pcrfKIla")
       filenames = argv
-      options[?h] = true if context[:help]
+      options[?h] = true if properties[:help]
 
       ## help, version
       if options[?h] || options[?v]
@@ -57,15 +62,32 @@ module Erubis
         require library
       end if options[?r]
 
+      ## action
+      action = options[?a]
+      action ||= 'compile' if options[?x]
+      action ||= 'compile' if options[?s]
+
+      ## lang
+      lang = options[?l] || 'ruby'
+      action ||= 'compile' if options[?l]
+
       ## class name of Eruby
-      classname = options[?c] || 'Eruby'
+      classname = options[?c]
+      unless classname
+        classname = lang =~ /\Axml(.*)/ ? "XmlE#{$1}" : "E#{lang}"
+      end
       begin
         klass = Erubis.const_get(classname)
       rescue NameError
         klass = nil
       end
-      unless klass && classname =~ /Eruby\z/
-        raise CommandOptionError.new("-c #{classname}: invalid class name.")
+      unless klass
+        if lang
+          msg = "-l #{lang}: invalid language name (class Erubis::#{classname} not found)."
+        else
+          msg = "-c #{classname}: invalid class name."
+        end
+        raise CommandOptionError.new(msg)
       end
 
       ## kanji code
@@ -82,42 +104,43 @@ module Erubis
           unless ydoc.is_a?(Hash)
             raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
           end
-          convert_mapping_key_from_string_to_symbol(ydoc) if options[?k]
+          convert_mapping_key_from_string_to_symbol(ydoc) if options[?S]
           hash.update(ydoc)
         end
-        hash.update(context)
+        #hash.update(context)
         context = hash
+      else
+        context = {}
       end
 
-      ## options for Eruby
-      eruby_options = {}
-      eruby_options[:pattern] = options[?p] if options[?p]
-      eruby_options[:trim]    = false       if options[?T]
+      ## properties for compiler
+      properties[:pattern] = options[?p] if options[?p]
+      properties[:trim]    = false       if options[?T]
 
-      ## execute Eruby
+      ## compile and execute
+      val = nil
       if filenames && !filenames.empty?
         filenames.each do |filename|
-          eruby = klass.load_file(filename, eruby_options)
-          print get_result(eruby, context, options)
+          compiler = klass.load_file(filename, properties)
+          print val if val = do_action(action, compiler, context, options)
         end
       else
         input = $stdin.read()
-        eruby = klass.new(input, eruby_options)
-        print get_result(eruby, context, options)
+        compiler = klass.new(input, properties)
+        print val if val = do_action(action, compiler, context, options)
       end
 
     end
 
     private
 
-    def get_result(eruby, context, options)
-      if options[?x]
-        s = eruby.src
-        s.sub!(/^.+\s*\z/, '')
-      elsif options[?s]
-        s = eruby.src
-      else
-        s = eruby.evaluate(context)
+    def do_action(action, compiler, context, options)
+      case action
+      when 'compile'
+        s = compiler.src
+        s.sub!(/^.+\s*\z/, '') if options[?x]
+      when nil, 'exec', 'execute'
+        s = compiler.evaluate(context)
       end
       return s
     end
@@ -130,18 +153,19 @@ Usage: #{command} [..options..] [file ...]
   -v            : version
   -s            : script source
   -x            : script source (removed the last '_out' line)
-  -T            : no trimming
+  -T            : no trimming spaces around '<% %>'
   -p pattern    : embedded pattern (default '<% %>')
+  -l lang       : compile but no execute (ruby/php/c/java/scheme)
   -c class      : class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby)
   -I path       : library include path
   -K kanji      : kanji code (euc, sjis, utf8, none) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
-  -k            : convert mapping key from string to symbol
+  -S            : convert mapping key from string to symbol
   --name=value  : context name and value
 END
       #  -r library    : require library
-      #  -k            : convert mapping key from string to symbol
+      #  -a            : action (compile/execute)
       return s
     end
 

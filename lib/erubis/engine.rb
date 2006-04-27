@@ -9,16 +9,16 @@ module Erubis
 
 
   ##
-  ## base exception class
+  ## base error class
   ##
   class ErubisError < StandardError
   end
 
 
   ##
-  ## base class
+  ## base engine class
   ##
-  class Eruby
+  class Engine
 
     def initialize(input, options={})
       #@input    = input
@@ -65,7 +65,7 @@ module Erubis
 
     def compile(input)
       src = ""
-      initialize_src(src)
+      init_src(src)
       regexp = pattern_regexp(@pattern)
       input.scan(regexp) do |text, head_space, indicator, code, tail_space|
         ## * when '<%= %>', do nothing
@@ -76,51 +76,69 @@ module Erubis
           flag_trim = @trim && head_space && tail_space
         end
         #flag_trim = @trim && !(indicator && indicator[0]==?=) && head_space && tail_space
-        add_src_text(src, text)
-        add_src_text(src, head_space) if !flag_trim && head_space
+        add_text(src, text)
+        add_text(src, head_space) if !flag_trim && head_space
         if !indicator             # <% %>
           code = "#{head_space}#{code}#{tail_space}" if flag_trim
-          add_src_code(src, code)
+          add_stmt(src, code)
         elsif indicator[0] == ?=  # <%= %>
-          add_src_expr(src, code, indicator)
+          add_expr(src, code, indicator)
         else                      # <%# %>
           n = code.count("\n")
           n += tail_space.count("\n") if tail_space
-          add_src_code(src, "\n" * n)
+          add_stmt(src, "\n" * n)
         end
-        add_src_text(src, tail_space) if !flag_trim && tail_space
+        add_text(src, tail_space) if !flag_trim && tail_space
       end
       rest = $' || input
-      add_src_text(src, rest)
-      finalize_src(src)
+      add_text(src, rest)
+      finish_src(src)
       return src
     end
 
     protected
 
-    def initialize_src(src)
-      src << "_out = '';"
+    def escape_text(text)
+      return text
     end
 
-    def add_src_text(src, text)
-      return if text.empty?
-      text.gsub!(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
-      src << " _out << '" << text << "';"
+    def escaped_expr(code)
+      return code
     end
 
-    def add_src_expr(src, code, indicator)
-      src << ' _out << (' << code << ').to_s;'
+    def init_src(src)
     end
 
-    def add_src_code(src, code)
-      src << code << ';'
+    def add_text(src, text)
     end
 
-    def finalize_src(src)
-      src << "\n_out\n"
+    def add_stmt(src, code)
     end
 
-  end  # end of class Eruby
+    def add_expr(src, code, indicator)
+      case indicator
+      when '='
+        add_expr_literal(src, code)
+      when '=='
+        add_expr_escaped(src, code)
+      when '==='
+        add_expr_debug(src, code)
+      end
+    end
+
+    def add_expr_literal(src, code)
+    end
+
+    def add_expr_escaped(src, code)
+    end
+
+    def add_expr_debug(src, code)
+    end
+
+    def finish_src(src)
+    end
+
+  end  # end of class Engine
 
 
 end
