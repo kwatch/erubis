@@ -6,11 +6,14 @@
 
 require 'yaml'
 require 'erubis'
+require 'erubis/engine/enhanced'
+require 'erubis/engine/optimized'
 require 'erubis/engine/ruby'
 require 'erubis/engine/php'
 require 'erubis/engine/c'
 require 'erubis/engine/java'
 require 'erubis/engine/scheme'
+require 'erubis/engine/perl'
 
 
 module Erubis
@@ -49,6 +52,7 @@ module Erubis
       if options[?h] || options[?v]
         puts version() if options[?v]
         puts usage() if options[?h]
+        puts show_properties() if options[?h]
         return
       end
 
@@ -148,24 +152,40 @@ module Erubis
     def usage
       command = File.basename($0)
       s = <<END
+erubis - embedded program compiler for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
   -s            : script source
   -x            : script source (removed the last '_out' line)
-  -T            : no trimming spaces around '<% %>'
+  -T            : don't trim spaces around '<% %>'
   -p pattern    : embedded pattern (default '<% %>')
-  -l lang       : compile but no execute (ruby/php/c/java/scheme)
-  -c class      : class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby)
+  -l lang       : compile but no execute (ruby/php/c/java/scheme/perl)
+                  if lang is 'xmlxxx' then 'XmlExxx' class is used
+  -c class      : class name (XmlEruby/PrintStatementEruby/...) (default Eruby)
   -I path       : library include path
-  -K kanji      : kanji code (euc, sjis, utf8, none) (default none)
+  -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
-  -S            : convert mapping key from string to symbol
-  --name=value  : context name and value
+  -S            : convert mapping key from string to symbol in YAML file
+
 END
       #  -r library    : require library
       #  -a            : action (compile/execute)
+      return s
+    end
+
+    def show_properties
+      s = "supported properties:\n"
+      %w[ruby php c java scheme perl].each do |lang|
+        klass = Erubis.const_get("E#{lang}")
+        s << "  * #{lang}\n"
+        list = klass.supported_properties - Erubis::Engine.supported_properties
+        list.each do |name, default_val, desc|
+          s << ("    --%-25s : %s\n" % ["#{name}=#{default_val.inspect}", desc])
+        end
+      end
+      s << "\n"
       return s
     end
 

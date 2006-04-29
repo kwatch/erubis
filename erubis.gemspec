@@ -15,21 +15,23 @@ spec = Gem::Specification.new do |s|
   s.version     = ("$Release$" =~ /[\.\d]+/) && $&
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "http://rubyforge.org/projects/erubis"
-  s.summary     = "an implementation of eRuby"
+  s.summary     = "a fast and extensible eRuby implementation which supports multi-language"
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
+  * Very fast (about three times faster than ERB)
   * Auto trimming spaces around '<% %>'
   * Auto sanitizing
   * Change embedded pattern (default '<% %>')
   * Context object available
   * Easy to expand in subclass
+  * Able to output multi-language (Ruby/PHP/C/Java/Scheme/Perl)
   END
    
   ## files
   files = []
   files += Dir.glob('lib/**/*')
   files += Dir.glob('bin/*')
-  #files += Dir.glob('examples/**/*')
+  files += Dir.glob('examples/**/*')
   files += Dir.glob('test/test-*.rb')
   #files += Dir.glob('man/**/*')
   files += [ "doc/users-guide.html", "doc/docstyle.css", ]
@@ -38,7 +40,7 @@ spec = Gem::Specification.new do |s|
   s.files       = files
   s.executables = ["erubis"]
   s.bindir      = "bin"
-  s.test_file   = 'test/test-erubis.rb'
+  s.test_file   = 'test/test.rb'
 end
 
 # Quick fix for Ruby 1.8.3 / YAML bug   (thanks to Ross Bamford)

@@ -1,0 +1,27 @@
+##
+## $Rev$
+## $Release$
+## $Copyright$
+##
+
+
+unless defined?(TESTDIR)
+  TESTDIR = File.dirname(__FILE__)
+  LIBDIR  = TESTDIR == '.' ? '../lib' : File.dirname(TESTDIR) + '/lib'
+  $: << TESTDIR
+  $: << LIBDIR
+end
+
+
+require 'test/unit'
+#require 'test/unit/ui/console/testrunner'
+require 'assert-text-equal'
+require 'yaml'
+require 'testutil'
+
+
+if $0 == __FILE__
+  require "#{TESTDIR}/test-erubis.rb"
+  require "#{TESTDIR}/test-engines.rb"
+  require "#{TESTDIR}/test-bin.rb"
+end

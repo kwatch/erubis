@@ -16,6 +16,13 @@ module Erubis
   ##
   class Ec < Engine
 
+    def self.supported_properties()  # :nodoc:
+      list = super
+      list << [:indent, '',       "indent spaces (ex. '  ')"]
+      list << [:out,    'stdout', "output stream name"]
+      return list
+    end
+
     def initialize(input, properties={})
       @indent = properties[:indent] || ''
       @out = properties[:out] || 'stdout'
@@ -23,13 +30,22 @@ module Erubis
     end
 
     def init_src(src)
-      src << "# 1 \"#{self.filename}\"\n" if self.filename
+      src << "#line 1 \"#{self.filename}\"\n" if self.filename
     end
 
     def escape_text(text)
       @@table_ ||= { "\r"=>"\\r", "\n"=>"\\n", "\t"=>"\\t", '"'=>'\\"', "\\"=>"\\\\" }
       text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] }
       return text
+    end
+
+    def escaped_expr(code)
+      code.strip!
+      if code =~ /\A(\".*?\")\s*,\s*(.*)/
+        return "#{$1}, escape(#{$2})"
+      else
+        return "escape(#{code})"
+      end
     end
 
     def add_text(src, text)
@@ -60,10 +76,6 @@ module Erubis
       src << " fprintf(#{@out}, " << escaped_expr(code) << ');'
     end
 
-    def escaped_expr(code)
-      return code.strip
-    end
-
     def add_expr_debug(src, code)
       code.strip!
       s = nil
@@ -80,11 +92,9 @@ module Erubis
   end
 
 
-  #--
-  #class XmlEc < Ec
-  #  include EscapeEnhancer
-  #end
-  #++
+  class XmlEc < Ec
+    include EscapeEnhancer
+  end
 
 
 end

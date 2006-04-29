@@ -4,12 +4,9 @@
 ## $Date$
 ##
 
-testdir = File.dirname(File.expand_path(__FILE__))
-libdir  = File.dirname(testdir) + '/lib'
-$: << testdir
-$: << libdir
+require  "#{File.dirname(__FILE__)}/test.rb"
 
-bindir  = File.dirname(testdir) + '/bin'
+bindir  = File.dirname(TESTDIR) + '/bin'
 $script = bindir + '/erubis'
 if test(?f, 'bin/erubis')
   $script = 'bin/erubis'
@@ -48,14 +45,14 @@ END
 #_out
 #END
   SRC = <<'END'
-_out = ''; _out << 'list:
+_out = []; _out << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list 
 ; _out << '  - '; _out << ( item ).to_s; _out << '
 '; end 
 ; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
 ';
-_out
+_out.join
 END
 
   OUTPUT = <<'END'
@@ -109,7 +106,7 @@ END
 
   def test_source2
     @input    = INPUT
-    @expected = SRC.sub(/^_out\s*\z/, '')
+    @expected = SRC.sub(/^_out(\.join)?\s*\z/, '')
     @options  = '-x'
     _test()
   end
@@ -161,14 +158,14 @@ END
 #_out
 #END
     @expected = <<'END'
-_out = ''; _out << 'list:
+_out = []; _out << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list ; _out << '
 '; _out << '  - '; _out << ( item ).to_s; _out << '
 '; end ; _out << '
 '; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
 ';
-_out
+_out.join
 END
     @options = "-sT"
     _test()

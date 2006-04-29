@@ -16,6 +16,12 @@ module Erubis
   ##
   class Escheme < Engine
 
+    def self.supported_properties()  # :nodoc:
+      list = super
+      list << [:func,  '_add',   "function name (ex. 'display')"]
+      return list
+    end
+
     def initialize(input, properties={})
       @func = properties[:func] || '_add'   # or 'display'
       super
@@ -36,7 +42,7 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return code.strip! || code
+      return "(escape #{code.strip})"
     end
 
     def add_text(src, text)
@@ -69,11 +75,9 @@ module Erubis
   end
 
 
-  #--
-  #class XmlEscheme < Escheme
-  #  include EscapeEnhancer
-  #end
-  #++
+  class XmlEscheme < Escheme
+    include EscapeEnhancer
+  end
 
 
 end

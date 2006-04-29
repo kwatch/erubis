@@ -101,8 +101,8 @@ recipes:
 	mkdir_p dir
 	#
 	store 'lib/**/*', 'bin/*', 'test/**/*', $text_files, dir
-	#chdir 'examples' do cmd 'rook :clean' end
-	#store 'examples/**/*', dir
+	chdir 'examples' do sys 'make clean' end
+	store 'examples/**/*', dir
 	store '$(apidocdir)/**/*', dir
 	mkdir_p "#{dir}/doc"
 	cp_r $doc_files, "#{dir}/doc"
@@ -116,3 +116,17 @@ recipes:
 	#
 	chmod 0644, "#{dir}/**/*", :filetype=>'file'
 	chmod 0755, "#{dir}/{bin,contrib}/*", :filetype=>'file'
+
+  - product:	:duplicate
+    method: |
+	files = []
+	files += Dir.glob('lib/**/*.rb')
+	files += Dir.glob('benchmark/erubybench.{rb,rhtml,yaml}')
+	archive = "#{@product}.tar.gz"
+	tar_czf archive, files
+	dir = '/Volumes/WORKGROUP;DENEB/src/erubis/trunk'
+	cp archive, dir
+	chdir dir do
+	  tar_xzf archive
+	end
+

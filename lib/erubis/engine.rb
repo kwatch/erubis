@@ -20,6 +20,14 @@ module Erubis
   ##
   class Engine
 
+    def self.supported_properties    # :nodoc:
+      return [
+              [:pattern, '<% %>', "embed pattern"],
+              [:filename, nil,    "filename"],
+              [:trim,     true,   "trim spaces around <% ... %>"],
+             ]
+    end
+
     def initialize(input, options={})
       #@input    = input
       @pattern  = options[:pattern]  || '<% %>'
@@ -38,17 +46,13 @@ module Erubis
       return eruby
     end
 
-    def result(binding=TOPLEVEL_BINDING)
-      filename = @filename || '(erubis)'
-      eval @src, binding, filename
+    def result(_binding=TOPLEVEL_BINDING)
+      _filename = @filename || '(erubis)'
+      eval @src, _binding, _filename
     end
 
     def evaluate(_context={})
-      _evalstr = ''
-      _context.keys.each do |key|
-        _evalstr << "#{key.to_s} = _context[#{key.inspect}]\n"
-      end
-      eval _evalstr
+      eval _context.keys.inject("") { |s, k| s << "#{k.to_s} = _context[#{k.inspect}];" }
       return result(binding())
     end
 

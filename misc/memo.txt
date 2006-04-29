@@ -1,0 +1,373 @@
+
+●eRuby高速化計画
+
+高速なeRubyの処理系を実装するプロジェクト。目標はPure RubyでERubyより高速にすること。
+
+
+◎測定
+
+benchmark.rbを使う。
+
+
+◎高速化その1: 正規表現で解析する
+
+構文解析をやめて、正規表現によるパターンマッチを使う。
+
+.--------------------
+def MyEruby
+
+  def initialize(input)
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def compile(input)
+    ## バッファを初期化するコード
+    src = "_buf = '';"
+
+    ## パターンマッチを繰り返し行う
+    pattern = /(.*)<%(=?)(.*?)%>/m
+    input.scan(pattern) do |text, equal, code|
+
+      ## '<% ... %>' より前の部分を追加するコード
+      text.each_line { |line| src << " _buf << #{line.dump}\n" }
+      src[-1] = ?; if rest[-1] != ?\n
+
+      ## '<% ... %>' の処理
+      if equal                             # '<%= 式 %>' のとき
+        src << " _buf << (#{code}).to_s;"
+      else                                 # '<% 文 %>' のとき
+        src << code
+	src << ";" if code[-1] != ?\n
+      end
+
+    end
+
+    ## '<% %>' より後ろの部分（一度もマッチしないときはinputを使う）
+    rest = $' || input
+    rest.each_line { |line| src << " _buf << #{line.dump}\n" }
+    src[-1] = ?; if rest[-1] != ?\n
+
+    ## 結果の文字列を返すコード
+    src << " _buf\n"
+    return src
+  end
+
+  def result(binding=TOPLEVEL_BINDING)
+    eval @source, binding
+  end
+
+end
+.--------------------
+
+.#.--------------------
+.#def MyEruby
+.#
+.#  def initialize(input)
+.#    @source = compile(input)
+.#  end
+.#
+.#  attr_reader :source
+.#
+.#  def compile(input)
+.#    src = "_buf = '';"         ## バッファを初期化するコード
+.#    pattern = /(.*)<%(=?)(.*?)%>/m
+.#    input.scan(pattern) do |text, equal, code|  ## パターンマッチ
+.#                               ## マッチした箇所の前のテキスト
+.#      text.each_line { |line| src << " _buf << #{line.dump}\n" }
+.#      src[-1] = ?; if rest[-1] != ?\n
+.#      if equal                 ## '<%= 式 %>' のとき
+.#        src << " _buf << (#{code}).to_s;"
+.#      else                     ## '<% 文 %>' のとき
+.#        src << code
+.#        src << ";" if code[-1] != ?\n
+.#      end
+.#    end
+.#    rest = $' || input         ## マッチした箇所の残りのテキスト
+.#    rest.each_line { |line| src << " _buf << #{line.dump}\n" }
+.#    src[-1] = ?; if rest[-1] != ?\n
+.#    src << " _buf\n"           ## 結果の文字列を返すコード
+.#    return src
+.#  end
+.#
+.#  def result(binding=TOPLEVEL_BINDING)
+.#    eval @source, binding
+.#  end
+.#
+.#end
+.#.--------------------
+
+
+◎高速化その2: 文字列を結合する
+
+.--------------------
+def MyEruby
+
+  def initialize(input)
+    @input = input
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def escape_text(text)
+    ## 「'」と「\」をエスケープする
+    text.gsub!(/['\\]/, '\\\\\1')
+    text
+  end
+
+  def compile(input)
+    ## バッファを初期化するコード
+    src = "_buf = '';"
+
+    ## パターンマッチを繰り返し行う
+    pattern = /(.*)<%(=?)(.*?)%>/m
+    input.scan(pattern) do |text, equal, code|
+
+      ## '<% ... %>' より前の部分を追加するコード
+      src << " _buf << '" << escape_text(text) << "'" unless text.empty?
+
+      ## '<% ... %>' の処理
+      if equal                             # '<%= 式 %>' のとき
+        src << " _buf << (#{code}).to_s;"
+      else                                 # '<% 文 %>' のとき
+        src << code
+	src << ";" if code[-1] != ?\n
+      end
+
+    end
+
+    ## '<% %>' より後ろの部分（一度もマッチしないときはinputを使う）
+    rest = $' || input
+    src << " _buf << '" << escape_text(rest) << "'" unless rest.empty?
+
+    ## 結果の文字列を返すコード
+    src << "\n_buf\n"
+    return src
+  end
+
+  def result(binding=TOPLEVEL_BINDING)
+    eval @source, binding
+  end
+
+end
+.--------------------
+
+
+◎高速化その3: $stdoutに出力する
+
+.--------------------
+def MyEruby
+
+  def initialize(input)
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def escape_text(text)
+    ## 「'」と「\」をエスケープする
+    text.gsub!(/['\\]/, '\\\\\1')  # "'" => "\\'", "\\" => "\\\\"
+    text
+  end
+
+  def compile(input)
+    ## バッファとして$stdoutを使う
+    src = "_buf = $stout;"
+
+    ## パターンマッチを繰り返し行う
+    pattern = /(.*)<%(=?)(.*?)%>/m
+    input.scan(pattern) do |text, equal, code|
+
+      ## '<% ... %>' より前の部分を追加するコード
+      src << " _buf << '" << escape_text(text) << "'" unless text.empty?
+
+      ## '<% ... %>' の処理
+      if equal                             # '<%= 式 %>' のとき
+        src << " _buf << (#{code}).to_s;"
+      else                                 # '<% 文 %>' のとき
+        src << code
+	src << ";" if code[-1] != ?\n
+      end
+
+    end
+
+    ## '<% %>' より後ろの部分（一度もマッチしないときはinputを使う）
+    rest = $' || input
+    src << " _buf << '" << escape_text(rest) << "'" unless rest.empty?
+
+    ## nil を返すコード
+    src << "\nnil\n"
+    return _buf
+  end
+
+  def result(binding=TOPLEVEL_BINDING)
+    eval @source, binding
+  end
+
+end
+.--------------------
+
+あるいは引数でバッファオブジェクトを指定するようにしてもよい。
+
+.--------------------
+class MyEruby
+
+  def initialize(input, buffer='')
+    @buffer = buffer
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def compile(input)
+    ## @bufferで初期化する
+    src = "_buf = @buffer;"
+
+    ...
+
+    ## 戻り値
+    src << "\n_buf\n"
+    return src
+  end
+  
+end
+.--------------------
+
+
+◎高速化その4: 配列バッファを使う
+
+$stdoutを使うのは確かに高速なのだが、文字列を返してくれたほうが柔軟性がある。
+文字列を返すようにしたままで高速化することはできないか。
+
+そこで、バッファとして文字列ではなく配列を使う。
+
+.--------------------
+def MyEruby
+
+  def initialize(input)
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def escape_text(text)
+    text.gsub!(/['\\]/, '\\\\\1')  ## 「'」と「\」をエスケープする
+    text
+  end
+
+  def compile(input)
+    src = "_buf = [];"       ## バッファとして配列を使う
+    pattern = /(.*)<%(=?)(.*?)%>/m
+    input.scan(pattern) do |text, equal, code|
+      src << " _buf << '" << escape_text(text) << "'" unless text.empty?
+      if equal               ## '<%= 式 %>' のとき
+        src << " _buf << (#{code}).to_s;"
+      else                   ## '<% 文 %>' のとき
+        src << code << ";"
+      end
+    end
+    rest = $' || input       ## マッチした箇所の残りのテキスト
+    src << " _buf << '" << escape_text(rest) << "'" unless rest.empty?
+    src << "\n_buf.join\n"   ## 配列の要素を結合して返すコード
+    return src
+  end
+
+  def result(binding=TOPLEVEL_BINDING)
+    eval @source, binding
+  end
+
+end
+.--------------------
+
+
+◎高速化その5: オブジェクトの生成を減らす
+
+不変なオブジェクトは一回だけ生成してそれを使い回すようにする。
+今回は正規表現オブジェクトを定数にすることで、毎回生成されるのを避ける。
+あまり高速化しないけど。
+
+.--------------------
+def MyEruby
+
+  def initialize(input)
+    @source = compile(input)
+  end
+
+  attr_reader :source
+
+  def escape_text(text)
+    text.gsub!(/['\\]/, '\\\\\1')  ## 「'」と「\」をエスケープする
+    text
+  end
+
+  PATTERN = /(.*)<%(=?)(.*?)%>/m
+
+  def compile(input)
+    src = "_buf = [];"       ## バッファとして配列を使う
+    input.scan(PATTERN) do |text, equal, code|
+      src << " _buf << '" << escape_text(text) << "'" unless text.empty?
+      if equal               ## '<%= 式 %>' のとき
+        src << " _buf << (#{code}).to_s;"
+      else                   ## '<% 文 %>' のとき
+        src << code << ";"
+      end
+    end
+    rest = $' || input       ## マッチした箇所の残りのテキスト
+    src << " _buf << '" << escape_text(rest) << "'" unless rest.empty?
+    src << "\n_buf.join\n"   ## 配列の要素を結合して返すコード
+    return src
+  end
+
+  def result(binding=TOPLEVEL_BINDING)
+    eval @source, binding
+  end
+
+end
+.--------------------
+
+
+◎高速化その6: コンパイル結果をキャッシュする
+
+毎回コンパイルするのではなく、一度コンパイルした結果をファイルにキャッシュしておく。
+つまり
+.* eRubyファイルをRubyスクリプトにコンパイル
+.* Rubyスクリプトをevalで実行
+が
+.* （キャッシュされた）Rubyスクリプトをevalで実行
+になり、eRubyファイルをコンパイルする処理が省ける。
+
+
+◎高速化その7: メソッドにしてしまう
+
+
+
+
+◎まとめ
+
+.* 「構文解析」より「パターンマッチ」
+.* 「行ごとの分割」より「複数行の連結」
+.* 「文字列にして出力」より「直接出力」
+.* 「文字列バッファ」より「配列バッファ」
+.* 「リテラル」より「定数」
+.* 「Cで拡張ライブラリ」より「プログラムの見直し」
+
+「適当に作ったCプログラム」より「よく考えられたRubyスクリプト」のほうが高速な場合があることを実証した。
+しかし逆に言えば、Cで書けばよく考えなくても高速になるわけだ。
+
+もっといえば「よく考えられたRubyスクリプト」は「適当に作ったCプログラム」より高速になることはあっても、「よく考えられたCプログラム」には間違いなく負ける。
+決して、Cによる拡張プログラムが不要になることはない。
+
+適当に作ったCプログラム ≒ よく考えられたRubyスクリプト ≪ よく考えられたCプログラム
+
+
+.* httpd, ruby, mod_ruby.soはstripされているか？
+   .- MacOS Xではstripすると動かないので注意
+.* apacheの設定は適切か？
+   .- 
+.* 同等の拡張プログラムはないか？
+   .- Ruby/MySQLよりMySQL/Ruby
+.* そのプログラムはほんとうにボトルネックなのか？
+
+

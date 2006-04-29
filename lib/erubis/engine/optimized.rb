@@ -12,11 +12,23 @@ module Erubis
 
 
   ##
-  ## Eruby class which generates optimized code
+  ## Eruby class which generates optimized ruby code
   ##
-  class OptimizedEruby < Eruby
+  class OptimizedEruby < Engine    # Eruby
+
+    def self.supported_properties()  # :nodoc:
+      return super
+    end
 
     protected
+
+    def escape_text(text)
+      text.gsub(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
+    end
+
+    def escaped_expr(code)
+      return "Erubis::XmlHelper.escape_xml(#{code})"
+    end
 
     def switch_to_expr(src)
       return if @prev_is_expr
@@ -46,6 +58,12 @@ module Erubis
       end
     end
 
+    def add_stmt(src, code)
+      switch_to_stmt(src) if @initialized
+      #super
+      src << code << ';'
+    end
+
     def add_expr_literal(src, code)
       unless @initialized; src << "_out = ''"; @initialized = true; end
       switch_to_expr(src)
@@ -58,20 +76,22 @@ module Erubis
       src << " << " << escaped_expr(code)
     end
 
-    def add_stmt(src, code)
-      switch_to_stmt(src) if @initialized
-      super
+    def add_expr_debug(src, code)
+      code.strip!
+      s = (code.dump =~ /\A"(.*)"\z/) && $1
+      src << ' $stderr.puts("*** debug: ' << s << '=#{(' << code << ').inspect}");'
     end
 
     def finish_src(src)
-      super if @initialized
+      #super if @initialized
+      src << "\n_out\n" if @initialized
     end
 
   end  # end of class OptimizedEruby
 
 
   ##
-  ## XmlEruby class which generates optimized code
+  ## XmlEruby class which generates optimized ruby code
   ##
   class OptimizedXmlEruby < OptimizedEruby
     include EscapeEnhancer
@@ -82,6 +102,86 @@ module Erubis
     end
 
   end  # end of class OptimizedXmlEruby
+
+
+  ## for test
+  class Optimized2Eruby < Eruby   # :nodoc:
+
+    def self.supported_properties()  # :nodoc:
+      return super
+    end
+
+    protected
+
+    def escape_text(text)
+      text.gsub(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
+    end
+
+    def escaped_expr(code)
+      return "Erubis::XmlHelper.escape_xml(#{code})"
+    end
+
+    #def switch_to_expr(src)
+    #  return if @prev_is_expr
+    #  @prev_is_expr = true
+    #  src << ' _out'
+    #end
+
+    #def switch_to_stmt(src)
+    #  return unless @prev_is_expr
+    #  @prev_is_expr = false
+    #  src << ';'
+    #end
+
+    def init_src(src)
+      @initialized = false
+      #@prev_is_expr = false
+    end
+
+    def add_text(src, text)
+      return if text.empty?
+      if @initialized
+        #switch_to_expr(src)
+        #src << " << '" << escape_text(text) << "'"
+        src << "_out << '" << escape_text(text) << "';"
+      else
+        src << "_out = '" << escape_text(text) << "';"
+        @initialized = true
+      end
+    end
+
+    def add_stmt(src, code)
+      #switch_to_stmt(src) if @initialized
+      #super
+      src << code << ';'
+    end
+
+    def add_expr_literal(src, code)
+      unless @initialized; src << "_out = ''"; @initialized = true; end
+      #switch_to_expr(src)
+      #src << " << (" << code << ").to_s"
+      src << " _out << (" << code << ").to_s;"
+    end
+
+    def add_expr_escaped(src, code)
+      unless @initialized; src << "_out = ''"; @initialized = true; end
+      #switch_to_expr(src)
+      #src << " << " << escaped_expr(code)
+      src << " _out << " << escaped_expr(code) << ';'
+    end
+
+    def add_expr_debug(src, code)
+      code.strip!
+      s = (code.dump =~ /\A"(.*)"\z/) && $1
+      src << ' $stderr.puts("*** debug: ' << s << '=#{(' << code << ').inspect}");'
+    end
+
+    def finish_src(src)
+      #super if @initialized
+      src << "\n_out\n" if @initialized
+    end
+
+  end
 
 
 end

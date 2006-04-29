@@ -15,9 +15,11 @@ module Erubis
   ## engine for Ruby
   ##
   class Eruby < Engine
+    #include StringBufferEnhancer
+    include ArrayBufferEnhancer
 
-    def init_src(src)
-      src << "_out = '';"
+    def self.supported_properties()  # :nodoc:
+      return super
     end
 
     def escape_text(text)
@@ -27,6 +29,12 @@ module Erubis
     def escaped_expr(code)
       return "Erubis::XmlHelper.escape_xml(#{code})"
     end
+
+    #--
+    #def init_src(src)
+    #  src << "_out = [];"
+    #end
+    #++
 
     def add_text(src, text)
       src << " _out << '" << escape_text(text) << "';" unless text.empty?
@@ -50,9 +58,11 @@ module Erubis
       src << ' $stderr.puts("*** debug: ' << s << '=#{(' << code << ').inspect}");'
     end
 
-    def finish_src(src)
-      src << "\n_out\n"
-    end
+    #--
+    #def finish_src(src)
+    #  src << "\n_out.join\n"
+    #end
+    #++
 
   end
 
@@ -61,52 +71,6 @@ module Erubis
   ## sanitize expression (<%= ... %>) by default
   ##
   class XmlEruby < Eruby
-    include EscapeEnhancer
-  end
-
-
-  ## (obsolete)
-  class FastEruby < Eruby
-    include FastEnhancer
-  end
-
-
-  class StdoutEruby < Eruby
-    include StdoutEnhancer
-  end
-
-
-  class PrintEruby < Eruby
-    include PrintEnhancer
-  end
-
-
-  class ArrayBufferEruby < Eruby
-    include ArrayBufferEnhancer
-  end
-
-
-  ## (obsolete)
-  class FastXmlEruby < Eruby
-    include FastEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class StdoutXmlEruby < Eruby
-    include StdoutEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class PrintXmlEruby < Eruby
-    include PrintEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class ArrayBufferXmlEruby < Eruby
-    include ArrayBufferEnhancer
     include EscapeEnhancer
   end
 

@@ -2,6 +2,25 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.13 (2006-04-29)
+	.- [change] Eruby adopt ArrayBufferEnhancer as default
+	.- [enhance] new module BiPatternEnhancer [experimental]
+	.- [enhance] new module SimplifiedEnhancer
+	.- [enhance] new module StringBufferEnhancer
+	.- [enhance] new module PrintStatementEnhancer
+	.- [enhance] new module PercentLineEnhancer
+	.- [enhance] new module HeaderFooterEnhancer [experimental]
+	.- [enhance] new class OutputSimplifiedEruby
+	.- [enhance] Engine.supported_properties() added
+	.- [enhance] print show_properties() when '-h' is specified
+	.- [enhance] add Eperl class (engine/perl.rb)
+	.- [enhance] add examples
+	.- [change] class Eruby includes ArrayBufferEnhancer
+	.- [change] EscapeEnhancer now overrides add_expr()
+	.- [change] module PrintEnhancer is renamed to PrintAvailableEnhancer
+	.- [change] Ejava doesn't out 'StringBuffer _buf' nor 'return _buf.toString();'
+	.- [change] subclasses of Eruby are moved to new file 'enhanced.rb'
+
 .: Rev.12 (2006-04-26)
 	.- [enhance] PHP, C, Java, and Scheme support
 	.- [enhance] new class Engine is splitted from Eruby

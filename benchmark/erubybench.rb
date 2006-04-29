@@ -7,13 +7,13 @@
 require 'eruby'
 require 'erb'
 require 'erubis'
+require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
 
 
 ## default values
-base = __FILE__.sub(/\.rb$/, '')
-filename = base + '.rhtml'
-datafile = base + '.yaml'
+filename = 'erubybench.rhtml'
+datafile = 'erubybench.yaml'
 n = 1000
 
 
@@ -21,7 +21,7 @@ n = 1000
 def usage(n, filename, datafile)
   s =  "Usage: ruby #{$0} [-h] [-n N] [-f file] [-d file] [testname ...]\n"
   s << "  -h      :  help\n"
-  s << "  -n N    :  number of repeat (default #{n})\n"
+  s << "  -n N    :  number of times to loop (default #{n})\n"
   s << "  -f file :  eruby filename (default '#{filename}')\n"
   s << "  -d file :  data filename (default '#{datafile}')\n"
   return s
@@ -40,7 +40,7 @@ while !ARGV.empty? && ARGV[0][0] == ?-
   when '-f'  ;  filename = ARGV.shift
   when '-d'  ;  datafile = ARGV.shift
   when '-h', '--help'  ;  flag_help = true
-  when '-A'  ;  flag_all = true
+  when '-A'  ;  test_all = true
   when '-C'  ;  compiler_name = ARGV.shift
   else       ;  raise "#{opt}: invalid option."
   end
@@ -75,7 +75,8 @@ $devnull = File.open("/dev/null", 'w')
 module Erubis
   class Eruby2 < Eruby
     def finalize_src(src)
-      src << "\nprint _out\n"
+      #src << "\nprint _out.join; nil\n"
+      src << "\n_out.join; ''\n"
     end
   end
 end
@@ -99,7 +100,7 @@ testdefs_str = <<END
 #    print eruby.result(binding())
   compile: |
     ERB.new(str).src
-  return: str    
+  return: str
 
 - name:   ErubisEruby
   class:  Erubis::Eruby
@@ -131,6 +132,33 @@ testdefs_str = <<END
   return: str
   skip:   yes
 
+#- name:   ErubisArrayBuffer
+#  class:  Erubis::ArrayBufferEruby
+#  code: |
+#    Erubis::ArrayBufferEruby.new(File.read(filename)).result(binding())
+#  compile: |
+#    Erubis::ArrayBufferEruby.new(str).src
+#  return: str
+#  skip:   no
+
+- name:   ErubisStringBuffer
+  class:  Erubis::StringBufferEruby
+  code: |
+    Erubis::StringBufferEruby.new(File.read(filename)).result(binding())
+  compile: |
+    Erubis::StringBufferEruby.new(str).src
+  return: str
+  skip:   no
+
+- name:   ErubisSimplified
+  class:  Erubis::SimplifiedEruby
+  code: |
+    Erubis::SimplifiedEruby.new(File.read(filename)).result(binding())
+  compile: |
+    Erubis::SimplifiedEruby.new(str).src
+  return: str
+  skip:   no
+
 - name:   ErubisStdout
   class:  Erubis::StdoutEruby
   code: |
@@ -138,47 +166,47 @@ testdefs_str = <<END
   compile: |
     Erubis::StdoutEruby.new(str).src
   return: null
-  skip:   yes
+  skip:   no
 
-- name:   ErubisArrayBuffer
-  class:  Erubis::ArrayBufferEruby
+- name:   ErubisStdoutSimplified
+  class:  Erubis::StdoutSimplifiedEruby
   code: |
-    Erubis::ArrayBufferEruby.new(File.read(filename)).result(binding())
+    Erubis::StdoutSimplifiedEruby.new(File.read(filename)).result(binding())
   compile: |
-    Erubis::ArrayBufferEruby.new(str).src
+    Erubis::StdoutSimplifiedEruby.new(str).src
   return: str
-  skip:   yes
+  skip:   no
 
-- name:    load
-  class:   load
-  code: |
-    load($load_filename)
-  compile: null
-  return: null
-  skip:    yes
+#- name:    load
+#  class:   load
+#  code: |
+#    load($load_filename)
+#  compile: null
+#  return: null
+#  skip:    yes
 
 END
 testdefs = YAML.load(testdefs_str)
 
 
-## create file for load
-if testdefs.find { |h| h['name'] == 'load' }
-  $load_filename = filename + ".tmp"   # for load
-  $data = data
-  str = File.read(filename)
-  str.gsub!(/\bdata\b/, '$data')
-  hash = testdefs.find { |h| h['name'] == compiler_name }
-  code = eval hash['compile']
-  code.sub!(/_out\s*\z/, 'print \&')
-  File.open($load_filename, 'w') { |f| f.write(code) }
-  at_exit do
-    File.unlink $load_filename if test(?f, $load_filename)
-  end
-end
+### create file for load
+#if testdefs.find { |h| h['name'] == 'load' }
+#  $load_filename = filename + ".tmp"   # for load
+#  $data = data
+#  str = File.read(filename)
+#  str.gsub!(/\bdata\b/, '$data')
+#  hash = testdefs.find { |h| h['name'] == compiler_name }
+#  code = eval hash['compile']
+#  code.sub!(/_out\s*\z/, 'print \&')
+#  File.open($load_filename, 'w') { |f| f.write(code) }
+#  at_exit do
+#    File.unlink $load_filename if test(?f, $load_filename)
+#  end
+#end
 
 
 ## select test target
-if flag_all
+if test_all
   #testdefs.each { |h| h['skip'] = false }
 elsif !ARGV.empty?
   #testdefs.each { |h| h['skip'] = ARGV.include?(h['name']) }
@@ -284,6 +312,7 @@ begin
     testdefs.each do |h|
       title = h['class']
       func = 'test_' + h['name']
+      GC.start
       job.report(title) do
         __send__(func, filename, data)
       end
@@ -294,6 +323,7 @@ begin
       next unless h['compile']
       title = 'eval_' + h['name']
       func = 'test_eval_' + h['name']
+      GC.start
       job.report(title) do
         __send__(func, filename, data)
       end
@@ -304,6 +334,7 @@ begin
       next unless h['compile']
       title = 'func_' + h['name']
       func = 'test_view_' + h['name']
+      GC.start
       job.report(title) do
         __send__(func, data)
       end

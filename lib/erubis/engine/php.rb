@@ -16,8 +16,8 @@ module Erubis
   ##
   class Ephp < Engine
 
-    def initialize(input, properties={})
-      super
+    def self.supported_properties()  # :nodoc:
+      return super
     end
 
     #--
