@@ -60,6 +60,12 @@ module Erubis
   end
 
 
+  class PrintStatementSimplifiedEruby < Eruby
+    include PrintStatementEnhancer
+    include SimplifiedEnhancer
+  end
+
+
   class BiPatternEruby < Eruby
     include BiPatternEnhancer
   end
@@ -128,6 +134,13 @@ module Erubis
 
   class StdoutSimplifiedXmlEruby < Eruby
     include StdoutEnhancer
+    include SimplifiedEnhancer
+    include EscapeEnhancer
+  end
+
+
+  class PrintStatementSimplifiedXmlEruby < Eruby
+    include PrintStatementEnhancer
     include SimplifiedEnhancer
     include EscapeEnhancer
   end

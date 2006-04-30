@@ -27,10 +27,8 @@ module Erubis
       super
     end
 
-    #--
-    #def init_src(src)
-    #end
-    #++
+    def add_preamble(src)
+    end
 
     def escape_text(text)
       return text.gsub!(/['\\]/, '\\\\\&') || text
@@ -40,9 +38,12 @@ module Erubis
       src << @func << "('" << escape_text(text) << "'); " unless text.empty?
     end
 
-    def escaped_expr(code)
-      return "escape(#{code.strip})"
-    end
+    #--
+    #def escaped_expr(code)
+    #  @escape ||= 'escape'
+    #  return "escape(#{code.strip})"
+    #end
+    #++
 
     def add_expr_literal(src, code)
       src << @func << "(" << code.strip << "); "
@@ -62,7 +63,7 @@ module Erubis
       src << code
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
     end
 

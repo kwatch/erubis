@@ -13,6 +13,7 @@ require 'erubis/engine/c'
 require 'erubis/engine/java'
 require 'erubis/engine/scheme'
 require 'erubis/engine/perl'
+require 'erubis/engine/javascript'
 
 
 class EnginesTest < Test::Unit::TestCase
@@ -139,7 +140,7 @@ __END__
 - name:  java1
   lang:  java
   class: Ejava
-  options: { :out: _buf, :indent: '    ' }
+  options: { :out: _buf, :outclass: StringBuilder, :indent: '    ' }
   input: |
       <table>
        <tbody>
@@ -160,7 +161,7 @@ __END__
       </table>
       <%=== i %>
   expected: |4
-          _buf.append("<table>\n"
+          StringBuilder _buf = new StringBuilder(); _buf.append("<table>\n"
                     + " <tbody>\n");
            
           int i = 0;
@@ -178,6 +179,7 @@ __END__
           _buf.append(" <tbody>\n"
                     + "</table>\n");
            System.err.println("*** debug: i="+(i)); _buf.append("\n");
+          return _buf.toString();
 ##
 - name:  scheme1
   lang:  scheme
@@ -207,8 +209,8 @@ __END__
   expected: |4
       (let ((_out '())) (define (_add x) (set! _out (cons x _out)))  (let ((i 0)) 
       (_add "<table>
-       <tbody>
-      ")
+       <tbody>\n")
+      
         (for-each
          (lambda (item)
            (set! i (+ i 1))
@@ -216,15 +218,15 @@ __END__
       (_add "  <tr>
          <td>")(_add i)(_add "</td>
          <td>")(_add (escape item))(_add "</td>
-        </tr>
-      ")
+        </tr>\n")
+      
           ); lambda end
          list); for-each end
       
       (_add " </tbody>
-      </table>
-      ")(display "*** debug: i=")(display i)(display "\n")(_add "
-      ") ); let end 
+      </table>\n")
+      (display "*** debug: i=")(display i)(display "\n")(_add "\n")
+       ); let end 
         (reverse _out))
   
 ##
@@ -236,8 +238,8 @@ __END__
   expected: |4
        (let ((i 0)) 
       (display "<table>
-       <tbody>
-      ")
+       <tbody>\n")
+      
         (for-each
          (lambda (item)
            (set! i (+ i 1))
@@ -245,15 +247,15 @@ __END__
       (display "  <tr>
          <td>")(display i)(display "</td>
          <td>")(display (escape item))(display "</td>
-        </tr>
-      ")
+        </tr>\n")
+      
           ); lambda end
          list); for-each end
       
       (display " </tbody>
-      </table>
-      ")(display "*** debug: i=")(display i)(display "\n")(display "
-      ") ); let end 
+      </table>\n")
+      (display "*** debug: i=")(display i)(display "\n")(display "\n")
+       ); let end 
 ##
 - name:  perl1
   lang:  perl
@@ -296,3 +298,46 @@ __END__
       </table>
       '); print('*** debug: $i=', $i, "\n");print('
       '); 
+##
+- name:  javascript
+  lang:  javascript
+  class: Ejavascript
+  options:
+  input: |
+      <%
+         var user = 'Erubis';
+         var list = ['<aaa>', 'b&b', '"ccc"'];
+      %>
+      <p>Hello <%= user %>!</p>
+      <table>
+        <tbody>
+          <% var i; %>
+          <% for (i = 0; i < list.length; i++) { %>
+          <tr bgcolor=<%= ++i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
+            <td><%= i %></td>
+            <td><%= list[i] %></td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <%=== i %>
+  expected: |4
+      _out = [];
+         var user = 'Erubis';
+         var list = ['<aaa>', 'b&b', '"ccc"'];
+      
+      _out.push("<p>Hello "); _out.push(user); _out.push("!</p>\n\
+      <table>\n\
+        <tbody>\n");
+           var i; 
+           for (i = 0; i < list.length; i++) { 
+      _out.push("    <tr bgcolor="); _out.push(++i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _out.push("\">\n\
+            <td>"); _out.push(i); _out.push("</td>\n\
+            <td>"); _out.push(list[i]); _out.push("</td>\n\
+          </tr>\n");
+           } 
+      _out.push("  </tbody>\n\
+      </table>\n");
+      alert("*** debug: i="+(i)); _out.push("\n");
+      document.write(_out.join(""));
+ ##

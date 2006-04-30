@@ -1,4 +1,4 @@
-all = example.rb example.php example.c example.java example.scm example.pl
+all = example.rb example.php example.c example.java example.scm example.pl example.js
 
 all:  $(all)
 
@@ -22,10 +22,13 @@ example.scm:  example.escheme
 example.pl:   example.eperl
 	erubis -l perl example.eperl > example.pl
 
+example.js:   example.ejavascript
+	erubis -l javascript example.ejavascript > example.js
+
 
 ###----------
 
-src = example.eruby example.ephp example.ec example.ejava example.escheme example.eperl Makefile
+src = example.eruby example.ephp example.ec example.ejava example.escheme example.eperl example.ejavascript Makefile
 
 clean:
 	rm -f `ruby -e 'puts(Dir.glob("*.*") - %w[$(src)])'`

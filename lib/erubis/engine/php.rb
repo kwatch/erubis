@@ -21,7 +21,7 @@ module Erubis
     end
 
     #--
-    #def init_src(src)
+    #def add_preamble(src)
     #end
     #++
 
@@ -34,7 +34,8 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return "htmlspecialchars(#{code.strip})"
+      @escape ||= 'htmlspecialchars'
+      return "#{@escape}(#{code.strip})"
     end
 
     def add_expr_literal(src, code)
@@ -62,8 +63,10 @@ module Erubis
       end
     end
 
-    def finalize_src(src)
-    end
+    #--
+    #def add_postamble(src)
+    #end
+    #++
 
   end
 

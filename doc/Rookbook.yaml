@@ -1,0 +1,50 @@
+
+variables:
+  #- tagfile    : html-css_i,euc
+  - tagfile    : html-css
+  - textfile   : eruby.txt
+  - htmlfile   : eruby.html
+  - testscript : test-eruby.rb
+  - u          : users-guide
+
+recipes:
+
+  - product:	:html
+    ingreds:	[ $(htmlfile) ]
+
+  - product:	:test
+    method: |
+	sys "retrieve $(textfile)"
+	(1..5).each do |i|
+	  sys "ruby -s $(testscript) -target=eruby#{i}"
+	end
+
+  - product:	*.html
+    ingreds:	[ $(1).txt ]
+    #byprods:	[ $(1).toc.html ]
+    method: |
+	sys "retrieve $(1).txt"
+	sys "kwaser -t $(tagfile) -T $(1).txt > $(1).toc.html"
+	sys "kwaser -t $(tagfile)    $(1).txt > $(1).html"
+	rm_f "{1}.toc.html"
+
+  - product:	:all
+    ingreds:	[ $(u).html ]
+
+  - product:	$(u).html
+    ingreds:	[ $(u).txt ]
+    byprods:	[ $(u).toc.html ]
+    method: |
+	rm_rf "guide.d"
+	mkdir_p "guide.d"
+	cmd "retrieve -d guide.d #{@ingred}"
+	cmd "kwaser -t $(tagfile) -T #{@ingred} > #{@byprods[0]}"
+	cmd "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
+	rm "#{@byprods[0]}"
+
+  - product:	:clean
+    method: |
+	list = `retrieve -l #{textfile}`
+	rm_rf list.split
+
+

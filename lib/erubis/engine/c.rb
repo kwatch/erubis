@@ -29,7 +29,7 @@ module Erubis
       super
     end
 
-    def init_src(src)
+    def add_preamble(src)
       src << "#line 1 \"#{self.filename}\"\n" if self.filename
     end
 
@@ -40,11 +40,12 @@ module Erubis
     end
 
     def escaped_expr(code)
+      @escape ||= "escape"
       code.strip!
       if code =~ /\A(\".*?\")\s*,\s*(.*)/
-        return "#{$1}, escape(#{$2})"
+        return "#{$1}, #{@escape}(#{$2})"
       else
-        return "escape(#{code})"
+        return "#{@escape}(#{code})"
       end
     end
 
@@ -86,7 +87,7 @@ module Erubis
       src << " fprintf(stderr, \"*** debug: #{s}\" #{code});"
     end
 
-    def finalize_src(src)
+    def add_postamble(src)
     end
 
   end

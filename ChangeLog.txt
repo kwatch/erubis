@@ -2,6 +2,18 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.14 (2006-04-29)
+	.- [enhance] javascript support
+	.- [enhance] new property :preamble and :postamble support
+	.- [enhance] new command-line option '-b' (body only)
+	.- [change] Engine#init_src()/finis_src() are named to add_preamble()/add_postamble()
+	.- [change] Ejava changed to print preamble and postamble.
+	.- [enhance] add simplest.rb
+	.- [enhance] new method Engine#compile!(), which compile input and set @src
+	.- [enhance] new command-line option '-E' (load enhancers)
+	.- [enhance] new property :escape, which represents escape function name
+	.- [update] update users-guide
+
 .: Rev.13 (2006-04-29)
 	.- [change] Eruby adopt ArrayBufferEnhancer as default
 	.- [enhance] new module BiPatternEnhancer [experimental]

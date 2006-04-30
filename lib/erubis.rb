@@ -56,11 +56,15 @@ require 'erubis/engine'
 require 'erubis/helper'
 require 'erubis/enhancer'
 require 'erubis/engine/ruby'
+#require 'erubis/simplest'
 #require 'erubis/engine/enhanced'    # enhanced eruby engines
 #require 'erubis/engine/optimized'   # generates optimized ruby code
 #require 'erubis/engine/php'
 #require 'erubis/engine/c'
 #require 'erubis/engine/java'
 #require 'erubis/engine/scheme'
+#require 'erubis/engine/perl'
+#require 'erubis/engine/javascript'
+
 
 require 'erubis/local-setting'

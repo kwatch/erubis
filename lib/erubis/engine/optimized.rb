@@ -20,6 +20,12 @@ module Erubis
       return super
     end
 
+    def initialize(input, options={})
+      @initialized = false
+      @prev_is_expr = false
+      super
+    end
+
     protected
 
     def escape_text(text)
@@ -27,7 +33,8 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return "Erubis::XmlHelper.escape_xml(#{code})"
+      @escape ||= 'Erubis::XmlHelper.escape_xml'
+      return "#{@escape}(#{code})"
     end
 
     def switch_to_expr(src)
@@ -42,9 +49,9 @@ module Erubis
       src << ';'
     end
 
-    def init_src(src)
-      @initialized = false
-      @prev_is_expr = false
+    def add_preamble(src)
+      #@initialized = false
+      #@prev_is_expr = false
     end
 
     def add_text(src, text)
@@ -82,7 +89,7 @@ module Erubis
       src << ' $stderr.puts("*** debug: ' << s << '=#{(' << code << ').inspect}");'
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       #super if @initialized
       src << "\n_out\n" if @initialized
     end
@@ -111,6 +118,12 @@ module Erubis
       return super
     end
 
+    def initialize(input, options={})
+      @initialized = false
+      #@prev_is_expr = false
+      super
+    end
+
     protected
 
     def escape_text(text)
@@ -133,7 +146,7 @@ module Erubis
     #  src << ';'
     #end
 
-    def init_src(src)
+    def add_preamble(src)
       @initialized = false
       #@prev_is_expr = false
     end
@@ -176,7 +189,7 @@ module Erubis
       src << ' $stderr.puts("*** debug: ' << s << '=#{(' << code << ').inspect}");'
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       #super if @initialized
       src << "\n_out\n" if @initialized
     end

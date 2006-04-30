@@ -20,19 +20,19 @@ module Erubis
       list = super
       list << [:indent,   '',       "indent spaces (ex. '  ')"]
       list << [:out,      '_out',   "output buffer name"]
-      #list << [:outclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"]
+      list << [:outclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"]
       return list
     end
 
     def initialize(input, properties={})
       @indent = properties[:indent] || ''
       @out = properties[:out] || '_out'
-      #@outclass = properties[:outclass] || 'StringBuffer'
+      @outclass = properties[:outclass] || 'StringBuffer'
       super
     end
 
-    def init_src(src)
-      #src << "#{@indent}#{@out} _out = new #{@outclass}();\n"
+    def add_preamble(src)
+      src << "#{@indent}#{@outclass} #{@out} = new #{@outclass}();"
     end
 
     def escape_text(text)
@@ -40,9 +40,12 @@ module Erubis
       return text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] } || text
     end
 
-    def escaped_expr(code)
-      return "escape(#{code.strip})"
-    end
+    #--
+    #def escaped_expr(code)
+    #  @escape ||= 'escape'
+    #  return "#{@escape}(#{code.strip})"
+    #end
+    #++
 
     def add_text(src, text)
       return if text.empty?
@@ -77,9 +80,9 @@ module Erubis
       src << " System.err.println(\"*** debug: #{code}=\"+(#{code}));"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" if src[-1] == ?;
-      #src << @indent << "return " << @out << ".toString();\n"
+      src << @indent << "return " << @out << ".toString();\n"
     end
 
   end

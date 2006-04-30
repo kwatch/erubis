@@ -9,6 +9,7 @@ require 'erb'
 require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
+require 'erubis/simplest'
 
 
 ## default values
@@ -79,6 +80,11 @@ module Erubis
       src << "\n_out.join; ''\n"
     end
   end
+  class ExprStrippedEruby < Eruby
+    def add_expr(src, code, indicator)
+      super(src, code.strip! || code, indicator)
+    end
+  end
 end
 
 
@@ -104,12 +110,6 @@ testdefs_str = <<END
 
 - name:   ErubisEruby
   class:  Erubis::Eruby
-  code: |
-    print Erubis::Eruby.new(File.read(filename)).result(binding())
-#    eruby = Erubis::Eruby.new(File.read(filename))
-#    print eruby.result(binding())
-  compile: |
-    Erubis::Eruby.new(str).src
   return: str
 
 - name:   ErubisEruby2
@@ -118,17 +118,22 @@ testdefs_str = <<END
   code: |
     #Erubis::Eruby2.new(File.read(filename)).result()
     Erubis::Eruby2.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::Eruby2.new(str).src
   return: null
+  skip:   yes
+
+- name:   ErubisExprStripped
+  desc:   strip expr code
+  class:  Erubis::ExprStrippedEruby
+  return: str
   skip:   yes
 
 - name:   ErubisOptimized
   class:  Erubis::OptimizedEruby
-  code: |
-    print Erubis::OptimizedEruby.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::OptimizedEruby.new(str).src
+  return: str
+  skip:   yes
+
+- name:   ErubisOptimized2
+  class:  Erubis::Optimized2Eruby
   return: str
   skip:   yes
 
@@ -143,39 +148,38 @@ testdefs_str = <<END
 
 - name:   ErubisStringBuffer
   class:  Erubis::StringBufferEruby
-  code: |
-    Erubis::StringBufferEruby.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::StringBufferEruby.new(str).src
   return: str
   skip:   no
 
 - name:   ErubisSimplified
   class:  Erubis::SimplifiedEruby
-  code: |
-    Erubis::SimplifiedEruby.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::SimplifiedEruby.new(str).src
   return: str
   skip:   no
 
 - name:   ErubisStdout
   class:  Erubis::StdoutEruby
-  code: |
-    Erubis::StdoutEruby.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::StdoutEruby.new(str).src
   return: null
   skip:   no
 
 - name:   ErubisStdoutSimplified
   class:  Erubis::StdoutSimplifiedEruby
-  code: |
-    Erubis::StdoutSimplifiedEruby.new(File.read(filename)).result(binding())
-  compile: |
-    Erubis::StdoutSimplifiedEruby.new(str).src
   return: str
   skip:   no
+
+- name:   ErubisPrintStatement
+  class:  Erubis::PrintStatementEruby
+  return: str
+  skip:   yes
+
+- name:   ErubisPrintStatementSimplified
+  class:  Erubis::PrintStatementSimplifiedEruby
+  return: str
+  skip:   yes
+
+- name:   ErubisSimplest
+  class:  Erubis::SimplestEruby
+  return: str
+  skip:   yes
 
 #- name:    load
 #  class:   load
@@ -187,6 +191,14 @@ testdefs_str = <<END
 
 END
 testdefs = YAML.load(testdefs_str)
+
+## manipulate
+testdefs.each do |testdef|
+  c = testdef['class']
+  testdef['code']    ||= "print #{c}.new(File.read(filename)).result(binding())\n"
+  testdef['compile'] ||= "#{c}.new(str).src\n"
+  require 'pp'
+end
 
 
 ### create file for load

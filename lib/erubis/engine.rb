@@ -22,28 +22,34 @@ module Erubis
 
     def self.supported_properties    # :nodoc:
       return [
-              [:pattern, '<% %>', "embed pattern"],
-              [:filename, nil,    "filename"],
-              [:trim,     true,   "trim spaces around <% ... %>"],
+              [:pattern,  '<% %>', "embed pattern"],
+              #[:filename,  nil,    "filename"],
+              [:trim,      true,   "trim spaces around <% ... %>"],
+              [:preamble,  nil,    "preamble (no preamble when false)"],
+              [:postamble, nil,    "postamble (no postamble when false)"],
+              [:escape,    nil,     "escape function name"],
              ]
     end
 
-    def initialize(input, options={})
+    def initialize(input, properties={})
       #@input    = input
-      @pattern  = options[:pattern]  || '<% %>'
-      @filename = options[:filename]
-      @trim     = options[:trim] != false
-      @src      = compile(input)
+      @pattern   = properties[:pattern]  || '<% %>'
+      @filename  = properties[:filename]
+      @trim      = properties[:trim] != false
+      @preamble  = properties[:preamble]
+      @postamble = properties[:postamble]
+      @escape    = properties[:escape]
+      @src       = compile(input) if input
     end
     attr_reader :src
     attr_accessor :filename
 
-    def self.load_file(filename, options={})
+    def self.load_file(filename, properties={})
       input = File.open(filename, 'rb') { |f| f.read }
       input.untaint   # is it ok?
-      options[:filename] = filename
-      eruby = self.new(input, options)
-      return eruby
+      properties[:filename] = filename
+      engine = self.new(input, properties)
+      return engine
     end
 
     def result(_binding=TOPLEVEL_BINDING)
@@ -52,6 +58,7 @@ module Erubis
     end
 
     def evaluate(_context={})
+      ## load _context data as local variables by eval
       eval _context.keys.inject("") { |s, k| s << "#{k.to_s} = _context[#{k.inspect}];" }
       return result(binding())
     end
@@ -69,35 +76,39 @@ module Erubis
 
     def compile(input)
       src = ""
-      init_src(src)
+      @preamble.nil? ? add_preamble(src) : (@preamble && (src << @preamble))
       regexp = pattern_regexp(@pattern)
-      input.scan(regexp) do |text, head_space, indicator, code, tail_space|
+      input.scan(regexp) do |text, lspace, indicator, code, rspace|
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
         if indicator && indicator[0] == ?=
           flag_trim = false
         else
-          flag_trim = @trim && head_space && tail_space
+          flag_trim = @trim && lspace && rspace
         end
-        #flag_trim = @trim && !(indicator && indicator[0]==?=) && head_space && tail_space
+        #flag_trim = @trim && !(indicator && indicator[0]==?=) && lspace && rspace
         add_text(src, text)
-        add_text(src, head_space) if !flag_trim && head_space
+        add_text(src, lspace) if !flag_trim && lspace
         if !indicator             # <% %>
-          code = "#{head_space}#{code}#{tail_space}" if flag_trim
+          code = "#{lspace}#{code}#{rspace}" if flag_trim
           add_stmt(src, code)
-        elsif indicator[0] == ?=  # <%= %>
-          add_expr(src, code, indicator)
-        else                      # <%# %>
+        elsif indicator[0] == ?\# # <%# %>
           n = code.count("\n")
-          n += tail_space.count("\n") if tail_space
+          n += rspace.count("\n") if rspace
           add_stmt(src, "\n" * n)
+        else                      # <%= %>
+          add_expr(src, code, indicator)
         end
-        add_text(src, tail_space) if !flag_trim && tail_space
+        add_text(src, rspace) if !flag_trim && rspace
       end
-      rest = $' || input
+      rest = $' || input     # add input when no matched
       add_text(src, rest)
-      finish_src(src)
+      @postamble.nil? ? add_postamble(src) : (@postamble && (src << @postamble))
       return src
+    end
+
+    def compile!(input)
+      @src = compile(input)
     end
 
     protected
@@ -107,10 +118,11 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return code
+      @escape ||= 'escape'
+      return "#{@escape}(#{code.strip})"
     end
 
-    def init_src(src)
+    def add_preamble(src)
     end
 
     def add_text(src, text)
@@ -139,7 +151,7 @@ module Erubis
     def add_expr_debug(src, code)
     end
 
-    def finish_src(src)
+    def add_postamble(src)
     end
 
   end  # end of class Engine

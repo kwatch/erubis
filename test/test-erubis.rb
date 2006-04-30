@@ -11,6 +11,7 @@ require 'stringio'
 require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
+require 'erubis/simplest'
 
 
 class ErubisTest < Test::Unit::TestCase
@@ -25,9 +26,22 @@ class ErubisTest < Test::Unit::TestCase
     @output.gsub!(/\^/, ' ') if @output.is_a?(String)
     @klass = @class ? Erubis.const_get(@class) : Erubis::Eruby
     @options ||= {}
+    @chomp.each do |target|
+      case target
+      when 'src'      ;  @src.chomp!
+      when 'input'    ;  @input.chomp!
+      when 'expected' ;  @expected.chomp!
+      else
+        raise "#{@name}: invalid chomp value: #{@chomp.inspect}"
+      end
+    end if @chomp
 
     if @testopt != 'load_file'
-      eruby = @klass.new(@input, @options)
+      if @klass == Erubis::SimplestEruby
+        eruby = @klass.new(@input)
+      else
+        eruby = @klass.new(@input, @options)
+      end
     else
       filename = "tmp.#{@name}.eruby"
       begin
@@ -63,6 +77,9 @@ class ErubisTest < Test::Unit::TestCase
         assert_nil(actual)
       end
       assert_text_equal(@output, stringio.string)
+    when 'result'
+      actual = eruby.result(binding())
+      assert_text_equal(@output, actual)
     else
       actual = eruby.evaluate(context)
       assert_text_equal(@output, actual)
@@ -137,6 +154,38 @@ __END__
       _out.join
   output: |
       <ul><li><aaa></li><li>b&b</li><li>"ccc"</li>
+      </ul>
+##
+- name:  ignore1
+  input: |
+      <ul>
+       <%# i = 0 %>
+       <% for item in list %>
+        <%#
+           i += 1
+           color = i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'
+         %>
+        <li>  <%#= i %>  :  <%= item %>  </li>
+       <% end %>
+      </ul>
+  src: |
+      _out = []; _out << '<ul>
+      ';
+      ;  for item in list 
+      ;
+      
+      
+      
+      ; _out << '  <li>  ';; _out << '  :  '; _out << ( item ).to_s; _out << '  </li>
+      ';  end 
+      ; _out << '</ul>
+      ';
+      _out.join
+  output: |
+      <ul>
+        <li>    :  <aaa>  </li>
+        <li>    :  b&b  </li>
+        <li>    :  "ccc"  </li>
       </ul>
 ##
 - name:  quotation1
@@ -230,37 +279,19 @@ __END__
       ^
       </ul>
 ##
-- name:  ignore1
-  input: |
-      <ul>
-       <%# i = 0 %>
-       <% for item in list %>
-        <%#
-           i += 1
-           color = i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'
-         %>
-        <li>  <%#= i %>  :  <%= item %>  </li>
-       <% end %>
-      </ul>
-  src: |
-      _out = []; _out << '<ul>
-      ';
-      ;  for item in list 
-      ;
-      
-      
-      
-      ; _out << '  <li>  ';; _out << '  :  '; _out << ( item ).to_s; _out << '  </li>
+- name:  bodyonly1
+  testopt:  skip_output
+  options: { :preamble: no, :postamble: no }
+  input: *basic1_input
+  src: |4
+       _out << '<ul>
+      ';  for item in list 
+      ; _out << '  <li>'; _out << ( item ).to_s; _out << '</li>
       ';  end 
       ; _out << '</ul>
       ';
-      _out.join
-  output: |
-      <ul>
-        <li>    :  <aaa>  </li>
-        <li>    :  b&b  </li>
-        <li>    :  "ccc"  </li>
-      </ul>
+  chomp:  [src]
+  expected: null  
 ##
 - name:  loadfile1
   testopt: load_file
@@ -773,4 +804,32 @@ __END__
       ';
       _out
   output: *optimized4_input
+##
+- name:  simplest1
+  class: SimplestEruby
+  testopt:  result
+  input: |
+      <ul>
+       <% for item in list %>
+        <li><%= item %></li>
+       <% end %>
+      </ul>
+  src: |
+      _out = []; _out << '<ul>
+       '; for item in list ; _out << '
+        <li>'; _out << ( item ).to_s; _out << '</li>
+       '; end ; _out << '
+      </ul>
+      ';
+      _out.join
+  output: |
+      <ul>
+      ^
+        <li><aaa></li>
+      ^
+        <li>b&b</li>
+      ^
+        <li>"ccc"</li>
+      ^
+      </ul>
 ##

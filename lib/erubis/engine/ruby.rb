@@ -27,11 +27,12 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return "Erubis::XmlHelper.escape_xml(#{code})"
+      @escape ||= "Erubis::XmlHelper.escape_xml"
+      return "#{@escape}(#{code})"
     end
 
     #--
-    #def init_src(src)
+    #def add_preamble(src)
     #  src << "_out = [];"
     #end
     #++
@@ -59,7 +60,7 @@ module Erubis
     end
 
     #--
-    #def finish_src(src)
+    #def add_postamble(src)
     #  src << "\n_out.join\n"
     #end
     #++

@@ -14,9 +14,13 @@ require 'erubis/engine/c'
 require 'erubis/engine/java'
 require 'erubis/engine/scheme'
 require 'erubis/engine/perl'
+require 'erubis/engine/javascript'
 
 
 module Erubis
+
+  Ejs = Ejavascript
+  XmlEjs = XmlEjavascript
 
 
   class CommandOptionError < ErubisError
@@ -44,7 +48,7 @@ module Erubis
 
     def execute(argv=ARGV)
       ## parse command-line options
-      options, properties = parse_argv(argv, "hvsxTtS", "pcrfKIla")
+      options, properties = parse_argv(argv, "hvsxTtSb", "pcrfKIlaE")
       filenames = argv
       options[?h] = true if properties[:help]
 
@@ -117,34 +121,58 @@ module Erubis
         context = {}
       end
 
-      ## properties for compiler
+      ## properties for engine
       properties[:pattern] = options[?p] if options[?p]
       properties[:trim]    = false       if options[?T]
+      properties[:preamble] = properties[:postamble] = false if options[?b]
+
+      ## enhancers
+      enhancers = []
+      if options[?E]
+        enhancer_name = nil
+        begin
+          options[?E].split(/,/).each do |shortname|
+            enhancer_name = "#{shortname}Enhancer"
+            enhancers << Erubis.const_get(enhancer_name)
+          end
+        rescue NameError
+          raise CommandOptionError.new("#{enhancer_name}: no such Enhancer.")
+        end
+      end
+
+      ## create engine
+      engine = klass.new(nil, properties)
+      enhancers.each do |enhancer|
+        engine.extend(enhancer)
+        engine.bipattern = properties[:bipattern] if enhancer == Erubis::BiPatternEnhancer
+      end
 
       ## compile and execute
       val = nil
       if filenames && !filenames.empty?
         filenames.each do |filename|
-          compiler = klass.load_file(filename, properties)
-          print val if val = do_action(action, compiler, context, options)
+          #engine = klass.load_file(filename, properties)
+          engine.filename = filename
+          engine.compile!(File.read(filename))
+          print val if val = do_action(action, engine, context, options)
         end
       else
-        input = $stdin.read()
-        compiler = klass.new(input, properties)
-        print val if val = do_action(action, compiler, context, options)
+        #engine = klass.new(input, properties)
+        engine.compile!($stdin.read())
+        print val if val = do_action(action, engine, context, options)
       end
 
     end
 
     private
 
-    def do_action(action, compiler, context, options)
+    def do_action(action, engine, context, options)
       case action
       when 'compile'
-        s = compiler.src
-        s.sub!(/^.+\s*\z/, '') if options[?x]
+        s = engine.src
+        s.sub!(/^\s*[\w]+\s*\z/, '') if options[?x]
       when nil, 'exec', 'execute'
-        s = compiler.evaluate(context)
+        s = engine.evaluate(context)
       end
       return s
     end
@@ -159,10 +187,12 @@ Usage: #{command} [..options..] [file ...]
   -s            : script source
   -x            : script source (removed the last '_out' line)
   -T            : don't trim spaces around '<% %>'
+  -b            : body only (no preamble nor postamble)
   -p pattern    : embedded pattern (default '<% %>')
-  -l lang       : compile but no execute (ruby/php/c/java/scheme/perl)
+  -l lang       : compile but no execute (ruby/php/c/java/scheme/perl/js)
                   if lang is 'xmlxxx' then 'XmlExxx' class is used
   -c class      : class name (XmlEruby/PrintStatementEruby/...) (default Eruby)
+  -E enhancer,...  : enhancer name (Escape,PercentLine,HeaderFooter,...)
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
@@ -177,10 +207,13 @@ END
 
     def show_properties
       s = "supported properties:\n"
-      %w[ruby php c java scheme perl].each do |lang|
-        klass = Erubis.const_get("E#{lang}")
+      %w[(common) ruby php c java scheme perl javascript].each do |lang|
+        list = Erubis::Engine.supported_properties
+        if lang != '(common)'
+          klass = Erubis.const_get("E#{lang}")
+          list = klass.supported_properties - list
+        end
         s << "  * #{lang}\n"
-        list = klass.supported_properties - Erubis::Engine.supported_properties
         list.each do |name, default_val, desc|
           s << ("    --%-25s : %s\n" % ["#{name}=#{default_val.inspect}", desc])
         end

@@ -27,7 +27,7 @@ module Erubis
       super
     end
 
-    def init_src(src)
+    def add_preamble(src)
       return unless @func == '_add'
       src << "(let ((_out '())) " + \
                "(define (_add x) (set! _out (cons x _out))) "
@@ -42,11 +42,19 @@ module Erubis
     end
 
     def escaped_expr(code)
-      return "(escape #{code.strip})"
+      @escape ||= 'escape'
+      return "(#{@escape} #{code.strip})"
     end
 
     def add_text(src, text)
-      src << "(#{@func} \"" << escape_text(text) << '")' unless text.empty?
+      return if text.empty?
+      t = escape_text(text)
+      if t[-1] == ?\n
+        t[-1, 1] = ''
+        src << "(#{@func} \"" << t << "\\n\")\n"
+      else
+        src << "(#{@func} \"" << t << '")'
+      end
     end
 
     def add_stmt(src, code)
@@ -66,7 +74,7 @@ module Erubis
       src << "(display \"*** debug: #{s}=\")(display #{code.strip})(display \"\\n\")"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       return unless @func == '_add'
       src << "\n" unless src[-1] == ?\n
       src << "  (reverse _out))\n"

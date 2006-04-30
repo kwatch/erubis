@@ -23,13 +23,17 @@
 It has the following features.
 </p>
 <ul type="disc">
-<li>Auto sanitizing support
+<li>Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
+</li>
+<li>Auto escaping support
 </li>
 <li>Auto trimming spaces around '&lt;% %&gt;'
 </li>
 <li>Embedded pattern changeable (default '&lt;% %&gt;')
 </li>
-<li>Context object available
+<li>Support multi-language (Ruby/PHP/C/Java/Scheme/Perl)
+</li>
+<li>Context object available and easy to combine eRuby template with YAML datafile
 </li>
 <li>Print statement available
 </li>
@@ -55,17 +59,53 @@ It has the following features.
     </li>
     <li><a href="#tut-trim">Trimming Spaces</a>
     </li>
-    <li><a href="#tut-xml">Auto Sanitizing</a>
+    <li><a href="#tut-xml">Escape by Default</a>
     </li>
     <li><a href="#tut-pattern">Embedded Pattern</a>
     </li>
     <li><a href="#tut-context">Context Object</a>
     </li>
-    <li><a href="#tut-fast">Faster Eruby</a>
+    <li><a href="#Preamble and Postamble">Preamble and Postamble</a>
     </li>
-    <li><a href="#tut-stdout">Stdout Eruby</a>
+  </ul>
+  </li>
+  <li><a href="#enhancer">Enhancer</a>
+  <ul>
+    <li><a href="#escapeenhander">EscapeEnhancer</a>
     </li>
-    <li><a href="#tut-print">Print Avairable Eruby</a>
+    <li><a href="#stdoutenhancer">StdoutEnhancer</a>
+    </li>
+    <li><a href="#printstatementenhancer">PrintStatementEnhancer</a>
+    </li>
+    <li><a href="#printenabledenhancer">PrintEnabledEnhancer</a>
+    </li>
+    <li><a href="#arrayenhancer">ArrayEnhancer</a>
+    </li>
+    <li><a href="#arraybufferenhancer">ArrayBufferEnhancer</a>
+    </li>
+    <li><a href="#stringbufferenhancer">StringBufferEnhancer</a>
+    </li>
+    <li><a href="#simplifiedenhancer">SimplifiedEnhancer</a>
+    </li>
+    <li><a href="#bipatternenhancer">BiPatternEnhancer</a>
+    </li>
+    <li><a href="#percentlineenhancer">PercentLineEnhancer</a>
+    </li>
+    <li><a href="#headerfooterenhancer">HeaderFooterEnhancer</a>
+    </li>
+  </ul>
+  </li>
+  <li><a href="#lang">Multi-Language</a>
+  <ul>
+    <li><a href="#lang-php">PHP</a>
+    </li>
+    <li><a href="#lang-c">C</a>
+    </li>
+    <li><a href="#lang-scheme">Scheme</a>
+    </li>
+    <li><a href="#lang-perl">Perl</a>
+    </li>
+    <li><a href="#lang-javascript">JavaScript</a>
     </li>
   </ul>
   </li>
@@ -74,6 +114,8 @@ It has the following features.
     <li><a href="#command-usage">Usage</a>
     </li>
     <li><a href="#command-options">Options</a>
+    </li>
+    <li><a href="#command-props">Properties</a>
     </li>
   </ul>
   </li>
@@ -101,10 +143,10 @@ $ ruby setup.rb
 </li>
 </ul>
 <ul type="disc">
-<li>Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
+<li>Else you should copy 'lib/erubis.rb', 'lib/erubis/', and 'bin/erubis' into proper directory manually.
 <pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
 $ cd erubis_X.X.X/
-$ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
+$ cp -r lib/erubis.rb lib/erubis /usr/local/lib/ruby/site_ruby/1.8
 $ cp bin/erubis /usr/local/bin
 </pre>
 </li>
@@ -142,34 +184,32 @@ example1.eruby</div>
 <a name="example1.rb"></a>
 <div class="program_caption">
 example1.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example1.eruby')
-eruby = <b>Erubis::Eruby.new(input)</b>
+eruby = <b>Erubis::Eruby.new(input)</b>    # create Eruby object
 
-## print script source
-puts "--- script source ---"
-puts <b>eruby.src</b>
+puts "---------- script source ---"
+puts <b>eruby.src</b>                      # print script source
 
-## get result
-puts "--- result ---"
+puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
-puts <b>eruby.result(binding())</b>
+puts <b>eruby.result(binding())</b>        # get result
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example1.rb
---- script source ---
-_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-   for item in list 
-_out &lt;&lt; "  &lt;li&gt;\n"
-_out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
-_out &lt;&lt; "  &lt;/li&gt;\n"
-   end 
-
-_out &lt;&lt; "&lt;/ul&gt;\n"
-_out
---- result ---
+---------- script source ---
+_out = []; _out &lt;&lt; '&lt;ul&gt;
+';   for item in list 
+; _out &lt;&lt; '  &lt;li&gt;
+'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;/li&gt;
+';   end 
+;
+; _out &lt;&lt; '&lt;/ul&gt;
+';
+_out.join
+---------- result ----------
 &lt;ul&gt;
   &lt;li&gt;
     aaa
@@ -204,33 +244,31 @@ example2.eruby</div>
 <a name="example2.rb"></a>
 <div class="program_caption">
 example2.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example2.eruby')
 eruby = Erubis::Eruby.new(input<b>, :trim=&gt;false</b>)
 
-## print script source
-puts "--- script source ---"
-puts eruby.src
+puts "---------- script source ---"
+puts eruby.src                            # print script source
 
-## get result
-puts "--- result ---"
+puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
-puts eruby.result(binding())
+puts eruby.result(binding())              # get result
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example2.rb
---- script source ---
-_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-<b>_out &lt;&lt; "  ";</b>  for item in list <b>; _out &lt;&lt; "\n"</b>
-_out &lt;&lt; "  &lt;li&gt;\n"
-_out &lt;&lt; "    "; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "\n"
-_out &lt;&lt; "  &lt;/li&gt;\n"
-<b>_out &lt;&lt; "  ";</b>  end <b>; _out &lt;&lt; "\n"</b>
-_out &lt;&lt; "&lt;/ul&gt;\n"
-_out
---- result ---
+---------- script source ---
+_out = []; _out &lt;&lt; '&lt;ul&gt;
+'; _out &lt;&lt; '  '; for item in list ; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;li&gt;
+'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;/li&gt;
+'; _out &lt;&lt; '  '; end ; _out &lt;&lt; '
+'; _out &lt;&lt; '&lt;/ul&gt;
+';
+_out.join
+---------- result ----------
 &lt;ul&gt;
   
   &lt;li&gt;
@@ -251,15 +289,15 @@ _out
 
 
 <a name="tut-xml"></a>
-<h3 class="section2">Auto Sanitizing</h3>
-<p>If you use Erubis::XmlEruby instead of Erubis::Eruby, output is sanitized automatically.
+<h3 class="section2">Escape by Default</h3>
+<p>If you use Erubis::XmlEruby instead of Erubis::Eruby, output is escaped by default.
 </p>
 <p>Erubis::XmlEruby acts the following:
 </p>
 <ul type="disc">
-<li><code>&lt;%= <i>expr</i> %&gt;</code> will be sanitized.
+<li><code>&lt;%= <i>expr</i> %&gt;</code> will be escaped.
 </li>
-<li><code>&lt;%== <i>expr</i> %&gt;</code> will be out as it is.
+<li><code>&lt;%== <i>expr</i> %&gt;</code> will be not escaped.
 </li>
 <li><code>&lt;%=== <i>expr</i> %&gt;</code> will be out to $stderr.
 </li>
@@ -269,64 +307,74 @@ _out
 <a name="example3.eruby"></a>
 <div class="program_caption">
 example3.eruby</div>
-<pre class="program">&lt;ul&gt;
-  &lt;% for item in list %&gt;
-  &lt;li&gt;<b>&lt;%=</b> item <b>%&gt;</b>&lt;/li&gt;
-  &lt;li&gt;<b>&lt;%==</b> item <b>%&gt;</b>&lt;/li&gt;
-  &lt;li&gt;<b>&lt;%===</b> item <b>%&gt;</b>&lt;/li&gt;
+<pre class="program">&lt;% for item in list %&gt;
+  &lt;p&gt;<b>&lt;%=</b> item <b>%&gt;</b>&lt;/p&gt;
+  &lt;p&gt;<b>&lt;%==</b> item <b>%&gt;</b>&lt;/p&gt;
+  &lt;p&gt;<b>&lt;%===</b> item <b>%&gt;</b>&lt;/p&gt;
 
-  &lt;% end %&gt;
-&lt;/ul&gt;
+&lt;% end %&gt;
 </pre>
 <a name="example3.rb"></a>
 <div class="program_caption">
 example3.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::<b>XmlEruby</b>.new(input)
+eruby = Erubis::<b>XmlEruby</b>.new(input)  # create Eruby object
 
-## print script source
-puts "--- script source ---"
-puts eruby.src
+puts "---------- script source ---"
+puts eruby.src                             # print script source
 
-## get result
-puts "--- result ---"
+puts "---------- result ----------"
 <b>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</b>
-puts eruby.result(binding())
+puts eruby.result(binding())               # get result
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example3.rb 2&gt; stderr.log
---- script source ---
-_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-   for item in list 
-_out &lt;&lt; "  &lt;li&gt;"; <b>_out &lt;&lt; Erubis::XmlEruby.escape( item )</b>; _out &lt;&lt; "&lt;/li&gt;\n"
-_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
-_out &lt;&lt; "  &lt;li&gt;"; <b>$stderr.puts("** erubis: item = #{(item).inspect}")</b>; _out &lt;&lt; "&lt;/li&gt;\n"
-_out &lt;&lt; "\n"
-   end 
-_out &lt;&lt; "&lt;/ul&gt;\n"
-_out
---- result ---
-&lt;ul&gt;
-  &lt;li&gt;<b>&amp;lt;aaa&amp;gt;</b>&lt;/li&gt;
-  &lt;li&gt;&lt;aaa&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;/li&gt;
+---------- script source ---
+_out = []; for item in list 
+; _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '&lt;/p&gt;
 
-  &lt;li&gt;<b>b&amp;amp;b</b>&lt;/li&gt;
-  &lt;li&gt;b&amp;b&lt;/li&gt;
-  &lt;li&gt;&lt;/li&gt;
+'; end 
+;
+_out.join
+---------- result ----------
+  &lt;p&gt;&amp;lt;aaa&amp;gt;&lt;/p&gt;
+  &lt;p&gt;&lt;aaa&gt;&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
 
-  &lt;li&gt;<b>&amp;quot;ccc&amp;quot;</b>&lt;/li&gt;
-  &lt;li&gt;"ccc"&lt;/li&gt;
-  &lt;li&gt;&lt;/li&gt;
+  &lt;p&gt;b&amp;amp;b&lt;/p&gt;
+  &lt;p&gt;b&amp;b&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
 
-&lt;/ul&gt;
+  &lt;p&gt;&amp;quot;ccc&amp;quot;&lt;/p&gt;
+  &lt;p&gt;"ccc"&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
+
 $ cat stderr.log
-** erubis: item = "&lt;aaa&gt;"
-** erubis: item = "b&amp;b"
-** erubis: item = "\"ccc\""
+*** debug: item="&lt;aaa&gt;"
+*** debug: item="b&amp;b"
+*** debug: item="\"ccc\""
+</pre>
+<p>Default escaping function is 'Erubis::XmlHelper.escape_xml()'.
+You can change it by overriding Erubis::Eruby#escaped_expr() in subclass.
+</p>
+<div class="program_caption">
+example to override Erubis::Eruby#escaped_expr()</div>
+<pre class="program">class CGIEruby &lt; Erubis::Eruby
+  def escaped_expr(code)
+    return "CGI.escapeHTML((#{code.strip}).to_s)"
+    #return "h(#{code.strip})"
+  end
+end
+
+class LatexEruby &lt; Erubi::Eruby
+  def escaped_expr(code)
+    return "(#{code}).gsub(/[%\\]/,'\\\\\&amp;')"
+  end
+end
 </pre>
 <br>
 
@@ -338,46 +386,38 @@ $ cat stderr.log
 <a name="example4.eruby"></a>
 <div class="program_caption">
 example4.eruby</div>
-<pre class="program">&lt;ul&gt;
- <b>&lt;!--%</b> for item in list <b>%--&gt;</b>
-  &lt;li&gt;<b>&lt;!--%=</b> item <b>%--&gt;</b>&lt;/li&gt;
- <b>&lt;!--%</b> end <b>%--&gt;</b>
-&lt;/ul&gt;
+<pre class="program"><b>&lt;!--%</b> for item in list <b>%--&gt;</b>
+  &lt;p&gt;<b>&lt;!--%=</b> item <b>%--&gt;</b>&lt;/p&gt;
+<b>&lt;!--%</b> end <b>%--&gt;</b>
 </pre>
 <a name="example4.rb"></a>
 <div class="program_caption">
 example4.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example4.eruby')
 eruby = Erubis::Eruby.new(input<b>, :pattern=&gt;'&lt;!--% %--&gt;'</b>)
                                       # or '&lt;(?:!--)?% %(?:--)?&gt;'
 
-## print script source
-puts "--- script source ---"
-puts eruby.src
+puts "---------- script source ---"
+puts eruby.src                            # print script source
 
-## get result
-puts "--- result ---"
+puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
-puts eruby.result(binding())
+puts eruby.result(binding())              # get result
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example4.rb
---- script source ---
-_out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-  for item in list 
-_out &lt;&lt; "  &lt;li&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/li&gt;\n"
-  end 
-_out &lt;&lt; "&lt;/ul&gt;\n"
-_out
---- result ---
-&lt;ul&gt;
-  &lt;li&gt;aaa&lt;/li&gt;
-  &lt;li&gt;bbb&lt;/li&gt;
-  &lt;li&gt;ccc&lt;/li&gt;
-&lt;/ul&gt;
+---------- script source ---
+_out = []; for item in list 
+; _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+'; end 
+;
+_out.join
+---------- result ----------
+  &lt;p&gt;aaa&lt;/p&gt;
+  &lt;p&gt;bbb&lt;/p&gt;
+  &lt;p&gt;ccc&lt;/p&gt;
 </pre>
 <p>It is able to specify regular expression with :pattern option.
 Notice that you must use '<code>(?: )</code>' instead of '<code>( )</code>' for grouping.
@@ -407,10 +447,9 @@ example5.eruby</div>
 <a name="example5.rb"></a>
 <div class="program_caption">
 example5.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example5.eruby')
-eruby = Erubis::Eruby.new(input)
+eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## create context object
 ## (key means var name, which may be string or symbol.)
@@ -418,14 +457,11 @@ eruby = Erubis::Eruby.new(input)
 <b>context[:val]   = 'Erubis Example'</b>
 <b>context['list'] = ['aaa', 'bbb', 'ccc']</b>
 
-## get result
-puts "--- result ---"
-puts <b>eruby.evaluate(context)</b>
+puts <b>eruby.evaluate(context)</b>         # get result
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example5.rb
---- result ---
 &lt;span&gt;Erubis Example&lt;/span&gt;
 &lt;ul&gt;
   &lt;li&gt;aaa&lt;/li&gt;
@@ -462,17 +498,15 @@ example6.eruby</div>
 <a name="example6.rb"></a>
 <div class="program_caption">
 example6.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example6.eruby')
-eruby = Erubis::Eruby.new(input)
+eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## load YAML document as context object
 <b>require 'yaml'</b>
 <b>context = YAML.load_file('example6.yaml')</b>
 
-## get result
-puts <b>eruby.evaluate(context)</b>
+puts <b>eruby.evaluate(context)</b>        # get result
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -493,226 +527,1007 @@ output</div>
 <br>
 
 
-<a name="tut-fast"></a>
-<h3 class="section2">Faster Eruby</h3>
-<p>Erubis::FastEruby and Erubis::FastXmlEruby make faster Erubis::Eruby and Erubis::XmlEruby
-to combine several strings into a string.
+<a name="Preamble and Postamble"></a>
+<h3 class="section2">Preamble and Postamble</h3>
+<p>The first line ('_out = [];') in the compiled source code is called preamble
+and the last line ('_out.join') is called postamble.
+</p>
+<p>You can specify Eruby not to print preamble and postamble with option :preamble and :postamble.
 </p>
 <a name="example7.eruby"></a>
 <div class="program_caption">
 example7.eruby</div>
-<pre class="program">&lt;table&gt;
-  &lt;tbody&gt;
-   &lt;% for item in list %&gt;
-    &lt;tr&gt;
-      &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-   &lt;% end %&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
+<pre class="program">&lt;% for item in list %&gt;
+ &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
+&lt;% end %&gt;
 </pre>
 <a name="example7.rb"></a>
 <div class="program_caption">
 example7.rb</div>
-<pre class="program">## print script source with Eruby
-require 'erubis'
+<pre class="program">require 'erubis'
 input = File.read('example7.eruby')
-eruby = Erubis::Eruby.new(input)
-puts "--- script source (Eruby) ---"
-puts eruby.src
+eruby1 = Erubis::Eruby.new(input)
+eruby2 = Erubis::Eruby.new(input, <b>:preamble=&gt;false, :postamble=&gt;false</b>)
 
-## print script source with FastEruby
-eruby = Erubis::<b>FastEruby</b>.new(input)
-puts "--- script source (FastEruby) ---"
-puts eruby.src
+puts eruby1.src   # print preamble and postamble
+puts "--------------"
+puts eruby2.src   # don't print preamble and postamble
 </pre>
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example7.rb
---- script source (Eruby) ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n"
-_out &lt;&lt; "  &lt;tbody&gt;\n"
-    for item in list 
-_out &lt;&lt; "    &lt;tr&gt;\n"
-_out &lt;&lt; "      &lt;td&gt;"; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n"
-_out &lt;&lt; "    &lt;/tr&gt;\n"
-    end 
-_out &lt;&lt; "  &lt;/tbody&gt;\n"
-_out &lt;&lt; "&lt;/table&gt;\n"
-_out
---- script source (FastEruby) ---
-_out = ''; _out &lt;&lt; "&lt;table&gt;\n  &lt;tbody&gt;\n"
-
-    for item in list 
-_out &lt;&lt; "    &lt;tr&gt;\n      &lt;td&gt;"
-_out &lt;&lt; ( item ).to_s; _out &lt;&lt; "&lt;/td&gt;\n    &lt;/tr&gt;\n"
-
-    end 
-_out &lt;&lt; "  &lt;/tbody&gt;\n&lt;/table&gt;\n"
-
-_out
-</pre>
-<p>Here is the definition of FastEruby or FastXmlEruby.
-They are subclass of Eruby and XmlEruby respectively and only include FastEnhancer module.
-It shows that Erubis is extensible.
-</p>
-<div class="program_caption">
-definition of FastEruby and FastXmlEruby</div>
-<pre class="program">module Erubis
-  class FastEruby &lt; Eruby
-    <b>include FastEnhancer</b>
-  end
-  class FastXmlEruby &lt; XmlEruby
-    <b>include FastEnhancer</b>
-  end
-end
+_out = []; for item in list 
+; _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out.join
+--------------
+ for item in list 
+; _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
 </pre>
 <br>
 
 
-<a name="tut-stdout"></a>
-<h3 class="section2">Stdout Eruby</h3>
-<p>Erubis::StdoutEruby and Erubis::StdoutXmlEruby use $stdout instead of string object.
+<br>
+
+
+<a name="enhancer"></a>
+<h2 class="section1">Enhancer</h2>
+<p>Enhancer is a module to extend Erubis::Eruby class.
+Enhancer may be language-independent or only for Eruby.
+</p>
+<p>To use enhancers, define subclass and include them.
+The folloing is an example to use EscapeEnhancer and PercentLineEnhancer.
+</p>
+<pre class="program">class MyEruby &lt; Erubis::Eruby
+  include EscapeEnhancer
+  include PercentLineEnhancer
+end
+</pre>
+<p>The following is the list of enhancers.
+</p>
+<dl class="dl1">
+<dt class="dt1">
+EscapeEnhander (language-independent)</dt>
+<dd class="dd1">
+	Switch '&lt;%= %&gt;' to escaped and '&lt;%== %&gt;' to unescaped.
+</dd>
+<dt class="dt1">
+StdoutEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Use $stdout instead of array buffer.
+</dd>
+<dt class="dt1">
+PrintStatementEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Use "print(...)" statement insead of "_out &lt;&lt; ...".
+</dd>
+<dt class="dt1">
+PrintEnabledEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Enable to use print() in '&lt;% ... %&gt;'.
+</dd>
+<dt class="dt1">
+ArrayEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Return array of string instead of returning string.
+</dd>
+<dt class="dt1">
+ArrayBufferEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Use array buffer. This is included in Erubis::Eruby by default.
+</dd>
+<dt class="dt1">
+StringBufferEnhancer (only for Eruby)</dt>
+<dd class="dd1">
+	Use string buffer. It is a little slower than ArrayBufferEnhancer.
+</dd>
+<dt class="dt1">
+SimplifiedEnhancer (language-independent)</dt>
+<dd class="dd1">
+	Make compile faster but don't trim spaces around '&lt;% %&gt;'.
+</dd>
+<dt class="dt1">
+BiPatternEnhancer (language-independent)</dt>
+<dd class="dd1">
+	[experimental] Enable to use another embedded pattern with '&lt;% %&gt;'.
+</dd>
+<dt class="dt1">
+PercentLineEnhancer (language-independent)</dt>
+<dd class="dd1">
+	Regard lines starting with '%' as Ruby code. This is for compatibility with eruby and ERB.
+</dd>
+<dt class="dt1">
+HeaderFooterEnhancer (language-independent)</dt>
+<dd class="dd1">
+	[experimental] Enable you to add header and footer in eRuby script.
+</dd>
+</dl>
+<p>If you required 'erubis/engine/enhanced', Eruby subclasses which include each enhancers are defined.
+For example, class BiPatternEruby includes BiPatternEnhancer.
+</p>
+<a name="escapeenhander"></a>
+<h3 class="section2">EscapeEnhancer</h3>
+<p>EscapeEnhancer switches '&lt;%= ... %&gt;' to escaped and '&lt;%== ... %&gt;' to unescaped.
+</p>
+<a name="example.eruby"></a>
+<div class="program_caption">
+example.eruby</div>
+<pre class="program">&lt;% for item in list %&gt;
+  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
+  &lt;b&gt;&lt;%== item %&gt;&lt;/b&gt;
+&lt;% end %&gt;
+</pre>
+<a name="escape-enhancer-test.rb"></a>
+<div class="program_caption">
+escape-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class EscapedEruby &lt; Erubis::Eruby
+  include Erubis::EscapeEnhancer
+end
+eruby = EscapedEruby.new(File.read('example.eruby'))
+print eruby.src
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby escape-enhancer-test.rb
+_out = []; for item in list 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out.join
+</pre>
+<p>EscapeEnhancer is language-independent.
+</p>
+<br>
+
+
+<a name="stdoutenhancer"></a>
+<h3 class="section2">StdoutEnhancer</h3>
+<p>StdoutEnhancer use $sdtdout instead of array buffer.
 Therefore, you can use 'print' statement in embedded ruby code.
 </p>
-<a name="example8.eruby"></a>
+<a name="stdout-enhancer-test.rb"></a>
 <div class="program_caption">
-example8.eruby</div>
-<pre class="program">&lt;ul&gt;
- &lt;% for item in list %&gt;
-  &lt;li&gt;<b>&lt;% print item %&gt;</b>&lt;/li&gt;
- &lt;% end %&gt;
-&lt;/ul&gt;
-</pre>
-<a name="example8.rb"></a>
-<div class="program_caption">
-example8.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
-input = File.read('example8.eruby')
-eruby = Erubis::<b>StdoutEruby</b>.new(input)
-
-## print script source
-puts "--- script source ---"
-puts eruby.src
-
-## get result
-puts "--- result ---"
-list = ['aaa', 'bbb', 'ccc']
-#puts eruby.result(binding())
-<b>eruby.result(binding())</b>  # returns nil
+stdout-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class StdoutEruby &lt; Erubis::Eruby
+  include Erubis::StdoutEnhancer
+end
+eruby = StdoutEruby.new(File.read('example.eruby'))
+print eruby.src
 </pre>
 <div class="terminal_caption">
-output</div>
-<pre class="terminal">$ ruby example8.rb
---- script source ---
-<b>_out = $stdout</b>; _out &lt;&lt; "&lt;ul&gt;\n"
-  for item in list 
-_out &lt;&lt; "  &lt;li&gt;";  <b>print item</b> ; _out &lt;&lt; "&lt;/li&gt;\n"
-  end 
-_out &lt;&lt; "&lt;/ul&gt;\n"
-<b>nil</b>
---- result ---
-&lt;ul&gt;
-  &lt;li&gt;aaa&lt;/li&gt;
-  &lt;li&gt;bbb&lt;/li&gt;
-  &lt;li&gt;ccc&lt;/li&gt;
-&lt;/ul&gt;
+compiled source code</div>
+<pre class="terminal">$ ruby stdout-enhancer-test.rb
+_out = $stdout; for item in list 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+''
 </pre>
-<p>Here is the definition of StdoutEruby or StdoutXmlEruby.
-They are subclass of Eruby and XmlEruby respectively and only include StdoutEnhancer module.
-It shows that Erubis is extensible.
+<p>StdoutEnhancer is only for Eruby.
 </p>
+<br>
+
+
+<a name="printstatementenhancer"></a>
+<h3 class="section2">PrintStatementEnhancer</h3>
+<p>PrintStatementEnhancer makes compiled source code to use 'print(...)' instead of '_out &lt;&lt; ...'.
+</p>
+<a name="printstatement-enhancer-test.rb"></a>
 <div class="program_caption">
-definition of StdoutEruby and StdoutXmlEruby</div>
-<pre class="program">module Erubis
-  class StdoutEruby &lt; Eruby
-    <b>include StdoutEnhancer</b>
-  end
-  class StdoutXmlEruby &lt; XmlEruby
-    <b>include StdoutEnhancer</b>
-  end
+printstatement-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class PrintStatementEruby &lt; Erubis::Eruby
+  include Erubis::PrintStatementEnhancer
 end
+eruby = PrintStatementEruby.new(File.read('example.eruby'))
+print eruby.src
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby printstatement-enhancer-test.rb
+ for item in list 
+; print '  &lt;b&gt;'; print(( item ).to_s); print '&lt;/b&gt;
+  &lt;b&gt;'; print Erubis::XmlHelper.escape_xml( item ); print '&lt;/b&gt;
+'; end 
+;
+</pre>
+<p>PrintStatementEnhancer is only for Eruby.
+</p>
+<br>
+
+
+<a name="printenabledenhancer"></a>
+<h3 class="section2">PrintEnabledEnhancer</h3>
+<p>PrintEnabledEnhancer enables you to use print() method in '&lt;% ... %&gt;'.
+</p>
+<a name="printenabled-enhancer-test.eruby"></a>
+<div class="program_caption">
+printenabled-enhancer-test.eruby</div>
+<pre class="program">&lt;% for item in list %&gt;
+  &lt;b&gt;<b>&lt;% print item %&gt;</b>&lt;/b&gt;
+&lt;% end %&gt;
+</pre>
+<a name="printenabled-enhancer-test.rb"></a>
+<div class="program_caption">
+printenabled-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class PrintEnabledEruby &lt; Erubis::Eruby
+  include Erubis::PrintEnabledEnhancer
+end
+input = File.read('printenabled-enhancer-test.eruby')
+eruby = PrintEnabledEruby.new(input)
+list = ['aaa', 'bbb', 'ccc']
+print eruby.evaluate(:list=&gt;list)
+</pre>
+<div class="terminal_caption">
+output result</div>
+<pre class="terminal">$ ruby printenabled-enhancer-test.rb
+  &lt;b&gt;aaa&lt;/b&gt;
+  &lt;b&gt;bbb&lt;/b&gt;
+  &lt;b&gt;ccc&lt;/b&gt;
+</pre>
+<p>Notice to use Eruby#evaluate() and not to use Eruby#result(),
+because print() method in '&lt;% ... %&gt;' invokes not Kernel#print() but PrintEnabledEnhancer#print().
+</p>
+<p>PrintEnabledEnhancer is only for Eruby.
+</p>
+<br>
+
+
+<a name="arrayenhancer"></a>
+<h3 class="section2">ArrayEnhancer</h3>
+<p>ArrayEnhancer makes Eruby to return an array of strings.
+</p>
+<a name="array-enhancer-test.rb"></a>
+<div class="program_caption">
+array-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class ArrayEruby &lt; Erubis::Eruby
+  include Erubis::ArrayEnhancer
+end
+eruby = ArrayEruby.new(File.read('example.eruby'))
+print eruby.src
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby array-enhancer-test.rb
+_out = []; for item in list 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out
+</pre>
+<p>ArrayEnhancer is only for Eruby.
+</p>
+<br>
+
+
+<a name="arraybufferenhancer"></a>
+<h3 class="section2">ArrayBufferEnhancer</h3>
+<p>Arraybufferenhancer makes Eruby to use array buffer.
+Array buffer is a litte faster than String buffer.
+Erubis::Eruby includes this enhancer by default.
+</p>
+<p>ArrayBufferEnhancer is only for Eruby.
+</p>
+<br>
+
+
+<a name="stringbufferenhancer"></a>
+<h3 class="section2">StringBufferEnhancer</h3>
+<p>StringBufferEnhancer makes Eruby to use string buffer.
+</p>
+<a name="stringbuffer-enhancer-test.rb"></a>
+<div class="program_caption">
+stringbuffer-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class StringBufferEruby &lt; Erubis::Eruby
+  include Erubis::StringBufferEnhancer
+end
+eruby = StringBufferEruby.new(File.read('example.eruby'))
+print eruby.src
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby stringbuffer-enhancer-test.rb
+_out = ''; for item in list 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out
 </pre>
 <br>
 
 
-<a name="tut-print"></a>
-<h3 class="section2">Print Avairable Eruby</h3>
-<p>Erubis::PrintEruby and Erubis::PrintXmlEruby enables you to use print statement.
-You can get output as String because Erubis::PrintEruby and Erubis::PrintXmlEruby doesn't use $stdout.
+<a name="simplifiedenhancer"></a>
+<h3 class="section2">SimplifiedEnhancer</h3>
+<p>SimplifiedEnhancer makes compiling a little faster but don't trim spaces around '&lt;% %&gt;'.
 </p>
-<p>Notice:
-</p>
- <ul type="disc">
- <li>Use evaluate() and don't use result().
- </li>
- <li>Only print() is available, put() or p() are not available.
- </li>
- <li>PrintEruby and PrintXmlEruby has instance method 'print()'.
-    It means that print statement invokes PrintEruby#print() or PrintXmlEruby#print(),
-    and Kernel#print() is not invoked.
- </li>
- <li>PrintEruby#print() and PrintXmlEruby#print() can take just an argument.
- </li>
- </ul>
-<a name="example9.eruby"></a>
+<a name="simplified-enhancer-test.rb"></a>
 <div class="program_caption">
-example9.eruby</div>
-<pre class="program">&lt;ul&gt;
- &lt;% for item in list %&gt;
-  &lt;li&gt;<b>&lt;% print item %&gt;</b>&lt;/li&gt;
- &lt;% end %&gt;
-&lt;/ul&gt;
-</pre>
-<a name="example9.rb"></a>
-<div class="program_caption">
-example9.rb</div>
-<pre class="program">## create Eruby object
-require 'erubis'
-input = File.read('example9.eruby')
-eruby = Erubis::<b>PrintEruby</b>.new(input)
-
-## print script source
-puts "--- script source ---"
-puts eruby.src
-
-## get result
-puts "--- result ---"
-list = ['aaa', 'bbb', 'ccc']
-puts <b>eruby.evaluate(:list =&gt; list)</b>   # don't use result()!
+simplified-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class SimplifiedEruby &lt; Erubis::Eruby
+  include Erubis::SimplifiedEnhancer
+end
+eruby = SimplifiedEruby.new(File.read('example.eruby'))
+print eruby.src
 </pre>
 <div class="terminal_caption">
-output</div>
-<pre class="terminal">$ ruby example9.rb
---- script source ---
-<b>@_out =</b> _out = ''; _out &lt;&lt; "&lt;ul&gt;\n"
-  for item in list 
-_out &lt;&lt; "  &lt;li&gt;";  <b>print item</b> ; _out &lt;&lt; "&lt;/li&gt;\n"
-  end 
-_out &lt;&lt; "&lt;/ul&gt;\n"
-_out
---- result ---
-&lt;ul&gt;
-  &lt;li&gt;aaa&lt;/li&gt;
-  &lt;li&gt;bbb&lt;/li&gt;
-  &lt;li&gt;ccc&lt;/li&gt;
-&lt;/ul&gt;
+compiled source code</div>
+<pre class="terminal">$ ruby simplified-enhancer-test.rb
+_out = []; for item in list ; _out &lt;&lt; '
+  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+'; end ; _out &lt;&lt; '
+';
+_out.join
 </pre>
-<p>Here is the definition of PrintEruby or PrintXmlEruby.
-They are subclass of Eruby and XmlEruby respectively and only include PrintEnhancer module.
-It shows that Erubis is extensible.
+<br>
+
+
+<a name="bipatternenhancer"></a>
+<h3 class="section2">BiPatternEnhancer</h3>
+<p>BiPatternEnhancer enables to use another embedded pattern with '&lt;% %&gt;'.
+By Default, '[= ... =]' is available for expression.
+You can specify pattern by :bipattern property.
 </p>
+<a name="bipattern-enhancer-test.rb"></a>
 <div class="program_caption">
-definition of PrintEruby and PrintXmlEruby</div>
-<pre class="program">module Erubis
-  class PrintEruby &lt; Eruby
-    <b>include PrintEnhancer</b>
-  end
-  class PrintXmlEruby &lt; XmlEruby
-    <b>include PrintEnhancer</b>
-  end
+bipattern-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class BiPatternEruby &lt; Erubis::Eruby
+  include Erubis::BiPatternEnhancer
 end
+
+input = File.read('bipattern-enhancer-test.rhtml')
+eruby = BiPatternEruby.new(input)
+print eruby.src
+</pre>
+<a name="bipattern-enhancer-test.rhtml"></a>
+<div class="program_caption">
+bipattern-enhancer-test.rhtml</div>
+<pre class="program">&lt;% for item in list %&gt;
+  &lt;b&gt;<b>[= item =]</b>&lt;/b&gt;
+  &lt;b&gt;<b>[== item =]</b>&lt;/b&gt;
+&lt;% end %&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby bipattern-enhancer-test.rb
+_out = []; for item in list 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out.join
+</pre>
+<p>BiPatternEnhancer is language-independent.
+</p>
+<br>
+
+
+<a name="percentlineenhancer"></a>
+<h3 class="section2">PercentLineEnhancer</h3>
+<p>PercentLineEnhancer regards lines starting with '%' as Ruby code.
+This is for compatibility with eruby and ERB.
+</p>
+<a name="percentline-enhancer-test.rb"></a>
+<div class="program_caption">
+percentline-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class PercentLineEruby &lt; Erubis::Eruby
+  include Erubis::PercentLineEnhancer
+end
+
+input = File.read('percentline-enhancer-test.rhtml')
+eruby = PercentLineEruby.new(input)
+print eruby.src
+</pre>
+<a name="percentline-enhancer-test.rhtml"></a>
+<div class="program_caption">
+percentline-enhancer-test.rhtml</div>
+<pre class="program"><b>% for item in list</b>
+  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
+<b>% end</b>
+%% lines with '%%'
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby percentline-enhancer-test.rb
+_out = []; for item in list
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end
+; _out &lt;&lt; '% lines with \'%%\'
+';
+_out.join
+</pre>
+<p>PercentLineEnhancer is language-independent.
+</p>
+<br>
+
+
+<a name="headerfooterenhancer"></a>
+<h3 class="section2">HeaderFooterEnhancer</h3>
+<p>[experimental]
+</p>
+<p>HeaderFooterEnhancer enables you to add header and footer in eRuby script.
+</p>
+<a name="headerfooter-enhancer-test.rb"></a>
+<div class="program_caption">
+headerfooter-enhancer-test.rb</div>
+<pre class="program">require 'erubis'
+class HeaderFooterEruby &lt; Erubis::Eruby
+  include Erubis::HeaderFooterEnhancer
+end
+
+input = File.read('headerfooter-enhancer-test.eruby')
+eruby = HeaderFooterEruby.new(input)
+print eruby.src
+</pre>
+<a name="headerfooter-enhancer-test.eruby"></a>
+<div class="program_caption">
+headerfooter-enhancer-test.eruby</div>
+<pre class="program"><b>&lt;!--#header:</b>
+<b>def list_items(items)</b>
+<b>#--&gt;</b>
+&lt;% for item in items %&gt;
+  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
+&lt;% end %&gt;
+<b>&lt;!--#footer:</b>
+<b>end</b>
+<b>#--&gt;</b>
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby headerfooter-enhancer-test.rb
+
+def list_items(items)
+
+_out = []; for item in items 
+; _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+;
+_out.join
+
+end
+
+</pre>
+<p>Compare to the following:
+</p>
+<a name="normal-eruby-test.eruby"></a>
+<div class="program_caption">
+normal-eruby-test.eruby</div>
+<pre class="program"><b>&lt;%</b>
+<b>def list_items(items)</b>
+<b>%&gt;</b>
+&lt;% for item in items %&gt;
+&lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+<b>&lt;%</b>
+<b>end</b>
+<b>%&gt;</b>
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -s normal-eruby-test.eruby
+_out = [];
+def list_items(items)
+
+; for item in items 
+; _out &lt;&lt; '&lt;li&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/li&gt;
+'; end 
+;
+end
+
+;
+_out.join
+</pre>
+<p>Header and footer can be in any position in eRuby script,
+that is, header is no need to be in the head of eRuby script.
+</p>
+<a name="headerfooter-enhancer-test2.rhtml"></a>
+<div class="program_caption">
+headerfooter-enhancer-test2.rhtml</div>
+<pre class="program">&lt;?xml version="1.0"?&gt;
+&lt;html&gt;
+<b>&lt;!--#header:</b>
+<b>def page(list)</b>
+<b>#--&gt;</b>
+ :
+<b>&lt;!--#footer:</b>
+<b>end</b>
+<b>#--&gt;</b>
+&lt;/html&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby headerfooter-enhancer-test2.rb
+
+def page(list)
+
+_out = []; _out &lt;&lt; '&lt;?xml version="1.0"?&gt;
+&lt;html&gt;
+'; _out &lt;&lt; ' :
+'; _out &lt;&lt; '&lt;/html&gt;
+';
+_out.join
+
+end
+
+</pre>
+<p>HeaderFooterEnhancer is experimental and is language-independent.
+</p>
+<br>
+
+
+<br>
+
+
+<a name="lang"></a>
+<h2 class="section1">Multi-Language</h2>
+<p>Erubis supports the following language currently:
+</p>
+<ul type="disc">
+<li>Ruby
+</li>
+<li>PHP
+</li>
+<li>C
+</li>
+<li>Java
+</li>
+<li>Scheme
+</li>
+<li>Perl
+</li>
+<li>JavaScript
+</li>
+</ul>
+<a name="lang-php"></a>
+<h3 class="section2">PHP</h3>
+<a name="example.ephp"></a>
+<div class="program_caption">
+example.ephp</div>
+<pre class="program">&lt;?xml version="1.0"?&gt;
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <b>&lt;%= $user %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+    <b>&lt;% $i = 0 %&gt;</b>
+    <b>&lt;% foreach ($list as $item) { %&gt;</b>
+    <b>&lt;%   $i++; %&gt;</b>
+    &lt;tr bgcolor=<b>"&lt;%= $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;"</b>&gt;
+     &lt;td&gt;<b>&lt;%= $i %&gt;</b>&lt;/td&gt;
+     &lt;td&gt;<b>&lt;%== $item %&gt;</b>&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;% } %&gt;
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l php example.ephp
+&lt;&lt;?php ?&gt;?xml version="1.0"?&gt;
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello &lt;?php echo $user; ?&gt;!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+&lt;?php     $i = 0 ?&gt;
+&lt;?php     foreach ($list as $item) { ?&gt;
+&lt;?php       $i++; ?&gt;
+    &lt;tr bgcolor="&lt;?php echo $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'; ?&gt;"&gt;
+     &lt;td&gt;&lt;?php echo $i; ?&gt;&lt;/td&gt;
+     &lt;td&gt;&lt;?php echo htmlspecialchars($item); ?&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;?php     } ?&gt;
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<br>
+
+
+<a name="lang-c"></a>
+<h3 class="section2">C</h3>
+<a name="example.ec"></a>
+<div class="program_caption">
+example.ec</div>
+<pre class="program"><b>&lt;%
+#include &lt;stdio.h&gt;
+
+int main(int argc, char *argv[])
+{
+    int i;
+
+%&gt;</b>
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <b>&lt;%= "%s", argv[0] %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+    <b>&lt;% for (i = 1; i &lt; argc; i++) { %&gt;</b>
+    &lt;tr bgcolor="<b>&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;</b>"&gt;
+      &lt;td&gt;<b>&lt;%= "%d", i %&gt;</b>&lt;/td&gt;
+      &lt;td&gt;<b>&lt;%= "%s", argv[i] %&gt;</b>&lt;/td&gt;
+    &lt;/tr&gt;
+    <b>&lt;% } %&gt;</b>
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+<b>&lt;%
+    return 0; 
+}
+%&gt;</b>
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l c example.ec
+#line 1 "example.ec"
+
+#include &lt;stdio.h&gt;
+
+int main(int argc, char *argv[])
+{
+    int i;
+
+
+fputs("&lt;html&gt;\n"
+      " &lt;body&gt;\n"
+      "  &lt;p&gt;Hello ", stdout); fprintf(stdout, "%s", argv[0]); fputs("!&lt;/p&gt;\n"
+      "  &lt;table&gt;\n"
+      "   &lt;tbody&gt;\n", stdout);
+     for (i = 1; i &lt; argc; i++) { 
+fputs("    &lt;tr bgcolor=\"", stdout); fprintf(stdout, i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); fputs("\"&gt;\n"
+      "      &lt;td&gt;", stdout); fprintf(stdout, "%d", i); fputs("&lt;/td&gt;\n"
+      "      &lt;td&gt;", stdout); fprintf(stdout, "%s", argv[i]); fputs("&lt;/td&gt;\n"
+      "    &lt;/tr&gt;\n", stdout);
+     } 
+fputs("   &lt;/tbody&gt;\n"
+      "  &lt;/table&gt;\n"
+      " &lt;/body&gt;\n"
+      "&lt;/html&gt;\n", stdout);
+
+    return 0; 
+}
+
+</pre>
+<a name="Example.ejava"></a>
+<div class="program_caption">
+Example.ejava</div>
+<pre class="program"><b>&lt;%
+import java.util.*;
+
+public class Example {
+  private String user;
+  private String[] list;
+  public example(String user, String[] list) {
+    this.user = user;
+    this.list = list;
+  }
+
+  public String view() {
+%&gt;</b>
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+    <b>&lt;% for (int i = 0; i &lt; list.length; i++) { %&gt;</b>
+    &lt;tr bgcolor=<b>"&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;"</b>&gt;
+     &lt;td&gt;<b>&lt;%= i + 1 %&gt;</b>&lt;/td&gt;
+     &lt;td&gt;<b>&lt;%== list[i] %&gt;</b>&lt;/td&gt;
+    &lt;/tr&gt;
+    <b>&lt;% } %&gt;</b>
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;body&gt;
+&lt;/html&gt;
+<b>&lt;%
+  }
+
+  public static void main(String[] args) {
+    String[] list = { "&lt;aaa&gt;", "b&amp;b", "\"ccc\"" };
+    Example ex = Example.new("Erubis", list);
+    System.out.print(ex.view());
+  }
+
+  public static String escape(String s) {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i &lt; s.length(); i++) {
+      char ch = s.charAt(i);
+      switch (ch) {
+      case '&lt;':   sb.append("&amp;lt;"); break;
+      case '&gt;':   sb.append("&amp;gt;"); break;
+      case '&amp;':   sb.append("&amp;amp;"); break;
+      case '"':   sb.append("&amp;quot;"); break;
+      default:    sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+}
+%&gt;</b>
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l java example.ejava
+StringBuffer _out = new StringBuffer();
+import java.util.*;
+
+public class Example {
+  private String user;
+  private String[] list;
+  public example(String user, String[] list) {
+    this.user = user;
+    this.list = list;
+  }
+
+  public String view() {
+
+_out.append("&lt;html&gt;\n"
+          + " &lt;body&gt;\n"
+          + "  &lt;p&gt;Hello "); _out.append(user); _out.append("!&lt;/p&gt;\n"
+          + "  &lt;table&gt;\n"
+          + "   &lt;tbody&gt;\n");
+     for (int i = 0; i &lt; list.length; i++) { 
+_out.append("    &lt;tr bgcolor=\""); _out.append(i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _out.append("\"&gt;\n"
+          + "     &lt;td&gt;"); _out.append(i + 1); _out.append("&lt;/td&gt;\n"
+          + "     &lt;td&gt;"); _out.append(escape(list[i])); _out.append("&lt;/td&gt;\n"
+          + "    &lt;/tr&gt;\n");
+     } 
+_out.append("   &lt;/tbody&gt;\n"
+          + "  &lt;/table&gt;\n"
+          + " &lt;body&gt;\n"
+          + "&lt;/html&gt;\n");
+
+  }
+
+  public static void main(String[] args) {
+    String[] list = { "&lt;aaa&gt;", "b&amp;b", "\"ccc\"" };
+    Example ex = Example.new("Erubis", list);
+    System.out.print(ex.view());
+  }
+
+  public static String escape(String s) {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i &lt; s.length(); i++) {
+      char ch = s.charAt(i);
+      switch (ch) {
+      case '&lt;':   sb.append("&amp;lt;"); break;
+      case '&gt;':   sb.append("&amp;gt;"); break;
+      case '&amp;':   sb.append("&amp;amp;"); break;
+      case '"':   sb.append("&amp;quot;"); break;
+      default:    sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+}
+
+return _out.toString();
+</pre>
+<br>
+
+
+<a name="lang-scheme"></a>
+<h3 class="section2">Scheme</h3>
+<a name="example.escheme"></a>
+<div class="program_caption">
+example.escheme</div>
+<pre class="program">&lt;html&gt;
+ &lt;body&gt;
+<b>&lt;%
+(let ((user "Erubis")
+      (items '("&lt;aaa&gt;" "b&amp;b" "\"ccc\""))
+      (i 0))
+ %&gt;</b>
+  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+<b>&lt;%
+  (for-each
+   (lambda (item)
+     (set! i (+ i 1))
+ %&gt;</b>
+   &lt;tr bgcolor="<b>&lt;%= (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF") %&gt;</b>"&gt;
+    &lt;td&gt;<b>&lt;%= i %&gt;</b>&lt;/td&gt;
+    &lt;td&gt;<b>&lt;%= item %&gt;</b>&lt;/td&gt;
+   &lt;/tr&gt;
+<b>&lt;%
+   ) ; lambda end
+   items) ; for-each end
+ %&gt;</b>
+  &lt;/table&gt;
+<b>&lt;%
+) ; let end
+%&gt;</b>
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l scheme example.escheme
+(let ((_out '())) (define (_add x) (set! _out (cons x _out))) (_add "&lt;html&gt;
+ &lt;body&gt;
+")
+(let ((user "Erubis")
+      (items '("&lt;aaa&gt;" "b&amp;b" "\"ccc\""))
+      (i 0))
+ 
+(_add "  &lt;p&gt;Hello ")(_add user)(_add "!&lt;/p&gt;
+  &lt;table&gt;
+")
+  (for-each
+   (lambda (item)
+     (set! i (+ i 1))
+ 
+(_add "   &lt;tr bgcolor=\"")(_add (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF"))(_add "\"&gt;
+    &lt;td&gt;")(_add i)(_add "&lt;/td&gt;
+    &lt;td&gt;")(_add item)(_add "&lt;/td&gt;
+   &lt;/tr&gt;
+")
+   ) ; lambda end
+   items) ; for-each end
+ 
+(_add "  &lt;/table&gt;
+")
+) ; let end
+
+(_add " &lt;/body&gt;
+&lt;/html&gt;
+")
+  (reverse _out))
+</pre>
+<div class="terminal_caption">
+compiled source code (with --func=display property)</div>
+<pre class="terminal">$ erubis -l scheme --func=display example.escheme
+(display "&lt;html&gt;
+ &lt;body&gt;
+")
+(let ((user "Erubis")
+      (items '("&lt;aaa&gt;" "b&amp;b" "\"ccc\""))
+      (i 0))
+ 
+(display "  &lt;p&gt;Hello ")(display user)(display "!&lt;/p&gt;
+  &lt;table&gt;
+")
+  (for-each
+   (lambda (item)
+     (set! i (+ i 1))
+ 
+(display "   &lt;tr bgcolor=\"")(display (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF"))(display "\"&gt;
+    &lt;td&gt;")(display i)(display "&lt;/td&gt;
+    &lt;td&gt;")(display item)(display "&lt;/td&gt;
+   &lt;/tr&gt;
+")
+   ) ; lambda end
+   items) ; for-each end
+ 
+(display "  &lt;/table&gt;
+")
+) ; let end
+
+(display " &lt;/body&gt;
+&lt;/html&gt;
+")</pre>
+<br>
+
+
+<a name="lang-perl"></a>
+<h3 class="section2">Perl</h3>
+<a name="example.eperl"></a>
+<div class="program_caption">
+example.eprl</div>
+<pre class="program"><b>&lt;%
+   my $user = 'Erubis';
+   my @list = ('&lt;aaa&gt;', 'b&amp;b', '"ccc"');
+%&gt;</b>
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <b>&lt;%= $user %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+   <b>&lt;% $i = 0; %&gt;</b>
+   <b>&lt;% for $item (@list) { %&gt;</b>
+   &lt;tr bgcolor=<b>&lt;%= ++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</b>"&gt;
+    &lt;td&gt;<b>&lt;%= $i %&gt;</b>&lt;/td&gt;
+    &lt;td&gt;<b>&lt;%= $item %&gt;</b>&lt;/td&gt;
+   &lt;/tr&gt;
+   <b>&lt;% } %&gt;</b>
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l perl example.eperl
+
+   my $user = 'Erubis';
+   my @list = ('&lt;aaa&gt;', 'b&amp;b', '"ccc"');
+
+print('&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello '); print($user); print('!&lt;/p&gt;
+  &lt;table&gt;
+');     $i = 0; 
+    for $item (@list) { 
+print('   &lt;tr bgcolor='); print(++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); print('"&gt;
+    &lt;td&gt;'); print($i); print('&lt;/td&gt;
+    &lt;td&gt;'); print($item); print('&lt;/td&gt;
+   &lt;/tr&gt;
+');     } 
+print('  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+'); 
+</pre>
+<br>
+
+
+<a name="lang-javascript"></a>
+<h3 class="section2">JavaScript</h3>
+<p>example.ejs
+</p>
+<a name="example.ejs"></a>
+<pre class="program"><b>&lt;%
+   var user = 'Erubis';
+   var list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"'];
+ %&gt;</b>
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+    <b>&lt;% var i; %&gt;</b>
+    <b>&lt;% for (i = 0; i &lt; list.length; i++) { %&gt;</b>
+    &lt;tr bgcolor="<b>&lt;%= i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</b>"&gt;
+     &lt;td&gt;<b>&lt;%= i + 1 %&gt;</b>&lt;/td&gt;
+     &lt;td&gt;<b>&lt;%= list[i] %&gt;</b>&lt;/td&gt;
+    &lt;/tr&gt;
+    <b>&lt;% } %&gt;</b>
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l js example.ejs
+_out = [];
+   var user = 'Erubis';
+   var list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"'];
+ 
+_out.push("&lt;html&gt;\n\
+ &lt;body&gt;\n\
+  &lt;p&gt;Hello "); _out.push(user); _out.push("!&lt;/p&gt;\n\
+  &lt;table&gt;\n\
+   &lt;tbody&gt;\n");
+     var i; 
+     for (i = 0; i &lt; list.length; i++) { 
+_out.push("    &lt;tr bgcolor=\""); _out.push(i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _out.push("\"&gt;\n\
+     &lt;td&gt;"); _out.push(i + 1); _out.push("&lt;/td&gt;\n\
+     &lt;td&gt;"); _out.push(list[i]); _out.push("&lt;/td&gt;\n\
+    &lt;/tr&gt;\n");
+     } 
+_out.push("   &lt;/tbody&gt;\n\
+  &lt;/table&gt;\n\
+ &lt;/body&gt;\n\
+&lt;/html&gt;\n");
+document.write(_out.join(""));
 </pre>
 <br>
 
@@ -748,25 +1563,45 @@ end
   	Show script source.
   </dd>
   <dt class="dt3"><b>
+-x            </b></dt>
+  <dd class="dd3">
+  	Show script source, removing the last '_out' line.
+  </dd>
+  <dt class="dt3"><b>
 -T            </b></dt>
   <dd class="dd3">
   	No trimming spaces around '&lt;% %&gt;'.
+			This is equivarent to '--trim=false'.
+  </dd>
+  <dt class="dt3"><b>
+-b            </b></dt>
+  <dd class="dd3">
+  	Body only (no preamble nor postamble).
+			This is equivarent to '--preamble=false --postamble=false'.
   </dd>
   <dt class="dt3"><b>
 -p pattern    </b></dt>
   <dd class="dd3">
   	Embedded pattern (default '&lt;% %&gt;').
+			This is equivarent to '--pattern=<i>pattern</i>'.
+  </dd>
+  <dt class="dt3"><b>
+-l lang       </b></dt>
+  <dd class="dd3">
+  	Language name.
+			This option makes erubis command to compile script but no execute.
   </dd>
   <dt class="dt3"><b>
 -c class      </b></dt>
   <dd class="dd3">
-  	Class name (Eruby, XmlEruby, FastEruby, ...) (default Eruby).
+  	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
   </dd>
   <dt class="dt3"><b>
 -I path       </b></dt>
   <dd class="dd3">
   	Require library path ($:).
-			It is able to specify several paths separating with ',' (ex. -f path1,path2,path3).
+			It is able to specify several paths separating with ','
+			(ex. -f path1,path2,path3).
   </dd>
   <dt class="dt3"><b>
 -K kanji      </b></dt>
@@ -777,14 +1612,29 @@ end
 -f file.yaml  </b></dt>
   <dd class="dd3">
   	YAML file for context values (read stdin if filename is '-').
-			It is able to specify several filenames separating with ',' (ex. -f file1,file2,file3).
+			It is able to specify several filenames separating with ','
+			(ex. -f file1,file2,file3).
   </dd>
   <dt class="dt3"><b>
---name=value  </b></dt>
+-t            </b></dt>
   <dd class="dd3">
-  	Variable name and value
+  	Expand tab character in YAML file.
+  </dd>
+  <dt class="dt3"><b>
+-S            </b></dt>
+  <dd class="dd3">
+  	Convert mapping key from string to symbol in YAML file.
   </dd>
   </dl>
+<br>
+
+
+<a name="command-props"></a>
+<h3 class="section2">Properties</h3>
+<p>Some Eruby classes can take optional properties to change it's compile option.
+For example, property '--indent="  "' may change indentation of compiled source code.
+Try 'eruby -h' for details.
+</p>
 <br>
 
 

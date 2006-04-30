@@ -19,6 +19,8 @@ module Erubis
   ##     include EscapeEnhancer
   ##   end
   ##
+  ## this is language-indenedent.
+  ##
   module EscapeEnhancer
 
     #--
@@ -56,13 +58,15 @@ module Erubis
   ##
   ## use $stdout instead of string
   ##
+  ## this is only for Eruby.
+  ##
   module StdoutEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
       src << "_out = $stdout;"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n''\n"
     end
 
@@ -72,9 +76,11 @@ module Erubis
   ##
   ## use print statement instead of '_out << ...' style
   ##
+  ## this is only for Eruby.
+  ##
   module PrintStatementEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
     end
 
     def add_text(src, text)
@@ -93,7 +99,7 @@ module Erubis
       src << ' print ' << escaped_expr(code) << ';'
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
     end
 
@@ -106,9 +112,11 @@ module Erubis
   ## Notice: use Eruby#evaluate() and don't use Eruby#result()
   ## to be enable print function.
   ##
+  ## this is only for Eruby.
+  ##
   module PrintEnabledEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
       src << "@_out = "
       super
     end
@@ -125,13 +133,15 @@ module Erubis
   ##
   ## return array instead of string
   ##
+  ## this is only for Eruby.
+  ##
   module ArrayEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
       src << "_out = [];"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
       src << "_out\n"
     end
@@ -142,13 +152,15 @@ module Erubis
   ##
   ## use array buffer instead of string buffer
   ##
+  ## this is only for Eruby.
+  ##
   module ArrayBufferEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
       src << "_out = [];"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
       src << "_out.join\n"
     end
@@ -159,13 +171,15 @@ module Erubis
   ##
   ## use string buffer instead of array buffer
   ##
+  ## this is only for Eruby.
+  ##
   module StringBufferEnhancer
 
-    def init_src(src)
+    def add_preamble(src)
       src << "_out = '';"
     end
 
-    def finish_src(src)
+    def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
       src << "_out\n"
     end
@@ -178,6 +192,8 @@ module Erubis
   ##
   ## this makes compile faster, but spaces around '<%...%>' are not trimmed.
   ##
+  ## this is language-independent.
+  ##
   module SimplifiedEnhancer
 
     #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
@@ -185,22 +201,22 @@ module Erubis
 
     def compile(input)
       src = ""
-      init_src(src)
-      regexp = pattern_regexp(@pattern)
+      add_preamble(src)
+      #regexp = pattern_regexp(@pattern)
       input.scan(SIMPLE_REGEXP) do |text, indicator, code|
         add_text(src, text)
-        if !indicator             # <% %>
+        if !indicator              # <% %>
           add_stmt(src, code)
-        elsif indicator[0] == ?=  # <%= %>
-          add_expr(src, code, indicator)
-        else                      # <%# %>
+        elsif indicator[0] == ?\#  # <%# %>
           n = code.count("\n")
           add_stmt(src, "\n" * n)
+        else                       # <%= %>
+          add_expr(src, code, indicator)
         end
       end
       rest = $' || input
       add_text(src, rest)
-      finish_src(src)
+      add_postamble(src)
       return src
     end
 
@@ -235,16 +251,24 @@ module Erubis
   ##     "c" : &quot;c&quot;
   ##     "c" : &quot;c&quot;
   ##
+  ## this is language independent.
+  ##
   module BiPatternEnhancer
 
     def initialize(input, properties={})
-      @bipattern = properties[:bipattern] || '\[= =\]'    # or '\$\{ \}'
-      pre, post = @bipattern.split()
-      @bipattern_regexp = /(.*?)#{pre}(=*)(.*?)#{post}/m
+      self.bipattern = properties[:bipattern]    # or '\$\{ \}'
       super
     end
 
+    ## when pat is nil then '\[= =\]' is used
+    def bipattern=(pat)   # :nodoc:
+      @bipattern = pat || '\[= =\]'
+      pre, post = @bipattern.split()
+      @bipattern_regexp = /(.*?)#{pre}(=*)(.*?)#{post}/m
+    end
+
     def add_text(src, text)
+      return unless text
       text.scan(@bipattern_regexp) do |txt, indicator, code|
         super(src, txt)
         add_expr(src, code, '=' + indicator)
@@ -260,6 +284,8 @@ module Erubis
   ## enable to use ruby statement line starts with '%'
   ##
   ## this is for compatibility to eruby and ERB.
+  ##
+  ## this is language-independent.
   ##
   module PercentLineEnhancer
 
@@ -329,6 +355,8 @@ module Erubis
   ##
   ##   ====================
   ##
+  ## this is language-independent.
+  ##
   module HeaderFooterEnhancer
 
     HEADER_FOOTER_PATTERN = /(.*?)(^[ \t]*)?<!--\#(\w+):(.*?)\#-->([ \t]*\r?\n)?/m
@@ -350,7 +378,7 @@ module Erubis
 
     def compile(input)
       source = super
-      return "#{@header}#{source}#{@footer}"
+      return @src = "#{@header}#{source}#{@footer}"
     end
 
   end

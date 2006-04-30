@@ -63,6 +63,14 @@ list:
 user: (none)
 END
 
+  ESCAPED_OUTPUT = <<'END'
+list:
+  - &lt;aaa&gt;
+  - b&amp;b
+  - &quot;ccc&quot;
+user: (none)
+END
+
 
   def _test()
     if @filename == nil
@@ -80,7 +88,7 @@ END
   end
 
 
-  def test_version
+  def test_version    # -v
     @options = '-v'
     @expected = (("$Release: 0.0.0 $" =~ /[.\d]+/) && $&) + "\n"
     @filename = false
@@ -96,7 +104,7 @@ END
   end
 
 
-  def test_source1
+  def test_source1    # -s
     @input    = INPUT
     @expected = SRC
     @options  = '-s'
@@ -104,15 +112,15 @@ END
   end
 
 
-  def test_source2
+  def test_source2    # -x
     @input    = INPUT
-    @expected = SRC.sub(/^_out(\.join)?\s*\z/, '')
+    @expected = SRC.sub(/^_out\s*\z/, '')
     @options  = '-x'
     _test()
   end
 
 
-  def test_pattern1
+  def test_pattern1   # -p
     @input    = INPUT.gsub(/<%/, '<!--%').gsub(/%>/, '%-->')
     @expected = OUTPUT
     @options  = "-p '<!--% %-->'"
@@ -120,7 +128,7 @@ END
   end
 
 
-  def test_class1
+  def test_class1     # -c
     @input    = INPUT
     @expected = OUTPUT.gsub(/<aaa>/, '&lt;aaa&gt;').gsub(/b&b/, 'b&amp;b').gsub(/"ccc"/, '&quot;ccc&quot;')
     @options  = "-c XmlEruby"
@@ -128,7 +136,7 @@ END
   end
 
 
-  def test_notrim1
+  def test_notrim1    # -T
     @input   = INPUT
     @expected = <<'END'
 list:
@@ -146,7 +154,7 @@ END
   end
 
 
-  def test_notrim2
+  def test_notrim2    # -T
     @input    = INPUT
 #    @expected = <<'END'
 #_out = ''; _out << "list:\n"
@@ -182,7 +190,7 @@ END
   #++
 
 
-  def test_yaml1
+  def test_yaml1      # -f
     yamlfile = "test.context1.yaml"
     @input    = INPUT
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
@@ -201,7 +209,7 @@ END
   end
 
 
-  def test_untabify1
+  def test_untabify1  # -t
     yamlfile = "test.context2.yaml"
     @input    = INPUT
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
@@ -220,7 +228,7 @@ END
   end
 
 
-  def test_symbolify1
+  def test_symbolify1 # -S
     yamlfile = "test.context3.yaml"
     @input    = <<END
 <% for h in list %>
@@ -255,7 +263,7 @@ END
   end
 
 
-  def test_include1
+  def test_include1   # -I
     dir = 'foo'
     lib = 'bar'
     Dir.mkdir dir unless test(?d, dir)
@@ -281,7 +289,7 @@ END
   end
 
 
-  def test_require1
+  def test_require1   # -r
     dir = 'foo'
     lib = 'bar'
     Dir.mkdir dir unless test(?d, dir)
@@ -304,6 +312,35 @@ END
       File.unlink filename if test(?f, filename)
       Dir.rmdir dir if test(?d, dir)
     end
+  end
+
+
+  def test_enhancers1 # -E
+    @input   = <<END
+<% list = %w[<aaa> b&b "ccc"] %>
+% for item in list
+ - <%= item %> : <%== item %>
+ - [= item =] : [== item =]
+% end
+END
+    @expected = <<END
+ - &lt;aaa&gt; : <aaa>
+ - &lt;aaa&gt; : <aaa>
+ - b&amp;b : b&b
+ - b&amp;b : b&b
+ - &quot;ccc&quot; : "ccc"
+ - &quot;ccc&quot; : "ccc"
+END
+    @options = "-E Escape,PercentLine,HeaderFooter,BiPattern"
+    _test()
+  end
+
+
+  def test_bodyonly1  # -b
+    @input = INPUT
+    @expected = SRC.sub(/\A_out = \[\];/,'').sub(/\n_out.join\n\z/,'')
+    @options = '-b -s'
+    _test()
   end
 
 
