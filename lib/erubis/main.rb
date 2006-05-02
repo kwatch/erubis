@@ -6,6 +6,7 @@
 
 require 'yaml'
 require 'erubis'
+require 'erubis/simplest'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
 require 'erubis/engine/ruby'
@@ -19,8 +20,9 @@ require 'erubis/engine/javascript'
 
 module Erubis
 
+
   Ejs = Ejavascript
-  XmlEjs = XmlEjavascript
+  EscapedEjs = EscapedEjavascript
 
 
   class CommandOptionError < ErubisError
@@ -48,15 +50,16 @@ module Erubis
 
     def execute(argv=ARGV)
       ## parse command-line options
-      options, properties = parse_argv(argv, "hvsxTtSb", "pcrfKIlaE")
+      options, properties = parse_argv(argv, "hvsxTtSbE", "pcrfKIlae")
       filenames = argv
       options[?h] = true if properties[:help]
 
-      ## help, version
-      if options[?h] || options[?v]
+      ## help, version, enhancer list
+      if options[?h] || options[?v] || options[?E]
         puts version() if options[?v]
         puts usage() if options[?h]
         puts show_properties() if options[?h]
+        puts show_enhancers() if options[?E]
         return
       end
 
@@ -82,7 +85,7 @@ module Erubis
       ## class name of Eruby
       classname = options[?c]
       unless classname
-        classname = lang =~ /\Axml(.*)/ ? "XmlE#{$1}" : "E#{lang}"
+        classname = lang =~ /\Axml(.*)/ ? "EscapedE#{$1}" : "E#{lang}"
       end
       begin
         klass = Erubis.const_get(classname)
@@ -128,15 +131,14 @@ module Erubis
 
       ## enhancers
       enhancers = []
-      if options[?E]
+      if options[?e]
         enhancer_name = nil
         begin
-          options[?E].split(/,/).each do |shortname|
-            enhancer_name = "#{shortname}Enhancer"
-            enhancers << Erubis.const_get(enhancer_name)
+          options[?e].split(/,/).each do |shortname|
+            enhancers << Erubis.const_get("#{shortname}Enhancer")
           end
         rescue NameError
-          raise CommandOptionError.new("#{enhancer_name}: no such Enhancer.")
+          raise CommandOptionError.new("#{shortname}: no such Enhancer (try '-E' to show all enhancers).")
         end
       end
 
@@ -190,9 +192,9 @@ Usage: #{command} [..options..] [file ...]
   -b            : body only (no preamble nor postamble)
   -p pattern    : embedded pattern (default '<% %>')
   -l lang       : compile but no execute (ruby/php/c/java/scheme/perl/js)
-                  if lang is 'xmlxxx' then 'XmlExxx' class is used
   -c class      : class name (XmlEruby/PrintStatementEruby/...) (default Eruby)
-  -E enhancer,...  : enhancer name (Escape,PercentLine,HeaderFooter,...)
+  -e enhancer,...  : enhancer name (Escaped, PercentLine, BiPattern, ...)
+  -E            : show all enhancers
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
@@ -219,6 +221,19 @@ END
         end
       end
       s << "\n"
+      return s
+    end
+
+    def show_enhancers
+      s = ''
+      list = []
+      ObjectSpace.each_object(Module) do |m| list << m end
+      list.sort_by { |m| m.name }.each do |m|
+        next unless m.name =~ /\AErubis::(.*)Enhancer\z/
+        name = $1
+        desc = m.desc
+        s << ("%-14s : %s\n" % [name, desc])
+      end
       return s
     end
 
@@ -282,12 +297,13 @@ END
       end
     end
 
-    def untabify(str)
-      s = ''
-      str.each_line do |line|
-        s << line.gsub(/([^\t]{8})|([^\t]*)\t/n) { [$+].pack("A8") }
+    def untabify(text, width=8)
+      sb = ''
+      text.scan(/(.*?)\t/m) do |s, |
+        len = (n = s.rindex(?\n)) ? s.length - n - 1 : s.length
+        sb << s << (" " * (width - len % width))
       end
-      return s
+      return $' ? (sb << $') : text
     end
 
     def convert_mapping_key_from_string_to_symbol(ydoc)

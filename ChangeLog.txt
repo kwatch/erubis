@@ -2,7 +2,19 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-.: Rev.14 (2006-04-29)
+.: Rev.15 (2006-05-02)
+	.- [refactor] Engine#compile() refactored
+	.- [refactor] XxxxXmlEruby classes are removed
+	.- [change] PrintStatementEnhancer is renamed to PrintOutEnhancer
+	.- [change] add benchmark/erubybench-lib.rb
+	.- [change] command-line option '-E' (enhancers) changed to '-e'
+	.- [change] README is rewrited in RDoc format
+	.- [change] removed FastEnhancer
+	.- [change] removed XxxXmlEruby classes
+	.- [enhance] new command-line option '-E' (show all enhancers)
+	.- [enhance] add XxxEnhancer.desc
+
+.: Rev.14 (2006-04-30)
 	.- [enhance] javascript support
 	.- [enhance] new property :preamble and :postamble support
 	.- [enhance] new command-line option '-b' (body only)

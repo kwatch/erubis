@@ -55,8 +55,8 @@
 require 'erubis/engine'
 require 'erubis/helper'
 require 'erubis/enhancer'
-require 'erubis/engine/ruby'
 #require 'erubis/simplest'
+require 'erubis/engine/ruby'
 #require 'erubis/engine/enhanced'    # enhanced eruby engines
 #require 'erubis/engine/optimized'   # generates optimized ruby code
 #require 'erubis/engine/php'

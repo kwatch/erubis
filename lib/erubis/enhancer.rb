@@ -23,6 +23,10 @@ module Erubis
   ##
   module EscapeEnhancer
 
+    def self.desc   # :nodoc:
+      "switch '<%= %>' to escaped and '<%== %>' to unescaped"
+    end
+
     #--
     #def self.included(klass)
     #  klass.class_eval <<-END
@@ -50,9 +54,11 @@ module Erubis
   end
 
 
+  #--
   ## (obsolete)
-  module FastEnhancer
-  end
+  #module FastEnhancer
+  #end
+  #++
 
 
   ##
@@ -61,6 +67,10 @@ module Erubis
   ## this is only for Eruby.
   ##
   module StdoutEnhancer
+
+    def self.desc   # :nodoc:
+      "use $stdout instead of array buffer or string buffer"
+    end
 
     def add_preamble(src)
       src << "_out = $stdout;"
@@ -74,11 +84,15 @@ module Erubis
 
 
   ##
-  ## use print statement instead of '_out << ...' style
+  ## use print statement instead of '_out << ...'
   ##
   ## this is only for Eruby.
   ##
-  module PrintStatementEnhancer
+  module PrintOutEnhancer
+
+    def self.desc   # :nodoc:
+      "use print statement instead of '_out << ...'"
+    end
 
     def add_preamble(src)
     end
@@ -116,6 +130,10 @@ module Erubis
   ##
   module PrintEnabledEnhancer
 
+    def self.desc   # :nodoc:
+      "enable to use print statement in '<% %>'"
+    end
+
     def add_preamble(src)
       src << "@_out = "
       super
@@ -137,6 +155,10 @@ module Erubis
   ##
   module ArrayEnhancer
 
+    def self.desc   # :nodoc:
+      "return array instead of string"
+    end
+
     def add_preamble(src)
       src << "_out = [];"
     end
@@ -150,11 +172,15 @@ module Erubis
 
 
   ##
-  ## use array buffer instead of string buffer
+  ## use array buffer instead of string buffer (included in Eruby by default)
   ##
   ## this is only for Eruby.
   ##
   module ArrayBufferEnhancer
+
+    def self.desc   # :nodoc:
+      "use array buffer instead of string (included in Eruby by default)"
+    end
 
     def add_preamble(src)
       src << "_out = [];"
@@ -175,6 +201,10 @@ module Erubis
   ##
   module StringBufferEnhancer
 
+    def self.desc   # :nodoc:
+      "use string buffer instead of array buffer"
+    end
+
     def add_preamble(src)
       src << "_out = '';"
     end
@@ -188,13 +218,15 @@ module Erubis
 
 
   ##
-  ## simple and minimum compiler engine
-  ##
-  ## this makes compile faster, but spaces around '<%...%>' are not trimmed.
+  ## get compile faster, but spaces around '<%...%>' are not trimmed.
   ##
   ## this is language-independent.
   ##
-  module SimplifiedEnhancer
+  module SimplifyEnhancer
+
+    def self.desc   # :nodoc:
+      "get compile faster but leave spaces around '<% %>'"
+    end
 
     #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
     SIMPLE_REGEXP = /(.*?)<%(=+|\#)?(.*?)-?%>/m
@@ -255,6 +287,10 @@ module Erubis
   ##
   module BiPatternEnhancer
 
+    def self.desc   # :nodoc:
+      "another embedded expression pattern (default '\[= =\]')."
+    end
+
     def initialize(input, properties={})
       self.bipattern = properties[:bipattern]    # or '\$\{ \}'
       super
@@ -281,13 +317,17 @@ module Erubis
 
 
   ##
-  ## enable to use ruby statement line starts with '%'
+  ## regards lines starting with '%' as program code
   ##
   ## this is for compatibility to eruby and ERB.
   ##
   ## this is language-independent.
   ##
   module PercentLineEnhancer
+
+    def self.desc   # :nodoc:
+      "regard lines starting with '%' as program code"
+    end
 
     PERCENT_LINE_PATTERN = /(.*?)^\%(.*?\r?\n)/m
 
@@ -358,6 +398,10 @@ module Erubis
   ## this is language-independent.
   ##
   module HeaderFooterEnhancer
+
+    def self.desc   # :nodoc:
+      "allow header/footer in document (ex. '<!--#header: #-->')"
+    end
 
     HEADER_FOOTER_PATTERN = /(.*?)(^[ \t]*)?<!--\#(\w+):(.*?)\#-->([ \t]*\r?\n)?/m
 

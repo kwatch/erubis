@@ -1,0 +1,38 @@
+
+properties:
+  - tagfile    : html-css_i,euc
+
+variables:
+  #- tagfile    : html-css
+  - textfile   : eruby.txt
+  - htmlfile   : eruby.html
+  - testscript : test-eruby.rb
+
+recipes:
+
+  - product:	:html
+    desc:	create eruby.html
+    ingreds:	[ $(htmlfile) ]
+
+  - product:	:test
+    method: |
+	sys "retrieve $(textfile)"
+	(1..5).each do |i|
+	  sys "ruby -s $(testscript) -target=eruby#{i}"
+	end
+
+  - product:	*.html
+    ingreds:	[ $(1).txt ]
+    byprods:	[ $(1).toc.html ]
+    method: |
+	sys "retrieve $(1).txt"
+	sys "kwaser -t $(tagfile) -T $(1).txt > $(1).toc.html"
+	sys "kwaser -t $(tagfile)    $(1).txt > $(1).html"
+	rm_f "$(1).toc.html"
+
+  - product:	:clean
+    method: |
+	list = `retrieve -l $(textfile)`
+	rm_rf list.split
+
+

@@ -91,9 +91,14 @@ module Erubis
   end
 
 
-  class XmlEjavascript < Ejavascript
+  class EscapedEjavascript < Ejavascript
     include EscapeEnhancer
   end
+
+
+  #class XmlEjavascript < Ejavascript
+  #  include EscapeEnhancer
+  #end
 
 
 end

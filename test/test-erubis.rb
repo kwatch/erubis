@@ -385,8 +385,8 @@ __END__
       _out.join
   output: |
 ##
-- name:  printstatement1
-  class: PrintStatementEruby
+- name:  printout1
+  class: PrintOutEruby
   testopt:  print
   input: *basic1_input
   src: |4
@@ -406,29 +406,6 @@ __END__
         <li><% print item %></li>
        <% end %>
       </ul>
-  src: |
-      @_out = _out = []; _out << '<ul>
-      ';  for item in list 
-      ; _out << '  <li>'; print item ; _out << '</li>
-      ';  end 
-      ; _out << '</ul>
-      ';
-      _out.join
-  output: *basic1_output
-#      <ul>
-#        <li><aaa></li>
-#        <li>b&b</li>
-#        <li>"ccc"</li>
-#      </ul>
-##
-- name:  printenabled2
-  class: PrintEnabledXmlEruby
-  input: *printenabled1_input
-#      <ul>
-#       <% for item in list %>
-#        <li><% print item %></li>
-#       <% end %>
-#      </ul>
   src: |
       @_out = _out = []; _out << '<ul>
       ';  for item in list 

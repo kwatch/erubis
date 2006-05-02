@@ -88,9 +88,14 @@ module Erubis
   end
 
 
-  class XmlEjava < Ejava
+  class EscapedEjava < Ejava
     include EscapeEnhancer
   end
+
+
+  #class XmlEjava < Ejava
+  #  include EscapeEnhancer
+  #end
 
 
 end

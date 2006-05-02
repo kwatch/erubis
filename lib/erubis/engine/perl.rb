@@ -22,8 +22,8 @@ module Erubis
       return list
     end
 
-    def initialize(input, options={})
-      @func = options[:func] || 'print'
+    def initialize(input, properties={})
+      @func = properties[:func] || 'print'
       super
     end
 
@@ -70,9 +70,14 @@ module Erubis
   end
 
 
-  class XmlEperl < Eperl
+  class EscapedEperl < Eperl
     include EscapeEnhancer
   end
+
+
+  #class XmlEperl < Eperl
+  #  include EscapeEnhancer
+  #end
 
 
 end

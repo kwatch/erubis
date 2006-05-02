@@ -11,10 +11,20 @@ require 'erubis/engine/ruby'
 module Erubis
 
 
-  ## (obsolete)
-  class FastEruby < Eruby
-    include FastEnhancer
-  end
+  #--
+  ## moved to engine/ruby.rb
+  #class EscapedEruby < Eruby
+  #  include EscapeEnhancer
+  #end
+  #++
+
+
+  #--
+  ### (obsolete)
+  #class FastEruby < Eruby
+  #  include FastEnhancer
+  #end
+  #++
 
 
   class StdoutEruby < Eruby
@@ -22,8 +32,8 @@ module Erubis
   end
 
 
-  class PrintStatementEruby < Eruby
-    include PrintStatementEnhancer
+  class PrintOutEruby < Eruby
+    include PrintOutEnhancer
   end
 
 
@@ -50,19 +60,19 @@ module Erubis
 
 
   class SimplifiedEruby < Eruby
-    include SimplifiedEnhancer
+    include SimplifyEnhancer
   end
 
 
   class StdoutSimplifiedEruby < Eruby
     include StdoutEnhancer
-    include SimplifiedEnhancer
+    include SimplifyEnhancer
   end
 
 
-  class PrintStatementSimplifiedEruby < Eruby
-    include PrintStatementEnhancer
-    include SimplifiedEnhancer
+  class PrintOutSimplifiedEruby < Eruby
+    include PrintOutEnhancer
+    include SimplifyEnhancer
   end
 
 
@@ -78,89 +88,6 @@ module Erubis
 
   class HeaderFooterEruby < Eruby
     include HeaderFooterEnhancer
-  end
-
-
-  ## (obsolete)
-  class FastXmlEruby < Eruby
-    include FastEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class StdoutXmlEruby < Eruby
-    include StdoutEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class PrintStatementXmlEruby < Eruby
-    include PrintStatementEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class PrintEnabledXmlEruby < Eruby
-    include PrintEnabledEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class ArrayXmlEruby < Eruby
-    include ArrayEnhancer
-    include EscapeEnhancer
-  end
-
-
-  #--
-  #class ArrayBufferXmlEruby < Eruby
-  #  include ArrayBufferEnhancer
-  #  include EscapeEnhancer
-  #end
-  #++
-
-
-  class StrinBufferXmlEruby < Eruby
-    include StringBufferEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class SimplifiedXmlEruby < Eruby
-    include SimplifiedEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class StdoutSimplifiedXmlEruby < Eruby
-    include StdoutEnhancer
-    include SimplifiedEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class PrintStatementSimplifiedXmlEruby < Eruby
-    include PrintStatementEnhancer
-    include SimplifiedEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class BiPatternXmlEruby < Eruby
-    include BiPatternEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class PercentLineXmlEruby < Eruby
-    include PercentLineEnhancer
-    include EscapeEnhancer
-  end
-
-
-  class HeaderFooterXmlEruby < Eruby
-    include HeaderFooterEnhancer
-    include EscapeEnhancer
   end
 
 

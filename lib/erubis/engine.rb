@@ -79,27 +79,54 @@ module Erubis
       @preamble.nil? ? add_preamble(src) : (@preamble && (src << @preamble))
       regexp = pattern_regexp(@pattern)
       input.scan(regexp) do |text, lspace, indicator, code, rspace|
+        add_text(src, text)
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
-        if indicator && indicator[0] == ?=
-          flag_trim = false
-        else
-          flag_trim = @trim && lspace && rspace
-        end
-        #flag_trim = @trim && !(indicator && indicator[0]==?=) && lspace && rspace
-        add_text(src, text)
-        add_text(src, lspace) if !flag_trim && lspace
-        if !indicator             # <% %>
-          code = "#{lspace}#{code}#{rspace}" if flag_trim
-          add_stmt(src, code)
-        elsif indicator[0] == ?\# # <%# %>
-          n = code.count("\n")
-          n += rspace.count("\n") if rspace
-          add_stmt(src, "\n" * n)
-        else                      # <%= %>
+        if !indicator               # <% %>
+          if @trim && lspace && rspace
+            add_stmt(src, "#{lspace}#{code}#{rspace}")
+          else
+            add_text(src, lspace) if lspace
+            add_stmt(src, code)
+            add_text(src, rspace) if rspace
+          end
+        elsif indicator[0] == ?\#   # <%# %>
+          n = code.count("\n") + (rspace ? 1 : 0)
+          if @trim && lspace && rspace
+            add_stmt(src, "\n" * n)
+          else
+            add_text(src, lspace) if lspace
+            add_stmt(src, "\n" * n)
+            add_text(src, rspace) if lspace
+          end
+          #flag_trim = @trim && lspace && rspace
+          #add_text(src, lspace) if !flag_trim && lspace
+          #n = code.count("\n") + (rspace ? 1 : 0)
+          #add_stmt(src, "\n" * n)
+          #add_text(src, rspace) if !flag_trim && rspace
+        else                        # <%= %>
+          add_text(src, lspace) if lspace
           add_expr(src, code, indicator)
+          add_text(src, rspace) if rspace
         end
-        add_text(src, rspace) if !flag_trim && rspace
+        #if indicator && indicator[0] == ?=
+        #  flag_trim = false
+        #else
+        #  flag_trim = @trim && lspace && rspace
+        #end
+        ##flag_trim = @trim && !(indicator && indicator[0]==?=) && lspace && rspace
+        #add_text(src, text)
+        #add_text(src, lspace) if !flag_trim && lspace
+        #if !indicator             # <% %>
+        #  code = "#{lspace}#{code}#{rspace}" if flag_trim
+        #  add_stmt(src, code)
+        #elsif indicator[0] == ?\# # <%# %>
+        #  n = code.count("\n") + (rspace ? 1 : 0)
+        #  add_stmt(src, "\n" * n)
+        #else                      # <%= %>
+        #  add_expr(src, code, indicator)
+        #end
+        #add_text(src, rspace) if !flag_trim && rspace
       end
       rest = $' || input     # add input when no matched
       add_text(src, rest)

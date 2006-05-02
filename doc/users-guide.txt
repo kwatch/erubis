@@ -13,7 +13,7 @@ It has the following features.
 .* Auto escaping support
 .* Auto trimming spaces around '<% %>'
 .* Embedded pattern changeable (default '<% %>')
-.* Support multi-language (Ruby/PHP/C/Java/Scheme/Perl)
+.* Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 .* Context object available and easy to combine eRuby template with YAML datafile
 .* Print statement available
 .* Easy to expand in subclass
@@ -172,13 +172,14 @@ $ ruby example2.rb
 
 Erubis have ability to escape (sanitize) expression.
 Erubis::Eruby class act as the following:
-.* {{,<%= {{/expr/}} %>,}} will be not escaped.
-.* {{,<%== {{/expr/}} %>,}} will be escaped.
-.* {{,<%=== {{/expr/}} %>,}} will be out to $stderr.
-.* {{,<%==== {{/expr/}} %>,}} will be ignored.
+.* {{,<%= {{/expr/}} %>,}} -  not escaped.
+.* {{,<%== {{/expr/}} %>,}} - escaped.
+.* {{,<%=== {{/expr/}} %>,}} - out to $stderr.
+.* {{,<%==== {{/expr/}} %>,}} - ignored.
 
-Erubis::XmlEruby{{(Erubis::XmlEruby class includes Erubis::EscapeEnhancer which swtches the action of '<%= %>' and '<%== %>'.)}} class handle '<%= %>' as escaped and '<%== %>' as not escaped.
-It means that using Erubis::XmlEruby you can escape expression by default.
+Erubis::EscapedEruby{{(Erubis::EscapedEruby class includes Erubis::EscapeEnhancer which swtches the action of '<%= %>' and '<%== %>'.)}} class handle '<%= %>' as escaped and '<%== %>' as not escaped.
+It means that using Erubis::EscapedEruby you can escape expression by default.
+Also Erubis::XmlEruby class (which is equivalent to Erubis::EscapedEruby) is provided for compatibility with Erubis 1.1.
 
 .? example3.eruby
 .-------------------- example3.eruby
@@ -194,7 +195,7 @@ It means that using Erubis::XmlEruby you can escape expression by default.
 .-------------------- example3.rb
 require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::{{*XmlEruby*}}.new(input)           # create Eruby object
+eruby = Erubis::{{*EscapedEruby*}}.new(input)           # or Erubis::XmlEruby
 
 puts "---------- script source ---"
 puts eruby.src                             # print script source
@@ -240,9 +241,15 @@ $ cat stderr.log
 .#** erubis: item = "\"ccc\""
 .====================
 
-Default escaping function is 'Erubis::XmlHelper.escape_xml()'.
-You can change it with command-line property '--escape=xxx' 
-or by overriding Erubis::Eruby#escaped_expr() in subclass.
+The command-line option '-e Escape' will do the same action as Erubis::EscapedEruby.
+This is available in any language.
+
+.====================
+$ erubis -l ruby {{*-e Escape*}} example3.eruby
+.<<<:! erubis -e Escape -l ruby example3.eruby
+.====================
+
+Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
 
 .? example to override Erubis::Eruby#escaped_expr()
 .--------------------
@@ -424,11 +431,11 @@ The command-line option '-b' specify both :preamble and :postamble to false.
 
 .$ Enhancer		| enhancer
 
-Enhancer is a module to extend Erubis::Eruby class.
+Enhancer is a module to add a certain feature into Erubis::Eruby class.
 Enhancer may be language-independent or only for Eruby.
 
 To use enhancers, define subclass and include them.
-The folloing is an example to use EscapeEnhancer, PercentLineEnhancer, and BiPatternEnhancer.
+The folloing is an example to use {{<EscapeEnhancer|#escape-enhancer>}}, {{<PercentLineEnhancer|#percentline-enhancer>}}, and {{<BiPatternEnhancer|#bipattern-enhancer>}}.
 .--------------------
 class MyEruby < Erubis::Eruby
   include EscapeEnhancer
@@ -437,35 +444,35 @@ class MyEruby < Erubis::Eruby
 end
 .--------------------
 
-You can specify enhancers in command-line with option '-E'.
+You can specify enhancers in command-line with option '-e'.
 The following is an example to use some enhancers in command-line.
 .====================
-$ erubis -l ruby -E Escape,PercentLine,BiPattern example.eruby
+$ erubis -l ruby -e Escape,PercentLine,BiPattern example.eruby
 .====================
 
 The following is the list of enhancers.
 
-.: EscapeEnhander (language-independent)
+.: {{*EscapeEnhander*}} (language-independent)
 	Switch '<%= %>' to escaped and '<%== %>' to unescaped.
-.: StdoutEnhancer (only for Eruby)
+.: {{*StdoutEnhancer*}} (only for Eruby)
 	Use $stdout instead of array buffer.
-.: PrintStatementEnhancer (only for Eruby)
+.: {{*PrintOutEnhancer*}} (only for Eruby)
 	Use "print(...)" statement insead of "_out << ...".
-.: PrintEnabledEnhancer (only for Eruby)
+.: {{*PrintEnabledEnhancer*}} (only for Eruby)
 	Enable to use print() in '<% ... %>'.
-.: ArrayEnhancer (only for Eruby)
+.: {{*ArrayEnhancer*}} (only for Eruby)
 	Return array of string instead of returning string.
-.: ArrayBufferEnhancer (only for Eruby)
+.: {{*ArrayBufferEnhancer*}} (only for Eruby)
 	Use array buffer. This is included in Erubis::Eruby by default.
-.: StringBufferEnhancer (only for Eruby)
+.: {{*StringBufferEnhancer*}} (only for Eruby)
 	Use string buffer. It is a little slower than ArrayBufferEnhancer.
-.: SimplifiedEnhancer (language-independent)
+.: {{*SimplifiedEnhancer*}} (language-independent)
 	Make compile faster but don't trim spaces around '<% %>'.
-.: BiPatternEnhancer (language-independent)
+.: {{*BiPatternEnhancer*}} (language-independent)
 	[experimental] Enable to use another embedded pattern with '<% %>'.
-.: PercentLineEnhancer (language-independent)
+.: {{*PercentLineEnhancer*}} (language-independent)
 	Regard lines starting with '%' as Ruby code. This is for compatibility with eruby and ERB.
-.: HeaderFooterEnhancer (language-independent)
+.: {{*HeaderFooterEnhancer*}} (language-independent)
 	[experimental] Enable you to add header and footer in eRuby script.
 
 
@@ -484,7 +491,7 @@ For example, class BiPatternEruby includes BiPatternEnhancer.
 
 
 
-.$$ EscapeEnhancer	| escapeenhander
+.$$ EscapeEnhancer	| escape-enhander
 
 EscapeEnhancer switches '<%= ... %>' to escaped and '<%== ... %>' to unescaped.
 
@@ -516,7 +523,7 @@ EscapeEnhancer is language-independent.
 
 
 
-.$$ StdoutEnhancer	| stdoutenhancer
+.$$ StdoutEnhancer	| stdout-enhancer
 
 StdoutEnhancer use $sdtdout instead of array buffer.
 Therefore, you can use 'print' statement in embedded ruby code.
@@ -541,17 +548,17 @@ StdoutEnhancer is only for Eruby.
 
 
 
-.$$ PrintStatementEnhancer	| printstatementenhancer
+.$$ PrintOutEnhancer	| printout-enhancer
 
-PrintStatementEnhancer makes compiled source code to use 'print(...)' instead of '_out << ...'.
+PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_out << ...'.
 
 .? printstatement-enhancer-test.rb
 .-------------------- printstatement-enhancer-test.rb
 require 'erubis'
-class PrintStatementEruby < Erubis::Eruby
-  include Erubis::PrintStatementEnhancer
+class PrintOutEruby < Erubis::Eruby
+  include Erubis::PrintOutEnhancer
 end
-eruby = PrintStatementEruby.new(File.read('example.eruby'))
+eruby = PrintOutEruby.new(File.read('example.eruby'))
 print eruby.src
 .--------------------
 
@@ -561,11 +568,11 @@ $ ruby printstatement-enhancer-test.rb
 .<<<:! (cd guide.d; ruby printstatement-enhancer-test.rb)
 .====================
 
-PrintStatementEnhancer is only for Eruby.
+PrintOutEnhancer is only for Eruby.
 
 
 
-.$$ PrintEnabledEnhancer	| printenabledenhancer
+.$$ PrintEnabledEnhancer	| printenabled-enhancer
 
 PrintEnabledEnhancer enables you to use print() method in '<% ... %>'.
 
@@ -601,7 +608,7 @@ PrintEnabledEnhancer is only for Eruby.
 
 
 
-.$$ ArrayEnhancer	| arrayenhancer
+.$$ ArrayEnhancer	| array-enhancer
 
 ArrayEnhancer makes Eruby to return an array of strings.
 
@@ -625,7 +632,7 @@ ArrayEnhancer is only for Eruby.
 
 
 
-.$$ ArrayBufferEnhancer	| arraybufferenhancer
+.$$ ArrayBufferEnhancer	| arraybuffer-enhancer
 
 Arraybufferenhancer makes Eruby to use array buffer.
 Array buffer is a litte faster than String buffer.
@@ -635,7 +642,7 @@ ArrayBufferEnhancer is only for Eruby.
 
 
 
-.$$ StringBufferEnhancer | stringbufferenhancer
+.$$ StringBufferEnhancer | stringbuffer-enhancer
 
 StringBufferEnhancer makes Eruby to use string buffer.
 
@@ -657,15 +664,15 @@ $ ruby stringbuffer-enhancer-test.rb
 
 
 
-.$$ SimplifiedEnhancer	| simplifiedenhancer
+.$$ SimplifyEnhancer	| simplify-enhancer
 
-SimplifiedEnhancer makes compiling a little faster but don't trim spaces around '<% %>'.
+SimplifyEnhancer makes compiling a little faster but don't trim spaces around '<% %>'.
 
-.? simplified-enhancer-test.rb
-.-------------------- simplified-enhancer-test.rb
+.? simplify-enhancer-test.rb
+.-------------------- simplify-enhancer-test.rb
 require 'erubis'
 class SimplifiedEruby < Erubis::Eruby
-  include Erubis::SimplifiedEnhancer
+  include Erubis::SimplifyEnhancer
 end
 eruby = SimplifiedEruby.new(File.read('example.eruby'))
 print eruby.src
@@ -673,13 +680,13 @@ print eruby.src
 
 .? compiled source code
 .====================
-$ ruby simplified-enhancer-test.rb
-.<<<:! (cd guide.d; ruby simplified-enhancer-test.rb)
+$ ruby simplify-enhancer-test.rb
+.<<<:! (cd guide.d; ruby simplify-enhancer-test.rb)
 .====================
 
 
 
-.$$ BiPatternEnhancer	| bipatternenhancer
+.$$ BiPatternEnhancer	| bipattern-enhancer
 
 BiPatternEnhancer enables to use another embedded pattern with '<% %>'.
 By Default, '[= ... =]' is available for expression.
@@ -715,7 +722,7 @@ BiPatternEnhancer is language-independent.
 
 
 
-.$$ PercentLineEnhancer	| percentlineenhancer
+.$$ PercentLineEnhancer	| percentline-enhancer
 
 PercentLineEnhancer regards lines starting with '%' as Ruby code.
 This is for compatibility with eruby and ERB.
@@ -750,7 +757,7 @@ PercentLineEnhancer is language-independent.
 
 
 
-.$$ HeaderFooterEnhancer | headerfooterenhancer
+.$$ HeaderFooterEnhancer | headerfooter-enhancer
 
 [experimental]
 
@@ -1116,6 +1123,55 @@ $ erubis -l js example.ejs
 
 
 
+.$ Benchmark
+
+A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
+Here is an example result of benchmark.
+
+.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4
+.____________________
+                                            user     system      total        real
+ERuby                                 138.280000   1.900000 140.180000 (141.470426)
+ERB                                   402.220000   3.190000 405.410000 (408.886894)
+Erubis::Eruby                         147.080000   2.400000 149.480000 (150.752255)
+Erubis::StringBufferEruby             186.130000   2.600000 188.730000 (190.374098)
+Erubis::SimplifiedEruby               130.100000   2.210000 132.310000 (133.426010)
+Erubis::StdoutEruby                   106.010000   2.130000 108.140000 (108.999193)
+Erubis::StdoutSimplifiedEruby          97.130000   2.180000  99.310000 (100.104433)
+Erubis::PrintOutEruby                 109.900000   2.090000 111.990000 (112.854442)
+Erubis::PrintOutSimplifiedEruby        93.120000   2.140000  95.260000 ( 96.002970)
+Erubis::SimplestEruby                 118.740000   2.360000 121.100000 (122.141380)
+Erubis::SimplestStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
+Erubis::SimplestPrintEruby             86.540000   1.970000  88.510000 ( 89.208078)
+.____________________
+
+.? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4
+.____________________
+                                            user     system      total        real
+ERuby                                  55.040000   2.120000  57.160000 ( 89.311397)
+ERB                                   103.960000   3.480000 107.440000 (159.231792)
+Erubis::Eruby                          36.130000   1.570000  37.700000 ( 52.188574)
+Erubis::StringBufferEruby              47.270000   1.980000  49.250000 ( 73.867537)
+Erubis::SimplifiedEruby                34.310000   1.600000  35.910000 ( 51.762841)
+Erubis::StdoutEruby                    26.240000   1.490000  27.730000 ( 41.840430)
+Erubis::StdoutSimplifiedEruby          25.380000   1.340000  26.720000 ( 37.231918)
+Erubis::PrintOutEruby                  26.850000   1.260000  28.110000 ( 38.378227)
+Erubis::PrintOutSimplifiedEruby        24.160000   1.280000  25.440000 ( 40.048199)
+Erubis::SimplestEruby                  31.690000   1.590000  33.280000 ( 49.862091)
+Erubis::SimplestStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
+Erubis::SimplestPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
+.____________________
+
+This shows that:
+.* Erubis::Eruby is about 2.7 or 2.9 times faster than ERB.
+.* Erubis::Eruby is about 6% slower in linux or 1.5 times faster than ERuby in Mac.
+.* Erubis::SimplifiedEruby (which incudes SimplifiedEnhander) is faster than ERuby.
+.* String buffer (StringBufferEnhancer) is slower than array buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
+.* Using print statement or $stdout is faster than array buffer and string buffer.
+.* Erubis::SimplestEruby (at 'erubis/simples.rb') and it's subclasses are the fastest in all eRuby implementation.
+
+
+
 .$ Command Reference	| command
 
 
@@ -1141,9 +1197,10 @@ erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.
   .[ -l lang       ]	Language name.
 			This option makes erubis command to compile script but no execute.
   .[ -c class      ]	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
-  .[ -E enhacers   ]	Enhancer name (Escape, PercentLine, ...).
+  .[ -e enhacers   ]	Enhancer name (Escape, PercentLine, ...).
 			It is able to specify several enhancer name separating with ','
 			(ex. -f Escape,PercentLine,HeaderFooter).
+  .[ -E            ]	Show all enhancers.
   .[ -I path       ]	Require library path ($:).
 			It is able to specify several paths separating with ','
 			(ex. -f path1,path2,path3).

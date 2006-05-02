@@ -315,7 +315,7 @@ END
   end
 
 
-  def test_enhancers1 # -E
+  def test_enhancers1 # -e
     @input   = <<END
 <% list = %w[<aaa> b&b "ccc"] %>
 % for item in list
@@ -331,7 +331,7 @@ END
  - &quot;ccc&quot; : "ccc"
  - &quot;ccc&quot; : "ccc"
 END
-    @options = "-E Escape,PercentLine,HeaderFooter,BiPattern"
+    @options = "-e Escape,PercentLine,HeaderFooter,BiPattern"
     _test()
   end
 

@@ -10,12 +10,13 @@ require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
 require 'erubis/simplest'
+require 'erubybench-lib'
 
 
 ## default values
 filename = 'erubybench.rhtml'
 datafile = 'erubybench.yaml'
-n = 1000
+n = 10000
 
 
 ## usage
@@ -33,6 +34,7 @@ end
 flag_help = false
 flag_all = false
 targets = nil
+test_type = nil
 compiler_name = 'ErubisOptimized'
 while !ARGV.empty? && ARGV[0][0] == ?-
   opt = ARGV.shift
@@ -43,6 +45,7 @@ while !ARGV.empty? && ARGV[0][0] == ?-
   when '-h', '--help'  ;  flag_help = true
   when '-A'  ;  test_all = true
   when '-C'  ;  compiler_name = ARGV.shift
+  when '-t'  ;  test_type = ARGV.shift
   else       ;  raise "#{opt}: invalid option."
   end
 end
@@ -70,22 +73,6 @@ data = data.sort_by { |h| h[:code] }
 
 ## open /dev/null
 $devnull = File.open("/dev/null", 'w')
-
-
-## define ErubisEruby2 class
-module Erubis
-  class Eruby2 < Eruby
-    def finalize_src(src)
-      #src << "\nprint _out.join; nil\n"
-      src << "\n_out.join; ''\n"
-    end
-  end
-  class ExprStrippedEruby < Eruby
-    def add_expr(src, code, indicator)
-      super(src, code.strip! || code, indicator)
-    end
-  end
-end
 
 
 ## test definitions
@@ -166,20 +153,30 @@ testdefs_str = <<END
   return: str
   skip:   no
 
-- name:   ErubisPrintStatement
-  class:  Erubis::PrintStatementEruby
+- name:   ErubisPrintOut
+  class:  Erubis::PrintOutEruby
   return: str
-  skip:   yes
+  skip:   no
 
-- name:   ErubisPrintStatementSimplified
-  class:  Erubis::PrintStatementSimplifiedEruby
+- name:   ErubisPrintOutSimplified
+  class:  Erubis::PrintOutSimplifiedEruby
   return: str
-  skip:   yes
+  skip:   no
 
 - name:   ErubisSimplest
   class:  Erubis::SimplestEruby
-  return: str
-  skip:   yes
+  return: yes
+  skip:   no
+
+- name:   ErubisSimplestStdout
+  class:  Erubis::SimplestStdoutEruby
+  return: null
+  skip:   no
+
+- name:   ErubisSimplestPrint
+  class:  Erubis::SimplestPrintEruby
+  return: null
+  skip:   no
 
 #- name:    load
 #  class:   load
@@ -198,6 +195,7 @@ testdefs.each do |testdef|
   testdef['code']    ||= "print #{c}.new(File.read(filename)).result(binding())\n"
   testdef['compile'] ||= "#{c}.new(str).src\n"
   require 'pp'
+  #pp testdef
 end
 
 
@@ -276,7 +274,7 @@ testdefs.each do |h|
 end
 
 
-## define tests for read-and-eval
+## define tests for caching
 str = File.read(filename)
 testdefs.each do |h|
   next unless h['compile']
@@ -288,7 +286,7 @@ testdefs.each do |h|
   # define function
   pr = h['return'] ? 'print ' : ''
   s = ''
-  s << "def test_eval_#{h['name']}(filename, data)\n"
+  s << "def test_cache_#{h['name']}(filename, data)\n"
   s << "  $stdout = $devnull\n"
   n.times do
     s << "  #{pr}eval(File.read(\"\#{filename}.#{h['name']}\"))\n"
@@ -309,7 +307,7 @@ testdefs.each do |h|
   next unless h['compile']
   v = __send__("view_#{h['name']}", data)
   print v if h['return']
-  ## execute read-and-eval action
+  ## execute caching function
   v = eval(File.read("#{filename}.#{h['name']}"))
   print v if h['return']
 end
@@ -328,18 +326,18 @@ begin
       job.report(title) do
         __send__(func, filename, data)
       end
-    end
+    end if !test_type || test_type == 'basic'
 
-    ## read-and-eval function
+    ## caching function
     testdefs.each do |h|
       next unless h['compile']
-      title = 'eval_' + h['name']
-      func = 'test_eval_' + h['name']
+      title = 'cache_' + h['name']
+      func = 'test_cache_' + h['name']
       GC.start
       job.report(title) do
         __send__(func, filename, data)
       end
-    end
+    end if !test_type || test_type == 'eval'
 
     ## view-function test
     testdefs.each do |h|
@@ -350,7 +348,7 @@ begin
       job.report(title) do
         __send__(func, data)
       end
-    end
+    end if !test_type || test_type == 'func'
 
   end
 ensure

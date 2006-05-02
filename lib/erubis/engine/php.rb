@@ -71,9 +71,14 @@ module Erubis
   end
 
 
-  class XmlEphp < Ephp
+  class EscapedEphp < Ephp
     include EscapeEnhancer
   end
+
+
+  #class XmlEphp < Ephp
+  #  include EscapeEnhancer
+  #end
 
 
 end

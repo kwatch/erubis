@@ -83,9 +83,14 @@ module Erubis
   end
 
 
-  class XmlEscheme < Escheme
+  class EscapedEscheme < Escheme
     include EscapeEnhancer
   end
+
+
+  #class XmlEscheme < Escheme
+  #  include EscapeEnhancer
+  #end
 
 
 end

@@ -93,9 +93,14 @@ module Erubis
   end
 
 
-  class XmlEc < Ec
+  class EscapedEc < Ec
     include EscapeEnhancer
   end
+
+
+  #class XmlEc < Ec
+  #  include EscapeEnhancer
+  #end
 
 
 end

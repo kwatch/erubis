@@ -233,7 +233,7 @@ class MyEruby
     src << "\n_buf\n"
     return src
   end
-  
+
 end
 .--------------------
 
@@ -367,7 +367,7 @@ end
 .* httpd, ruby, mod_ruby.soはstripされているか？
    .- MacOS Xではstripすると動かないので注意
 .* apacheの設定は適切か？
-   .- 
+   .-
 .* 同等の拡張プログラムはないか？
    .- Ruby/MySQLよりMySQL/Ruby
 .* そのプログラムはほんとうにボトルネックなのか？

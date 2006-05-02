@@ -69,7 +69,17 @@ module Erubis
 
 
   ##
+  ## swtich '<%= %>' to escaped and '<%== %>' to not escaped
+  ##
+  class EscapedEruby < Eruby
+    include EscapeEnhancer
+  end
+
+
+  ##
   ## sanitize expression (<%= ... %>) by default
+  ##
+  ## this is equivalent to EscapedEruby and is prepared only for compatibility.
   ##
   class XmlEruby < Eruby
     include EscapeEnhancer

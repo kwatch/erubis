@@ -1,50 +1,63 @@
-.=title:	README
-.?release:	$Release$
-.?copyright:	$Copyright$
+= README
 
-
-.$ About Erubis
-
-  Erubis is an implementation of eRuby. It has the following features.
-  .* Auto trimming spaces around '<% %>'
-  .* Auto sanitizing
-  .* Change embedded pattern (default '<% %>')
-  .* Context object available
-  .* Easy to expand in subclass
-
-  Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
-
-  See doc/users-guide.html for detail.
+release::	$Release$
+copyright::	$Copyright$
 
 
 
-.$ Installation
+== About Erubis
 
-  .* If you have installed RubyGems, just type {{,gem install --remote erubis,}}.
-	.====================
-	$ sudo gem install --remote erubis
-	.====================
+Erubis is an implementation of eRuby. It has the following features.
+* Very fast (about three times faster than ERB and almost as fast as eruby)
+* Auto trimming spaces around '<% %>'
+* Auto escape (sanitizing)
+* Changeable embedded pattern (default '<% %>')
+* Context object available
+* Easy to expand and customize in subclass
+* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 
-  .* Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
-	.====================
-	$ tar xjf erubis-X.X.X.tar.bz2
-	$ cd erubis-X.X.X/
-	$ ruby setup.rb config
-	$ ruby setup.rb setup
-	$ sudo ruby setup.rb install
-	.====================
+Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
-  .* Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
-	.====================
-	$ tar xjf erubis-X.X.X.tar.bz2
-	$ cd erubis-X.X.X/
-	$ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
-	$ cp bin/erubis /usr/local/bin
-	.====================
+See doc/users-guide.html for details.
 
 
 
-.$ License
+== Installation
 
-  GPL ver.2
+* If you have installed RubyGems, just type {{,gem install --remote erubis,}}.
 
+   $ sudo gem install --remote erubis
+
+* Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
+
+   $ tar xjf erubis-X.X.X.tar.bz2
+   $ cd erubis-X.X.X/
+   $ ruby setup.rb config
+   $ ruby setup.rb setup
+   $ sudo ruby setup.rb install
+
+* Else you should copy 'lib/erubis.rb' and 'bin/erubis' into proper directory manually.
+
+   $ tar xjf erubis-X.X.X.tar.bz2
+   $ cd erubis-X.X.X/
+   $ cp lib/erubis.rb /usr/local/lib/ruby/site_ruby/1.8
+   $ cp bin/erubis /usr/local/bin
+
+
+
+== Benchmark
+
+'benchmark/erubybenchmark.rb' is a benchmark script of Erubis.
+Try 'ruby erubybenchmark.rb' in benchmark directory.
+
+
+
+== License
+
+GPL ver.2
+
+
+
+== Author
+
+makoto kuwata <kwa(at)kuwata-lab.com>
