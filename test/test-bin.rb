@@ -263,6 +263,39 @@ END
   end
 
 
+  def test_context1   # -X
+    yamlfile = "test.context4.yaml"
+    #
+    @input = <<'END'
+user = <%= @user %>
+<% for item in @list %>
+ - <%= item %>
+<% end %>
+END
+    @expected = <<'END'
+user = World
+ - aaa
+ - bbb
+ - ccc
+END
+    @options = "-f #{yamlfile} -X "
+    #
+    yaml = <<-END
+user: World
+list:
+  - aaa
+  - bbb
+  - ccc
+END
+    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    begin
+      _test()
+    ensure
+      File.unlink(yamlfile) if test(?f, yamlfile)
+    end
+  end
+
+
   def test_include1   # -I
     dir = 'foo'
     lib = 'bar'

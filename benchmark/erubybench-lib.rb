@@ -18,7 +18,7 @@ module Erubis
   ##
   ## use $stdout
   ##
-  class SimplestStdoutEruby
+  class TinyStdoutEruby
 
     def initialize(input)
       @src = compile(input)
@@ -60,7 +60,7 @@ module Erubis
   ##
   ## use print statement
   ##
-  class SimplestPrintEruby
+  class TinyPrintEruby
 
     def initialize(input)
       @src = compile(input)

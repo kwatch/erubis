@@ -16,7 +16,7 @@ It has the following features.
 .* Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 .* Context object available and easy to combine eRuby template with YAML datafile
 .* Print statement available
-.* Easy to expand in subclass
+.* Easy to extend in subclass
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -246,7 +246,7 @@ This is available in any language.
 
 .====================
 $ erubis -l ruby {{*-e Escape*}} example3.eruby
-.<<<:! erubis -e Escape -l ruby example3.eruby
+.<<<:! (cd guide.d; erubis -e Escape -l ruby example3.eruby)
 .====================
 
 Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
@@ -311,9 +311,10 @@ For example, '{{,<(!--)?% %(--)?>,}}' will not work while '{{,<(?:!--)?% %(?:--)
 
 Context object is a set of data which are used in eRuby script.
 Using context object makes clear which data to be used.
+In Erubis, Hash object and Erubis::Context object are available as context object.
 
-In Erubis, Hash object is used as context object.
-Hash key means variable name and it can be string or symbol.
+When using Hash as context object,
+hash key means variable name and it should be string or symbol.
 
 .? example5.eruby
 .-------------------- example5.eruby
@@ -346,28 +347,14 @@ $ ruby example5.rb
 .<<<:! (cd guide.d; ruby example5.rb)
 .====================
 
-It is very useful to import YAML document data into context object.
-
-.? example6.yaml
-.-------------------- example6.yaml
-title: Users List
-users:
-  - name:  foo
-    mail:  foo@mail.com
-  - name:  bar
-    mail:  bar@mail.net
-  - name:  baz
-    mail:  baz@mail.org
-.--------------------
+When using Erubis::Context object, context data is accessible via instance variables in eRuby template.
 
 .? example6.eruby
 .-------------------- example6.eruby
-<h1><%= title %></h1>
+<span><%= {{*@val*}} %></span>
 <ul>
- <% for user in users %>
-  <li>
-    <a href="mailto:<%= user['mail']%>"><%= user['name'] %></a>
-  </li>
+ <% for item in {{*@list*}} %>
+  <li><%= item %></li>
  <% end %>
 </ul>
 .--------------------
@@ -378,11 +365,13 @@ require 'erubis'
 input = File.read('example6.eruby')
 eruby = Erubis::Eruby.new(input)      # create Eruby object
 
-## load YAML document as context object
-{{*require 'yaml'*}}
-{{*context = YAML.load_file('example6.yaml')*}}
+## create context object
+## (key means var name, which may be string or symbol.)
+{{*context = Erubis::Context.new*}}
+{{*context[:val]   = 'Erubis Example'*}}
+{{*context['list'] = ['aaa', 'bbb', 'ccc']*}}
 
-puts {{*eruby.evaluate(context)*}}        # get result
+puts {{*eruby.evaluate(context)*}}         # get result
 .--------------------
 
 .? output
@@ -390,6 +379,85 @@ puts {{*eruby.evaluate(context)*}}        # get result
 $ ruby example6.rb
 .<<<:! (cd guide.d; ruby example6.rb)
 .====================
+
+{{,eruby.evaluate(context),}} is almost equivalent to {{,context.instance_eval(eruby.src),}}.
+In fact, eruby.evaluate() can take any object.
+
+.--------------------
+class MyData
+  def initialize(val, list)
+    @val = val
+    @list = list
+  end
+end
+
+{{*mydata = MyData.new*}}('Erubis Example', ['aaa', 'bbb', 'ccc'])
+
+require 'erubis'
+eruby = Erubis::Eruby.new(File.read('example6.eruby'))
+puts eruby.evaluate({{*mydata*}})
+.--------------------
+
+
+
+.$$ Context Data File	| tut-datafile
+
+It is very useful to import YAML document data into Hash context object.
+
+.? example7.yaml
+.-------------------- example7.yaml
+title: Users List
+users:
+  - name:  foo
+    mail:  foo@mail.com
+  - name:  bar
+    mail:  bar@mail.net
+  - name:  baz
+    mail:  baz@mail.org
+.--------------------
+
+.? example7.eruby
+.-------------------- example7.eruby
+<h1><%= title %></h1>
+<ul>
+ <% for user in users %>
+  <li>
+    <a href="mailto:<%= user['mail']%>"><%= user['name'] %></a>
+  </li>
+ <% end %>
+</ul>
+.--------------------
+
+.? example7.rb
+.-------------------- example7.rb
+require 'erubis'
+input = File.read('example7.eruby')
+eruby = Erubis::Eruby.new(input)      # create Eruby object
+
+## load YAML document as context object
+{{*require 'yaml'*}}
+{{*context = YAML.load_file('example7.yaml')*}}
+
+puts {{*eruby.evaluate(context)*}}        # get result
+.--------------------
+
+.? output
+.====================
+$ ruby example7.rb
+.<<<:! (cd guide.d; ruby example7.rb)
+.====================
+
+It is able to specify YAML data file with the command-line option '-f'.
+You don't have to write ruby script such as 'example7.rb'.
+
+.? example of command-line option '-f'
+.====================
+$ erubis {{*-f example7.yaml*}} example7.eruby
+.<<<:! (cd guide.d; erubis -f example7.yaml example7.eruby)
+.====================
+
+Command-line option '-S' converts keys of mapping in YAML data file from string into symbol.
+Command-line option '-X' use Erubis::Context as context object.
 
 
 
@@ -400,17 +468,17 @@ and the last line ('_out.join') is called postamble.
 
 You can specify Eruby not to print preamble nor postamble with option :preamble and :postamble.
 
-.? example7.eruby
-.-------------------- example7.eruby
+.? example8.eruby
+.-------------------- example8.eruby
 <% for item in list %>
  <b><%= item %></b>
 <% end %>
 .--------------------
 
-.? example7.rb
-.-------------------- example7.rb
+.? example8.rb
+.-------------------- example8.rb
 require 'erubis'
-input = File.read('example7.eruby')
+input = File.read('example8.eruby')
 eruby1 = Erubis::Eruby.new(input)
 eruby2 = Erubis::Eruby.new(input, {{*:preamble=>false, :postamble=>false*}})
 
@@ -421,8 +489,8 @@ puts eruby2.src   # don't print preamble and postamble
 
 .? output
 .====================
-$ ruby example7.rb
-.<<<:! (cd guide.d; ruby example7.rb)
+$ ruby example8.rb
+.<<<:! (cd guide.d; ruby example8.rb)
 .====================
 
 The command-line option '-b' specify both :preamble and :postamble to false.
@@ -1130,36 +1198,36 @@ Here is an example result of benchmark.
 
 .? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4
 .____________________
-                                            user     system      total        real
-ERuby                                 138.280000   1.900000 140.180000 (141.470426)
-ERB                                   402.220000   3.190000 405.410000 (408.886894)
-Erubis::Eruby                         147.080000   2.400000 149.480000 (150.752255)
-Erubis::StringBufferEruby             186.130000   2.600000 188.730000 (190.374098)
-Erubis::SimplifiedEruby               130.100000   2.210000 132.310000 (133.426010)
-Erubis::StdoutEruby                   106.010000   2.130000 108.140000 (108.999193)
-Erubis::StdoutSimplifiedEruby          97.130000   2.180000  99.310000 (100.104433)
-Erubis::PrintOutEruby                 109.900000   2.090000 111.990000 (112.854442)
-Erubis::PrintOutSimplifiedEruby        93.120000   2.140000  95.260000 ( 96.002970)
-Erubis::SimplestEruby                 118.740000   2.360000 121.100000 (122.141380)
-Erubis::SimplestStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
-Erubis::SimplestPrintEruby             86.540000   1.970000  88.510000 ( 89.208078)
+                                        user     system      total        real
+ERuby                             138.280000   1.900000 140.180000 (141.470426)
+ERB                               402.220000   3.190000 405.410000 (408.886894)
+Erubis::Eruby                     147.080000   2.400000 149.480000 (150.752255)
+Erubis::StringBufferEruby         186.130000   2.600000 188.730000 (190.374098)
+Erubis::SimplifiedEruby           130.100000   2.210000 132.310000 (133.426010)
+Erubis::StdoutEruby               106.010000   2.130000 108.140000 (108.999193)
+Erubis::StdoutSimplifiedEruby      97.130000   2.180000  99.310000 (100.104433)
+Erubis::PrintOutEruby             109.900000   2.090000 111.990000 (112.854442)
+Erubis::PrintOutSimplifiedEruby    93.120000   2.140000  95.260000 ( 96.002970)
+Erubis::TinyEruby                 118.740000   2.360000 121.100000 (122.141380)
+Erubis::TinyStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
+Erubis::TinyPrintEruby             86.540000   1.970000  88.510000 ( 89.208078)
 .____________________
 
 .? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4
 .____________________
-                                            user     system      total        real
-ERuby                                  55.040000   2.120000  57.160000 ( 89.311397)
-ERB                                   103.960000   3.480000 107.440000 (159.231792)
-Erubis::Eruby                          36.130000   1.570000  37.700000 ( 52.188574)
-Erubis::StringBufferEruby              47.270000   1.980000  49.250000 ( 73.867537)
-Erubis::SimplifiedEruby                34.310000   1.600000  35.910000 ( 51.762841)
-Erubis::StdoutEruby                    26.240000   1.490000  27.730000 ( 41.840430)
-Erubis::StdoutSimplifiedEruby          25.380000   1.340000  26.720000 ( 37.231918)
-Erubis::PrintOutEruby                  26.850000   1.260000  28.110000 ( 38.378227)
-Erubis::PrintOutSimplifiedEruby        24.160000   1.280000  25.440000 ( 40.048199)
-Erubis::SimplestEruby                  31.690000   1.590000  33.280000 ( 49.862091)
-Erubis::SimplestStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
-Erubis::SimplestPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
+                                        user     system      total        real
+ERuby                              55.040000   2.120000  57.160000 ( 89.311397)
+ERB                               103.960000   3.480000 107.440000 (159.231792)
+Erubis::Eruby                      36.130000   1.570000  37.700000 ( 52.188574)
+Erubis::StringBufferEruby          47.270000   1.980000  49.250000 ( 73.867537)
+Erubis::SimplifiedEruby            34.310000   1.600000  35.910000 ( 51.762841)
+Erubis::StdoutEruby                26.240000   1.490000  27.730000 ( 41.840430)
+Erubis::StdoutSimplifiedEruby      25.380000   1.340000  26.720000 ( 37.231918)
+Erubis::PrintOutEruby              26.850000   1.260000  28.110000 ( 38.378227)
+Erubis::PrintOutSimplifiedEruby    24.160000   1.280000  25.440000 ( 40.048199)
+Erubis::TinyEruby                  31.690000   1.590000  33.280000 ( 49.862091)
+Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
+Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
 .____________________
 
 This shows that:
@@ -1168,7 +1236,7 @@ This shows that:
 .* Erubis::SimplifiedEruby (which incudes SimplifiedEnhander) is faster than ERuby.
 .* String buffer (StringBufferEnhancer) is slower than array buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
 .* Using print statement or $stdout is faster than array buffer and string buffer.
-.* Erubis::SimplestEruby (at 'erubis/simples.rb') and it's subclasses are the fastest in all eRuby implementation.
+.* Erubis::TinyEruby (at 'erubis/tiny.rb') and it's subclasses are the fastest in all eRuby implementation.
 
 
 

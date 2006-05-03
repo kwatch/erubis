@@ -163,18 +163,18 @@ testdefs_str = <<END
   return: str
   skip:   no
 
-- name:   ErubisSimplest
-  class:  Erubis::SimplestEruby
+- name:   ErubisTiny
+  class:  Erubis::TinyEruby
   return: yes
   skip:   no
 
-- name:   ErubisSimplestStdout
-  class:  Erubis::SimplestStdoutEruby
+- name:   ErubisTinyStdout
+  class:  Erubis::TinyStdoutEruby
   return: null
   skip:   no
 
-- name:   ErubisSimplestPrint
-  class:  Erubis::SimplestPrintEruby
+- name:   ErubisTinyPrint
+  class:  Erubis::TinyPrintEruby
   return: null
   skip:   no
 

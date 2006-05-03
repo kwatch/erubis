@@ -16,6 +16,41 @@ module Erubis
 
 
   ##
+  ## context object for Engine#evaluate
+  ##
+  ## ex.
+  ##   template = <<'END'
+  ##   Hello <%= @user %>!
+  ##   <% for item in @list %>
+  ##    - <%= item %>
+  ##   <% end %>
+  ##   END
+  ##
+  ##   context = Erubis::Context.new
+  ##   context[:user] = 'World'
+  ##   context[:list] = ['aaa', 'bbb', 'ccc']
+  ##
+  ##   eruby = Erubis::Eruby.new(template)
+  ##   print eruby.evaluate(context)
+  ##
+  class Context
+
+    def [](key)
+      return instance_variable_get("@#{key}")
+    end
+
+    def []=(key, value)
+      return instance_variable_set("@#{key}", value)
+    end
+
+    def keys
+      return instance_variables.collect { |name| name[1,name.length-1] }
+    end
+
+  end
+
+
+  ##
   ## base engine class
   ##
   class Engine
@@ -53,14 +88,18 @@ module Erubis
     end
 
     def result(_binding=TOPLEVEL_BINDING)
-      _filename = @filename || '(erubis)'
-      eval @src, _binding, _filename
+      return eval(@src, _binding, (@filename || '(erubis)'))
     end
 
     def evaluate(_context={})
-      ## load _context data as local variables by eval
-      eval _context.keys.inject("") { |s, k| s << "#{k.to_s} = _context[#{k.inspect}];" }
-      return result(binding())
+      _filename = @filename || '(erubis)'
+      if _context.is_a?(Hash)
+        ## load _context data as local variables by eval
+        eval _context.keys.inject("") { |s, k| s << "#{k.to_s} = _context[#{k.inspect}];" }
+        return eval(@src, binding(), _filename)
+      else
+        return _context.instance_eval(@src, _filename)
+      end
     end
 
     DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m

@@ -7,23 +7,19 @@
 module Erubis
 
   ##
-  ## the simplest implementation of eRuby
+  ## tiny and the simplest implementation of eRuby
   ##
   ## ex.
-  ##   eruby = SimplestEruby.new(File.read('example.rhtml'))
+  ##   eruby = TinyEruby.new(File.read('example.rhtml'))
   ##   print eruby.src                 # print ruby code
   ##   print eruby.result(binding())   # eval ruby code
   ##
-  class SimplestEruby
+  class TinyEruby
 
     def initialize(input)
       @src = compile(input)
     end
     attr_reader :src
-
-    def result(binding=TOPLEVEL_BINDING)
-      eval @src, binding
-    end
 
     EMBEDDED_PATTERN = /(.*?)<%(=+|\#)?(.*?)-?%>/m
 
@@ -48,6 +44,10 @@ module Erubis
 
     def escape_text(text)
       return text.gsub!(/['\\]/, '\\\\\&') || text
+    end
+
+    def result(binding=TOPLEVEL_BINDING)
+      eval @src, binding
     end
 
   end

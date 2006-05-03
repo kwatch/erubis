@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.16
+	.- [change] 'simplest.rb' is renamed to 'tiny.rb'
+	.- [enhance] add Context class
+	.- [enahnce] Engine#enhacne() now support Context object
+	.- [enhance] new command-line option '-X' (convert to context obj) added
+
 .: Rev.15 (2006-05-02)
 	.- [refactor] Engine#compile() refactored
 	.- [refactor] XxxxXmlEruby classes are removed

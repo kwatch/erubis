@@ -21,9 +21,9 @@ recipes:
 	rm_rf "guide.d"
 	mkdir_p "guide.d"
 	cmd "retrieve -d guide.d #{@ingred}"
-	cmd "kwaser -t $(tagfile) -T #{@ingred} > #{@byprods[0]}"
+	cmd "kwaser -t $(tagfile) -T #{@ingred} > #{@byprod}"
 	cmd "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
-	rm "#{@byprods[0]}"
+	rm "#{@byprod}"
 
 
 

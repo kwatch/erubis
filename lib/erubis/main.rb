@@ -6,7 +6,7 @@
 
 require 'yaml'
 require 'erubis'
-require 'erubis/simplest'
+require 'erubis/tiny'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
 require 'erubis/engine/ruby'
@@ -50,7 +50,7 @@ module Erubis
 
     def execute(argv=ARGV)
       ## parse command-line options
-      options, properties = parse_argv(argv, "hvsxTtSbE", "pcrfKIlae")
+      options, properties = parse_argv(argv, "hvsxTtSbEX", "pcrfKIlae")
       filenames = argv
       options[?h] = true if properties[:help]
 
@@ -84,66 +84,23 @@ module Erubis
 
       ## class name of Eruby
       classname = options[?c]
-      unless classname
-        classname = lang =~ /\Axml(.*)/ ? "EscapedE#{$1}" : "E#{lang}"
-      end
-      begin
-        klass = Erubis.const_get(classname)
-      rescue NameError
-        klass = nil
-      end
-      unless klass
-        if lang
-          msg = "-l #{lang}: invalid language name (class Erubis::#{classname} not found)."
-        else
-          msg = "-c #{classname}: invalid class name."
-        end
-        raise CommandOptionError.new(msg)
-      end
+      klass = get_classobj(classname, lang)
 
       ## kanji code
       $KCODE = options[?K] if options[?K]
 
       ## read context values from yaml file
       yamlfiles = options[?f]
-      if yamlfiles
-        hash = {}
-        yamlfiles.split(/,/).each do |yamlfile|
-          str = yamlfile == '-' ? $stdin.read() : File.read(yamlfile)
-          str = untabify(str) if options[?t]
-          ydoc = YAML.load(str)
-          unless ydoc.is_a?(Hash)
-            raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
-          end
-          convert_mapping_key_from_string_to_symbol(ydoc) if options[?S]
-          hash.update(ydoc)
-        end
-        #hash.update(context)
-        context = hash
-      else
-        context = {}
-      end
+      context = load_yamlfiles(yamlfiles, options)
 
       ## properties for engine
-      properties[:pattern] = options[?p] if options[?p]
-      properties[:trim]    = false       if options[?T]
+      properties[:pattern]  = options[?p] if options[?p]
+      properties[:trim]     = false       if options[?T]
       properties[:preamble] = properties[:postamble] = false if options[?b]
 
-      ## enhancers
-      enhancers = []
-      if options[?e]
-        enhancer_name = nil
-        begin
-          options[?e].split(/,/).each do |shortname|
-            enhancers << Erubis.const_get("#{shortname}Enhancer")
-          end
-        rescue NameError
-          raise CommandOptionError.new("#{shortname}: no such Enhancer (try '-E' to show all enhancers).")
-        end
-      end
-
-      ## create engine
+      ## create engine and extend enhancers
       engine = klass.new(nil, properties)
+      enhancers = get_enhancers(options[?e])
       enhancers.each do |enhancer|
         engine.extend(enhancer)
         engine.bipattern = properties[:bipattern] if enhancer == Erubis::BiPatternEnhancer
@@ -153,13 +110,12 @@ module Erubis
       val = nil
       if filenames && !filenames.empty?
         filenames.each do |filename|
-          #engine = klass.load_file(filename, properties)
           engine.filename = filename
           engine.compile!(File.read(filename))
           print val if val = do_action(action, engine, context, options)
         end
       else
-        #engine = klass.new(input, properties)
+        engine.filename = '(stdin)'
         engine.compile!($stdin.read())
         print val if val = do_action(action, engine, context, options)
       end
@@ -200,6 +156,7 @@ Usage: #{command} [..options..] [file ...]
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
+  -X            : set mapping data in YAML file into instance variables
 
 END
       #  -r library    : require library
@@ -255,7 +212,8 @@ END
           end
           name = $1;  value = $2
           name  = name.gsub(/-/, '_').intern
-          value = value == nil ? true : to_value(value)
+          #value = value.nil? ? true : YAML.load(value)   # error, why?
+          value = value.nil? ? true : YAML.load("---\n#{value}\n")
           context[name] = value
           #
         else                  # options
@@ -284,19 +242,6 @@ END
       return options, context
     end
 
-    def to_value(str)
-      case str
-      when nil, "null", "nil"         ;   return nil
-      when "true", "yes"              ;   return true
-      when "false", "no"              ;   return false
-      when /\A\d+\z/                  ;   return str.to_i
-      when /\A\d+\.\d+\z/             ;   return str.to_f
-      when /\/(.*)\//                 ;   return Regexp.new($1)
-      when /\A'.*'\z/, /\A".*"\z/     ;   return eval(str)
-      else                            ;   return str
-      end
-    end
-
     def untabify(text, width=8)
       sb = ''
       text.scan(/(.*?)\t/m) do |s, |
@@ -304,6 +249,62 @@ END
         sb << s << (" " * (width - len % width))
       end
       return $' ? (sb << $') : text
+    end
+
+    def get_classobj(classname, lang)
+      unless classname
+        classname = lang =~ /\Axml(.*)/ ? "EscapedE#{$1}" : "E#{lang}"
+      end
+      begin
+        klass = Erubis.const_get(classname)
+      rescue NameError
+        klass = nil
+      end
+      unless klass
+        if lang
+          msg = "-l #{lang}: invalid language name (class Erubis::#{classname} not found)."
+        else
+          msg = "-c #{classname}: invalid class name."
+        end
+        raise CommandOptionError.new(msg)
+      end
+      return klass
+    end
+
+    def get_enhancers(enhancer_names)
+      return [] unless enhancer_names
+      enhancers = []
+      shortname = nil
+      begin
+        enhancer_names.split(/,/).each do |shortname|
+          enhancers << Erubis.const_get("#{shortname}Enhancer")
+        end
+      rescue NameError
+        raise CommandOptionError.new("#{shortname}: no such Enhancer (try '-E' to show all enhancers).")
+      end
+      return enhancers
+    end
+
+    def load_yamlfiles(yamlfiles, options)
+      hash = {}
+      return hash unless yamlfiles
+      yamlfiles.split(/,/).each do |yamlfile|
+        str = yamlfile == '-' ? $stdin.read() : File.read(yamlfile)
+        str = untabify(str) if options[?t]
+        ydoc = YAML.load(str)
+        unless ydoc.is_a?(Hash)
+          raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
+        end
+        convert_mapping_key_from_string_to_symbol(ydoc) if options[?S]
+        hash.update(ydoc)
+      end
+      if options[?X]    # conver hash to context object
+        context = Context.new
+        hash.each { |name, value| context[name] = value }
+      else
+        context = hash
+      end
+      return context
     end
 
     def convert_mapping_key_from_string_to_symbol(ydoc)

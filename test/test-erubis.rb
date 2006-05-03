@@ -11,7 +11,7 @@ require 'stringio'
 require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
-require 'erubis/simplest'
+require 'erubis/tiny'
 
 
 class ErubisTest < Test::Unit::TestCase
@@ -37,7 +37,7 @@ class ErubisTest < Test::Unit::TestCase
     end if @chomp
 
     if @testopt != 'load_file'
-      if @klass == Erubis::SimplestEruby
+      if @klass == Erubis::TinyEruby
         eruby = @klass.new(@input)
       else
         eruby = @klass.new(@input, @options)
@@ -55,8 +55,9 @@ class ErubisTest < Test::Unit::TestCase
 
     return if @testopt == 'skip_output'
 
-    context = {}
-    context[:list] = list = ['<aaa>', 'b&b', '"ccc"']
+    list = ['<aaa>', 'b&b', '"ccc"']
+    context = @testopt == 'context' ? Erubis::Context.new : {}
+    context[:list] = list
 
     case @testopt
     when/\Aeval\(/
@@ -155,6 +156,24 @@ __END__
   output: |
       <ul><li><aaa></li><li>b&b</li><li>"ccc"</li>
       </ul>
+##
+- name:  context1
+  testopt:  context
+  input: |
+      <ul>
+       <% for item in @list %>
+        <li><%= item %></li>
+       <% end %>
+      </ul>
+  src: |
+      _out = []; _out << '<ul>
+      ';  for item in @list 
+      ; _out << '  <li>'; _out << ( item ).to_s; _out << '</li>
+      ';  end 
+      ; _out << '</ul>
+      ';
+      _out.join
+  output: *basic1_output
 ##
 - name:  ignore1
   input: |
@@ -782,8 +801,8 @@ __END__
       _out
   output: *optimized4_input
 ##
-- name:  simplest1
-  class: SimplestEruby
+- name:  tiny1
+  class: TinyEruby
   testopt:  result
   input: |
       <ul>
