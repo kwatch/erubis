@@ -16,7 +16,6 @@ end
 
 
 require 'test/unit'
-#require 'test/unit/ui/console/testrunner'
 require 'assert-text-equal'
 require 'yaml'
 require 'tempfile'
@@ -34,6 +33,7 @@ list:
 <% end %>
 user: <%= defined?(user) ? user : "(none)" %>
 END
+  INPUT2 = INPUT.gsub(/\blist([^:])/, '@list\1').gsub(/\buser([^:])/, '@user\1')
 
 #  SRC = <<'END'
 #_out = ''; _out << "list:\n"
@@ -54,6 +54,7 @@ _out = []; _out << 'list:
 ';
 _out.join
 END
+#  SRC2 = SRC.gsub(/\blist /, '@list ').gsub(/\buser /, '@user ')
 
   OUTPUT = <<'END'
 list:
@@ -192,7 +193,7 @@ END
 
   def test_yaml1      # -f
     yamlfile = "test.context1.yaml"
-    @input    = INPUT
+    @input    = INPUT2
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
     @options  = "-f #{yamlfile}"
     #
@@ -211,7 +212,7 @@ END
 
   def test_untabify1  # -t
     yamlfile = "test.context2.yaml"
-    @input    = INPUT
+    @input    = INPUT2
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
     @options  = "-tf #{yamlfile}"
     #
@@ -231,7 +232,7 @@ END
   def test_symbolify1 # -S
     yamlfile = "test.context3.yaml"
     @input    = <<END
-<% for h in list %>
+<% for h in @list %>
 <tr>
  <td><%= h[:name] %></td><td><%= h[:mail] %></td>
 </tr>
@@ -263,12 +264,12 @@ END
   end
 
 
-  def test_context1   # -X
+  def test_context1   # -B
     yamlfile = "test.context4.yaml"
     #
     @input = <<'END'
-user = <%= @user %>
-<% for item in @list %>
+user = <%= user %>
+<% for item in list %>
  - <%= item %>
 <% end %>
 END
@@ -278,7 +279,7 @@ user = World
  - bbb
  - ccc
 END
-    @options = "-f #{yamlfile} -X "
+    @options = "-f #{yamlfile} -B "
     #
     yaml = <<-END
 user: World

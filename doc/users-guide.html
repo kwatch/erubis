@@ -67,7 +67,7 @@ It has the following features.
     </li>
     <li><a href="#tut-datafile">Context Data File</a>
     </li>
-    <li><a href="#Preamble and Postamble">Preamble and Postamble</a>
+    <li><a href="#tut-preamble">Preamble and Postamble</a>
     </li>
   </ul>
   </li>
@@ -111,7 +111,7 @@ It has the following features.
     </li>
   </ul>
   </li>
-  <li><a href="#Benchmark">Benchmark</a>
+  <li><a href="#benchmark">Benchmark</a>
   </li>
   <li><a href="#command">Command Reference</a>
   <ul>
@@ -315,9 +315,9 @@ Also Erubis::XmlEruby class (which is equivalent to Erubis::EscapedEruby) is pro
 <div class="program_caption">
 example3.eruby</div>
 <pre class="program">&lt;% for item in list %&gt;
- - <b>&lt;%=</b> item <b>%&gt;</b>
- - <b>&lt;%==</b> item <b>%&gt;</b>
- - <b>&lt;%===</b> item <b>%&gt;</b>
+  &lt;p&gt;<b>&lt;%=</b> item <b>%&gt;</b>&lt;/p&gt;
+  &lt;p&gt;<b>&lt;%==</b> item <b>%&gt;</b>&lt;/p&gt;
+  &lt;p&gt;<b>&lt;%===</b> item <b>%&gt;</b>&lt;/p&gt;
 
 &lt;% end %&gt;
 </pre>
@@ -326,7 +326,7 @@ example3.eruby</div>
 example3.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::<b>EscapedEruby</b>.new(input)           # or Erubis::XmlEruby
+eruby = Erubis::<b>EscapedEruby</b>.new(input)    # or Erubis::XmlEruby
 
 puts "---------- script source ---"
 puts eruby.src                             # print script source
@@ -340,25 +340,25 @@ output</div>
 <pre class="terminal">$ ruby example3.rb 2&gt; stderr.log
 ---------- script source ---
 _out = []; for item in list 
-; _out &lt;&lt; ' - '; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '
-'; _out &lt;&lt; ' - '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
-'; _out &lt;&lt; ' - '; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '
-'; _out &lt;&lt; '
+; _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '&lt;/p&gt;
+
 '; end 
 ;
 _out.join
 ---------- result ----------
- - &amp;lt;aaa&amp;gt;
- - &lt;aaa&gt;
- - 
+  &lt;p&gt;&amp;lt;aaa&amp;gt;&lt;/p&gt;
+  &lt;p&gt;&lt;aaa&gt;&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
 
- - b&amp;amp;b
- - b&amp;b
- - 
+  &lt;p&gt;b&amp;amp;b&lt;/p&gt;
+  &lt;p&gt;b&amp;b&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
 
- - &amp;quot;ccc&amp;quot;
- - "ccc"
- - 
+  &lt;p&gt;&amp;quot;ccc&amp;quot;&lt;/p&gt;
+  &lt;p&gt;"ccc"&lt;/p&gt;
+  &lt;p&gt;&lt;/p&gt;
 
 $ cat stderr.log
 *** debug: item="&lt;aaa&gt;"
@@ -370,10 +370,10 @@ This is available in any language.
 </p>
 <pre class="terminal">$ erubis -l ruby <b>-e Escape</b> example3.eruby
 _out = []; for item in list 
-; _out &lt;&lt; ' - '; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '
-'; _out &lt;&lt; ' - '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
-'; _out &lt;&lt; ' - '; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '
-'; _out &lt;&lt; '
+; _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '&lt;/p&gt;
+
 '; end 
 ;
 _out.join
@@ -457,15 +457,14 @@ For example, '<code>&lt;(!--)?% %(--)?&gt;</code>' will not work while '<code>&l
 Using context object makes clear which data to be used.
 In Erubis, Hash object and Erubis::Context object are available as context object.
 </p>
-<p>When using Hash as context object,
-hash key means variable name and it should be string or symbol.
+<p>Context data can be accessible via isntance variables in eRuby script.
 </p>
 <a name="example5.eruby"></a>
 <div class="program_caption">
 example5.eruby</div>
-<pre class="program">&lt;span&gt;&lt;%= val %&gt;&lt;/span&gt;
+<pre class="program">&lt;span&gt;&lt;%= <b>@val</b> %&gt;&lt;/span&gt;
 &lt;ul&gt;
- &lt;% for item in list %&gt;
+ &lt;% for item in <b>@list</b> %&gt;
   &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
  &lt;% end %&gt;
 &lt;/ul&gt;
@@ -479,9 +478,14 @@ eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## create context object
 ## (key means var name, which may be string or symbol.)
-<b>context = {}</b>
-<b>context[:val]   = 'Erubis Example'</b>
-<b>context['list'] = ['aaa', 'bbb', 'ccc']</b>
+<b>context = {
+  :val   =&gt; 'Erubis Example',
+  'list' =&gt; ['aaa', 'bbb', 'ccc'],
+}</b>
+  # or
+  #   context = Erubis::Context.new()
+  #   context['val'] = 'Erubis Example'
+  #   context[:list] = ['aaa', 'bbb', 'ccc'],
 
 puts <b>eruby.evaluate(context)</b>         # get result
 </pre>
@@ -495,58 +499,59 @@ output</div>
   &lt;li&gt;ccc&lt;/li&gt;
 &lt;/ul&gt;
 </pre>
-<p>When using Erubis::Context object, context data is accessible via instance variables in eRuby template.
+<p>The difference between Erubis#result(binding) and Erubis#evaluate(context) is that the former invokes 'eval @src, binding' and the latter invokes 'context.instance_eval @src'.
+This means that data is passed into eRuby script via local variable when Eruby::binding() is called, or instance variable when Eruby::evaluate() is called.
 </p>
-<a name="example6.eruby"></a>
+<p>Here is the definition of Erubis#result() and Erubis#evaluate().
+</p>
 <div class="program_caption">
-example6.eruby</div>
-<pre class="program">&lt;span&gt;&lt;%= <b>@val</b> %&gt;&lt;/span&gt;
-&lt;ul&gt;
- &lt;% for item in <b>@list</b> %&gt;
-  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
- &lt;% end %&gt;
-&lt;/ul&gt;
+definition of result(binding) and evaluate(context)</div>
+<pre class="program">def result(_binding)
+  if _binding.is_a?(Hash)
+    # load hash data as local variable
+    _h = _binding
+    eval _h.keys.inject("") {|s,k| s &lt;&lt; "#{k} = _h[#{k.inspect}];"}
+    _binding = binding()
+  end
+  return <b>eval(@src, _binding)</b>
+end
+
+def evaluate(context)
+  if context.is_a?(Hash)
+    # convert hash object to Context object
+    hash = context
+    context = Erubis::Context.new
+    hash.each { |key, val| context[key] = val }
+  end
+  return <b>context.instance_eval(@src)</b>
+end
 </pre>
+<p>instance_eval() is defined at Object class so it is able to use any object as a context object as well as Hash or Erubis::Context.
+</p>
 <a name="example6.rb"></a>
 <div class="program_caption">
 example6.rb</div>
-<pre class="program">require 'erubis'
-input = File.read('example6.eruby')
-eruby = Erubis::Eruby.new(input)      # create Eruby object
+<pre class="program">class MyData
+  attr_accessor :val, :list
+end
 
-## create context object
-## (key means var name, which may be string or symbol.)
-<b>context = Erubis::Context.new</b>
-<b>context[:val]   = 'Erubis Example'</b>
-<b>context['list'] = ['aaa', 'bbb', 'ccc']</b>
+<b>mydata = MyData.new</b>
+<b>mydata.val = 'Erubis Example'</b>
+<b>mydata.list = ['aaa', 'bbb', 'ccc']</b>
 
-puts <b>eruby.evaluate(context)</b>         # get result
+require 'erubis'
+eruby = Erubis::Eruby.new(File.read('example5.eruby'))
+puts eruby.evaluate(<b>mydata</b>)
 </pre>
-<div class="terminal_caption">
+<div class="program_caption">
 output</div>
-<pre class="terminal">$ ruby example6.rb
+<pre class="program">$ ruby example6.rb
 &lt;span&gt;Erubis Example&lt;/span&gt;
 &lt;ul&gt;
   &lt;li&gt;aaa&lt;/li&gt;
   &lt;li&gt;bbb&lt;/li&gt;
   &lt;li&gt;ccc&lt;/li&gt;
 &lt;/ul&gt;
-</pre>
-<p><code>eruby.evaluate(context)</code> is almost equivalent to <code>context.instance_eval(eruby.src)</code>.
-In fact, eruby.evaluate() can take any object.
-</p>
-<pre class="program">class MyData
-  def initialize(val, list)
-    @val = val
-    @list = list
-  end
-end
-
-<b>mydata = MyData.new</b>('Erubis Example', ['aaa', 'bbb', 'ccc'])
-
-require 'erubis'
-eruby = Erubis::Eruby.new(File.read('example6.eruby'))
-puts eruby.evaluate(<b>mydata</b>)
 </pre>
 <br>
 
@@ -558,8 +563,8 @@ puts eruby.evaluate(<b>mydata</b>)
 <a name="example7.yaml"></a>
 <div class="program_caption">
 example7.yaml</div>
-<pre class="program">title: Users List
-users:
+<pre class="program"><b>title:</b> Users List
+<b>users:</b>
   - name:  foo
     mail:  foo@mail.com
   - name:  bar
@@ -570,9 +575,9 @@ users:
 <a name="example7.eruby"></a>
 <div class="program_caption">
 example7.eruby</div>
-<pre class="program">&lt;h1&gt;&lt;%= title %&gt;&lt;/h1&gt;
+<pre class="program">&lt;h1&gt;&lt;%= <b>@title</b> %&gt;&lt;/h1&gt;
 &lt;ul&gt;
- &lt;% for user in users %&gt;
+ &lt;% for user in <b>@users</b> %&gt;
   &lt;li&gt;
     &lt;a href="mailto:&lt;%= user['mail']%&gt;"&gt;&lt;%= user['name'] %&gt;&lt;/a&gt;
   &lt;/li&gt;
@@ -628,12 +633,12 @@ example of command-line option '-f'</div>
 &lt;/ul&gt;
 </pre>
 <p>Command-line option '-S' converts keys of mapping in YAML data file from string into symbol.
-Command-line option '-X' use Erubis::Context as context object.
+Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'Erubis::Eruby#evaluate(context)'.
 </p>
 <br>
 
 
-<a name="Preamble and Postamble"></a>
+<a name="tut-preamble"></a>
 <h3 class="section2">Preamble and Postamble</h3>
 <p>The first line ('_out = [];') in the compiled source code is called preamble
 and the last line ('_out.join') is called postamble.
@@ -643,7 +648,7 @@ and the last line ('_out.join') is called postamble.
 <a name="example8.eruby"></a>
 <div class="program_caption">
 example8.eruby</div>
-<pre class="program">&lt;% for item in list %&gt;
+<pre class="program">&lt;% for item in @list %&gt;
  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
 &lt;% end %&gt;
 </pre>
@@ -662,13 +667,13 @@ puts eruby2.src   # don't print preamble and postamble
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example8.rb
-_out = []; for item in list 
+_out = []; for item in @list 
 ; _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
 '; end 
 ;
 _out.join
 --------------
- for item in list 
+ for item in @list 
 ; _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
 '; end 
 ;
@@ -864,7 +869,7 @@ compiled source code</div>
 <a name="printenabled-enhancer-test.eruby"></a>
 <div class="program_caption">
 printenabled-enhancer-test.eruby</div>
-<pre class="program">&lt;% for item in list %&gt;
+<pre class="program">&lt;% for item in @list %&gt;
   &lt;b&gt;<b>&lt;% print item %&gt;</b>&lt;/b&gt;
 &lt;% end %&gt;
 </pre>
@@ -883,9 +888,9 @@ print eruby.evaluate(:list=&gt;list)
 <div class="terminal_caption">
 output result</div>
 <pre class="terminal">$ ruby printenabled-enhancer-test.rb
-  &lt;b&gt;aaa&lt;/b&gt;
-  &lt;b&gt;bbb&lt;/b&gt;
-  &lt;b&gt;ccc&lt;/b&gt;
+aaabbbccc  &lt;b&gt;&lt;/b&gt;
+  &lt;b&gt;&lt;/b&gt;
+  &lt;b&gt;&lt;/b&gt;
 </pre>
 <p>Notice to use Eruby#evaluate() and not to use Eruby#result(),
 because print() method in '&lt;% ... %&gt;' invokes not Kernel#print() but PrintEnabledEnhancer#print().
@@ -1648,7 +1653,7 @@ document.write(_out.join(""));
 <br>
 
 
-<a name="Benchmark"></a>
+<a name="benchmark"></a>
 <h2 class="section1">Benchmark</h2>
 <p>A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
 Here is an example result of benchmark.
@@ -1805,6 +1810,11 @@ Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
 -S            </b></dt>
   <dd class="dd3">
   	Convert mapping key from string to symbol in YAML file.
+  </dd>
+  <dt class="dt3"><b>
+-B		   </b></dt>
+  <dd class="dd3">
+  	invoke Eruby#result() instead of Eruby#evaluate()
   </dd>
   </dl>
 <br>

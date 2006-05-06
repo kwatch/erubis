@@ -184,9 +184,9 @@ Also Erubis::XmlEruby class (which is equivalent to Erubis::EscapedEruby) is pro
 .? example3.eruby
 .-------------------- example3.eruby
 <% for item in list %>
- - {{*<%=*}} item {{*%>*}}
- - {{*<%==*}} item {{*%>*}}
- - {{*<%===*}} item {{*%>*}}
+  <p>{{*<%=*}} item {{*%>*}}</p>
+  <p>{{*<%==*}} item {{*%>*}}</p>
+  <p>{{*<%===*}} item {{*%>*}}</p>
 
 <% end %>
 .--------------------
@@ -195,7 +195,7 @@ Also Erubis::XmlEruby class (which is equivalent to Erubis::EscapedEruby) is pro
 .-------------------- example3.rb
 require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::{{*EscapedEruby*}}.new(input)           # or Erubis::XmlEruby
+eruby = Erubis::{{*EscapedEruby*}}.new(input)    # or Erubis::XmlEruby
 
 puts "---------- script source ---"
 puts eruby.src                             # print script source
@@ -313,14 +313,13 @@ Context object is a set of data which are used in eRuby script.
 Using context object makes clear which data to be used.
 In Erubis, Hash object and Erubis::Context object are available as context object.
 
-When using Hash as context object,
-hash key means variable name and it should be string or symbol.
+Context data can be accessible via isntance variables in eRuby script.
 
 .? example5.eruby
 .-------------------- example5.eruby
-<span><%= val %></span>
+<span><%= {{*@val*}} %></span>
 <ul>
- <% for item in list %>
+ <% for item in {{*@list*}} %>
   <li><%= item %></li>
  <% end %>
 </ul>
@@ -334,9 +333,14 @@ eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## create context object
 ## (key means var name, which may be string or symbol.)
-{{*context = {}*}}
-{{*context[:val]   = 'Erubis Example'*}}
-{{*context['list'] = ['aaa', 'bbb', 'ccc']*}}
+{{*context = {
+  :val   => 'Erubis Example',
+  'list' => ['aaa', 'bbb', 'ccc'],
+}*}}
+  # or
+  #   context = Erubis::Context.new()
+  #   context['val'] = 'Erubis Example'
+  #   context[:list] = ['aaa', 'bbb', 'ccc'],
 
 puts {{*eruby.evaluate(context)*}}         # get result
 .--------------------
@@ -347,55 +351,55 @@ $ ruby example5.rb
 .<<<:! (cd guide.d; ruby example5.rb)
 .====================
 
-When using Erubis::Context object, context data is accessible via instance variables in eRuby template.
+The difference between Erubis#result(binding) and Erubis#evaluate(context) is that the former invokes 'eval @src, binding' and the latter invokes 'context.instance_eval @src'.
+This means that data is passed into eRuby script via local variable when Eruby::binding() is called, or instance variable when Eruby::evaluate() is called.
 
-.? example6.eruby
-.-------------------- example6.eruby
-<span><%= {{*@val*}} %></span>
-<ul>
- <% for item in {{*@list*}} %>
-  <li><%= item %></li>
- <% end %>
-</ul>
+Here is the definition of Erubis#result() and Erubis#evaluate().
+
+.? definition of result(binding) and evaluate(context)
 .--------------------
+def result(_binding)
+  if _binding.is_a?(Hash)
+    # load hash data as local variable
+    _h = _binding
+    eval _h.keys.inject("") {|s,k| s << "#{k} = _h[#{k.inspect}];"}
+    _binding = binding()
+  end
+  return {{*eval(@src, _binding)*}}
+end
+
+def evaluate(context)
+  if context.is_a?(Hash)
+    # convert hash object to Context object
+    hash = context
+    context = Erubis::Context.new
+    hash.each { |key, val| context[key] = val }
+  end
+  return {{*context.instance_eval(@src)*}}
+end
+.--------------------
+
+instance_eval() is defined at Object class so it is able to use any object as a context object as well as Hash or Erubis::Context.
 
 .? example6.rb
 .-------------------- example6.rb
+class MyData
+  attr_accessor :val, :list
+end
+
+{{*mydata = MyData.new*}}
+{{*mydata.val = 'Erubis Example'*}}
+{{*mydata.list = ['aaa', 'bbb', 'ccc']*}}
+
 require 'erubis'
-input = File.read('example6.eruby')
-eruby = Erubis::Eruby.new(input)      # create Eruby object
-
-## create context object
-## (key means var name, which may be string or symbol.)
-{{*context = Erubis::Context.new*}}
-{{*context[:val]   = 'Erubis Example'*}}
-{{*context['list'] = ['aaa', 'bbb', 'ccc']*}}
-
-puts {{*eruby.evaluate(context)*}}         # get result
+eruby = Erubis::Eruby.new(File.read('example5.eruby'))
+puts eruby.evaluate({{*mydata*}})
 .--------------------
 
 .? output
-.====================
+.--------------------
 $ ruby example6.rb
 .<<<:! (cd guide.d; ruby example6.rb)
-.====================
-
-{{,eruby.evaluate(context),}} is almost equivalent to {{,context.instance_eval(eruby.src),}}.
-In fact, eruby.evaluate() can take any object.
-
-.--------------------
-class MyData
-  def initialize(val, list)
-    @val = val
-    @list = list
-  end
-end
-
-{{*mydata = MyData.new*}}('Erubis Example', ['aaa', 'bbb', 'ccc'])
-
-require 'erubis'
-eruby = Erubis::Eruby.new(File.read('example6.eruby'))
-puts eruby.evaluate({{*mydata*}})
 .--------------------
 
 
@@ -406,8 +410,8 @@ It is very useful to import YAML document data into Hash context object.
 
 .? example7.yaml
 .-------------------- example7.yaml
-title: Users List
-users:
+{{*title:*}} Users List
+{{*users:*}}
   - name:  foo
     mail:  foo@mail.com
   - name:  bar
@@ -418,9 +422,9 @@ users:
 
 .? example7.eruby
 .-------------------- example7.eruby
-<h1><%= title %></h1>
+<h1><%= {{*@title*}} %></h1>
 <ul>
- <% for user in users %>
+ <% for user in {{*@users*}} %>
   <li>
     <a href="mailto:<%= user['mail']%>"><%= user['name'] %></a>
   </li>
@@ -457,11 +461,11 @@ $ erubis {{*-f example7.yaml*}} example7.eruby
 .====================
 
 Command-line option '-S' converts keys of mapping in YAML data file from string into symbol.
-Command-line option '-X' use Erubis::Context as context object.
+Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'Erubis::Eruby#evaluate(context)'.
 
 
 
-.$$ Preamble and Postamble
+.$$ Preamble and Postamble   | tut-preamble
 
 The first line ('_out = [];') in the compiled source code is called preamble
 and the last line ('_out.join') is called postamble.
@@ -470,7 +474,7 @@ You can specify Eruby not to print preamble nor postamble with option :preamble 
 
 .? example8.eruby
 .-------------------- example8.eruby
-<% for item in list %>
+<% for item in @list %>
  <b><%= item %></b>
 <% end %>
 .--------------------
@@ -646,7 +650,7 @@ PrintEnabledEnhancer enables you to use print() method in '<% ... %>'.
 
 .? printenabled-enhancer-test.eruby
 .-------------------- printenabled-enhancer-test.eruby
-<% for item in list %>
+<% for item in @list %>
   <b>{{*<% print item %>*}}</b>
 <% end %>
 .--------------------
@@ -1191,7 +1195,7 @@ $ erubis -l js example.ejs
 
 
 
-.$ Benchmark
+.$ Benchmark		| benchmark
 
 A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
 Here is an example result of benchmark.
@@ -1278,7 +1282,7 @@ erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.
 			(ex. -f file1,file2,file3).
   .[ -t            ]	Expand tab character in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
-
+  .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()
 
 
 .$$ Properties	   	| command-props

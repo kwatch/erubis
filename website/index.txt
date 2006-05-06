@@ -1,0 +1,106 @@
+.=title:	Erubis
+.#.?lastupdate:	$Date$
+.?stylesheet:	docstyle.css
+
+
+.$ News
+
+.: 2006-05-05
+	.- {{<erubis_2.0.0|download.cgi>}} released.
+.: 2006-03-05
+	.- {{<erubis_1.1.0|download.cgi>}} released.
+
+
+.$ Introduction
+
+.#.+++++
+.#<p></p>   <!-- escape IE Bug -->
+.#<table style="float:right; width:424px; margin:0px 0px 10px 10px">
+.# <tr>
+.#  <td style="padding:10px 0px 0px 0px">
+.#  Fig1. Business layer and presentation layer have their own data and logic.
+.#  </td>
+.# </tr>
+.# <tr>
+.#  <td style="border-width:1px; border-style:solid; border-color:#999999">
+.#   <img src="img/fig02.png" alt="figure of kwartz"/>
+.#  </td>
+.# </tr>
+.# <tr>
+.#  <td style="padding:20px 0px 0px 0px">
+.#  Fig2. Kwartz vs. Other template system: Kwartz separates presentation logic from presentaion data(=HTML).
+.#  </td>
+.# </tr>
+.# <tr>
+.#  <td style="border-width:1px; border-style:solid; border-color:#999999">
+.#   <img src="img/fig03.png" alt="figure of kwartz"/>
+.#  </td>
+.# </tr>
+.#</table>
+.#.+++++
+
+Erubis is an pure Ruby implementation of eRuby.
+It has the following features.
+.* Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
+.* Auto escaping (sanitizing) support
+.* Auto trimming spaces around '<% %>'
+.* Embedded pattern changeable (default '<% %>')
+.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* Context object available and easy to combine eRuby template with YAML datafile
+.* Print statement available
+.* Easy to expand in subclass
+
+eRuby is "embedded Ruby" in documents.
+The following is an example of eRuby. '<% ... %>' means Ruby statement and '<%= ... %>' means Ruby expression.
+
+.? example.eruby
+.-------------------- example.eruby
+Hello <%= user %>!
+<% for item in list %>
+ * <%= item %>
+<% end %>
+.--------------------
+
+This will be compiled into Ruby program code.
+.====================
+$ erubis -l ruby example.eruby
+.<<<:! erubis -l ruby example.eruby
+.====================
+
+Or you can execute eRuby script directry.
+.====================
+$ cat data.yaml
+.<<<:! cat data.yaml
+$ erubis -f data.yaml example.eruby
+.<<<:! erubis -f data.yaml example.eruby
+.====================
+
+.#+++
+.-------------------- data.yaml
+user: Erubis
+list:
+  - aaa
+  - bbb
+  - ccc
+.--------------------
+.#---
+
+
+Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
+You can embed these language code into your document and compile it to target program code.
+
+
+.$ Download
+	.* if you have installed RubyGems, just type `{{,gem install --remote erubis,}}' to install Erubis
+	.* Or download from {{<RubyForge|http://rubyforge.org/projects/erubis/>}}
+
+.$ Documents
+	.#.* {{<README|README.en.html>}}
+	.* {{<Users' guide|users-guide.html>}}
+	.* {{<Changelog|ChangeLog.txt>}}
+
+.$ License
+	.* {{<GNU General Public License ver.2|http://www.gnu.org/copyleft/gpl.html>}}
+	   
+	   If you need looser license, please contact me.
+

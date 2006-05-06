@@ -68,7 +68,8 @@ class ErubisTest < Test::Unit::TestCase
       begin
         orig = $stdout
         $stdout = stringio = StringIO.new
-        actual = eruby.evaluate(context)
+        #actual = eruby.evaluate(context)
+        actual = eruby.result(context)
       ensure
         $stdout = orig
       end
@@ -78,11 +79,14 @@ class ErubisTest < Test::Unit::TestCase
         assert_nil(actual)
       end
       assert_text_equal(@output, stringio.string)
-    when 'result'
+    when 'evaluate', 'context'
+      actual = eruby.evaluate(context)
+      assert_text_equal(@output, actual)
+    when 'binding'
       actual = eruby.result(binding())
       assert_text_equal(@output, actual)
     else
-      actual = eruby.evaluate(context)
+      actual = eruby.result(context)
       assert_text_equal(@output, actual)
     end
   end
@@ -803,7 +807,7 @@ __END__
 ##
 - name:  tiny1
   class: TinyEruby
-  testopt:  result
+  testopt:  binding
   input: |
       <ul>
        <% for item in list %>
@@ -813,6 +817,34 @@ __END__
   src: |
       _out = []; _out << '<ul>
        '; for item in list ; _out << '
+        <li>'; _out << ( item ).to_s; _out << '</li>
+       '; end ; _out << '
+      </ul>
+      ';
+      _out.join
+  output: |
+      <ul>
+      ^
+        <li><aaa></li>
+      ^
+        <li>b&b</li>
+      ^
+        <li>"ccc"</li>
+      ^
+      </ul>
+##
+- name:  tiny2
+  class: TinyEruby
+  testopt:  evaluate
+  input: |
+      <ul>
+       <% for item in @list %>
+        <li><%= item %></li>
+       <% end %>
+      </ul>
+  src: |
+      _out = []; _out << '<ul>
+       '; for item in @list ; _out << '
         <li>'; _out << ( item ).to_s; _out << '</li>
        '; end ; _out << '
       </ul>

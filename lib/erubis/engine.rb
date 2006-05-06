@@ -26,14 +26,22 @@ module Erubis
   ##   <% end %>
   ##   END
   ##
-  ##   context = Erubis::Context.new
-  ##   context[:user] = 'World'
-  ##   context[:list] = ['aaa', 'bbb', 'ccc']
+  ##   context = Erubis::Context.new(:user=>'World', :list=>['a','b','c'])
+  ##   # or
+  ##   # context = Erubis::Context.new
+  ##   # context[:user] = 'World'
+  ##   # context[:list] = ['a', 'b', 'c']
   ##
   ##   eruby = Erubis::Eruby.new(template)
   ##   print eruby.evaluate(context)
   ##
   class Context
+
+    def initialize(hash=nil)
+      hash.each do |name, value|
+        self[name] = value
+      end if hash
+    end
 
     def [](key)
       return instance_variable_get("@#{key}")
@@ -87,19 +95,19 @@ module Erubis
       return engine
     end
 
-    def result(_binding=TOPLEVEL_BINDING)
-      return eval(@src, _binding, (@filename || '(erubis)'))
+    def result(_binding_or_hash=TOPLEVEL_BINDING)
+      _arg = _binding_or_hash
+      if _arg.is_a?(Hash)
+        ## load _context data as local variables by eval
+        eval _arg.keys.inject("") { |s, k| s << "#{k.to_s} = _arg[#{k.inspect}];" }
+        _arg = binding()
+      end
+      return eval(@src, _arg, (@filename || '(erubis)'))
     end
 
-    def evaluate(_context={})
-      _filename = @filename || '(erubis)'
-      if _context.is_a?(Hash)
-        ## load _context data as local variables by eval
-        eval _context.keys.inject("") { |s, k| s << "#{k.to_s} = _context[#{k.inspect}];" }
-        return eval(@src, binding(), _filename)
-      else
-        return _context.instance_eval(@src, _filename)
-      end
+    def evaluate(context={})
+      context = Context.new(context) if context.is_a?(Hash)
+      return context.instance_eval(@src, (@filename || '(erubis)'))
     end
 
     DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m

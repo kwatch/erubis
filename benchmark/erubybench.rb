@@ -9,7 +9,7 @@ require 'erb'
 require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
-require 'erubis/simplest'
+require 'erubis/tiny'
 require 'erubybench-lib'
 
 

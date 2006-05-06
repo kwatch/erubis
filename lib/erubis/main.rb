@@ -50,7 +50,7 @@ module Erubis
 
     def execute(argv=ARGV)
       ## parse command-line options
-      options, properties = parse_argv(argv, "hvsxTtSbEX", "pcrfKIlae")
+      options, properties = parse_argv(argv, "hvsxTtSbEB", "pcrfKIlae")
       filenames = argv
       options[?h] = true if properties[:help]
 
@@ -130,7 +130,11 @@ module Erubis
         s = engine.src
         s.sub!(/^\s*[\w]+\s*\z/, '') if options[?x]
       when nil, 'exec', 'execute'
-        s = engine.evaluate(context)
+        if options[?B]
+          s = engine.result(context)
+        else
+          s = engine.evaluate(context)
+        end
       end
       return s
     end
@@ -156,7 +160,7 @@ Usage: #{command} [..options..] [file ...]
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
-  -X            : set mapping data in YAML file into instance variables
+  -B            : invoke result(binding()) instead of evaluate(context)
 
 END
       #  -r library    : require library
@@ -298,12 +302,7 @@ END
         convert_mapping_key_from_string_to_symbol(ydoc) if options[?S]
         hash.update(ydoc)
       end
-      if options[?X]    # conver hash to context object
-        context = Context.new
-        hash.each { |name, value| context[name] = value }
-      else
-        context = hash
-      end
+      context = hash
       return context
     end
 

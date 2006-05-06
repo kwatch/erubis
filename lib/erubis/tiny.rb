@@ -12,7 +12,8 @@ module Erubis
   ## ex.
   ##   eruby = TinyEruby.new(File.read('example.rhtml'))
   ##   print eruby.src                 # print ruby code
-  ##   print eruby.result(binding())   # eval ruby code
+  ##   print eruby.result(binding())   # eval ruby code with Binding object
+  ##   print eruby.evalute(context)    # eval ruby code with context object
   ##
   class TinyEruby
 
@@ -48,6 +49,15 @@ module Erubis
 
     def result(binding=TOPLEVEL_BINDING)
       eval @src, binding
+    end
+
+    def evaluate(context=Object.new)
+      if context.is_a?(Hash)
+        obj = Object.new
+        context.each do |k, v| obj.instance_variable_set("@#{k}", v) end
+        context = obj
+      end
+      context.instance_eval @src
     end
 
   end

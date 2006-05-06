@@ -2,7 +2,15 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-.: Rev.16
+.: Rev.17 (2005-05-06)
+	.- [enhance] Context#initialize() can take a hash object
+	.- [enhance] Engine#result() can take a hash object
+	.- [enhance] TinyEruby#evaluate() added
+	.- [change] Engine#evaluate() convert hash into Context object
+	.- [change] command-line option '-X' removed and add '-B' (invoke result(binding))
+	.- [enhance] add 'website/' directory
+
+.: Rev.16 (2005-05-03)
 	.- [change] 'simplest.rb' is renamed to 'tiny.rb'
 	.- [enhance] add Context class
 	.- [enahnce] Engine#enhacne() now support Context object
