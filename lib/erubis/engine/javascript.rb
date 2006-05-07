@@ -31,7 +31,7 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "#{@indent}#{@out} = [];"
+      src << "#{@indent}var #{@out} = [];"
     end
 
     def escape_text(text)

@@ -110,6 +110,7 @@ module Erubis
       val = nil
       if filenames && !filenames.empty?
         filenames.each do |filename|
+          test(?f, filename)  or raise CommandOptionError.new("#{filename}: file not found.")
           engine.filename = filename
           engine.compile!(File.read(filename))
           print val if val = do_action(action, engine, context, options)
@@ -293,6 +294,12 @@ END
       hash = {}
       return hash unless yamlfiles
       yamlfiles.split(/,/).each do |yamlfile|
+        if yamlfile == '-'
+          str = $stdin.read()
+        else
+          test(?f, yamlfile)  or raise CommandOptionError.new("#{yamlfile}: file not found.")
+          str = File.read(yamlfile)
+        end
         str = yamlfile == '-' ? $stdin.read() : File.read(yamlfile)
         str = untabify(str) if options[?t]
         ydoc = YAML.load(str)

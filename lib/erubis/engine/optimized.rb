@@ -68,7 +68,8 @@ module Erubis
     def add_stmt(src, code)
       switch_to_stmt(src) if @initialized
       #super
-      src << code << ';'
+      src << code
+      src << ';' unless code[-1] == ?\n
     end
 
     def add_expr_literal(src, code)

@@ -47,15 +47,18 @@ module Erubis
   end
 
 
-  #--
-  #class ArrayBufferEruby < Eruby
-  #  include ArrayBufferEnhancer
-  #end
-  #++
+  class ArrayBufferEruby < Eruby
+    include ArrayBufferEnhancer
+  end
 
 
   class StringBufferEruby < Eruby
     include StringBufferEnhancer
+  end
+
+
+  class NoTextEruby < Eruby
+    include NoTextEnhancer
   end
 
 

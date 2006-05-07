@@ -105,7 +105,7 @@ module Erubis
       return eval(@src, _arg, (@filename || '(erubis)'))
     end
 
-    def evaluate(context={})
+    def evaluate(context=Context.new)
       context = Context.new(context) if context.is_a?(Hash)
       return context.instance_eval(@src, (@filename || '(erubis)'))
     end

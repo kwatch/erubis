@@ -55,12 +55,12 @@ __END__
        <tbody>
       ';   i = 0
            list.each_with_index do |item, i| 
-      ; _out << '  <tr>
+       _out << '  <tr>
          <td>'; _out << ( i+1 ).to_s; _out << '</td>
          <td>'; _out << Erubis::XmlHelper.escape_xml( list ); _out << '</td>
         </tr>
       ';  end 
-      ; _out << ' </tbody>
+       _out << ' </tbody>
       </table>
       '; $stderr.puts("*** debug: i+1=#{(i+1).inspect}"); _out << '
       ';
@@ -322,7 +322,7 @@ __END__
       </table>
       <%=== i %>
   expected: |4
-      _out = [];
+      var _out = [];
          var user = 'Erubis';
          var list = ['<aaa>', 'b&b', '"ccc"'];
       

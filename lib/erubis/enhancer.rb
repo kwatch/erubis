@@ -101,10 +101,6 @@ module Erubis
       src << " print '" << escape_text(text) << "';" unless text.empty?
     end
 
-    def add_stmt(src, code)
-      src << code << ';'
-    end
-
     def add_expr_literal(src, code)
       src << ' print((' << code << ').to_s);'
     end
@@ -131,7 +127,7 @@ module Erubis
   module PrintEnabledEnhancer
 
     def self.desc   # :nodoc:
-      "enable to use print statement in '<% %>'"
+      "enable to use print function in '<% %>'"
     end
 
     def add_preamble(src)
@@ -143,6 +139,18 @@ module Erubis
       args.each do |arg|
         @_out << arg.to_s
       end
+    end
+
+    def evaluate(context=Context.new)
+      _src = @src
+      if context.is_a?(Hash)
+        context.each do |key, val| instance_variable_set("@#{key}", val) end
+      else
+        context.instance_variables.each do |name|
+          instance_variable_set(name, context.instance_variable_get(name))
+        end
+      end
+      return instance_eval(_src, (@filename || '(erubis)'))
     end
 
   end
@@ -212,6 +220,27 @@ module Erubis
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
       src << "_out\n"
+    end
+
+  end
+
+
+  ##
+  ## remove text and leave code, especially useful when debugging.
+  ##
+  ## ex.
+  ##   $ erubis -s -e NoText file.eruby | more
+  ##
+  ## this is language independent.
+  ##
+  module NoTextEnhancer
+
+    def self.desc   # :nodoc:
+      "remove text and leave code (useful when debugging)"
+    end
+
+    def add_text(src, text)
+      src << ("\n" * text.count("\n"))
     end
 
   end

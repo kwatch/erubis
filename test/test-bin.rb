@@ -48,9 +48,9 @@ END
 _out = []; _out << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list 
-; _out << '  - '; _out << ( item ).to_s; _out << '
+ _out << '  - '; _out << ( item ).to_s; _out << '
 '; end 
-; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
+ _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
 ';
 _out.join
 END

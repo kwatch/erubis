@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.18 (2005-05-07)
+	.- [enhance] new module NoTextEnhancer added
+	.- [change] Eruby#add_stmt() desn't add ';' when the last character is ?\n
+	.- [bugfix] PrintEnableEnhancer#evaluate() added to evaluate with it's context
+
 .: Rev.17 (2005-05-06)
 	.- [enhance] Context#initialize() can take a hash object
 	.- [enhance] Engine#result() can take a hash object

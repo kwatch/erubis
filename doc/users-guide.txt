@@ -69,15 +69,13 @@ Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
 .$$ Basic Example	| tut-basic
 
-Here is a most basic example of Erubis.
+Here is a basic example of Erubis.
 
 .? example1.eruby
 .-------------------- example1.eruby
 <ul>
   {{*<% for item in list %>*}}
-  <li>
-    {{*<%= item %>*}}
-  </li>
+  <li>{{*<%= item %>*}}</li>
   {{*<% end %>*}}
   {{*<%# here is ignored because starting with '#' %>*}}
 </ul>
@@ -101,6 +99,14 @@ puts {{*eruby.result(binding())*}}        # get result
 .====================
 $ ruby example1.rb
 .<<<:! (cd guide.d; ruby example1.rb)
+.====================
+
+Erubis has command 'erubis'.  Command-line option '-s' shows the compiled source code of eRuby script.
+
+.? example of command-line option '-s'
+.====================
+$ erubis {{*-s*}} example1.eruby
+.<<<:! (cd guide.d; erubis -s example1.eruby)
 .====================
 
 
@@ -168,7 +174,7 @@ $ ruby example2.rb
 
 
 
-.$$ Escape 	| tut-escape
+.$$ Escape		| tut-escape
 
 Erubis have ability to escape (sanitize) expression.
 Erubis::Eruby class act as the following:
@@ -208,7 +214,7 @@ puts eruby.result(binding())               # get result
 .? output
 .====================
 $ ruby example3.rb 2> stderr.log
-.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)
+.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)  | ruby -pe 'sub! /_out << [E(].*?;|\$stderr.*?;/, "{{*\\&*}}"'
 .#--- script source ---
 .#_out = ''; _out << "<ul>\n"
 .#   for item in list 
@@ -254,14 +260,14 @@ Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by c
 .? example to override Erubis::Eruby#escaped_expr()
 .--------------------
 class CGIEruby < Erubis::Eruby
-  def escaped_expr(code)
+  def {{*escaped_expr(code)*}}
     return "CGI.escapeHTML((#{code.strip}).to_s)"
     #return "h(#{code.strip})"
   end
 end
 
 class LatexEruby < Erubi::Eruby
-  def escaped_expr(code)
+  def {{*escaped_expr(code)*}}
     return "(#{code}).gsub(/[%\\]/,'\\\\\&')"
   end
 end
@@ -387,6 +393,7 @@ class MyData
   attr_accessor :val, :list
 end
 
+## any object can be a context object
 {{*mydata = MyData.new*}}
 {{*mydata.val = 'Erubis Example'*}}
 {{*mydata.list = ['aaa', 'bbb', 'ccc']*}}
@@ -397,10 +404,10 @@ puts eruby.evaluate({{*mydata*}})
 .--------------------
 
 .? output
-.--------------------
+.====================
 $ ruby example6.rb
 .<<<:! (cd guide.d; ruby example6.rb)
-.--------------------
+.====================
 
 
 
@@ -519,32 +526,34 @@ end
 You can specify enhancers in command-line with option '-e'.
 The following is an example to use some enhancers in command-line.
 .====================
-$ erubis -l ruby -e Escape,PercentLine,BiPattern example.eruby
+$ erubis -se Escape,PercentLine,BiPattern example.eruby
 .====================
 
 The following is the list of enhancers.
 
-.: {{*EscapeEnhander*}} (language-independent)
+.: {{<EscapeEnhander|#escape-enhancer>}} (language-independent)
 	Switch '<%= %>' to escaped and '<%== %>' to unescaped.
-.: {{*StdoutEnhancer*}} (only for Eruby)
+.: {{<StdoutEnhancer|#stdout-enhancer>}} (only for Eruby)
 	Use $stdout instead of array buffer.
-.: {{*PrintOutEnhancer*}} (only for Eruby)
+.: {{<PrintOutEnhancer|#printout-enhancer>}} (only for Eruby)
 	Use "print(...)" statement insead of "_out << ...".
-.: {{*PrintEnabledEnhancer*}} (only for Eruby)
+.: {{<PrintEnabledEnhancer|#printenabled-enhancer>}} (only for Eruby)
 	Enable to use print() in '<% ... %>'.
-.: {{*ArrayEnhancer*}} (only for Eruby)
+.: {{<ArrayEnhancer|#array-enhancer>}} (only for Eruby)
 	Return array of string instead of returning string.
-.: {{*ArrayBufferEnhancer*}} (only for Eruby)
+.: {{<ArrayBufferEnhancer|#arraybuffer-enhancer>}} (only for Eruby)
 	Use array buffer. This is included in Erubis::Eruby by default.
-.: {{*StringBufferEnhancer*}} (only for Eruby)
+.: {{<StringBufferEnhancer|#stringbuffer-enhancer>}} (only for Eruby)
 	Use string buffer. It is a little slower than ArrayBufferEnhancer.
-.: {{*SimplifiedEnhancer*}} (language-independent)
+.: {{<NoTextEnhancer|#notext-enhancer>}} (language-independent)
+	Print embedded code only and ignore normal text.
+.: {{<SimplifyEnhancer|#simplify-enhancer>}} (language-independent)
 	Make compile faster but don't trim spaces around '<% %>'.
-.: {{*BiPatternEnhancer*}} (language-independent)
+.: {{<BiPatternEnhancer|#bipattern-enhancer>}} (language-independent)
 	[experimental] Enable to use another embedded pattern with '<% %>'.
-.: {{*PercentLineEnhancer*}} (language-independent)
+.: {{<PercentLineEnhancer|#percentline-enhancer>}} (language-independent)
 	Regard lines starting with '%' as Ruby code. This is for compatibility with eruby and ERB.
-.: {{*HeaderFooterEnhancer*}} (language-independent)
+.: {{<HeaderFooterEnhancer|#headerfooter-enhancer>}} (language-independent)
 	[experimental] Enable you to add header and footer in eRuby script.
 
 
@@ -563,32 +572,40 @@ For example, class BiPatternEruby includes BiPatternEnhancer.
 
 
 
-.$$ EscapeEnhancer	| escape-enhander
+.$$ EscapeEnhancer	| escape-enhancer
 
 EscapeEnhancer switches '<%= ... %>' to escaped and '<%== ... %>' to unescaped.
 
 .? example.eruby
 .-------------------- example.eruby
+<div>
 <% for item in list %>
-  <b><%= item %></b>
-  <b><%== item %></b>
+  <p><%= item %></p>
+  <p><%== item %></p>
 <% end %>
+</div>
 .--------------------
 
-.? escape-enhancer-test.rb
-.-------------------- escape-enhancer-test.rb
-require 'erubis'
-class EscapedEruby < Erubis::Eruby
-  include Erubis::EscapeEnhancer
-end
-eruby = EscapedEruby.new(File.read('example.eruby'))
-print eruby.src
-.--------------------
+.#.? escape-example.rb
+.#.-------------------- escape-example.rb
+.#require 'erubis'
+.#class EscapedEruby < Erubis::Eruby
+.#  include Erubis::EscapeEnhancer
+.#end
+.#eruby = EscapedEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby escape-example.rb
+.#.<<<:! (cd guide.d; ruby escape-example.rb)
+.#.====================
 
 .? compiled source code
 .====================
-$ ruby escape-enhancer-test.rb
-.<<<:! (cd guide.d; ruby escape-enhancer-test.rb)
+$ erubis -se Escape example.eruby
+.<<<:! erubis -se Escape guide.d/example.eruby | ruby -pe 'sub! /_out << [E(].*?;/, "{{*\\&*}}"'
 .====================
 
 EscapeEnhancer is language-independent.
@@ -600,20 +617,26 @@ EscapeEnhancer is language-independent.
 StdoutEnhancer use $sdtdout instead of array buffer.
 Therefore, you can use 'print' statement in embedded ruby code.
 
-.? stdout-enhancer-test.rb
-.-------------------- stdout-enhancer-test.rb
-require 'erubis'
-class StdoutEruby < Erubis::Eruby
-  include Erubis::StdoutEnhancer
-end
-eruby = StdoutEruby.new(File.read('example.eruby'))
-print eruby.src
-.--------------------
+.#.? stdout-example.rb
+.#.-------------------- stdout-example.rb
+.#require 'erubis'
+.#class StdoutEruby < Erubis::Eruby
+.#  include Erubis::StdoutEnhancer
+.#end
+.#eruby = StdoutEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby stdout-example.rb
+.#.<<<:! (cd guide.d; ruby stdout-example.rb)
+.#.====================
 
 .? compiled source code
 .====================
-$ ruby stdout-enhancer-test.rb
-.<<<:! (cd guide.d; ruby stdout-enhancer-test.rb)
+$ erubis -se Stdout example.eruby
+.<<<:! erubis -se Stdout guide.d/example.eruby | ruby -pe 'sub! /^_out = .*;/, "{{*\\&*}}"'
 .====================
 
 StdoutEnhancer is only for Eruby.
@@ -624,20 +647,26 @@ StdoutEnhancer is only for Eruby.
 
 PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_out << ...'.
 
-.? printstatement-enhancer-test.rb
-.-------------------- printstatement-enhancer-test.rb
-require 'erubis'
-class PrintOutEruby < Erubis::Eruby
-  include Erubis::PrintOutEnhancer
-end
-eruby = PrintOutEruby.new(File.read('example.eruby'))
-print eruby.src
-.--------------------
+.#.? printstatement-example.rb
+.#.-------------------- printstatement-example.rb
+.#require 'erubis'
+.#class PrintOutEruby < Erubis::Eruby
+.#  include Erubis::PrintOutEnhancer
+.#end
+.#eruby = PrintOutEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby printstatement-example.rb
+.#.<<<:! (cd guide.d; ruby printstatement-example.rb)
+.#.====================
 
 .? compiled source code
 .====================
-$ ruby printstatement-enhancer-test.rb
-.<<<:! (cd guide.d; ruby printstatement-enhancer-test.rb)
+$ erubis -se PrintOut example.eruby
+.<<<:! erubis -se PrintOut guide.d/example.eruby | ruby -pe 'gsub! /print/, "{{*\\&*}}"'
 .====================
 
 PrintOutEnhancer is only for Eruby.
@@ -648,20 +677,20 @@ PrintOutEnhancer is only for Eruby.
 
 PrintEnabledEnhancer enables you to use print() method in '<% ... %>'.
 
-.? printenabled-enhancer-test.eruby
-.-------------------- printenabled-enhancer-test.eruby
+.? printenabled-example.eruby
+.-------------------- printenabled-example.eruby
 <% for item in @list %>
   <b>{{*<% print item %>*}}</b>
 <% end %>
 .--------------------
 
-.? printenabled-enhancer-test.rb
-.-------------------- printenabled-enhancer-test.rb
+.? printenabled-example.rb
+.-------------------- printenabled-example.rb
 require 'erubis'
 class PrintEnabledEruby < Erubis::Eruby
   include Erubis::PrintEnabledEnhancer
 end
-input = File.read('printenabled-enhancer-test.eruby')
+input = File.read('printenabled-example.eruby')
 eruby = PrintEnabledEruby.new(input)
 list = ['aaa', 'bbb', 'ccc']
 print eruby.evaluate(:list=>list)
@@ -669,8 +698,8 @@ print eruby.evaluate(:list=>list)
 
 .? output result
 .====================
-$ ruby printenabled-enhancer-test.rb
-.<<<:! (cd guide.d; ruby printenabled-enhancer-test.rb)
+$ ruby printenabled-example.rb
+.<<<:! (cd guide.d; ruby printenabled-example.rb)
 .====================
 
 Notice to use Eruby#evaluate() and not to use Eruby#result(),
@@ -684,20 +713,25 @@ PrintEnabledEnhancer is only for Eruby.
 
 ArrayEnhancer makes Eruby to return an array of strings.
 
-.? array-enhancer-test.rb
-.-------------------- array-enhancer-test.rb
-require 'erubis'
-class ArrayEruby < Erubis::Eruby
-  include Erubis::ArrayEnhancer
-end
-eruby = ArrayEruby.new(File.read('example.eruby'))
-print eruby.src
-.--------------------
+.#.? array-example.rb
+.#.-------------------- array-example.rb
+.#require 'erubis'
+.#class ArrayEruby < Erubis::Eruby
+.#  include Erubis::ArrayEnhancer
+.#end
+.#eruby = ArrayEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby array-example.rb
+.#.<<<:! (cd guide.d; ruby array-example.rb)
+.#.====================
 
 .? compiled source code
 .====================
-$ ruby array-enhancer-test.rb
-.<<<:! (cd guide.d; ruby array-enhancer-test.rb)
+.<<<:! erubis -se Array guide.d/example.eruby | ruby -pe 'sub! /^_out( = \[\];)?/, "{{*\\&*}}"'
 .====================
 
 ArrayEnhancer is only for Eruby.
@@ -718,21 +752,68 @@ ArrayBufferEnhancer is only for Eruby.
 
 StringBufferEnhancer makes Eruby to use string buffer.
 
-.? stringbuffer-enhancer-test.rb
-.-------------------- stringbuffer-enhancer-test.rb
-require 'erubis'
-class StringBufferEruby < Erubis::Eruby
-  include Erubis::StringBufferEnhancer
-end
-eruby = StringBufferEruby.new(File.read('example.eruby'))
-print eruby.src
+.#.? stringbuffer-example.rb
+.#.-------------------- stringbuffer-example.rb
+.#require 'erubis'
+.#class StringBufferEruby < Erubis::Eruby
+.#  include Erubis::StringBufferEnhancer
+.#end
+.#eruby = StringBufferEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby stringbuffer-example.rb
+.#.<<<:! (cd guide.d; ruby stringbuffer-example.rb)
+.#.====================
+
+.====================
+$ erubis -se StringBuffer example.eruby
+.<<<:! erubis -se StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_out( = ..;)?/,"{{*\\&*}}")'
+.====================
+
+.#+++
+.--------- printen
+.---------
+.#---
+
+
+
+StringBufferEnhancer is only for Eruby.
+
+
+
+.$$ NoTextEnhancer	| notext-enhancer
+
+NoTextEnhancer suppress output of text and prints only embedded code.
+This is useful especially when debugging a complex eRuby script.
+
+.? notext-example.eruby
+.-------------------- notext-example.eruby
+<h3>List</h3>
+<% if !@list || @list.empty? %>
+<p>not found.</p>
+<% else %>
+<table>
+  <tbody>
+    <% @list.each_with_index do |item, i| %>
+    <tr bgcolor="<%= i%2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
+      <td><%= item %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% end %>
 .--------------------
 
-.? compiled source code
+.? output example of NoTextEnhancer
 .====================
-$ ruby stringbuffer-enhancer-test.rb
-.<<<:! (cd guide.d; ruby stringbuffer-enhancer-test.rb)
+$ erubis {{*-se NoText*}} notext-example.eruby
+.<<<:! (cd guide.d; erubis -se NoText notext-example.eruby)
 .====================
+
+NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
 
 
 
@@ -740,21 +821,29 @@ $ ruby stringbuffer-enhancer-test.rb
 
 SimplifyEnhancer makes compiling a little faster but don't trim spaces around '<% %>'.
 
-.? simplify-enhancer-test.rb
-.-------------------- simplify-enhancer-test.rb
-require 'erubis'
-class SimplifiedEruby < Erubis::Eruby
-  include Erubis::SimplifyEnhancer
-end
-eruby = SimplifiedEruby.new(File.read('example.eruby'))
-print eruby.src
-.--------------------
+.#.? simplify-example.rb
+.#.-------------------- simplify-example.rb
+.#require 'erubis'
+.#class SimplifiedEruby < Erubis::Eruby
+.#  include Erubis::SimplifyEnhancer
+.#end
+.#eruby = SimplifiedEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby simplify-example.rb
+.#.<<<:! (cd guide.d; ruby simplify-example.rb)
+.#.====================
 
 .? compiled source code
 .====================
-$ ruby simplify-enhancer-test.rb
-.<<<:! (cd guide.d; ruby simplify-enhancer-test.rb)
+$ erubis -se Simplify example.euby
+.<<<:! erubis -se Simplify guide.d/example.eruby
 .====================
+
+SimplifyEnhancer is language-independent.
 
 
 
@@ -764,30 +853,36 @@ BiPatternEnhancer enables to use another embedded pattern with '<% %>'.
 By Default, '[= ... =]' is available for expression.
 You can specify pattern by :bipattern property.
 
-.? bipattern-enhancer-test.rb
-.-------------------- bipattern-enhancer-test.rb
-require 'erubis'
-class BiPatternEruby < Erubis::Eruby
-  include Erubis::BiPatternEnhancer
-end
-
-input = File.read('bipattern-enhancer-test.rhtml')
-eruby = BiPatternEruby.new(input)
-print eruby.src
-.--------------------
-
-.? bipattern-enhancer-test.rhtml
-.-------------------- bipattern-enhancer-test.rhtml
+.? bipattern-example.rhtml
+.-------------------- bipattern-example.rhtml
 <% for item in list %>
   <b>{{*[= item =]*}}</b>
   <b>{{*[== item =]*}}</b>
 <% end %>
 .--------------------
 
+.#.? bipattern-example.rb
+.#.-------------------- bipattern-example.rb
+.#require 'erubis'
+.#class BiPatternEruby < Erubis::Eruby
+.#  include Erubis::BiPatternEnhancer
+.#end
+.#
+.#input = File.read('bipattern-example.rhtml')
+.#eruby = BiPatternEruby.new(input)
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby bipattern-example.rb
+.#.<<<:! (cd guide.d; ruby bipattern-example.rb)
+.#.====================
+
 .? compiled source code
 .====================
-$ ruby bipattern-enhancer-test.rb
-.<<<:! (cd guide.d; ruby bipattern-enhancer-test.rb)
+$ erubis -se BiPattern bipattern-example.rhtml
+.<<<:! erubis -se BiPattern guide.d/bipattern-example.rhtml | ruby -pe 'sub! /_out << [E(].*;/, "{{*\\&*}}"'
 .====================
 
 BiPatternEnhancer is language-independent.
@@ -799,30 +894,36 @@ BiPatternEnhancer is language-independent.
 PercentLineEnhancer regards lines starting with '%' as Ruby code.
 This is for compatibility with eruby and ERB.
 
-.? percentline-enhancer-test.rb
-.-------------------- percentline-enhancer-test.rb
-require 'erubis'
-class PercentLineEruby < Erubis::Eruby
-  include Erubis::PercentLineEnhancer
-end
-
-input = File.read('percentline-enhancer-test.rhtml')
-eruby = PercentLineEruby.new(input)
-print eruby.src
-.--------------------
-
-.? percentline-enhancer-test.rhtml
-.-------------------- percentline-enhancer-test.rhtml
+.? percentline-example.rhtml
+.-------------------- percentline-example.rhtml
 {{*% for item in list*}}
   <b><%= item %></b>
 {{*% end*}}
 %% lines with '%%'
 .--------------------
 
+.#.? percentline-example.rb
+.#.-------------------- percentline-example.rb
+.#require 'erubis'
+.#class PercentLineEruby < Erubis::Eruby
+.#  include Erubis::PercentLineEnhancer
+.#end
+.#
+.#input = File.read('percentline-example.rhtml')
+.#eruby = PercentLineEruby.new(input)
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby percentline-example.rb
+.#.<<<:! (cd guide.d; ruby percentline-example.rb)
+.#.====================
+
 .? compiled source code
 .====================
-$ ruby percentline-enhancer-test.rb
-.<<<:! (cd guide.d; ruby percentline-enhancer-test.rb)
+$ erubis -se PercentLine percentline-example.rhtml
+.<<<:! erubis -se PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
 .====================
 
 PercentLineEnhancer is language-independent.
@@ -835,20 +936,8 @@ PercentLineEnhancer is language-independent.
 
 HeaderFooterEnhancer enables you to add header and footer in eRuby script.
 
-.? headerfooter-enhancer-test.rb
-.-------------------- headerfooter-enhancer-test.rb
-require 'erubis'
-class HeaderFooterEruby < Erubis::Eruby
-  include Erubis::HeaderFooterEnhancer
-end
-
-input = File.read('headerfooter-enhancer-test.eruby')
-eruby = HeaderFooterEruby.new(input)
-print eruby.src
-.--------------------
-
-.? headerfooter-enhancer-test.eruby
-.-------------------- headerfooter-enhancer-test.eruby
+.? headerfooter-example.eruby
+.-------------------- headerfooter-example.eruby
 {{*<!--#header:*}}
 {{*def list_items(items)*}}
 {{*#-->*}}
@@ -860,10 +949,28 @@ print eruby.src
 {{*#-->*}}
 .--------------------
 
+.#.? headerfooter-example.rb
+.#.-------------------- headerfooter-example.rb
+.#require 'erubis'
+.#class HeaderFooterEruby < Erubis::Eruby
+.#  include Erubis::HeaderFooterEnhancer
+.#end
+.#
+.#input = File.read('headerfooter-example.eruby')
+.#eruby = HeaderFooterEruby.new(input)
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby headerfooter-example.rb
+.#.<<<:! (cd guide.d; ruby headerfooter-example.rb)
+.#.====================
+
 .? compiled source code
 .====================
-$ ruby headerfooter-enhancer-test.rb
-.<<<:! (cd guide.d; ruby headerfooter-enhancer-test.rb)
+$ erubis -se HeaderFooter headerfooter-example.eruby
+.<<<:! erubis -se HeaderFooter guide.d/headerfooter-example.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 Compare to the following:
@@ -884,27 +991,27 @@ Compare to the following:
 .? compiled source code
 .====================
 $ erubis -s normal-eruby-test.eruby
-.<<<:! (cd guide.d; erubis -s normal-eruby-test.eruby)
+.<<<:! erubis -s guide.d/normal-eruby-test.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 Header and footer can be in any position in eRuby script,
 that is, header is no need to be in the head of eRuby script.
 
 .#+++
-.-------------------- headerfooter-enhancer-test2.rb
+.-------------------- headerfooter-example2.rb
 require 'erubis'
 class HeaderFooterEruby < Erubis::Eruby
   include Erubis::HeaderFooterEnhancer
 end
 
-input = File.read('headerfooter-enhancer-test2.rhtml')
+input = File.read('headerfooter-example2.rhtml')
 eruby = HeaderFooterEruby.new(input)
 print eruby.src
 .--------------------
 .#---
 
-.? headerfooter-enhancer-test2.rhtml
-.-------------------- headerfooter-enhancer-test2.rhtml
+.? headerfooter-example2.rhtml
+.-------------------- headerfooter-example2.rhtml
 <?xml version="1.0"?>
 <html>
 {{*<!--#header:*}}
@@ -917,10 +1024,16 @@ print eruby.src
 </html>
 .--------------------
 
+.#.? compiled source code
+.#.====================
+.#$ ruby headerfooter-example2.rb
+.#.<<<:! (cd guide.d; ruby headerfooter-example2.rb)
+.#.====================
+
 .? compiled source code
 .====================
-$ ruby headerfooter-enhancer-test2.rb
-.<<<:! (cd guide.d; ruby headerfooter-enhancer-test2.rb)
+$ erubis -se HeaderFooter headerfooter-example2.rhtml
+.<<<:! erubis -se HeaderFooter guide.d/headerfooter-example2.rhtml | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 HeaderFooterEnhancer is experimental and is language-independent.
@@ -951,7 +1064,7 @@ Erubis supports the following language currently:
   <p>Hello {{*<%= $user %>*}}!</p>
   <table>
    <tbody>
-    {{*<% $i = 0 %>*}}
+    {{*<% $i = 0; %>*}}
     {{*<% foreach ($list as $item) { %>*}}
     {{*<%   $i++; %>*}}
     <tr bgcolor={{*"<%= $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %>"*}}>
@@ -1014,7 +1127,7 @@ $ erubis -l c example.ec
 
 
 
-.?? Java	| lang-java
+.$$ Java	| lang-java
 
 .? Example.ejava
 .-------------------- Example.ejava
@@ -1030,6 +1143,7 @@ public class Example {
   }
 
   public String view() {
+    StringBuffer _out = new StringBuffer();
 %>*}}
 <html>
  <body>
@@ -1047,6 +1161,7 @@ public class Example {
  <body>
 </html>
 {{*<%
+    return _out.toString();
   }
 
   public static void main(String[] args) {
@@ -1075,7 +1190,7 @@ public class Example {
 
 .? compiled source code
 .====================
-$ erubis -l java example.ejava
+$ erubis -b -l java example.ejava
 .<<<:! (cd guide.d; erubis -l java example.ejava)
 .====================
 
@@ -1195,7 +1310,63 @@ $ erubis -l js example.ejs
 
 
 
-.$ Benchmark		| benchmark
+.$ Other Topics	| topics
+
+
+
+.$$ TinyEruby class	| topics-tinyeruby
+
+TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
+If you don't need any enhancements of Erubis and only require simple eRuby implementation,
+try TinyEruby class.
+
+
+
+.$$ NoTextEnhancer in PHP	| topics-php
+
+NoTextEnhancer is quite useful not only for eRuby but also for PHP.
+It can "drop" HTML text and show up embedded Ruby/PHP code.
+
+For example, see the following PHP script.
+
+.? notext-example.php
+.-------------------- notext-example.php
+<html>
+  <body>
+    <h3>List</h3>
+    <?php if (!$list || count($list) == 0) { ?>
+    <p>not found.</p>
+    <?php } else { ?>
+    <table>
+      <tbody>
+        <?php $i = 0; ?>
+        <?php foreach ($list as $item) { ?>
+        <tr bgcolor="<?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>">
+          <td><?php echo $item; ?></td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+    <?php } ?>
+  </body>
+</html>
+.--------------------
+
+This is complex because PHP code and HTML document are mixed.
+NoTextEnhancer can separate PHP code from HTML document.
+
+.? example of using NoTextEnhancer with PHP file
+.====================
+.#$ erubis -l php -e NoText -p '<\?php \?>' notext-example.php
+.#.<<<:! erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php
+$ erubis -l php -e NoText -p '<\?php \?>' notext-example.php | uniq
+.<<<:! erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
+.#erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | ruby -ne 'print unless /^\s*$/'
+.====================
+
+
+
+.$$ Benchmark		| topics-benchmark
 
 A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
 Here is an example result of benchmark.
@@ -1210,11 +1381,11 @@ Erubis::StringBufferEruby         186.130000   2.600000 188.730000 (190.374098)
 Erubis::SimplifiedEruby           130.100000   2.210000 132.310000 (133.426010)
 Erubis::StdoutEruby               106.010000   2.130000 108.140000 (108.999193)
 Erubis::StdoutSimplifiedEruby      97.130000   2.180000  99.310000 (100.104433)
-Erubis::PrintOutEruby             109.900000   2.090000 111.990000 (112.854442)
-Erubis::PrintOutSimplifiedEruby    93.120000   2.140000  95.260000 ( 96.002970)
+.#Erubis::PrintOutEruby             109.900000   2.090000 111.990000 (112.854442)
+.#Erubis::PrintOutSimplifiedEruby    93.120000   2.140000  95.260000 ( 96.002970)
 Erubis::TinyEruby                 118.740000   2.360000 121.100000 (122.141380)
 Erubis::TinyStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
-Erubis::TinyPrintEruby             86.540000   1.970000  88.510000 ( 89.208078)
+.#Erubis::TinyPrintEruby             86.540000   1.970000  88.510000 ( 89.208078)
 .____________________
 
 .? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4
@@ -1227,11 +1398,11 @@ Erubis::StringBufferEruby          47.270000   1.980000  49.250000 ( 73.867537)
 Erubis::SimplifiedEruby            34.310000   1.600000  35.910000 ( 51.762841)
 Erubis::StdoutEruby                26.240000   1.490000  27.730000 ( 41.840430)
 Erubis::StdoutSimplifiedEruby      25.380000   1.340000  26.720000 ( 37.231918)
-Erubis::PrintOutEruby              26.850000   1.260000  28.110000 ( 38.378227)
-Erubis::PrintOutSimplifiedEruby    24.160000   1.280000  25.440000 ( 40.048199)
+.#Erubis::PrintOutEruby              26.850000   1.260000  28.110000 ( 38.378227)
+.#Erubis::PrintOutSimplifiedEruby    24.160000   1.280000  25.440000 ( 40.048199)
 Erubis::TinyEruby                  31.690000   1.590000  33.280000 ( 49.862091)
 Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
-Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
+.#Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
 .____________________
 
 This shows that:
