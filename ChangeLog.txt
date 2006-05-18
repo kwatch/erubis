@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.20 (2005-05-18)
+	.- [bugfix] test/test-erubis.rb fixed
+
 .: Rev.19 (2005-05-18)
 	.- [change] engine/xxx.rb is renamed to engine/exxx.rb
 	.- [enhance] add 'bin/notext' command

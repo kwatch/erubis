@@ -525,7 +525,7 @@ __END__
   src: |
       _out = [];
         for item in list 
-       _out << ( item ).to_s;
+             _out << ( item ).to_s;
         end 
       
       _out.join
