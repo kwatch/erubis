@@ -1,0 +1,139 @@
+#!/usr/bin/env ruby
+
+###
+### notext  -  retrieve embedded code from eRuby, PHP, and so on
+###
+### $Rev$
+### $Release$
+### $Copyright$
+###
+
+require 'erubis'
+require 'erubis/engine/eruby'
+require 'erubis/engine/ephp'
+require 'erubis/engine/ec'
+require 'erubis/engine/ejava'
+require 'erubis/engine/escheme'
+require 'erubis/engine/eperl'
+require 'erubis/engine/ejavascript'
+
+
+def help()
+  command = File.basename($0)
+  s = <<END
+#{command} - retrieve embedded code from eRuby, PHP, and so on.
+Usage:  #{command} [-hncu] [-l lang] [-p pattern] file.php ...
+  -h         : help
+  -n         : show line number
+  -c         : compact mode (delete empty lines)
+  -u         : uniq mode (compress repeated empty lines to a line)
+  -l lang    : 'ruby' or 'php'
+  -p pattern : embedded pattern (default '<% %>' or '<\\?(?:php|=|\\s) \\?>')
+END
+  return s
+end
+
+
+## Engine classes which include NoTextEnhancer
+klass_table = {}
+lang_list = %w[ruby php c java scheme perl javascript]
+lang_list.each do |lang|
+  eval <<-END
+    class NoTextE#{lang} < Erubis::E#{lang}
+      include Erubis::NoTextEnhancer
+    end
+  END
+  klass_table[lang] = Object.const_get("NoTextE#{lang}")
+end
+
+
+## parse command-line options
+options = {}
+while !ARGV.empty? && ARGV[0][0] == ?-
+  optstr = ARGV.shift
+  optstr = optstr.sub(/^-/, '')
+  while !optstr.empty?
+    optch = optstr[0]
+    optstr = optstr[1, optstr.length-1]
+    case optch
+    when ?h, ?n, ?c, ?u       # help, linenum, compact, uniq
+      options[optch] = true
+    when ?l, ?p               # lang, pattern
+      arg = !optstr.empty? ? optstr : ARGV.shift
+      unless arg
+        words = { ?l => 'lang name', ?p => 'pattern' }
+        $stderr.puts "-#{optch.chr}: #{words[optch]} required."
+        exit(1)
+      end
+      options[optch] = arg
+    else
+      $stderr.puts "-#{optch.chr}: unknown option."
+      exit(1)
+    end
+  end
+end
+
+opt_help    = options[?h]
+opt_linenum = options[?n]
+opt_compact = options[?c]
+opt_unique  = options[?u]
+opt_pattern = options[?p]
+opt_lang    = options[?l]
+
+if opt_lang
+  unless lang_list.include?(opt_lang)
+    $stderr.puts "-l #{opt_lang}: not supported."
+    exit(1)
+  end
+end
+
+
+## help message
+if opt_help
+  print help()
+  exit(0)
+end
+
+
+## determine pattern and lang
+pattern = opt_pattern
+lang    = opt_lang
+unless lang
+  filename = ARGV[0]
+  if filename =~ /\.(\w+)$/
+    case suffix = $1
+    when 'php', 'php5', 'inc' ;  lang = 'php'
+    when 'ec'                 ;  lang = 'c'
+    when 'ejava'              ;  lang = 'java'
+    when 'escheme', 'escm'    ;  lang = 'scheme'
+    when 'eperl'              ;  lang = 'perl'
+    when 'js', 'javascript'   ;  lang = 'javascript'
+    else                      ;  lang = 'ruby'
+    end
+  else
+    lang = 'ruby'
+  end
+end
+pattern ||= lang == 'php' ? '<\?(?:php\b|=|\s) \?>' : '<% %>'
+
+
+## read input and create engine
+klass = klass_table[lang]
+input = ARGF.read()
+engine = klass.new(input, :pattern=>pattern, :trim=>false)
+
+
+## print embedded code
+n = 0
+prev_empty = false
+engine.src.each_line do |line|
+  n += 1
+  if line =~ /^\s*$/
+    next if opt_compact || (opt_unique && prev_empty)
+    print opt_linenum && !opt_unique ? ("%3d: \n" % n) : "\n"
+    prev_empty = true
+  else
+    print opt_linenum ? ("%3d: %s" % [n, line]) : line
+    prev_empty = false
+  end
+end

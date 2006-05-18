@@ -7,13 +7,13 @@
 require "#{File.dirname(__FILE__)}/test.rb"
 
 require 'erubis'
-require 'erubis/engine/ruby'
-require 'erubis/engine/php'
-require 'erubis/engine/c'
-require 'erubis/engine/java'
-require 'erubis/engine/scheme'
-require 'erubis/engine/perl'
-require 'erubis/engine/javascript'
+require 'erubis/engine/eruby'
+require 'erubis/engine/ephp'
+require 'erubis/engine/ec'
+require 'erubis/engine/ejava'
+require 'erubis/engine/escheme'
+require 'erubis/engine/eperl'
+require 'erubis/engine/ejavascript'
 
 
 class EnginesTest < Test::Unit::TestCase

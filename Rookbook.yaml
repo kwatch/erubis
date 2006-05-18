@@ -109,7 +109,7 @@ recipes:
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#
-	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
+	store 'lib/**/*', 'bin/erubis', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)
 	  !exclude_libs.include?(base)
 	end

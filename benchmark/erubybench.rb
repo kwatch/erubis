@@ -6,11 +6,14 @@
 
 require 'eruby'
 require 'erb'
+require 'stringio'
+
 require 'erubis'
 require 'erubis/engine/enhanced'
 require 'erubis/engine/optimized'
 require 'erubis/tiny'
 require 'erubybench-lib'
+
 
 
 ## default values
@@ -137,6 +140,11 @@ testdefs_str = <<END
   class:  Erubis::StringBufferEruby
   return: str
   skip:   no
+
+- name:   ErubisStringIO
+  class:  Erubis::StringIOEruby
+  return: str
+  skip:   yes
 
 - name:   ErubisSimplified
   class:  Erubis::SimplifiedEruby

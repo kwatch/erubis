@@ -183,7 +183,7 @@ $ contrib/inline-require -I lib bin/erubis &gt; contrib/erubis
 <h2 class="section1">Tutorial</h2>
 <a name="tut-basic"></a>
 <h3 class="section2">Basic Example</h3>
-<p>Here is a most basic example of Erubis.
+<p>Here is a basic example of Erubis.
 </p>
 <a name="example1.eruby"></a>
 <div class="program_caption">
@@ -248,19 +248,48 @@ _out.join
 <a name="tut-trim"></a>
 <h3 class="section2">Trimming Spaces</h3>
 <p>Erubis deletes spaces around '&lt;% %&gt;' automatically, while it leaves spaces around '&lt;%= %&gt;'.
-If you want leave spaces around '&lt;% %&gt;', add <code>:trim=&gt;false</code> option to Erubis::Eruby.new().
 </p>
 <a name="example2.eruby"></a>
 <div class="program_caption">
 example2.eruby</div>
 <pre class="program">&lt;ul&gt;
-  &lt;% for item in list %&gt;
+  &lt;% for item in list %&gt;      # trimmed
   &lt;li&gt;
-    &lt;%= item %&gt;
+    &lt;%= item %&gt;               # not trimmed
   &lt;/li&gt;
-  &lt;% end %&gt;
+  &lt;% end %&gt;                   # trimmed
 &lt;/ul&gt;
 </pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -s example2.eruby
+_out = []; _out &lt;&lt; '&lt;ul&gt;
+';   for item in list 
+ _out &lt;&lt; '  &lt;li&gt;
+'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;/li&gt;
+';   end 
+ _out &lt;&lt; '&lt;/ul&gt;
+';
+_out.join
+</pre>
+<p>If you want leave spaces around '&lt;% %&gt;', add command-line option '-T'.
+</p>
+<div class="terminal_caption">
+compiled source code with command-line option '-T'</div>
+<pre class="terminal">$ erubis -s <b>-T</b> example2.eruby
+_out = []; _out &lt;&lt; '&lt;ul&gt;
+'; _out &lt;&lt; '  '; for item in list ; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;li&gt;
+'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
+'; _out &lt;&lt; '  &lt;/li&gt;
+'; _out &lt;&lt; '  '; end ; _out &lt;&lt; '
+'; _out &lt;&lt; '&lt;/ul&gt;
+';
+_out.join
+</pre>
+<p>Or add option <code>:trim=&gt;false</code> to Erubis::Eruby.new().
+</p>
 <a name="example2.rb"></a>
 <div class="program_caption">
 example2.rb</div>
@@ -420,7 +449,7 @@ end
 
 <a name="tut-pattern"></a>
 <h3 class="section2">Embedded Pattern</h3>
-<p>You can change embedded pattern '<code>&lt;% %&gt;</code>' to another.
+<p>You can change embedded pattern '<code>&lt;% %&gt;</code>' to another with command-line option '-p' or option '<code>:pattern=&gt;...</code>' of Erubis::Eruby.new().
 </p>
 <a name="example4.eruby"></a>
 <div class="program_caption">
@@ -428,6 +457,14 @@ example4.eruby</div>
 <pre class="program"><b>&lt;!--%</b> for item in list <b>%--&gt;</b>
   &lt;p&gt;<b>&lt;!--%=</b> item <b>%--&gt;</b>&lt;/p&gt;
 <b>&lt;!--%</b> end <b>%--&gt;</b>
+</pre>
+<div class="terminal_caption">
+compiled source code with command-line option '-p'</div>
+<pre class="terminal">$ erubis -s <b>-p '&lt;!--% %--&gt;'</b> example4.eruby
+_out = []; for item in list 
+ _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+'; end 
+_out.join
 </pre>
 <a name="example4.rb"></a>
 <div class="program_caption">
@@ -657,7 +694,7 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 <p>The first line ('_out = [];') in the compiled source code is called preamble
 and the last line ('_out.join') is called postamble.
 </p>
-<p>You can specify Eruby not to print preamble nor postamble with option :preamble and :postamble.
+<p>Command-line option '-b' skips the output of preamble and postamble.
 </p>
 <a name="example8.eruby"></a>
 <div class="program_caption">
@@ -666,6 +703,22 @@ example8.eruby</div>
  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
 &lt;% end %&gt;
 </pre>
+<p>compiled source code with and without command-line option '-b'
+</p>
+<pre class="terminal">## without '-b'
+$ erubis -s example8.eruby
+<b>_out = [];</b> for item in @list 
+ _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+<b>_out.join</b>
+## with '-b'
+$ erubis -s <b>-b</b> example8.eruby
+ for item in @list 
+ _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+'; end 
+</pre>
+<p>Erubis::Eruby.new option '<code>:preamble=&gt;false</code>' and '<code>:postamble=&gt;false</code>' also suppress output of preamble or postamle.
+</p>
 <a name="example8.rb"></a>
 <div class="program_caption">
 example8.rb</div>
@@ -690,8 +743,6 @@ _out.join
  _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
 '; end 
 </pre>
-<p>The command-line option '-b' specify both :preamble and :postamble to false.
-</p>
 <br>
 
 
@@ -970,21 +1021,21 @@ notext-example.eruby</div>
 </pre>
 <div class="terminal_caption">
 output example of NoTextEnhancer</div>
-<pre class="terminal">$ erubis <b>-se NoText</b> notext-example.eruby
+<pre class="terminal">$ erubis -Tse NoText notext-example.eruby
 _out = [];
- if !@list || @list.empty? 
+ if !@list || @list.empty? ;
 
- else 
-
-
-     @list.each_with_index do |item, i| 
- _out &lt;&lt; ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
- _out &lt;&lt; ( item ).to_s;
-
-     end 
+ else ;
 
 
- end 
+     @list.each_with_index do |item, i| ;
+                  _out &lt;&lt; ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+           _out &lt;&lt; ( item ).to_s;
+
+     end ;
+
+
+ end ;
 _out.join
 </pre>
 <p>NoTextEnhancer is language-independent. It is useful even if you are PHP user, see <a href="#topics-php">this section</a>.
@@ -1688,20 +1739,20 @@ NoTextEnhancer can separate PHP code from HTML document.
 </p>
 <div class="terminal_caption">
 example of using NoTextEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -l php -e NoText -p '&lt;\?php \?&gt;' notext-example.php | uniq
+<pre class="terminal">$ erubis -T -l php -e NoText -p '&lt;\?php \?&gt;' notext-example.php | uniq
 
-&lt;?php     if (!$list || count($list) == 0) { ?&gt;
+    &lt;?php if (!$list || count($list) == 0) { ?&gt;
 
-&lt;?php     } else { ?&gt;
+    &lt;?php } else { ?&gt;
 
-&lt;?php         $i = 0; ?&gt;
-&lt;?php         foreach ($list as $item) { ?&gt;
-&lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;
-&lt;?php echo $item; ?&gt;
+        &lt;?php $i = 0; ?&gt;
+        &lt;?php foreach ($list as $item) { ?&gt;
+                     &lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;
+              &lt;?php echo $item; ?&gt;
 
-&lt;?php         } ?&gt;
+        &lt;?php } ?&gt;
 
-&lt;?php     } ?&gt;
+    &lt;?php } ?&gt;
 
 </pre>
 <br>

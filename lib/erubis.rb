@@ -15,39 +15,39 @@
 ## * class OptimizedXmlEruby - optimized XmlEruby class faster than FastXmlEruby
 ##
 ## example:
-##   list = ['<aaa>', 'b&b', '"ccc"']
 ##   input = <<'END'
 ##    <ul>
-##     <% for item in list %>
+##     <% for item in @list %>
 ##      <li><%= item %>
 ##          <%== item %></li>
 ##     <% end %>
 ##    </ul>
 ##   END
-##   eruby = Erubis::XmlEruby.new(input)  # or try OptimizedXmlEruby
+##   list = ['<aaa>', 'b&b', '"ccc"']
+##   eruby = Erubis::Eruby.new(input)
 ##   puts "--- source ---"
 ##   puts eruby.src
 ##   puts "--- result ---"
-##   puts eruby.result(binding())
-##   # or puts eruby.evaluate(:list=>list)
+##   puts eruby.evaluate(:list=>list)
+##   # or puts eruby.result(binding())
 ##
 ## result:
 ##   --- source ---
 ##   _out = ""; _out << " <ul>\n"
 ##      for item in list
-##   _out << "   <li>"; _out << Erubis::XmlEruby.escape( item ); _out << "\n"
-##   _out << "       "; _out << ( item ).to_s; _out << "</li>\n"
+##   _out << "   <li>"; _out << ( item ).to_s; _out << "\n"
+##   _out << "       "; _out << Erubis::XmlEruby.escape( item ); _out << "</li>\n"
 ##      end
 ##   _out << " </ul>\n"
 ##   _out
 ##   --- result ---
 ##    <ul>
-##      <li>&lt;aaa&gt;
-##          <aaa></li>
-##      <li>b&amp;b
-##          b&b</li>
-##      <li>&quot;ccc&quot;
-##          "ccc"</li>
+##      <li><aaa>
+##          &lt;aaa&gt;</li>
+##      <li>b&b
+##          b&amp;b</li>
+##      <li>"ccc"
+##          &quot;ccc&quot;</li>
 ##    </ul>
 ##
 
@@ -56,15 +56,15 @@ require 'erubis/engine'
 require 'erubis/helper'
 require 'erubis/enhancer'
 #require 'erubis/tiny'
-require 'erubis/engine/ruby'
+require 'erubis/engine/eruby'
 #require 'erubis/engine/enhanced'    # enhanced eruby engines
 #require 'erubis/engine/optimized'   # generates optimized ruby code
-#require 'erubis/engine/php'
-#require 'erubis/engine/c'
-#require 'erubis/engine/java'
-#require 'erubis/engine/scheme'
-#require 'erubis/engine/perl'
-#require 'erubis/engine/javascript'
+#require 'erubis/engine/ephp'
+#require 'erubis/engine/ec'
+#require 'erubis/engine/ejava'
+#require 'erubis/engine/escheme'
+#require 'erubis/engine/eperl'
+#require 'erubis/engine/ejavascript'
 
 
 require 'erubis/local-setting'

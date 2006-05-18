@@ -5,7 +5,7 @@
 ##
 
 require 'erubis/enhancer'
-require 'erubis/engine/ruby'
+require 'erubis/engine/eruby'
 
 
 module Erubis
@@ -54,6 +54,11 @@ module Erubis
 
   class StringBufferEruby < Eruby
     include StringBufferEnhancer
+  end
+
+
+  class StringIOEruby < Eruby
+    include StringIOEnhancer
   end
 
 

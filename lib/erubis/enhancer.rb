@@ -180,14 +180,14 @@ module Erubis
 
 
   ##
-  ## use array buffer instead of string buffer (included in Eruby by default)
+  ## use an Array object for buffering (included in Eruby by default)
   ##
   ## this is only for Eruby.
   ##
   module ArrayBufferEnhancer
 
     def self.desc   # :nodoc:
-      "use array buffer instead of string (included in Eruby by default)"
+      "use an Array object for buffering (included in Eruby by default)"
     end
 
     def add_preamble(src)
@@ -203,14 +203,14 @@ module Erubis
 
 
   ##
-  ## use string buffer instead of array buffer
+  ## use String class for buffering
   ##
   ## this is only for Eruby.
   ##
   module StringBufferEnhancer
 
     def self.desc   # :nodoc:
-      "use string buffer instead of array buffer"
+      "use a String object for buffering"
     end
 
     def add_preamble(src)
@@ -220,6 +220,29 @@ module Erubis
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
       src << "_out\n"
+    end
+
+  end
+
+
+  ##
+  ## use StringIO class for buffering
+  ##
+  ## this is only for Eruby.
+  ##
+  module StringIOEnhancer  # :nodoc:
+
+    def self.desc   # :nodoc:
+      "use a StringIO object for buffering"
+    end
+
+    def add_preamble(src)
+      src << "_out = StringIO.new;"
+    end
+
+    def add_postamble(src)
+      src << "\n" unless src[-1] == ?\n
+      src << "_out.string\n"
     end
 
   end
@@ -241,6 +264,10 @@ module Erubis
 
     def add_text(src, text)
       src << ("\n" * text.count("\n"))
+      if text[-1] != ?\n
+        text =~ /^(.*?)\z/
+        src << (' ' * $1.length)
+      end
     end
 
   end

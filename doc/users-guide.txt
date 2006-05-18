@@ -114,18 +114,33 @@ $ erubis {{*-s*}} example1.eruby
 .$$ Trimming Spaces	| tut-trim
 
 Erubis deletes spaces around '<% %>' automatically, while it leaves spaces around '<%= %>'.
-If you want leave spaces around '<% %>', add {{,:trim=>false,}} option to Erubis::Eruby.new().
 
 .? example2.eruby
 .-------------------- example2.eruby
 <ul>
-  <% for item in list %>
+  <% for item in list %>      # trimmed
   <li>
-    <%= item %>
+    <%= item %>               # not trimmed
   </li>
-  <% end %>
+  <% end %>                   # trimmed
 </ul>
 .--------------------
+
+.? compiled source code
+.====================
+$ erubis -s example2.eruby
+.<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -s guide.d/example2.eruby)
+.====================
+
+If you want leave spaces around '<% %>', add command-line option '-T'.
+
+.? compiled source code with command-line option '-T'
+.====================
+$ erubis -s {{*-T*}} example2.eruby
+.<<<:! erubis -s -T guide.d/example2.eruby
+.====================
+
+Or add option {{,:trim=>false,}} to Erubis::Eruby.new().
 
 .? example2.rb
 .-------------------- example2.rb
@@ -277,7 +292,7 @@ end
 
 .$$ Embedded Pattern	| tut-pattern
 
-You can change embedded pattern '{{,<% %>,}}' to another.
+You can change embedded pattern '{{,<% %>,}}' to another with command-line option '-p' or option '{{,:pattern=>...,}}' of Erubis::Eruby.new().
 
 .? example4.eruby
 .-------------------- example4.eruby
@@ -285,6 +300,12 @@ You can change embedded pattern '{{,<% %>,}}' to another.
   <p>{{*<!--%=*}} item {{*%-->*}}</p>
 {{*<!--%*}} end {{*%-->*}}
 .--------------------
+
+.? compiled source code with command-line option '-p'
+.====================
+$ erubis -s {{*-p '<!--% %-->'*}} example4.eruby
+.<<<:! erubis -s -p '<!--% %-->' guide.d/example4.eruby
+.====================
 
 .? example4.rb
 .-------------------- example4.rb
@@ -477,7 +498,7 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 The first line ('_out = [];') in the compiled source code is called preamble
 and the last line ('_out.join') is called postamble.
 
-You can specify Eruby not to print preamble nor postamble with option :preamble and :postamble.
+Command-line option '-b' skips the output of preamble and postamble.
 
 .? example8.eruby
 .-------------------- example8.eruby
@@ -485,6 +506,18 @@ You can specify Eruby not to print preamble nor postamble with option :preamble 
  <b><%= item %></b>
 <% end %>
 .--------------------
+
+compiled source code with and without command-line option '-b'
+.====================
+## without '-b'
+$ erubis -s example8.eruby
+.<<<:! erubis -s guide.d/example8.eruby | ruby -pe 'sub! /^_out.*?(;|$)/, "{{*\\&*}}"'
+## with '-b'
+$ erubis -s {{*-b*}} example8.eruby
+.<<<:! erubis -s -b guide.d/example8.eruby
+.====================
+
+Erubis::Eruby.new option '{{,:preamble=>false,}}' and '{{,:postamble=>false,}}' also suppress output of preamble or postamle.
 
 .? example8.rb
 .-------------------- example8.rb
@@ -504,7 +537,7 @@ $ ruby example8.rb
 .<<<:! (cd guide.d; ruby example8.rb)
 .====================
 
-The command-line option '-b' specify both :preamble and :postamble to false.
+.#The command-line option '-b' specify both :preamble and :postamble to false.
 
 
 
@@ -809,8 +842,8 @@ This is useful especially when debugging a complex eRuby script.
 
 .? output example of NoTextEnhancer
 .====================
-$ erubis {{*-se NoText*}} notext-example.eruby
-.<<<:! (cd guide.d; erubis -se NoText notext-example.eruby)
+$ erubis -Tse NoText notext-example.eruby
+.<<<:! (cd guide.d; erubis -Tse NoText notext-example.eruby)
 .====================
 
 NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -1357,11 +1390,8 @@ NoTextEnhancer can separate PHP code from HTML document.
 
 .? example of using NoTextEnhancer with PHP file
 .====================
-.#$ erubis -l php -e NoText -p '<\?php \?>' notext-example.php
-.#.<<<:! erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php
-$ erubis -l php -e NoText -p '<\?php \?>' notext-example.php | uniq
-.<<<:! erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
-.#erubis -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | ruby -ne 'print unless /^\s*$/'
+$ erubis -T -l php -e NoText -p '<\?php \?>' notext-example.php | uniq
+.<<<:! erubis -T -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
 .====================
 
 

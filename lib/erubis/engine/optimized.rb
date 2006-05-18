@@ -5,7 +5,7 @@
 ##
 
 
-require 'erubis/engine/ruby'
+require 'erubis/engine/eruby'
 
 
 module Erubis
