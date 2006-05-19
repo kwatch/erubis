@@ -19,19 +19,19 @@ module Erubis
     def self.supported_properties()   # :nodoc:
       list = super
       #list << [:indent,   '',       "indent spaces (ex. '  ')"]
-      #list << [:out,      '_out',   "output buffer name"]
+      #list << [:buf,      '_buf',   "output buffer name"]
       return list
     end
 
     def initialize(input, properties={})
       @indent = properties[:indent] || ''
-      @out = properties[:out] || '_out'
-      #@outclass = properties[:outclass] || 'StringBuffer'
+      @buf = properties[:out] || '_buf'
+      #@bufclass = properties[:outclass] || 'StringBuffer'
       super
     end
 
     def add_preamble(src)
-      src << "#{@indent}var #{@out} = [];"
+      src << "#{@indent}var #{@buf} = [];"
     end
 
     def escape_text(text)
@@ -53,7 +53,7 @@ module Erubis
     def add_text(src, text)
       return if text.empty?
       add_indent(src, @indent)
-      src << @out << '.push("'
+      src << @buf << '.push("'
       s = escape_text(text)
       if s[-1] == ?\n
         s[-2, 2] = ''
@@ -69,12 +69,12 @@ module Erubis
 
     def add_expr_literal(src, code)
       add_indent(src, @indent)
-      src << @out << '.push(' << code.strip << ');'
+      src << @buf << '.push(' << code.strip << ');'
     end
 
     def add_expr_escaped(src, code)
       add_indent(src, @indent)
-      src << @out << '.push(' << escaped_expr(code) << ');'
+      src << @buf << '.push(' << escaped_expr(code) << ');'
     end
 
     def add_expr_debug(src, code)
@@ -85,7 +85,7 @@ module Erubis
 
     def add_postamble(src)
       src << "\n" if src[-1] == ?;
-      src << @indent << 'document.write(' << @out << ".join(\"\"));\n"
+      src << @indent << 'document.write(' << @buf << ".join(\"\"));\n"
     end
 
   end

@@ -73,7 +73,7 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_out = $stdout;"
+      src << "_buf = $stdout;"
     end
 
     def add_postamble(src)
@@ -84,14 +84,14 @@ module Erubis
 
 
   ##
-  ## use print statement instead of '_out << ...'
+  ## use print statement instead of '_buf << ...'
   ##
   ## this is only for Eruby.
   ##
   module PrintOutEnhancer
 
     def self.desc   # :nodoc:
-      "use print statement instead of '_out << ...'"
+      "use print statement instead of '_buf << ...'"
     end
 
     def add_preamble(src)
@@ -131,13 +131,13 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "@_out = "
+      src << "@_buf = "
       super
     end
 
     def print(*args)
       args.each do |arg|
-        @_out << arg.to_s
+        @_buf << arg.to_s
       end
     end
 
@@ -168,35 +168,35 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_out = [];"
+      src << "_buf = [];"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_out\n"
+      src << "_buf\n"
     end
 
   end
 
 
   ##
-  ## use an Array object for buffering (included in Eruby by default)
+  ## use an Array object as buffer (included in Eruby by default)
   ##
   ## this is only for Eruby.
   ##
   module ArrayBufferEnhancer
 
     def self.desc   # :nodoc:
-      "use an Array object for buffering (included in Eruby by default)"
+      "use an Array object for buffering (included in Eruby class)"
     end
 
     def add_preamble(src)
-      src << "_out = [];"
+      src << "_buf = [];"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_out.join\n"
+      src << "_buf.join\n"
     end
 
   end
@@ -214,12 +214,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_out = '';"
+      src << "_buf = '';"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_out\n"
+      src << "_buf\n"
     end
 
   end
@@ -237,12 +237,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_out = StringIO.new;"
+      src << "_buf = StringIO.new;"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_out.string\n"
+      src << "_buf.string\n"
     end
 
   end
@@ -417,13 +417,13 @@ module Erubis
   ##   <% end %>
   ##
   ##   $ erubis -s ex1.eruby
-  ##   _out = []; def list_items(list)
+  ##   _buf = []; def list_items(list)
   ##   ;   for item in list
-  ##   ; _out << '<li>'; _out << ( item ).to_s; _out << '</li>
+  ##   ; _buf << '<li>'; _buf << ( item ).to_s; _buf << '</li>
   ##   ';   end
   ##   ; end
   ##   ;
-  ##   _out.join
+  ##   _buf.join
   ##
   ##   ## with header and footer
   ##   $ cat ex2.eruby
@@ -440,13 +440,13 @@ module Erubis
   ##   $ erubis -s -c HeaderFooterEruby ex4.eruby
   ##
   ##   def list_items(list)
-  ##    _out = []; _out << '
+  ##    _buf = []; _buf << '
   ##   ';  for item in list
-  ##   ; _out << '<li>'; _out << ( item ).to_s; _out << '</li>
+  ##   ; _buf << '<li>'; _buf << ( item ).to_s; _buf << '</li>
   ##   ';  end
-  ##   ; _out << '
+  ##   ; _buf << '
   ##   ';
-  ##   _out.join
+  ##   _buf.join
   ##   end
   ##
   ##   ====================

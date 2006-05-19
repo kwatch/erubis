@@ -5,10 +5,8 @@
 
 .$ News
 
-.: 2006-05-05
-	.- {{<erubis_2.0.0|download.cgi>}} released.
-.: 2006-03-05
-	.- {{<erubis_1.1.0|download.cgi>}} released.
+.* [2006-05-??] {{<erubis_2.0.0|download.cgi>}} released.
+.* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
 
 
 .$ Introduction
@@ -39,7 +37,7 @@
 .#</table>
 .#.+++++
 
-Erubis is an pure Ruby implementation of eRuby.
+Erubis is a pure Ruby implementation of eRuby.
 It has the following features.
 .* Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
 .* Auto escaping (sanitizing) support
@@ -47,24 +45,27 @@ It has the following features.
 .* Embedded pattern changeable (default '<% %>')
 .* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 .* Context object available and easy to combine eRuby template with YAML datafile
-.* Print statement available
-.* Easy to expand in subclass
+.* Easy to expand in subclass, for example:
+  .- Print statement support
+  .- Lines starting with percent character ('%') support
+  .- Another embedded pattern support
+  .- etc...
 
 eRuby is "embedded Ruby" in documents.
 The following is an example of eRuby. '<% ... %>' means Ruby statement and '<%= ... %>' means Ruby expression.
 
 .? example.eruby
 .-------------------- example.eruby
-Hello <%= user %>!
-<% for item in list %>
+Hello <%= @user %>!
+<% for item in @list %>
  * <%= item %>
 <% end %>
 .--------------------
 
 This will be compiled into Ruby program code.
 .====================
-$ erubis -l ruby example.eruby
-.<<<:! erubis -l ruby example.eruby
+$ erubis -x example.eruby
+.<<<:! erubis -x example.eruby
 .====================
 
 Or you can execute eRuby script directry.
@@ -87,7 +88,7 @@ list:
 
 
 Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
-You can embed these language code into your document and compile it to target program code.
+You can embed these language code into your document and compile it into target program code.
 
 
 .$ Download
@@ -97,7 +98,7 @@ You can embed these language code into your document and compile it to target pr
 .$ Documents
 	.#.* {{<README|README.en.html>}}
 	.* {{<Users' guide|users-guide.html>}}
-	.* {{<Changelog|ChangeLog.txt>}}
+	.* {{<Changelog|ChangeLog>}}
 
 .$ License
 	.* {{<GNU General Public License ver.2|http://www.gnu.org/copyleft/gpl.html>}}

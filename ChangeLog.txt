@@ -1,6 +1,15 @@
-.=title:	ChangeLog
+.=document:	ChangeLog
 .?lastupdate:	$Date$
 .?version:	$Rev$
+
+.: Rev.21 (2005-05-19)
+	.- [change] '_out' is changed to '_buf'
+	.- [change] option '-s' is obsolete
+	.- [change] option '-E' is obsolete
+	.- [change] option '-e' is renamed to '-E'
+	.- [change] use command-line option object in Main class
+	.- [refact] Helper#escape_xml() is changed to call String#gsub a time
+	.- [change] test-bin.rb invoke Main.new.execute(), not 'ruby $script'
 
 .: Rev.20 (2005-05-18)
 	.- [bugfix] test/test-erubis.rb fixed
@@ -135,3 +144,4 @@
 .: Rev.1 (2005-01-29)
 	.- initial commit
 
+.-document:

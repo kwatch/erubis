@@ -2,24 +2,51 @@
 # $Release$
 # $Copyright$
 
-- release:   1.1
-  date:      205-03-05
-  desc:
-    - tag:   enhance
-      text:  '<%# ... %>' is supported
-    - tag:   enhance
-      text:  PrintEnhancer, PrintEruby, and PrintXmlEruby added
+- release:   2.0.0
+  date:      2006-05-20
+  changes:
+    - module 'PrintEnhancer' is renamed to 'PrintEnabledEnahncer'
+    - module 'FastEnhancer' and class 'FastEruby' is obsolete because they are integrated into Eruby class
+    - Eruby#evaluate() calls instance_eval() instead of eval()
+    - XmlEruby.escape_xml() is moved to XmlHelper.escape_xml()
+  enhances:
+    - multi programming language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+    - class Eruby runs very fast because FastEnhancer module is integrated into Eruby by default
+    - TinyEruby class (tiny.rb) is added
+    - module ArrayBufferEnhancer added
+    - module ArrayEnhancer added
+    - module BiPatternEnhancer added
+    - module EscapeEnhancer added
+    - module HeaderFooterEnhancer added
+    - module NoTextEnhancer added
+    - module PercentLineEnhancer added
+    - module PrintEnabledEnhancer added
+    - module PrintOutEnhancer added
+    - module SimplifyEnhancer added
+    - module StringBufferEnhancer added
+    - module StringIOEnhancer added
+    - command-line option '-b' (body only) added
+    - command-line option '-e' (escape) added
+    - command-line option '-l' (lang) added
+    - command-line option '-E' (enhancer) added
+    - command-line option '-I' (require path) added
+    - command-line option '-K' (kanji code) added
+    - command-line option '-S' (string to symbol) added
+    - command-line option '-B' (call result(binding())) added
+
+- release:   1.1.0
+  date:      2006-03-05
+  enhances:
+    - '<%# ... %>' is supported
+    - PrintEnhancer, PrintEruby, and PrintXmlEruby added
 
 - release:   1.0.1
-  date:      2005-02-01
-  desc:
-    - tag:   bugfix
-      text:  bin/erubis is available with RubyGems
+  date:      2006-02-01
+  bugfixes:
+    - bin/erubis is available with RubyGems
 
 - release:   1.0.0
-  date:      2005-02-01
-  desc:
-    - tag:   note
-      text:  first release
-
+  date:      2006-02-01
+  bugfixes:
+    - first release
 

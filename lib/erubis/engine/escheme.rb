@@ -29,10 +29,10 @@ module Erubis
 
     def add_preamble(src)
       return unless @func == '_add'
-      src << "(let ((_out '())) " + \
-               "(define (_add x) (set! _out (cons x _out))) "
-      #src << "(let* ((_out '())" + \
-      #             " (_add (lambda (x) (set! _out (cons x _out))))) "
+      src << "(let ((_buf '())) " + \
+               "(define (_add x) (set! _buf (cons x _buf))) "
+      #src << "(let* ((_buf '())" + \
+      #             " (_add (lambda (x) (set! _buf (cons x _buf))))) "
     end
 
     def escape_text(text)
@@ -77,7 +77,7 @@ module Erubis
     def add_postamble(src)
       return unless @func == '_add'
       src << "\n" unless src[-1] == ?\n
-      src << "  (reverse _out))\n"
+      src << "  (reverse _buf))\n"
     end
 
   end

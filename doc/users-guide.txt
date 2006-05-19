@@ -35,27 +35,39 @@ Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 	$ sudo gem install --remote erubis
 	.====================
 
-.* Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
+.* Else install {{<abstract|http://rubyforge.org/projects/erubis/>}} at first,
+   and download erubis_X.X.X.tar.bz2 and install it by setup.rb.
 	.====================
-	$ tar xjf erubis-X.X.X.tar.bz2
+	$ tar xjf abstract_X.X.X.tar.bz2
+	$ cd abstract_X.X.X/
+	$ sudo ruby setup.rb
+	$ cd ..
+	$ tar xjf erubis_X.X.X.tar.bz2
 	$ cd erubis_X.X.X/
-	$ ruby setup.rb
-	.#$ ruby setup.rb config
-	.#$ ruby setup.rb setup
-	.#$ sudo ruby setup.rb install
+	$ sudo ruby setup.rb
 	.====================
 
-.* Else you should copy 'lib/erubis.rb', 'lib/erubis/', and 'bin/erubis' into proper directory manually.
-	.====================
-	$ tar xjf erubis-X.X.X.tar.bz2
-	$ cd erubis_X.X.X/
-	$ cp -r lib/erubis.rb lib/erubis /usr/local/lib/ruby/site_ruby/1.8
-	$ cp bin/erubis /usr/local/bin
-	.====================
+.#.* Or if you can be root user, download erubis_X.X.X.tar.bz2 and install by setup.rb.
+.#	.====================
+.#	$ tar xjf erubis-X.X.X.tar.bz2
+.#	$ cd erubis_X.X.X/
+.#	$ ruby setup.rb
+.#	.#$ ruby setup.rb config
+.#	.#$ ruby setup.rb setup
+.#	.#$ sudo ruby setup.rb install
+.#	.====================
+.#
+.#.* Else you should copy 'lib/erubis.rb', 'lib/erubis/', and 'bin/erubis' into proper directory manually.
+.#	.====================
+.#	$ tar xjf erubis-X.X.X.tar.bz2
+.#	$ cd erubis_X.X.X/
+.#	$ cp -r lib/erubis.rb lib/erubis /usr/local/lib/ruby/site_ruby/1.8
+.#	$ cp bin/erubis /usr/local/bin
+.#	.====================
 
-.* (Optional) 'contrib/inline-require' enables you to merge 'lib/erubis.rb' into 'bin/erubis'.
+.* (Optional) 'contrib/inline-require' enables you to merge 'lib/**/*.rb' into 'bin/erubis'.
 	.====================
-	$ tar xjf erubis-X.X.X.tar.bz2
+	$ tar xjf erubis_X.X.X.tar.bz2
 	$ cd erubis_X.X.X/
 	$ unset RUBYLIB
 	$ contrib/inline-require -I lib bin/erubis > contrib/erubis
@@ -101,12 +113,12 @@ $ ruby example1.rb
 .<<<:! (cd guide.d; ruby example1.rb)
 .====================
 
-Erubis has command 'erubis'.  Command-line option '-s' shows the compiled source code of eRuby script.
+Erubis has command 'erubis'.  Command-line option '-x' shows the compiled source code of eRuby script.
 
-.? example of command-line option '-s'
+.? example of command-line option '-x'
 .====================
-$ erubis {{*-s*}} example1.eruby
-.<<<:! (cd guide.d; erubis -s example1.eruby)
+$ erubis {{*-x*}} example1.eruby
+.<<<:! (cd guide.d; erubis -x example1.eruby)
 .====================
 
 
@@ -128,16 +140,16 @@ Erubis deletes spaces around '<% %>' automatically, while it leaves spaces aroun
 
 .? compiled source code
 .====================
-$ erubis -s example2.eruby
-.<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -s guide.d/example2.eruby)
+$ erubis -x example2.eruby
+.<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -x guide.d/example2.eruby)
 .====================
 
 If you want leave spaces around '<% %>', add command-line option '-T'.
 
 .? compiled source code with command-line option '-T'
 .====================
-$ erubis -s {{*-T*}} example2.eruby
-.<<<:! erubis -s -T guide.d/example2.eruby
+$ erubis -x {{*-T*}} example2.eruby
+.<<<:! erubis -x -T guide.d/example2.eruby
 .====================
 
 Or add option {{,:trim=>false,}} to Erubis::Eruby.new().
@@ -161,14 +173,14 @@ puts eruby.result(binding())              # get result
 $ ruby example2.rb
 .<<<:! (cd guide.d; ruby example2.rb)
 .#--- script source ---
-.#_out = ''; _out << "<ul>\n"
-.#{{*_out << "  ";*}}  for item in list {{*; _out << "\n"*}}
-.#_out << "  <li>\n"
-.#_out << "    "; _out << ( item ).to_s; _out << "\n"
-.#_out << "  </li>\n"
-.#{{*_out << "  ";*}}  end {{*; _out << "\n"*}}
-.#_out << "</ul>\n"
-.#_out
+.#_buf = ''; _buf << "<ul>\n"
+.#{{*_buf << "  ";*}}  for item in list {{*; _buf << "\n"*}}
+.#_buf << "  <li>\n"
+.#_buf << "    "; _buf << ( item ).to_s; _buf << "\n"
+.#_buf << "  </li>\n"
+.#{{*_buf << "  ";*}}  end {{*; _buf << "\n"*}}
+.#_buf << "</ul>\n"
+.#_buf
 .#--- result ---
 .#<ul>
 .#  
@@ -229,17 +241,17 @@ puts eruby.result(binding())               # get result
 .? output
 .====================
 $ ruby example3.rb 2> stderr.log
-.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)  | ruby -pe 'sub! /_out << [E(].*?;|\$stderr.*?;/, "{{*\\&*}}"'
+.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)  | ruby -pe 'sub! /_buf << [E(].*?;|\$stderr.*?;/, "{{*\\&*}}"'
 .#--- script source ---
-.#_out = ''; _out << "<ul>\n"
+.#_buf = ''; _buf << "<ul>\n"
 .#   for item in list 
-.#_out << "  <li>"; {{*_out << Erubis::XmlEruby.escape( item )*}}; _out << "</li>\n"
-.#_out << "  <li>"; _out << ( item ).to_s; _out << "</li>\n"
-.#_out << "  <li>"; {{*$stderr.puts("** erubis: item = #{(item).inspect}")*}}; _out << "</li>\n"
-.#_out << "\n"
+.#_buf << "  <li>"; {{*_buf << Erubis::XmlEruby.escape( item )*}}; _buf << "</li>\n"
+.#_buf << "  <li>"; _buf << ( item ).to_s; _buf << "</li>\n"
+.#_buf << "  <li>"; {{*$stderr.puts("** erubis: item = #{(item).inspect}")*}}; _buf << "</li>\n"
+.#_buf << "\n"
 .#   end 
-.#_out << "</ul>\n"
-.#_out
+.#_buf << "</ul>\n"
+.#_buf
 .#--- result ---
 .#<ul>
 .#  <li>{{*&lt;aaa&gt;*}}</li>
@@ -262,12 +274,12 @@ $ cat stderr.log
 .#** erubis: item = "\"ccc\""
 .====================
 
-The command-line option '-e Escape' will do the same action as Erubis::EscapedEruby.
-This is available in any language.
+The command-line option '-e'{{(Command-line option '-e' is equivarent to '-E Escape'.)}} will do the same action as Erubis::EscapedEruby.
+This option is available for any language.
 
 .====================
-$ erubis -l ruby {{*-e Escape*}} example3.eruby
-.<<<:! (cd guide.d; erubis -e Escape -l ruby example3.eruby)
+$ erubis -l ruby {{*-e*}} example3.eruby
+.<<<:! (cd guide.d; erubis -e -l ruby example3.eruby)
 .====================
 
 Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
@@ -303,8 +315,8 @@ You can change embedded pattern '{{,<% %>,}}' to another with command-line optio
 
 .? compiled source code with command-line option '-p'
 .====================
-$ erubis -s {{*-p '<!--% %-->'*}} example4.eruby
-.<<<:! erubis -s -p '<!--% %-->' guide.d/example4.eruby
+$ erubis -x {{*-p '<!--% %-->'*}} example4.eruby
+.<<<:! erubis -x -p '<!--% %-->' guide.d/example4.eruby
 .====================
 
 .? example4.rb
@@ -495,8 +507,8 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 
 .$$ Preamble and Postamble   | tut-preamble
 
-The first line ('_out = [];') in the compiled source code is called preamble
-and the last line ('_out.join') is called postamble.
+The first line ('_buf = [];') in the compiled source code is called preamble
+and the last line ('_buf.join') is called postamble.
 
 Command-line option '-b' skips the output of preamble and postamble.
 
@@ -510,11 +522,12 @@ Command-line option '-b' skips the output of preamble and postamble.
 compiled source code with and without command-line option '-b'
 .====================
 ## without '-b'
-$ erubis -s example8.eruby
-.<<<:! erubis -s guide.d/example8.eruby | ruby -pe 'sub! /^_out.*?(;|$)/, "{{*\\&*}}"'
+$ erubis -x example8.eruby
+.<<<:! erubis -x guide.d/example8.eruby | ruby -pe 'sub! /^_buf.*?(;|$)/, "{{*\\&*}}"'
+
 ## with '-b'
-$ erubis -s {{*-b*}} example8.eruby
-.<<<:! erubis -s -b guide.d/example8.eruby
+$ erubis -x {{*-b*}} example8.eruby
+.<<<:! erubis -x -b guide.d/example8.eruby
 .====================
 
 Erubis::Eruby.new option '{{,:preamble=>false,}}' and '{{,:postamble=>false,}}' also suppress output of preamble or postamle.
@@ -544,7 +557,7 @@ $ ruby example8.rb
 .$ Enhancer		| enhancer
 
 Enhancer is a module to add a certain feature into Erubis::Eruby class.
-Enhancer may be language-independent or only for Eruby.
+Enhancer may be language-independent or only for Erubis::Eruby class.
 
 To use enhancers, define subclass and include them.
 The folloing is an example to use {{<EscapeEnhancer|#escape-enhancer>}}, {{<PercentLineEnhancer|#percentline-enhancer>}}, and {{<BiPatternEnhancer|#bipattern-enhancer>}}.
@@ -556,10 +569,10 @@ class MyEruby < Erubis::Eruby
 end
 .--------------------
 
-You can specify enhancers in command-line with option '-e'.
+You can specify enhancers in command-line with option '-E'.
 The following is an example to use some enhancers in command-line.
 .====================
-$ erubis -se Escape,PercentLine,BiPattern example.eruby
+$ erubis -xE Escape,PercentLine,BiPattern example.eruby
 .====================
 
 The following is the list of enhancers.
@@ -569,7 +582,7 @@ The following is the list of enhancers.
 .: {{<StdoutEnhancer|#stdout-enhancer>}} (only for Eruby)
 	Use $stdout instead of array buffer.
 .: {{<PrintOutEnhancer|#printout-enhancer>}} (only for Eruby)
-	Use "print(...)" statement insead of "_out << ...".
+	Use "print(...)" statement insead of "_buf << ...".
 .: {{<PrintEnabledEnhancer|#printenabled-enhancer>}} (only for Eruby)
 	Enable to use print() in '<% ... %>'.
 .: {{<ArrayEnhancer|#array-enhancer>}} (only for Eruby)
@@ -637,8 +650,8 @@ EscapeEnhancer switches '<%= ... %>' to escaped and '<%== ... %>' to unescaped.
 
 .? compiled source code
 .====================
-$ erubis -se Escape example.eruby
-.<<<:! erubis -se Escape guide.d/example.eruby | ruby -pe 'sub! /_out << [E(].*?;/, "{{*\\&*}}"'
+$ erubis -xE Escape example.eruby
+.<<<:! erubis -xE Escape guide.d/example.eruby | ruby -pe 'sub! /_buf << [E(].*?;/, "{{*\\&*}}"'
 .====================
 
 EscapeEnhancer is language-independent.
@@ -668,8 +681,8 @@ Therefore, you can use 'print' statement in embedded ruby code.
 
 .? compiled source code
 .====================
-$ erubis -se Stdout example.eruby
-.<<<:! erubis -se Stdout guide.d/example.eruby | ruby -pe 'sub! /^_out = .*;/, "{{*\\&*}}"'
+$ erubis -xE Stdout example.eruby
+.<<<:! erubis -xE Stdout guide.d/example.eruby | ruby -pe 'sub! /^_buf = .*;/, "{{*\\&*}}"'
 .====================
 
 StdoutEnhancer is only for Eruby.
@@ -678,7 +691,7 @@ StdoutEnhancer is only for Eruby.
 
 .$$ PrintOutEnhancer	| printout-enhancer
 
-PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_out << ...'.
+PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_buf << ...'.
 
 .#.? printstatement-example.rb
 .#.-------------------- printstatement-example.rb
@@ -698,8 +711,8 @@ PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_out
 
 .? compiled source code
 .====================
-$ erubis -se PrintOut example.eruby
-.<<<:! erubis -se PrintOut guide.d/example.eruby | ruby -pe 'gsub! /print/, "{{*\\&*}}"'
+$ erubis -xE PrintOut example.eruby
+.<<<:! erubis -xE PrintOut guide.d/example.eruby | ruby -pe 'gsub! /print/, "{{*\\&*}}"'
 .====================
 
 PrintOutEnhancer is only for Eruby.
@@ -764,7 +777,7 @@ ArrayEnhancer makes Eruby to return an array of strings.
 
 .? compiled source code
 .====================
-.<<<:! erubis -se Array guide.d/example.eruby | ruby -pe 'sub! /^_out( = \[\];)?/, "{{*\\&*}}"'
+.<<<:! erubis -xE Array guide.d/example.eruby | ruby -pe 'sub! /^_buf( = \[\];)?/, "{{*\\&*}}"'
 .====================
 
 ArrayEnhancer is only for Eruby.
@@ -802,14 +815,9 @@ StringBufferEnhancer makes Eruby to use string buffer.
 .#.====================
 
 .====================
-$ erubis -se StringBuffer example.eruby
-.<<<:! erubis -se StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_out( = ..;)?/,"{{*\\&*}}")'
+$ erubis -xE StringBuffer example.eruby
+.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;)?/,"{{*\\&*}}")'
 .====================
-
-.#+++
-.--------- printen
-.---------
-.#---
 
 
 
@@ -842,8 +850,8 @@ This is useful especially when debugging a complex eRuby script.
 
 .? output example of NoTextEnhancer
 .====================
-$ erubis -Tse NoText notext-example.eruby
-.<<<:! (cd guide.d; erubis -Tse NoText notext-example.eruby)
+$ erubis -TxE NoText notext-example.eruby
+.<<<:! (cd guide.d; erubis -TxE NoText notext-example.eruby)
 .====================
 
 NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -872,8 +880,8 @@ SimplifyEnhancer makes compiling a little faster but don't trim spaces around '<
 
 .? compiled source code
 .====================
-$ erubis -se Simplify example.euby
-.<<<:! erubis -se Simplify guide.d/example.eruby
+$ erubis -xE Simplify example.euby
+.<<<:! erubis -xE Simplify guide.d/example.eruby
 .====================
 
 SimplifyEnhancer is language-independent.
@@ -914,8 +922,8 @@ You can specify pattern by :bipattern property.
 
 .? compiled source code
 .====================
-$ erubis -se BiPattern bipattern-example.rhtml
-.<<<:! erubis -se BiPattern guide.d/bipattern-example.rhtml | ruby -pe 'sub! /_out << [E(].*;/, "{{*\\&*}}"'
+$ erubis -xE BiPattern bipattern-example.rhtml
+.<<<:! erubis -xE BiPattern guide.d/bipattern-example.rhtml | ruby -pe 'sub! /_buf << [E(].*;/, "{{*\\&*}}"'
 .====================
 
 BiPatternEnhancer is language-independent.
@@ -955,8 +963,8 @@ This is for compatibility with eruby and ERB.
 
 .? compiled source code
 .====================
-$ erubis -se PercentLine percentline-example.rhtml
-.<<<:! erubis -se PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
+$ erubis -xE PercentLine percentline-example.rhtml
+.<<<:! erubis -xE PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
 .====================
 
 PercentLineEnhancer is language-independent.
@@ -1002,8 +1010,8 @@ HeaderFooterEnhancer enables you to add header and footer in eRuby script.
 
 .? compiled source code
 .====================
-$ erubis -se HeaderFooter headerfooter-example.eruby
-.<<<:! erubis -se HeaderFooter guide.d/headerfooter-example.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+$ erubis -xE HeaderFooter headerfooter-example.eruby
+.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 Compare to the following:
@@ -1023,8 +1031,8 @@ Compare to the following:
 
 .? compiled source code
 .====================
-$ erubis -s normal-eruby-test.eruby
-.<<<:! erubis -s guide.d/normal-eruby-test.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+$ erubis -x normal-eruby-test.eruby
+.<<<:! erubis -x guide.d/normal-eruby-test.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 Header and footer can be in any position in eRuby script,
@@ -1065,8 +1073,8 @@ print eruby.src
 
 .? compiled source code
 .====================
-$ erubis -se HeaderFooter headerfooter-example2.rhtml
-.<<<:! erubis -se HeaderFooter guide.d/headerfooter-example2.rhtml | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+$ erubis -xE HeaderFooter headerfooter-example2.rhtml
+.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example2.rhtml | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
 .====================
 
 HeaderFooterEnhancer is experimental and is language-independent.
@@ -1176,7 +1184,7 @@ public class Example {
   }
 
   public String view() {
-    StringBuffer _out = new StringBuffer();
+    StringBuffer _buf = new StringBuffer();
 %>*}}
 <html>
  <body>
@@ -1194,7 +1202,7 @@ public class Example {
  <body>
 </html>
 {{*<%
-    return _out.toString();
+    return _buf.toString();
   }
 
   public static void main(String[] args) {
@@ -1390,8 +1398,8 @@ NoTextEnhancer can separate PHP code from HTML document.
 
 .? example of using NoTextEnhancer with PHP file
 .====================
-$ erubis -T -l php -e NoText -p '<\?php \?>' notext-example.php | uniq
-.<<<:! erubis -T -l php -e NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
+$ erubis -T -l php -E NoText -p '<\?php \?>' notext-example.php | uniq
+.<<<:! erubis -T -l php -E NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
 .====================
 
 
@@ -1451,7 +1459,7 @@ This shows that:
 
 .$$ Usage		| command-usage
 
-erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.yaml/}}] [{{/file/}} ...]
+erubis [..options..] [{{/file/}} ...]
 
 
 
@@ -1459,21 +1467,20 @@ erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.
 
   .[ -h, --help    ]	Help.
   .[ -v            ]	Release version.
-  .[ -s            ]	Show script source.
-  .[ -x            ]	Show script source, removing the last '_out' line.
+  .[ -x            ]	Show compiled source.
   .[ -T            ]	No trimming spaces around '<% %>'.
 			This is equivarent to '--trim=false'.
   .[ -b            ]	Body only (no preamble nor postamble).
 			This is equivarent to '--preamble=false --postamble=false'.
+  .[ -e            ]	Escape. This is equivarent to '-E Escape'.
   .[ -p pattern    ]	Embedded pattern (default '<% %>').
 			This is equivarent to '--pattern={{/pattern/}}'.
   .[ -l lang       ]	Language name.
 			This option makes erubis command to compile script but no execute.
-  .[ -c class      ]	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
-  .[ -e enhacers   ]	Enhancer name (Escape, PercentLine, ...).
+.#  .[ -c class      ]	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
+  .[ -E enhacers   ]	Enhancer name (Escape, PercentLine, ...).
 			It is able to specify several enhancer name separating with ','
 			(ex. -f Escape,PercentLine,HeaderFooter).
-  .[ -E            ]	Show all enhancers.
   .[ -I path       ]	Require library path ($:).
 			It is able to specify several paths separating with ','
 			(ex. -f path1,path2,path3).
@@ -1481,14 +1488,15 @@ erubis [-hvsT] [-p {{/pattern/}}] [-c {{/class/}}] [-K {{/kanji/}}] [-f {{/file.
   .[ -f file.yaml  ]	YAML file for context values (read stdin if filename is '-').
 			It is able to specify several filenames separating with ','
 			(ex. -f file1,file2,file3).
-  .[ -t            ]	Expand tab character in YAML file.
+  .[ -t            ]	Expand tab characters in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
   .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()
+
 
 
 .$$ Properties	   	| command-props
 
 Some Eruby classes can take optional properties to change it's compile option.
 For example, property '--indent="  "' may change indentation of compiled source code.
-Try 'eruby -h' for details.
+Try 'erubis -h' for details.
 

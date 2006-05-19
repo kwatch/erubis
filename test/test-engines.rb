@@ -51,20 +51,20 @@ __END__
       </table>
       <%=== i+1 %>
   expected: |
-      _out = []; _out << '<table>
+      _buf = []; _buf << '<table>
        <tbody>
       ';   i = 0
            list.each_with_index do |item, i| 
-       _out << '  <tr>
-         <td>'; _out << ( i+1 ).to_s; _out << '</td>
-         <td>'; _out << Erubis::XmlHelper.escape_xml( list ); _out << '</td>
+       _buf << '  <tr>
+         <td>'; _buf << ( i+1 ).to_s; _buf << '</td>
+         <td>'; _buf << Erubis::XmlHelper.escape_xml( list ); _buf << '</td>
         </tr>
       ';  end 
-       _out << ' </tbody>
+       _buf << ' </tbody>
       </table>
-      '; $stderr.puts("*** debug: i+1=#{(i+1).inspect}"); _out << '
+      '; $stderr.puts("*** debug: i+1=#{(i+1).inspect}"); _buf << '
       ';
-      _out.join
+      _buf.join
 ##
 - name:  php1
   lang:  php
@@ -140,7 +140,7 @@ __END__
 - name:  java1
   lang:  java
   class: Ejava
-  options: { :out: _buf, :outclass: StringBuilder, :indent: '    ' }
+  options: { :buf: _buf, :bufclass: StringBuilder, :indent: '    ' }
   input: |
       <table>
        <tbody>
@@ -207,7 +207,7 @@ __END__
       <%=== i %>
       <% ); let end %>
   expected: |4
-      (let ((_out '())) (define (_add x) (set! _out (cons x _out)))  (let ((i 0)) 
+      (let ((_buf '())) (define (_add x) (set! _buf (cons x _buf)))  (let ((i 0)) 
       (_add "<table>
        <tbody>\n")
       
@@ -227,7 +227,7 @@ __END__
       </table>\n")
       (display "*** debug: i=")(display i)(display "\n")(_add "\n")
        ); let end 
-        (reverse _out))
+        (reverse _buf))
   
 ##
 - name:  scheme2
@@ -322,22 +322,22 @@ __END__
       </table>
       <%=== i %>
   expected: |4
-      var _out = [];
+      var _buf = [];
          var user = 'Erubis';
          var list = ['<aaa>', 'b&b', '"ccc"'];
       
-      _out.push("<p>Hello "); _out.push(user); _out.push("!</p>\n\
+      _buf.push("<p>Hello "); _buf.push(user); _buf.push("!</p>\n\
       <table>\n\
         <tbody>\n");
            var i; 
            for (i = 0; i < list.length; i++) { 
-      _out.push("    <tr bgcolor="); _out.push(++i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _out.push("\">\n\
-            <td>"); _out.push(i); _out.push("</td>\n\
-            <td>"); _out.push(list[i]); _out.push("</td>\n\
+      _buf.push("    <tr bgcolor="); _buf.push(++i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _buf.push("\">\n\
+            <td>"); _buf.push(i); _buf.push("</td>\n\
+            <td>"); _buf.push(list[i]); _buf.push("</td>\n\
           </tr>\n");
            } 
-      _out.push("  </tbody>\n\
+      _buf.push("  </tbody>\n\
       </table>\n");
-      alert("*** debug: i="+(i)); _out.push("\n");
-      document.write(_out.join(""));
+      alert("*** debug: i="+(i)); _buf.push("\n");
+      document.write(_buf.join(""));
  ##

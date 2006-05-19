@@ -25,21 +25,21 @@ module Erubis
     EMBEDDED_PATTERN = /(.*?)<%(=+|\#)?(.*?)-?%>/m
 
     def compile(input)
-      src = "_out = [];"           # preamble
+      src = "_buf = [];"           # preamble
       input.scan(EMBEDDED_PATTERN) do |text, indicator, code|
-        src << " _out << '" << escape_text(text) << "';"
+        src << " _buf << '" << escape_text(text) << "';"
         if !indicator              # <% %>
           src << code << ";"
         elsif indicator[0] == ?\#  # <%# %>
           n = code.count("\n")
           add_stmt(src, "\n" * n)
         else                       # <%= %>
-          src << " _out << (" << code << ").to_s;"
+          src << " _buf << (" << code << ").to_s;"
         end
       end
       rest = $' || input
-      src << " _out << '" << escape_text(rest) << "';"
-      src << "\n_out.join\n"       # postamble
+      src << " _buf << '" << escape_text(rest) << "';"
+      src << "\n_buf.join\n"       # postamble
       return src
     end
 

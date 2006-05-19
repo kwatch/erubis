@@ -19,20 +19,20 @@ module Erubis
     def self.supported_properties()   # :nodoc:
       list = super
       list << [:indent,   '',       "indent spaces (ex. '  ')"]
-      list << [:out,      '_out',   "output buffer name"]
-      list << [:outclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"]
+      list << [:buf,      '_buf',   "output buffer name"]
+      list << [:bufclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"]
       return list
     end
 
     def initialize(input, properties={})
       @indent = properties[:indent] || ''
-      @out = properties[:out] || '_out'
-      @outclass = properties[:outclass] || 'StringBuffer'
+      @buf = properties[:buf] || '_buf'
+      @bufclass = properties[:bufclass] || 'StringBuffer'
       super
     end
 
     def add_preamble(src)
-      src << "#{@indent}#{@outclass} #{@out} = new #{@outclass}();"
+      src << "#{@indent}#{@bufclass} #{@buf} = new #{@bufclass}();"
     end
 
     def escape_text(text)
@@ -50,7 +50,7 @@ module Erubis
     def add_text(src, text)
       return if text.empty?
       src << (src.empty? || src[-1] == ?\n ? @indent : ' ')
-      src << @out << ".append("
+      src << @buf << ".append("
       i = 0
       text.each_line do |line|
         src << "\n" << @indent << '          + ' if i > 0
@@ -66,12 +66,12 @@ module Erubis
 
     def add_expr_literal(src, code)
       src << @indent if src.empty? || src[-1] == ?\n
-      src << ' ' << @out << '.append(' << code.strip << ');'
+      src << ' ' << @buf << '.append(' << code.strip << ');'
     end
 
     def add_expr_escaped(src, code)
       src << @indent if src.empty? || src[-1] == ?\n
-      src << ' ' << @out << '.append(' << escaped_expr(code) << ');'
+      src << ' ' << @buf << '.append(' << escaped_expr(code) << ');'
     end
 
     def add_expr_debug(src, code)
@@ -82,7 +82,7 @@ module Erubis
 
     def add_postamble(src)
       src << "\n" if src[-1] == ?;
-      src << @indent << "return " << @out << ".toString();\n"
+      src << @indent << "return " << @buf << ".toString();\n"
     end
 
   end

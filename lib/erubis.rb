@@ -33,13 +33,13 @@
 ##
 ## result:
 ##   --- source ---
-##   _out = ""; _out << " <ul>\n"
+##   _buf = ""; _buf << " <ul>\n"
 ##      for item in list
-##   _out << "   <li>"; _out << ( item ).to_s; _out << "\n"
-##   _out << "       "; _out << Erubis::XmlEruby.escape( item ); _out << "</li>\n"
+##   _buf << "   <li>"; _buf << ( item ).to_s; _buf << "\n"
+##   _buf << "       "; _buf << Erubis::XmlEruby.escape( item ); _buf << "</li>\n"
 ##      end
-##   _out << " </ul>\n"
-##   _out
+##   _buf << " </ul>\n"
+##   _buf
 ##   --- result ---
 ##    <ul>
 ##      <li><aaa>

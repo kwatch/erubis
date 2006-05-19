@@ -33,12 +33,12 @@ module Erubis
 
     #--
     #def add_preamble(src)
-    #  src << "_out = [];"
+    #  src << "_buf = [];"
     #end
     #++
 
     def add_text(src, text)
-      src << " _out << '" << escape_text(text) << "';" unless text.empty?
+      src << " _buf << '" << escape_text(text) << "';" unless text.empty?
     end
 
     def add_stmt(src, code)
@@ -48,11 +48,11 @@ module Erubis
     end
 
     def add_expr_literal(src, code)
-      src << ' _out << (' << code << ').to_s;'
+      src << ' _buf << (' << code << ').to_s;'
     end
 
     def add_expr_escaped(src, code)
-      src << ' _out << ' << escaped_expr(code) << ';'
+      src << ' _buf << ' << escaped_expr(code) << ';'
     end
 
     def add_expr_debug(src, code)
@@ -63,7 +63,7 @@ module Erubis
 
     #--
     #def add_postamble(src)
-    #  src << "\n_out.join\n"
+    #  src << "\n_buf.join\n"
     #end
     #++
 

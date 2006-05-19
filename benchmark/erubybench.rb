@@ -103,7 +103,7 @@ testdefs_str = <<END
   return: str
 
 - name:   ErubisEruby2
-  desc:   print _out    #, no binding()
+  desc:   print _buf    #, no binding()
   class:  Erubis::Eruby2
   code: |
     #Erubis::Eruby2.new(File.read(filename)).result()
@@ -215,7 +215,7 @@ end
 #  str.gsub!(/\bdata\b/, '$data')
 #  hash = testdefs.find { |h| h['name'] == compiler_name }
 #  code = eval hash['compile']
-#  code.sub!(/_out\s*\z/, 'print \&')
+#  code.sub!(/_buf\s*\z/, 'print \&')
 #  File.open($load_filename, 'w') { |f| f.write(code) }
 #  at_exit do
 #    File.unlink $load_filename if test(?f, $load_filename)

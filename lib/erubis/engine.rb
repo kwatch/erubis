@@ -4,6 +4,8 @@
 ## $Copyright$
 ##
 
+require 'abstract'
+
 
 module Erubis
 
@@ -16,7 +18,7 @@ module Erubis
 
 
   ##
-  ## context object for Engine#evaluate
+  ## .[abstract] context object for Engine#evaluate
   ##
   ## ex.
   ##   template = <<'END'
@@ -59,7 +61,7 @@ module Erubis
 
 
   ##
-  ## base engine class
+  ## [abstract] base engine class
   ##
   class Engine
 
@@ -87,6 +89,7 @@ module Erubis
     attr_reader :src
     attr_accessor :filename
 
+    ## load file and create engine object
     def self.load_file(filename, properties={})
       input = File.open(filename, 'rb') { |f| f.read }
       input.untaint   # is it ok?
@@ -95,6 +98,7 @@ module Erubis
       return engine
     end
 
+    ## eval(@src) with binding
     def result(_binding_or_hash=TOPLEVEL_BINDING)
       _arg = _binding_or_hash
       if _arg.is_a?(Hash)
@@ -105,6 +109,7 @@ module Erubis
       return eval(@src, _arg, (@filename || '(erubis)'))
     end
 
+    ## call context.instance_eval(@src)
     def evaluate(context=Context.new)
       context = Context.new(context) if context.is_a?(Hash)
       return context.instance_eval(@src, (@filename || '(erubis)'))
@@ -112,6 +117,7 @@ module Erubis
 
     DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
 
+    ## return regexp of pattern to parse eRuby script
     def pattern_regexp(pattern=@pattern)
       if pattern == '<% %>'
         return DEFAULT_REGEXP
@@ -120,7 +126,9 @@ module Erubis
         return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       end
     end
+    protected :pattern_regexp
 
+    ## compile input string into target language
     def compile(input)
       src = ""
       @preamble.nil? ? add_preamble(src) : (@preamble && (src << @preamble))
@@ -181,30 +189,40 @@ module Erubis
       return src
     end
 
+    ## compile input string and set it to @src
     def compile!(input)
       @src = compile(input)
     end
 
     protected
 
+    ## escape text string
     def escape_text(text)
       return text
     end
 
+    ## return escaped expression code
     def escaped_expr(code)
       @escape ||= 'escape'
       return "#{@escape}(#{code.strip})"
     end
 
+    ## .[empty] add @preamble to src
     def add_preamble(src)
+      # empty
     end
 
+    ## .[abstract] add text string to src
     def add_text(src, text)
+      not_implemented
     end
 
+    ## .[abstract] add statement code to src
     def add_stmt(src, code)
+      not_implemented
     end
 
+    ## add expression code to src
     def add_expr(src, code, indicator)
       case indicator
       when '='
@@ -216,16 +234,24 @@ module Erubis
       end
     end
 
+    ## .[abstract] add expression literal code to src. this is called by add_expr().
     def add_expr_literal(src, code)
+      not_implemented
     end
 
+    ## .[abstract] add escaped expression code to src. this is called by add_expr().
     def add_expr_escaped(src, code)
+      not_implemented
     end
 
+    ## .[empty] add expression code to src for debug. this is called by add_expr().
     def add_expr_debug(src, code)
+      # empty
     end
 
+    ## .[empty] add @postamble to src
     def add_postamble(src)
+      # empty
     end
 
   end  # end of class Engine

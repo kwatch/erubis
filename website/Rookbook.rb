@@ -10,14 +10,16 @@ material 'index.txt'
 ##  recipes for kuwata-lab.com
 ##
 #all = %W[index.xhtml README.xhtml #{U}.01.xhtml ChangeLog.txt]
-all = %W[index.xhtml #{U}.01.xhtml ChangeLog.txt]
+all = %W[index.xhtml #{U}.01.xhtml ChangeLog]
+
+recipe  :default		, :all
 
 recipe  :all			, all
 	
 recipe  :clean								do
 	files = []
 	files.concat Dir.glob("README.*")
-	files.concat Dir.glob("ChangeLog.*")
+	files.concat Dir.glob("ChangeLog")
 	files.concat Dir.glob("#{U}.*")
 	files.concat(%w[m18n.rb guide.d index.xhtml])
 	rm_rf [files]
@@ -40,12 +42,11 @@ recipe	"#{U}.01.xhtml"	, "#{U}.txt", :byprods=>["#{U}.toc.html"]  do
         files << "#{U}.html"
         #p files
         files.each do |old|
-            new = old.sub(/\.html$/, '.xhtml')
-            File.rename(old, new) if old != new
+          new = old.sub(/\.html$/, '.xhtml')
+          File.rename(old, new) if old != new
     	end
 	rm_f @byprods
 	end
-
 
 #recipe	'README.xhtml'		, '../README'			do
 #	tagfile = website_tagfile
@@ -65,7 +66,8 @@ recipe	"index.xhtml"		, "index.txt",
 #	sys "kwaser -t #{tagfile} -b #{@ingred} > #{@product}"
 #	end
 
-recipe	"ChangeLog.txt"			, "../ChangeLog.txt"		do
+recipe	"ChangeLog"			, "../ChangeLog"		do
 	#copy r.ingreds[0], r.product
 	cp @ingred, "."
 	end
+

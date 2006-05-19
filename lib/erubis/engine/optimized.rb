@@ -40,7 +40,7 @@ module Erubis
     def switch_to_expr(src)
       return if @prev_is_expr
       @prev_is_expr = true
-      src << ' _out'
+      src << ' _buf'
     end
 
     def switch_to_stmt(src)
@@ -60,7 +60,7 @@ module Erubis
         switch_to_expr(src)
         src << " << '" << escape_text(text) << "'"
       else
-        src << "_out = '" << escape_text(text) << "';"
+        src << "_buf = '" << escape_text(text) << "';"
         @initialized = true
       end
     end
@@ -73,13 +73,13 @@ module Erubis
     end
 
     def add_expr_literal(src, code)
-      unless @initialized; src << "_out = ''"; @initialized = true; end
+      unless @initialized; src << "_buf = ''"; @initialized = true; end
       switch_to_expr(src)
       src << " << (" << code << ").to_s"
     end
 
     def add_expr_escaped(src, code)
-      unless @initialized; src << "_out = ''"; @initialized = true; end
+      unless @initialized; src << "_buf = ''"; @initialized = true; end
       switch_to_expr(src)
       src << " << " << escaped_expr(code)
     end
@@ -92,7 +92,7 @@ module Erubis
 
     def add_postamble(src)
       #super if @initialized
-      src << "\n_out\n" if @initialized
+      src << "\n_buf\n" if @initialized
     end
 
   end  # end of class OptimizedEruby

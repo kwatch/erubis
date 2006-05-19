@@ -11,12 +11,14 @@ properties:
 variables:
   - project    :  erubis
   - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
-  - text_files :  [ChangeLog, README, COPYING, setup.rb, erubis.gemspec]
+  - text_files :  [ChangeLog, README.txt, COPYING, setup.rb, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]
   - apidocdir  :  doc-api
   - home*      :  ENV['HOME']
   - inline_require_script :  $(home)/src/inline-require/trunk/bin/inline-require
+  - abstract_rb : $(home)/src/abstract/trunk/lib/abstract.rb
+  - benchmark_files* : Dir.glob('benchmark/erubybench{-lib.rb,.rb,.rhtml,.yaml}')
   - base       :  $(project)_$(release)
   - base2      :  $(project)-$(release)
   - libfiles*  :  Dir.glob("lib/**/*")
@@ -40,7 +42,7 @@ recipes:
 
   - product:	:clear
     method: |
-	rm_rf '$(project)_*.*', '$(project)-*.gem'
+	rm_rf '$(project)_*.*', '$(project)-*.gem', apidocdir
 
   - product:	:apidoc
     desc:	create api document by RDoc
@@ -50,10 +52,10 @@ recipes:
     ingreds:	[ $(libfiles) ]
     method: |
         rm_rf '$(apidocdir)'
-	opts = "-o ../$(apidocdir) -S -m ../README"
+	opts = "-o ../$(apidocdir) -S -m ../README.txt"
 	opts << exclude_libs.collect { |f| " -x erubis/#{f}" }.join(" ")
 	chdir 'lib' do
-          sys "rdoc #{opts} ../README *"
+          sys "rdoc #{opts} ../README.txt *"
         end
 
   - product:	:chmod
@@ -113,20 +115,32 @@ recipes:
 	  base = File.basename(f)
 	  !exclude_libs.include?(base)
 	end
+	#
+	store 'benchmark/erubybench.{rb,rhtml,yaml}', 'benchmark/erubybench-lib.rb', dir
+	#
 	chdir 'examples' do sys 'make clean' end
 	store 'examples/**/*', dir
 	store '$(apidocdir)/**/*', dir
-	#
-	mkdir_p "#{dir}/contrib"
-	cp_r '$(inline_require_script)', "#{dir}/contrib"
 	#
 	chdir 'doc' do sys 'rook :all' end
 	mkdir_p "#{dir}/doc"
 	cp_r doc_files, "#{dir}/doc"
 	#
+	mkdir_p "#{dir}/contrib"
+	cp_r '$(inline_require_script)', "#{dir}/contrib"
+	#
 	edit "#{dir}/**/*" do |content|
 	  content.gsub!(/\$Release.*?\$/, "$Release: $(1) $")
 	  content.gsub!(/\$Copyright.*?\$/, '$(copyright)')
+	end
+	#
+	begin
+	  cp abstract_rb, "#{dir}/lib"
+	  chdir dir do
+	    sys "RUBYLIB= ruby $(inline_require_script) -I lib bin/erubis > contrib/erubis"
+	  end
+	ensure
+	  rm "#{dir}/lib/abstract.rb"
 	end
 	#
 	chmod 0644, "#{dir}/**/*", :filetype=>'file'

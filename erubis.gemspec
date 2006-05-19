@@ -19,28 +19,30 @@ spec = Gem::Specification.new do |s|
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
   * Very fast (about three times faster than ERB)
+  * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
   * Auto trimming spaces around '<% %>'
   * Auto sanitizing
   * Change embedded pattern (default '<% %>')
   * Context object available
   * Easy to expand in subclass
-  * Able to output multi-language (Ruby/PHP/C/Java/Scheme/Perl)
   END
-   
+
   ## files
   files = []
   files += Dir.glob('lib/**/*')
   files += Dir.glob('bin/*')
   files += Dir.glob('examples/**/*')
-  files += Dir.glob('test/test-*.rb')
-  #files += Dir.glob('man/**/*')
-  files += [ "doc/users-guide.html", "doc/docstyle.css", ]
-  files += %w[README ChangeLog COPYING setup.rb]
-  #s.files       = files.delete_if { |path| path =~ /\.svn/ }
+  files += Dir.glob('test/*.rb')
+  files += %w[doc/users-guide.html doc/docstyle.css]
+  files += %w[README.txt ChangeLog COPYING setup.rb]
+  files += Dir.glob('contrib/*')
+  files += Dir.glob('benchmark/*')
+  files += Dir.glob('doc-api/**/*')
   s.files       = files
-  s.executables = ["erubis"]
-  s.bindir      = "bin"
+  s.executables = ['erubis']
+  s.bindir      = 'bin'
   s.test_file   = 'test/test.rb'
+  s.add_dependency('abstract', ['>= 1.0.0'])
 end
 
 # Quick fix for Ruby 1.8.3 / YAML bug   (thanks to Ross Bamford)

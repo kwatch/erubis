@@ -48,59 +48,96 @@ module Erubis
       exit(status)
     end
 
+    def initialize
+      @single_options = "hvxTtSbeB"
+      @arg_options    = "pcrfKIlaE"
+      @option_names   = {
+        ?h => :help,
+        ?v => :version,
+        ?x => :source,
+        ?T => :notrim,
+        ?t => :untabify,
+        ?S => :intern,
+        ?b => :bodyonly,
+        ?B => :binding,
+        ?p => :pattern,
+        ?c => :class,
+        ?e => :escape,
+        ?r => :requires,
+        ?f => :yamlfiles,
+        ?K => :kanji,
+        ?I => :includes,
+        ?l => :lang,
+        ?a => :action,
+        ?E => :enhancers,
+      }
+      assert unless @single_options.length + @arg_options.length == @option_names.length
+      (@single_options + @arg_options).each_byte do |ch|
+        assert unless @option_names.key?(ch)
+      end
+    end
+
+
     def execute(argv=ARGV)
       ## parse command-line options
-      options, properties = parse_argv(argv, "hvsxTtSbEB", "pcrfKIlae")
+      options, properties = parse_argv(argv, @single_options, @arg_options)
       filenames = argv
       options[?h] = true if properties[:help]
+      opts = Object.new
+      arr = @option_names.collect { |ch, name| "def #{name}; @#{name}; end\n" }
+      opts.instance_eval arr.join
+      options.each do |ch, val|
+        name = @option_names[ch]
+        opts.instance_variable_set("@#{name}", val)
+      end
 
       ## help, version, enhancer list
-      if options[?h] || options[?v] || options[?E]
-        puts version() if options[?v]
-        puts usage() if options[?h]
-        puts show_properties() if options[?h]
-        puts show_enhancers() if options[?E]
+      if opts.help || opts.version
+        puts version()         if opts.version
+        puts usage()           if opts.help
+        puts show_properties() if opts.help
+        puts show_enhancers()  if opts.help
         return
       end
 
       ## include path
-      options[?I].split(/,/).each do |path|
+      opts.includes.split(/,/).each do |path|
         $: << path
-      end if options[?I]
+      end if opts.includes
 
       ## require library
-      options[?r].split(/,/).each do |library|
+      opts.requires.split(/,/).each do |library|
         require library
-      end if options[?r]
+      end if opts.requires
 
       ## action
-      action = options[?a]
-      action ||= 'compile' if options[?x]
-      action ||= 'compile' if options[?s]
+      action = opts.action
+      action ||= 'compile' if opts.source
 
       ## lang
-      lang = options[?l] || 'ruby'
-      action ||= 'compile' if options[?l]
+      lang = opts.lang || 'ruby'
+      action ||= 'compile' if opts.lang
 
       ## class name of Eruby
-      classname = options[?c]
+      classname = opts.class
       klass = get_classobj(classname, lang)
 
       ## kanji code
-      $KCODE = options[?K] if options[?K]
+      $KCODE = opts.kanji if opts.kanji
 
       ## read context values from yaml file
-      yamlfiles = options[?f]
-      context = load_yamlfiles(yamlfiles, options)
+      yamlfiles = opts.yamlfiles
+      context = load_yamlfiles(yamlfiles, opts)
 
       ## properties for engine
-      properties[:pattern]  = options[?p] if options[?p]
-      properties[:trim]     = false       if options[?T]
-      properties[:preamble] = properties[:postamble] = false if options[?b]
+      properties[:pattern]  = opts.pattern if opts.pattern
+      properties[:trim]     = false        if opts.notrim
+      properties[:preamble] = properties[:postamble] = false if opts.bodyonly
 
       ## create engine and extend enhancers
       engine = klass.new(nil, properties)
-      enhancers = get_enhancers(options[?e])
+      enhancers = get_enhancers(opts.enhancers)
+      enhancers.push(Erubis::EscapeEnhancer) if opts.escape
       enhancers.each do |enhancer|
         engine.extend(enhancer)
         engine.bipattern = properties[:bipattern] if enhancer == Erubis::BiPatternEnhancer
@@ -113,57 +150,53 @@ module Erubis
           test(?f, filename)  or raise CommandOptionError.new("#{filename}: file not found.")
           engine.filename = filename
           engine.compile!(File.read(filename))
-          print val if val = do_action(action, engine, context, options)
+          print val if val = do_action(action, engine, context, opts)
         end
       else
         engine.filename = '(stdin)'
         engine.compile!($stdin.read())
-        print val if val = do_action(action, engine, context, options)
+        print val if val = do_action(action, engine, context, opts)
       end
 
     end
 
     private
 
-    def do_action(action, engine, context, options)
+    def do_action(action, engine, context, opts)
       case action
       when 'compile'
         s = engine.src
-        s.sub!(/^\s*[\w]+\s*\z/, '') if options[?x]
       when nil, 'exec', 'execute'
-        if options[?B]
-          s = engine.result(context)
-        else
-          s = engine.evaluate(context)
-        end
+        s = opts.binding ? engine.result(context) : engine.evaluate(context)
+      else
+        raise "*** internal error"
       end
       return s
     end
 
     def usage
       command = File.basename($0)
-      s = <<END
+      s = <<'END'
 erubis - embedded program compiler for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
-  -s            : script source
-  -x            : script source (removed the last '_out' line)
+  -x            : compiled code
   -T            : don't trim spaces around '<% %>'
   -b            : body only (no preamble nor postamble)
+  -e            : escape (equal to '--E Escape')
   -p pattern    : embedded pattern (default '<% %>')
   -l lang       : compile but no execute (ruby/php/c/java/scheme/perl/js)
-  -c class      : class name (XmlEruby/PrintStatementEruby/...) (default Eruby)
-  -e enhancer,...  : enhancer name (Escaped, PercentLine, BiPattern, ...)
-  -E            : show all enhancers
+  -E enhancer,... : enhancer name (Escape, PercentLine, BiPattern, ...)
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
-  -B            : invoke result(binding()) instead of evaluate(context)
+  -B            : invoke 'result(binding)' instead of 'evaluate(context)'
 
 END
+      #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
       #  -a            : action (compile/execute)
       return s
@@ -179,7 +212,7 @@ END
         end
         s << "  * #{lang}\n"
         list.each do |name, default_val, desc|
-          s << ("    --%-25s : %s\n" % ["#{name}=#{default_val.inspect}", desc])
+          s << ("     --%-23s : %s\n" % ["#{name}=#{default_val.inspect}", desc])
         end
       end
       s << "\n"
@@ -187,14 +220,14 @@ END
     end
 
     def show_enhancers
-      s = ''
+      s = "enhancers:\n"
       list = []
       ObjectSpace.each_object(Module) do |m| list << m end
       list.sort_by { |m| m.name }.each do |m|
         next unless m.name =~ /\AErubis::(.*)Enhancer\z/
         name = $1
         desc = m.desc
-        s << ("%-14s : %s\n" % [name, desc])
+        s << ("  %-13s : %s\n" % [name, desc])
       end
       return s
     end
@@ -229,7 +262,10 @@ END
               options[optchar] = true
             elsif arg_required.include?(optchar)
               arg = optstr.empty? ? argv.shift : optstr
-              raise CommandOptionError.new("-#{optchar.chr}: argument required.") unless arg
+              unless arg
+                mesg = "-#{optchar.chr}: #{@option_args[optchar]} required."
+                raise CommandOptionError.new(mesg)
+              end
               options[optchar] = arg
               optstr = nil
             elsif arg_optional.include?(optchar)
@@ -290,7 +326,7 @@ END
       return enhancers
     end
 
-    def load_yamlfiles(yamlfiles, options)
+    def load_yamlfiles(yamlfiles, opts)
       hash = {}
       return hash unless yamlfiles
       yamlfiles.split(/,/).each do |yamlfile|
@@ -301,12 +337,12 @@ END
           str = File.read(yamlfile)
         end
         str = yamlfile == '-' ? $stdin.read() : File.read(yamlfile)
-        str = untabify(str) if options[?t]
+        str = untabify(str) if opts.untabify
         ydoc = YAML.load(str)
         unless ydoc.is_a?(Hash)
           raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
         end
-        convert_mapping_key_from_string_to_symbol(ydoc) if options[?S]
+        convert_mapping_key_from_string_to_symbol(ydoc) if opts.intern
         hash.update(ydoc)
       end
       context = hash

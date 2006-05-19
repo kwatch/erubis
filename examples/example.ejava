@@ -6,7 +6,7 @@ public class example {
   public static void main(String[] args) {
     String user = "Erubis";
     String[] list = { "<aaa>", "b&b", "\"ccc\"" };
-    StringBuffer _out = new StringBuffer();
+    StringBuffer _buf = new StringBuffer();
 %>
 <p>Hello <%= user %>!</p>
 <table>
@@ -20,7 +20,7 @@ public class example {
   </tbody>
 </table>
 <%
-    System.out.print(_out.toString());
+    System.out.print(_buf.toString());
   }
 
   public static String escape(String s) {

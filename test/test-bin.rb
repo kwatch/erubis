@@ -21,6 +21,14 @@ require 'yaml'
 require 'tempfile'
 
 require 'erubis'
+require 'erubis/main'
+
+
+class StringWriter < String
+  def write(arg)
+    self << arg
+  end
+end
 
 
 class BinTest < Test::Unit::TestCase
@@ -36,23 +44,23 @@ END
   INPUT2 = INPUT.gsub(/\blist([^:])/, '@list\1').gsub(/\buser([^:])/, '@user\1')
 
 #  SRC = <<'END'
-#_out = ''; _out << "list:\n"
+#_buf = ''; _buf << "list:\n"
 # list = ['<aaa>', 'b&b', '"ccc"']
 #   for item in list 
-#_out << "  - "; _out << ( item ).to_s; _out << "\n"
+#_buf << "  - "; _buf << ( item ).to_s; _buf << "\n"
 # end 
-#_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
-#_out
+#_buf << "user: "; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << "\n"
+#_buf
 #END
   SRC = <<'END'
-_out = []; _out << 'list:
+_buf = []; _buf << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list 
- _out << '  - '; _out << ( item ).to_s; _out << '
+ _buf << '  - '; _buf << ( item ).to_s; _buf << '
 '; end 
- _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
+ _buf << 'user: '; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << '
 ';
-_out.join
+_buf.join
 END
 #  SRC2 = SRC.gsub(/\blist /, '@list ').gsub(/\buser /, '@user ')
 
@@ -74,15 +82,31 @@ END
 
 
   def _test()
+    if $target
+      name = (caller()[0] =~ /in `test_(.*?)'/) && $1
+      return unless name == $target
+    end
     if @filename == nil
       method = (caller[0] =~ /in `(.*)'/) && $1    #'
       @filename = "tmp.#{method}"
     end
     File.open(@filename, 'w') { |f| f.write(@input) } if @filename
     begin
-      command = "ruby #{$script} #{@options} #{@filename}"
-      output = `#{command}`
+      #if @options.is_a?(Array)
+      #  command = "ruby #{$script} #{@options.join(' ')} #{@filename}"
+      #else
+      #  command = "ruby #{$script} #{@options} #{@filename}"
+      #end
+      #output = `#{command}`
+      if @options.is_a?(Array)
+        argv = @options + [ @filename ]
+      else
+        argv = "#{@options} #{@filename}".split
+      end
+      $stdout = output = StringWriter.new
+      Erubis::Main.new.execute(argv)
     ensure
+      $stdout = STDOUT
       File.unlink(@filename) if @filename && test(?f, @filename)
     end
     assert_text_equal(@expected, output)
@@ -105,17 +129,9 @@ END
   end
 
 
-  def test_source1    # -s
+  def test_source1    # -x
     @input    = INPUT
     @expected = SRC
-    @options  = '-s'
-    _test()
-  end
-
-
-  def test_source2    # -x
-    @input    = INPUT
-    @expected = SRC.sub(/^_out\s*\z/, '')
     @options  = '-x'
     _test()
   end
@@ -124,7 +140,8 @@ END
   def test_pattern1   # -p
     @input    = INPUT.gsub(/<%/, '<!--%').gsub(/%>/, '%-->')
     @expected = OUTPUT
-    @options  = "-p '<!--% %-->'"
+    #@options  = "-p '<!--% %-->'"
+    @options  = ["-p", "<!--% %-->"]
     _test()
   end
 
@@ -158,25 +175,25 @@ END
   def test_notrim2    # -T
     @input    = INPUT
 #    @expected = <<'END'
-#_out = ''; _out << "list:\n"
+#_buf = ''; _buf << "list:\n"
 # list = ['<aaa>', 'b&b', '"ccc"']
-#   for item in list ; _out << "\n"
-#_out << "  - "; _out << ( item ).to_s; _out << "\n"
-# end ; _out << "\n"
-#_out << "user: "; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << "\n"
-#_out
+#   for item in list ; _buf << "\n"
+#_buf << "  - "; _buf << ( item ).to_s; _buf << "\n"
+# end ; _buf << "\n"
+#_buf << "user: "; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << "\n"
+#_buf
 #END
     @expected = <<'END'
-_out = []; _out << 'list:
+_buf = []; _buf << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
-   for item in list ; _out << '
-'; _out << '  - '; _out << ( item ).to_s; _out << '
-'; end ; _out << '
-'; _out << 'user: '; _out << ( defined?(user) ? user : "(none)" ).to_s; _out << '
+   for item in list ; _buf << '
+'; _buf << '  - '; _buf << ( item ).to_s; _buf << '
+'; end ; _buf << '
+'; _buf << 'user: '; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << '
 ';
-_out.join
+_buf.join
 END
-    @options = "-sT"
+    @options = "-xT"
     _test()
   end
 
@@ -349,7 +366,7 @@ END
   end
 
 
-  def test_enhancers1 # -e
+  def test_enhancers1 # -E
     @input   = <<END
 <% list = %w[<aaa> b&b "ccc"] %>
 % for item in list
@@ -365,15 +382,23 @@ END
  - &quot;ccc&quot; : "ccc"
  - &quot;ccc&quot; : "ccc"
 END
-    @options = "-e Escape,PercentLine,HeaderFooter,BiPattern"
+    @options = "-E Escape,PercentLine,HeaderFooter,BiPattern"
     _test()
   end
 
 
   def test_bodyonly1  # -b
     @input = INPUT
-    @expected = SRC.sub(/\A_out = \[\];/,'').sub(/\n_out.join\n\z/,'')
-    @options = '-b -s'
+    @expected = SRC.sub(/\A_buf = \[\];/,'').sub(/\n_buf.join\n\z/,'')
+    @options = '-b -x'
+    _test()
+  end
+
+
+  def test_escape1  # -e
+    @input = INPUT
+    @expected = SRC.gsub(/<< \((.*?)\).to_s;/, '<< Erubis::XmlHelper.escape_xml(\1);')
+    @options = '-ex'
     _test()
   end
 

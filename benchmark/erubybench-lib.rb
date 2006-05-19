@@ -3,8 +3,8 @@ module Erubis
 
   class Eruby2 < Eruby
     def finalize_src(src)
-      #src << "\nprint _out.join; nil\n"
-      src << "\n_out.join; ''\n"
+      #src << "\nprint _buf.join; nil\n"
+      src << "\n_buf.join; ''\n"
     end
   end
 
@@ -32,20 +32,20 @@ module Erubis
     EMBEDDED_PATTERN = /(.*?)<%(=+|\#)?(.*?)-?%>/m
 
     def compile(input)
-      src = "_out = $stdout;"           # preamble
+      src = "_buf = $stdout;"           # preamble
       input.scan(EMBEDDED_PATTERN) do |text, indicator, code|
-        src << " _out << '" << escape_text(text) << "';"
+        src << " _buf << '" << escape_text(text) << "';"
         if !indicator              # <% %>
           src << code << ";"
         elsif indicator[0] == ?\#  # <%# %>
           n = code.count("\n")
           add_stmt(src, "\n" * n)
         else                       # <%= %>
-          src << " _out << (" << code << ").to_s;"
+          src << " _buf << (" << code << ").to_s;"
         end
       end
       rest = $' || input
-      src << " _out << '" << escape_text(rest) << "';"
+      src << " _buf << '" << escape_text(rest) << "';"
       src << "\nnil\n"       # postamble
       return src
     end
@@ -127,7 +127,7 @@ module Erubis
     #def switch_to_expr(src)
     #  return if @prev_is_expr
     #  @prev_is_expr = true
-    #  src << ' _out'
+    #  src << ' _buf'
     #end
 
     #def switch_to_stmt(src)
@@ -146,9 +146,9 @@ module Erubis
       if @initialized
         #switch_to_expr(src)
         #src << " << '" << escape_text(text) << "'"
-        src << "_out << '" << escape_text(text) << "';"
+        src << "_buf << '" << escape_text(text) << "';"
       else
-        src << "_out = '" << escape_text(text) << "';"
+        src << "_buf = '" << escape_text(text) << "';"
         @initialized = true
       end
     end
@@ -160,17 +160,17 @@ module Erubis
     end
 
     def add_expr_literal(src, code)
-      unless @initialized; src << "_out = ''"; @initialized = true; end
+      unless @initialized; src << "_buf = ''"; @initialized = true; end
       #switch_to_expr(src)
       #src << " << (" << code << ").to_s"
-      src << " _out << (" << code << ").to_s;"
+      src << " _buf << (" << code << ").to_s;"
     end
 
     def add_expr_escaped(src, code)
-      unless @initialized; src << "_out = ''"; @initialized = true; end
+      unless @initialized; src << "_buf = ''"; @initialized = true; end
       #switch_to_expr(src)
       #src << " << " << escaped_expr(code)
-      src << " _out << " << escaped_expr(code) << ';'
+      src << " _buf << " << escaped_expr(code) << ';'
     end
 
     def add_expr_debug(src, code)
@@ -181,7 +181,7 @@ module Erubis
 
     def add_postamble(src)
       #super if @initialized
-      src << "\n_out\n" if @initialized
+      src << "\n_buf\n" if @initialized
     end
 
   end

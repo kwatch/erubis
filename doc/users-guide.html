@@ -151,25 +151,21 @@ It has the following features.
 </li>
 </ul>
 <ul type="disc">
-<li>Or if you can be root user, download erubis-X.X.X.tar.bz2 and install by setup.rb.
-<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
+<li>Else install <a href="http://rubyforge.org/projects/erubis/">abstract</a> at first,
+   and download erubis_X.X.X.tar.bz2 and install it by setup.rb.
+<pre class="terminal">$ tar xjf abstract_X.X.X.tar.bz2
+$ cd abstract_X.X.X/
+$ sudo ruby setup.rb
+$ cd ..
+$ tar xjf erubis_X.X.X.tar.bz2
 $ cd erubis_X.X.X/
-$ ruby setup.rb
+$ sudo ruby setup.rb
 </pre>
 </li>
 </ul>
 <ul type="disc">
-<li>Else you should copy 'lib/erubis.rb', 'lib/erubis/', and 'bin/erubis' into proper directory manually.
-<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
-$ cd erubis_X.X.X/
-$ cp -r lib/erubis.rb lib/erubis /usr/local/lib/ruby/site_ruby/1.8
-$ cp bin/erubis /usr/local/bin
-</pre>
-</li>
-</ul>
-<ul type="disc">
-<li>(Optional) 'contrib/inline-require' enables you to merge 'lib/erubis.rb' into 'bin/erubis'.
-<pre class="terminal">$ tar xjf erubis-X.X.X.tar.bz2
+<li>(Optional) 'contrib/inline-require' enables you to merge 'lib/**/*.rb' into 'bin/erubis'.
+<pre class="terminal">$ tar xjf erubis_X.X.X.tar.bz2
 $ cd erubis_X.X.X/
 $ unset RUBYLIB
 $ contrib/inline-require -I lib bin/erubis &gt; contrib/erubis
@@ -213,14 +209,14 @@ puts <b>eruby.result(binding())</b>        # get result
 output</div>
 <pre class="terminal">$ ruby example1.rb
 ---------- script source ---
-_out = []; _out &lt;&lt; '&lt;ul&gt;
+_buf = []; _buf &lt;&lt; '&lt;ul&gt;
 ';   for item in list 
- _out &lt;&lt; '  &lt;li&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/li&gt;
+ _buf &lt;&lt; '  &lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
 ';   end 
 
- _out &lt;&lt; '&lt;/ul&gt;
+ _buf &lt;&lt; '&lt;/ul&gt;
 ';
-_out.join
+_buf.join
 ---------- result ----------
 &lt;ul&gt;
   &lt;li&gt;aaa&lt;/li&gt;
@@ -228,19 +224,19 @@ _out.join
   &lt;li&gt;ccc&lt;/li&gt;
 &lt;/ul&gt;
 </pre>
-<p>Erubis has command 'erubis'.  Command-line option '-s' shows the compiled source code of eRuby script.
+<p>Erubis has command 'erubis'.  Command-line option '-x' shows the compiled source code of eRuby script.
 </p>
 <div class="terminal_caption">
-example of command-line option '-s'</div>
-<pre class="terminal">$ erubis <b>-s</b> example1.eruby
-_out = []; _out &lt;&lt; '&lt;ul&gt;
+example of command-line option '-x'</div>
+<pre class="terminal">$ erubis <b>-x</b> example1.eruby
+_buf = []; _buf &lt;&lt; '&lt;ul&gt;
 ';   for item in list 
- _out &lt;&lt; '  &lt;li&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/li&gt;
+ _buf &lt;&lt; '  &lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
 ';   end 
 
- _out &lt;&lt; '&lt;/ul&gt;
+ _buf &lt;&lt; '&lt;/ul&gt;
 ';
-_out.join
+_buf.join
 </pre>
 <br>
 
@@ -262,31 +258,31 @@ example2.eruby</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -s example2.eruby
-_out = []; _out &lt;&lt; '&lt;ul&gt;
+<pre class="terminal">$ erubis -x example2.eruby
+_buf = []; _buf &lt;&lt; '&lt;ul&gt;
 ';   for item in list 
- _out &lt;&lt; '  &lt;li&gt;
-'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
-'; _out &lt;&lt; '  &lt;/li&gt;
+ _buf &lt;&lt; '  &lt;li&gt;
+'; _buf &lt;&lt; '    '; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '
+'; _buf &lt;&lt; '  &lt;/li&gt;
 ';   end 
- _out &lt;&lt; '&lt;/ul&gt;
+ _buf &lt;&lt; '&lt;/ul&gt;
 ';
-_out.join
+_buf.join
 </pre>
 <p>If you want leave spaces around '&lt;% %&gt;', add command-line option '-T'.
 </p>
 <div class="terminal_caption">
 compiled source code with command-line option '-T'</div>
-<pre class="terminal">$ erubis -s <b>-T</b> example2.eruby
-_out = []; _out &lt;&lt; '&lt;ul&gt;
-'; _out &lt;&lt; '  '; for item in list ; _out &lt;&lt; '
-'; _out &lt;&lt; '  &lt;li&gt;
-'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
-'; _out &lt;&lt; '  &lt;/li&gt;
-'; _out &lt;&lt; '  '; end ; _out &lt;&lt; '
-'; _out &lt;&lt; '&lt;/ul&gt;
+<pre class="terminal">$ erubis -x <b>-T</b> example2.eruby
+_buf = []; _buf &lt;&lt; '&lt;ul&gt;
+'; _buf &lt;&lt; '  '; for item in list ; _buf &lt;&lt; '
+'; _buf &lt;&lt; '  &lt;li&gt;
+'; _buf &lt;&lt; '    '; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '
+'; _buf &lt;&lt; '  &lt;/li&gt;
+'; _buf &lt;&lt; '  '; end ; _buf &lt;&lt; '
+'; _buf &lt;&lt; '&lt;/ul&gt;
 ';
-_out.join
+_buf.join
 </pre>
 <p>Or add option <code>:trim=&gt;false</code> to Erubis::Eruby.new().
 </p>
@@ -308,15 +304,15 @@ puts eruby.result(binding())              # get result
 output</div>
 <pre class="terminal">$ ruby example2.rb
 ---------- script source ---
-_out = []; _out &lt;&lt; '&lt;ul&gt;
-'; _out &lt;&lt; '  '; for item in list ; _out &lt;&lt; '
-'; _out &lt;&lt; '  &lt;li&gt;
-'; _out &lt;&lt; '    '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
-'; _out &lt;&lt; '  &lt;/li&gt;
-'; _out &lt;&lt; '  '; end ; _out &lt;&lt; '
-'; _out &lt;&lt; '&lt;/ul&gt;
+_buf = []; _buf &lt;&lt; '&lt;ul&gt;
+'; _buf &lt;&lt; '  '; for item in list ; _buf &lt;&lt; '
+'; _buf &lt;&lt; '  &lt;li&gt;
+'; _buf &lt;&lt; '    '; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '
+'; _buf &lt;&lt; '  &lt;/li&gt;
+'; _buf &lt;&lt; '  '; end ; _buf &lt;&lt; '
+'; _buf &lt;&lt; '&lt;/ul&gt;
 ';
-_out.join
+_buf.join
 ---------- result ----------
 &lt;ul&gt;
   
@@ -384,13 +380,13 @@ puts eruby.result(binding())               # get result
 output</div>
 <pre class="terminal">$ ruby example3.rb 2&gt; stderr.log
 ---------- script source ---
-_out = []; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; <b>_out &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>_out &lt;&lt; ( item ).to_s;</b> _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>$stderr.puts("*** debug: item=#{(item).inspect}");</b> _out &lt;&lt; '&lt;/p&gt;
+_buf = []; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <b>$stderr.puts("*** debug: item=#{(item).inspect}");</b> _buf &lt;&lt; '&lt;/p&gt;
 
 '; end 
-_out.join
+_buf.join
 ---------- result ----------
   &lt;p&gt;&amp;lt;aaa&amp;gt;&lt;/p&gt;
   &lt;p&gt;&lt;aaa&gt;&lt;/p&gt;
@@ -409,17 +405,17 @@ $ cat stderr.log
 *** debug: item="b&amp;b"
 *** debug: item="\"ccc\""
 </pre>
-<p>The command-line option '-e Escape' will do the same action as Erubis::EscapedEruby.
-This is available in any language.
+<p>The command-line option '-e'<sup>(<a href="#fnref:2" name="fnlink:2">*2</a>)</sup> will do the same action as Erubis::EscapedEruby.
+This option is available for any language.
 </p>
-<pre class="terminal">$ erubis -l ruby <b>-e Escape</b> example3.eruby
-_out = []; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; $stderr.puts("*** debug: item=#{(item).inspect}"); _out &lt;&lt; '&lt;/p&gt;
+<pre class="terminal">$ erubis -l ruby <b>-e</b> example3.eruby
+_buf = []; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; $stderr.puts("*** debug: item=#{(item).inspect}"); _buf &lt;&lt; '&lt;/p&gt;
 
 '; end 
-_out.join
+_buf.join
 </pre>
 <p>Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
 </p>
@@ -442,6 +438,8 @@ end
  <dl compact>
   <dt>(<a name="fnref:1" href="#fnlink:1">*1</a>)</dt>
   <dd>Erubis::EscapedEruby class includes Erubis::EscapeEnhancer which swtches the action of '&lt;%= %&gt;' and '&lt;%== %&gt;'.</dd>
+  <dt>(<a name="fnref:2" href="#fnlink:2">*2</a>)</dt>
+  <dd>Command-line option '-e' is equivarent to '-E Escape'.</dd>
  </dl>
 </div>
 <br>
@@ -460,11 +458,11 @@ example4.eruby</div>
 </pre>
 <div class="terminal_caption">
 compiled source code with command-line option '-p'</div>
-<pre class="terminal">$ erubis -s <b>-p '&lt;!--% %--&gt;'</b> example4.eruby
-_out = []; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+<pre class="terminal">$ erubis -x <b>-p '&lt;!--% %--&gt;'</b> example4.eruby
+_buf = []; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
 '; end 
-_out.join
+_buf.join
 </pre>
 <a name="example4.rb"></a>
 <div class="program_caption">
@@ -485,10 +483,10 @@ puts eruby.result(binding())              # get result
 output</div>
 <pre class="terminal">$ ruby example4.rb
 ---------- script source ---
-_out = []; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
+_buf = []; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
 '; end 
-_out.join
+_buf.join
 ---------- result ----------
   &lt;p&gt;aaa&lt;/p&gt;
   &lt;p&gt;bbb&lt;/p&gt;
@@ -691,8 +689,8 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 
 <a name="tut-preamble"></a>
 <h3 class="section2">Preamble and Postamble</h3>
-<p>The first line ('_out = [];') in the compiled source code is called preamble
-and the last line ('_out.join') is called postamble.
+<p>The first line ('_buf = [];') in the compiled source code is called preamble
+and the last line ('_buf.join') is called postamble.
 </p>
 <p>Command-line option '-b' skips the output of preamble and postamble.
 </p>
@@ -706,15 +704,16 @@ example8.eruby</div>
 <p>compiled source code with and without command-line option '-b'
 </p>
 <pre class="terminal">## without '-b'
-$ erubis -s example8.eruby
-<b>_out = [];</b> for item in @list 
- _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+$ erubis -x example8.eruby
+<b>_buf = [];</b> for item in @list 
+ _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
-<b>_out.join</b>
+<b>_buf.join</b>
+
 ## with '-b'
-$ erubis -s <b>-b</b> example8.eruby
+$ erubis -x <b>-b</b> example8.eruby
  for item in @list 
- _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+ _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
 </pre>
 <p>Erubis::Eruby.new option '<code>:preamble=&gt;false</code>' and '<code>:postamble=&gt;false</code>' also suppress output of preamble or postamle.
@@ -734,13 +733,13 @@ puts eruby2.src   # don't print preamble and postamble
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby example8.rb
-_out = []; for item in @list 
- _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+_buf = []; for item in @list 
+ _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
-_out.join
+_buf.join
 --------------
  for item in @list 
- _out &lt;&lt; ' &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+ _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
 </pre>
 <br>
@@ -752,7 +751,7 @@ _out.join
 <a name="enhancer"></a>
 <h2 class="section1">Enhancer</h2>
 <p>Enhancer is a module to add a certain feature into Erubis::Eruby class.
-Enhancer may be language-independent or only for Eruby.
+Enhancer may be language-independent or only for Erubis::Eruby class.
 </p>
 <p>To use enhancers, define subclass and include them.
 The folloing is an example to use <a href="#escape-enhancer">EscapeEnhancer</a>, <a href="#percentline-enhancer">PercentLineEnhancer</a>, and <a href="#bipattern-enhancer">BiPatternEnhancer</a>.
@@ -763,10 +762,10 @@ The folloing is an example to use <a href="#escape-enhancer">EscapeEnhancer</a>,
   include BiPatternEnhancer
 end
 </pre>
-<p>You can specify enhancers in command-line with option '-e'.
+<p>You can specify enhancers in command-line with option '-E'.
 The following is an example to use some enhancers in command-line.
 </p>
-<pre class="terminal">$ erubis -se Escape,PercentLine,BiPattern example.eruby
+<pre class="terminal">$ erubis -xE Escape,PercentLine,BiPattern example.eruby
 </pre>
 <p>The following is the list of enhancers.
 </p>
@@ -784,7 +783,7 @@ The following is an example to use some enhancers in command-line.
 <dt class="dt1">
 <a href="#printout-enhancer">PrintOutEnhancer</a> (only for Eruby)</dt>
 <dd class="dd1">
-	Use "print(...)" statement insead of "_out &lt;&lt; ...".
+	Use "print(...)" statement insead of "_buf &lt;&lt; ...".
 </dd>
 <dt class="dt1">
 <a href="#printenabled-enhancer">PrintEnabledEnhancer</a> (only for Eruby)</dt>
@@ -851,15 +850,15 @@ example.eruby</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se Escape example.eruby
-_out = []; _out &lt;&lt; '&lt;div&gt;
+<pre class="terminal">$ erubis -xE Escape example.eruby
+_buf = []; _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; <b>_out &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>_out &lt;&lt; ( item ).to_s;</b> _out &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/p&gt;
 '; end 
- _out &lt;&lt; '&lt;/div&gt;
+ _buf &lt;&lt; '&lt;/div&gt;
 ';
-_out.join
+_buf.join
 </pre>
 <p>EscapeEnhancer is language-independent.
 </p>
@@ -873,13 +872,13 @@ Therefore, you can use 'print' statement in embedded ruby code.
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se Stdout example.eruby
-<b>_out = $stdout;</b> _out &lt;&lt; '&lt;div&gt;
+<pre class="terminal">$ erubis -xE Stdout example.eruby
+<b>_buf = $stdout;</b> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
 '; end 
- _out &lt;&lt; '&lt;/div&gt;
+ _buf &lt;&lt; '&lt;/div&gt;
 ';
 ''
 </pre>
@@ -890,11 +889,11 @@ compiled source code</div>
 
 <a name="printout-enhancer"></a>
 <h3 class="section2">PrintOutEnhancer</h3>
-<p>PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_out &lt;&lt; ...'.
+<p>PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_buf &lt;&lt; ...'.
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se PrintOut example.eruby
+<pre class="terminal">$ erubis -xE PrintOut example.eruby
  <b>print</b> '&lt;div&gt;
 '; for item in list 
  <b>print</b> '  &lt;p&gt;'; <b>print</b>(( item ).to_s); <b>print</b> '&lt;/p&gt;
@@ -952,14 +951,14 @@ because print() method in '&lt;% ... %&gt;' invokes not Kernel#print() but Print
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal"><b>_out = [];</b> _out &lt;&lt; '&lt;div&gt;
+<pre class="terminal"><b>_buf = [];</b> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
 '; end 
- _out &lt;&lt; '&lt;/div&gt;
+ _buf &lt;&lt; '&lt;/div&gt;
 ';
-<b>_out</b>
+<b>_buf</b>
 </pre>
 <p>ArrayEnhancer is only for Eruby.
 </p>
@@ -981,15 +980,15 @@ Erubis::Eruby includes this enhancer by default.
 <h3 class="section2">StringBufferEnhancer</h3>
 <p>StringBufferEnhancer makes Eruby to use string buffer.
 </p>
-<pre class="terminal">$ erubis -se StringBuffer example.eruby
-<b>_out = '';</b> _out &lt;&lt; '&lt;div&gt;
+<pre class="terminal">$ erubis -xE StringBuffer example.eruby
+<b>_buf = '';</b> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
- _out &lt;&lt; '  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
 '; end 
- _out &lt;&lt; '&lt;/div&gt;
+ _buf &lt;&lt; '&lt;/div&gt;
 ';
-<b>_out</b>
+<b>_buf</b>
 </pre>
 <p>StringBufferEnhancer is only for Eruby.
 </p>
@@ -1021,22 +1020,22 @@ notext-example.eruby</div>
 </pre>
 <div class="terminal_caption">
 output example of NoTextEnhancer</div>
-<pre class="terminal">$ erubis -Tse NoText notext-example.eruby
-_out = [];
+<pre class="terminal">$ erubis -TxE NoText notext-example.eruby
+_buf = [];
  if !@list || @list.empty? ;
 
  else ;
 
 
      @list.each_with_index do |item, i| ;
-                  _out &lt;&lt; ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
-           _out &lt;&lt; ( item ).to_s;
+                  _buf &lt;&lt; ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+           _buf &lt;&lt; ( item ).to_s;
 
      end ;
 
 
  end ;
-_out.join
+_buf.join
 </pre>
 <p>NoTextEnhancer is language-independent. It is useful even if you are PHP user, see <a href="#topics-php">this section</a>.
 </p>
@@ -1049,15 +1048,15 @@ _out.join
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se Simplify example.euby
-_out = []; _out &lt;&lt; '&lt;div&gt;
-'; for item in list ; _out &lt;&lt; '
-  &lt;p&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; _out &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _out &lt;&lt; '&lt;/p&gt;
-'; end ; _out &lt;&lt; '
+<pre class="terminal">$ erubis -xE Simplify example.euby
+_buf = []; _buf &lt;&lt; '&lt;div&gt;
+'; for item in list ; _buf &lt;&lt; '
+  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
+'; end ; _buf &lt;&lt; '
 &lt;/div&gt;
 ';
-_out.join
+_buf.join
 </pre>
 <p>SimplifyEnhancer is language-independent.
 </p>
@@ -1080,12 +1079,12 @@ bipattern-example.rhtml</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se BiPattern bipattern-example.rhtml
-_out = []; for item in list 
- _out &lt;&lt; '  &lt;b&gt;'; <b>_out &lt;&lt; ( item ).to_s;</b> _out &lt;&lt; '&lt;/b&gt;
-  &lt;b&gt;'; <b>_out &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _out &lt;&lt; '&lt;/b&gt;
+<pre class="terminal">$ erubis -xE BiPattern bipattern-example.rhtml
+_buf = []; for item in list 
+ _buf &lt;&lt; '  &lt;b&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/b&gt;
 '; end 
-_out.join
+_buf.join
 </pre>
 <p>BiPatternEnhancer is language-independent.
 </p>
@@ -1107,13 +1106,13 @@ percentline-example.rhtml</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se PercentLine percentline-example.rhtml
-_out = []; <b>for item in list</b>
- _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+<pre class="terminal">$ erubis -xE PercentLine percentline-example.rhtml
+_buf = []; <b>for item in list</b>
+ _buf &lt;&lt; '  &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; <b>end</b>
- _out &lt;&lt; '% lines with \'%%\'
+ _buf &lt;&lt; '% lines with \'%%\'
 ';
-_out.join
+_buf.join
 </pre>
 <p>PercentLineEnhancer is language-independent.
 </p>
@@ -1141,14 +1140,14 @@ headerfooter-example.eruby</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se HeaderFooter headerfooter-example.eruby
+<pre class="terminal">$ erubis -xE HeaderFooter headerfooter-example.eruby
 
 <b>def list_items(items)</b>
 
-_out = []; for item in items 
- _out &lt;&lt; '  &lt;b&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/b&gt;
+_buf = []; for item in items 
+ _buf &lt;&lt; '  &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
-_out.join
+_buf.join
 
 <b>end</b>
 
@@ -1170,17 +1169,17 @@ normal-eruby-test.eruby</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -s normal-eruby-test.eruby
-_out = [];
+<pre class="terminal">$ erubis -x normal-eruby-test.eruby
+_buf = [];
 <b>def list_items(items)</b>
 
  for item in items 
- _out &lt;&lt; '&lt;li&gt;'; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '&lt;/li&gt;
+ _buf &lt;&lt; '&lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
 '; end 
 
 <b>end</b>
 
-_out.join
+_buf.join
 </pre>
 <p>Header and footer can be in any position in eRuby script,
 that is, header is no need to be in the head of eRuby script.
@@ -1201,16 +1200,16 @@ headerfooter-example2.rhtml</div>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal">$ erubis -se HeaderFooter headerfooter-example2.rhtml
+<pre class="terminal">$ erubis -xE HeaderFooter headerfooter-example2.rhtml
 
 <b>def page(list)</b>
 
-_out = []; _out &lt;&lt; '&lt;?xml version="1.0"?&gt;
+_buf = []; _buf &lt;&lt; '&lt;?xml version="1.0"?&gt;
 &lt;html&gt;
-'; _out &lt;&lt; ' :
-'; _out &lt;&lt; '&lt;/html&gt;
+'; _buf &lt;&lt; ' :
+'; _buf &lt;&lt; '&lt;/html&gt;
 ';
-_out.join
+_buf.join
 
 <b>end</b>
 
@@ -1377,7 +1376,7 @@ public class Example {
   }
 
   public String view() {
-    StringBuffer _out = new StringBuffer();
+    StringBuffer _buf = new StringBuffer();
 %&gt;</b>
 &lt;html&gt;
  &lt;body&gt;
@@ -1395,7 +1394,7 @@ public class Example {
  &lt;body&gt;
 &lt;/html&gt;
 <b>&lt;%
-    return _out.toString();
+    return _buf.toString();
   }
 
   public static void main(String[] args) {
@@ -1424,7 +1423,7 @@ public class Example {
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -b -l java example.ejava
-StringBuffer _out = new StringBuffer();
+StringBuffer _buf = new StringBuffer();
 import java.util.*;
 
 public class Example {
@@ -1436,25 +1435,25 @@ public class Example {
   }
 
   public String view() {
-    StringBuffer _out = new StringBuffer();
+    StringBuffer _buf = new StringBuffer();
 
-_out.append("&lt;html&gt;\n"
+_buf.append("&lt;html&gt;\n"
           + " &lt;body&gt;\n"
-          + "  &lt;p&gt;Hello "); _out.append(user); _out.append("!&lt;/p&gt;\n"
+          + "  &lt;p&gt;Hello "); _buf.append(user); _buf.append("!&lt;/p&gt;\n"
           + "  &lt;table&gt;\n"
           + "   &lt;tbody&gt;\n");
      for (int i = 0; i &lt; list.length; i++) { 
-_out.append("    &lt;tr bgcolor=\""); _out.append(i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _out.append("\"&gt;\n"
-          + "     &lt;td&gt;"); _out.append(i + 1); _out.append("&lt;/td&gt;\n"
-          + "     &lt;td&gt;"); _out.append(escape(list[i])); _out.append("&lt;/td&gt;\n"
+_buf.append("    &lt;tr bgcolor=\""); _buf.append(i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _buf.append("\"&gt;\n"
+          + "     &lt;td&gt;"); _buf.append(i + 1); _buf.append("&lt;/td&gt;\n"
+          + "     &lt;td&gt;"); _buf.append(escape(list[i])); _buf.append("&lt;/td&gt;\n"
           + "    &lt;/tr&gt;\n");
      } 
-_out.append("   &lt;/tbody&gt;\n"
+_buf.append("   &lt;/tbody&gt;\n"
           + "  &lt;/table&gt;\n"
           + " &lt;body&gt;\n"
           + "&lt;/html&gt;\n");
 
-    return _out.toString();
+    return _buf.toString();
   }
 
   public static void main(String[] args) {
@@ -1479,7 +1478,7 @@ _out.append("   &lt;/tbody&gt;\n"
   }
 }
 
-return _out.toString();
+return _buf.toString();
 </pre>
 <br>
 
@@ -1521,7 +1520,7 @@ example.escheme</div>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -l scheme example.escheme
-(let ((_out '())) (define (_add x) (set! _out (cons x _out))) (_add "&lt;html&gt;
+(let ((_buf '())) (define (_add x) (set! _buf (cons x _buf))) (_add "&lt;html&gt;
  &lt;body&gt;\n")
 
 (let ((user "Erubis")
@@ -1549,7 +1548,7 @@ compiled source code</div>
 
 (_add " &lt;/body&gt;
 &lt;/html&gt;\n")
-  (reverse _out))
+  (reverse _buf))
 </pre>
 <div class="terminal_caption">
 compiled source code (with --func=display property)</div>
@@ -1665,27 +1664,27 @@ print('  &lt;/table&gt;
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -l js example.ejs
-var _out = [];
+var _buf = [];
    var user = 'Erubis';
    var list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"'];
  
-_out.push("&lt;html&gt;\n\
+_buf.push("&lt;html&gt;\n\
  &lt;body&gt;\n\
-  &lt;p&gt;Hello "); _out.push(user); _out.push("!&lt;/p&gt;\n\
+  &lt;p&gt;Hello "); _buf.push(user); _buf.push("!&lt;/p&gt;\n\
   &lt;table&gt;\n\
    &lt;tbody&gt;\n");
      var i; 
      for (i = 0; i &lt; list.length; i++) { 
-_out.push("    &lt;tr bgcolor=\""); _out.push(i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _out.push("\"&gt;\n\
-     &lt;td&gt;"); _out.push(i + 1); _out.push("&lt;/td&gt;\n\
-     &lt;td&gt;"); _out.push(list[i]); _out.push("&lt;/td&gt;\n\
+_buf.push("    &lt;tr bgcolor=\""); _buf.push(i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _buf.push("\"&gt;\n\
+     &lt;td&gt;"); _buf.push(i + 1); _buf.push("&lt;/td&gt;\n\
+     &lt;td&gt;"); _buf.push(list[i]); _buf.push("&lt;/td&gt;\n\
     &lt;/tr&gt;\n");
      } 
-_out.push("   &lt;/tbody&gt;\n\
+_buf.push("   &lt;/tbody&gt;\n\
   &lt;/table&gt;\n\
  &lt;/body&gt;\n\
 &lt;/html&gt;\n");
-document.write(_out.join(""));
+document.write(_buf.join(""));
 </pre>
 <br>
 
@@ -1739,7 +1738,7 @@ NoTextEnhancer can separate PHP code from HTML document.
 </p>
 <div class="terminal_caption">
 example of using NoTextEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -T -l php -e NoText -p '&lt;\?php \?&gt;' notext-example.php | uniq
+<pre class="terminal">$ erubis -T -l php -E NoText -p '&lt;\?php \?&gt;' notext-example.php | uniq
 
     &lt;?php if (!$list || count($list) == 0) { ?&gt;
 
@@ -1815,7 +1814,7 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 <h2 class="section1">Command Reference</h2>
 <a name="command-usage"></a>
 <h3 class="section2">Usage</h3>
-<p>erubis [-hvsT] [-p <i>pattern</i>] [-c <i>class</i>] [-K <i>kanji</i>] [-f <i>file.yaml</i>] [<i>file</i> ...]
+<p>erubis [..options..] [<i>file</i> ...]
 </p>
 <br>
 
@@ -1834,14 +1833,9 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
   	Release version.
   </dd>
   <dt class="dt3"><b>
--s            </b></dt>
-  <dd class="dd3">
-  	Show script source.
-  </dd>
-  <dt class="dt3"><b>
 -x            </b></dt>
   <dd class="dd3">
-  	Show script source, removing the last '_out' line.
+  	Show compiled source.
   </dd>
   <dt class="dt3"><b>
 -T            </b></dt>
@@ -1856,6 +1850,11 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 			This is equivarent to '--preamble=false --postamble=false'.
   </dd>
   <dt class="dt3"><b>
+-e            </b></dt>
+  <dd class="dd3">
+  	Escape. This is equivarent to '-E Escape'.
+  </dd>
+  <dt class="dt3"><b>
 -p pattern    </b></dt>
   <dd class="dd3">
   	Embedded pattern (default '&lt;% %&gt;').
@@ -1868,21 +1867,11 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 			This option makes erubis command to compile script but no execute.
   </dd>
   <dt class="dt3"><b>
--c class      </b></dt>
-  <dd class="dd3">
-  	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
-  </dd>
-  <dt class="dt3"><b>
--e enhacers   </b></dt>
+-E enhacers   </b></dt>
   <dd class="dd3">
   	Enhancer name (Escape, PercentLine, ...).
 			It is able to specify several enhancer name separating with ','
 			(ex. -f Escape,PercentLine,HeaderFooter).
-  </dd>
-  <dt class="dt3"><b>
--E            </b></dt>
-  <dd class="dd3">
-  	Show all enhancers.
   </dd>
   <dt class="dt3"><b>
 -I path       </b></dt>
@@ -1906,7 +1895,7 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
   <dt class="dt3"><b>
 -t            </b></dt>
   <dd class="dd3">
-  	Expand tab character in YAML file.
+  	Expand tab characters in YAML file.
   </dd>
   <dt class="dt3"><b>
 -S            </b></dt>
@@ -1926,7 +1915,7 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 <h3 class="section2">Properties</h3>
 <p>Some Eruby classes can take optional properties to change it's compile option.
 For example, property '--indent="  "' may change indentation of compiled source code.
-Try 'eruby -h' for details.
+Try 'erubis -h' for details.
 </p>
 <br>
 

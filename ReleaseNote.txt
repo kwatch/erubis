@@ -1,4 +1,64 @@
 
+$ [ANN] Erubis 2.0.0 release - a fast eRuby implementation
+
+I have released Erubis 2.0.0.
+http://rubyforge.org/projects/erubis/
+
+Erubis is a pure ruby implementation of eRuby.
+
+Features:
+ * Very fast, almost three times faster than ERB and
+   even as fast as eruby (implemented in C)
+ * Support multi-language
+   (Ruby,PHP,C,Java,Scheme,Perl,Javascript)
+ * Auto escaping support
+ * Auto trimming spaces around '<% %>'
+ * Embedded pattern changeable (default '<% %>')
+ * Context object available and easy to combine eRuby
+   template with YAML datafile
+ * Print statement available
+ * Easy to extend in subclass
+
+See users' guide (erubis_2.0.0/doc/users-guide.html)
+for details.
+
+
+Changes from 1.1:
+ * module 'PrintEnhancer' is renamed to 'PrintEnabledEnahncer'
+ * module 'FastEnhancer' and class 'FastEruby' is obsolete
+   (these are integrated with Eruby class)
+ * Eruby#evaluate() calls instance_eval() instead of eval()
+ * XmlEruby.escape_xml() is moved to XmlHelper.escape_xml()
+ * and so on
+
+Enhancements from 1.1:
+ * multi programming language support
+   (Ruby,PHP,C,Java,Scheme,Perl,Javascript)
+ * many enhancer modules are added (see users' guide for details)
+ * class Eruby runs very fast because FastEnhancer module is
+   integrated into Eruby by default
+ * TinyEruby class (tiny.rb) is added
+ * and so on
+ 
+
+If you are interested in Eruby internal, see the following classes
+at first.
+ * Erubis::TinyEruby (erubis/tiny.rb) --
+       the most simple eRuby implementation.
+ * Erubis::Engine (erubis/engine.rb) --
+       base class of Eruby, Ephp, Ejava, and so on.
+ * Erubis::Eruby (erubis/engine/eruby.rb) --
+       engine class for eRuby.
+
+
+--
+regards,
+kwatch
+
+
+
+
+
 $ Release 1.1.1 (2006-03-06)
 
 I have released Erubis 1.1.0.

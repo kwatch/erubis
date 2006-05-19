@@ -23,30 +23,18 @@
     <h1 id="doc_title">Erubis</h1>
 <a name="News"></a>
 <h2 class="section">News</h2>
-<dl class="dl1">
-<dt class="dt1">
-2006-05-05</dt>
-<dd class="dd1">
-	<ul class="ul2">
-	<li><a href="download.cgi">erubis_2.0.0</a> released.
-	</li>
-	</ul>
-</dd>
-<dt class="dt1">
-2006-03-05</dt>
-<dd class="dd1">
-	<ul class="ul2">
-	<li><a href="download.cgi">erubis_1.1.0</a> released.
-	</li>
-	</ul>
-</dd>
-</dl>
+<ul class="ul1">
+<li>[2006-05-??] <a href="download.cgi">erubis_2.0.0</a> released.
+</li>
+<li>[2006-03-05] <a href="download.cgi">erubis_1.1.0</a> released.
+</li>
+</ul>
 
 
 
 <a name="Introduction"></a>
 <h2 class="section">Introduction</h2>
-<p>Erubis is an pure Ruby implementation of eRuby.
+<p>Erubis is a pure Ruby implementation of eRuby.
 It has the following features.
 </p>
 <ul class="ul1">
@@ -62,9 +50,17 @@ It has the following features.
 </li>
 <li>Context object available and easy to combine eRuby template with YAML datafile
 </li>
-<li>Print statement available
-</li>
-<li>Easy to expand in subclass
+<li>Easy to expand in subclass, for example:
+  <ul class="ul2">
+  <li>Print statement support
+  </li>
+  <li>Lines starting with percent character ('%') support
+  </li>
+  <li>Another embedded pattern support
+  </li>
+  <li>etc...
+  </li>
+  </ul>
 </li>
 </ul>
 <p>eRuby is "embedded Ruby" in documents.
@@ -72,20 +68,19 @@ The following is an example of eRuby. '&lt;% ... %&gt;' means Ruby statement and
 </p>
 <a name="example.eruby"></a>
 <div class="program_caption">example.eruby</div>
-<pre class="program">Hello &lt;%= user %&gt;!
-&lt;% for item in list %&gt;
+<pre class="program">Hello &lt;%= @user %&gt;!
+&lt;% for item in @list %&gt;
  * &lt;%= item %&gt;
 &lt;% end %&gt;
 </pre>
 <p>This will be compiled into Ruby program code.
 </p>
-<pre class="terminal">$ erubis -l ruby example.eruby
-_out = []; _out &lt;&lt; 'Hello '; _out &lt;&lt; ( user ).to_s; _out &lt;&lt; '!
-'; for item in list 
-; _out &lt;&lt; ' * '; _out &lt;&lt; ( item ).to_s; _out &lt;&lt; '
+<pre class="terminal">$ erubis -x example.eruby
+_buf = []; _buf &lt;&lt; 'Hello '; _buf &lt;&lt; ( @user ).to_s; _buf &lt;&lt; '!
+'; for item in @list 
+ _buf &lt;&lt; ' * '; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '
 '; end 
-;
-_out.join
+_buf.join
 </pre>
 <p>Or you can execute eRuby script directry.
 </p>
@@ -102,7 +97,7 @@ Hello Erubis!
  * ccc
 </pre>
 <p>Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
-You can embed these language code into your document and compile it to target program code.
+You can embed these language code into your document and compile it into target program code.
 </p>
 
 

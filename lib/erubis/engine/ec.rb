@@ -19,7 +19,7 @@ module Erubis
     def self.supported_properties()  # :nodoc:
       list = super
       list << [:indent, '',       "indent spaces (ex. '  ')"]
-      list << [:out,    'stdout', "output stream name"]
+      list << [:out,    'stdout', "output file pointer name"]
       return list
     end
 
