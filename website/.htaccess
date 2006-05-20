@@ -1,0 +1,4 @@
+  RewriteEngine on
+  #RewriteRule (.*)\.html$ /site-design.cgi?fn=$1.html
+  RewriteRule  \.html$  /site-design.cgi
+  RewriteRule  ^$       /site-design.cgi

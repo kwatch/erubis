@@ -5,8 +5,10 @@
 
 .$ News
 
-.* [2006-05-??] {{<erubis_2.0.0|download.cgi>}} released.
+.* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
 .* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
+.#.* [2006-05-20] {{<erubis_2.0.0|http://rubyforge.org/projects/erubis/>}} released.
+.#.* [2006-03-05] {{<erubis_1.1.0|http://rubyforge.org/projects/erubis/>}} released.
 
 
 .$ Introduction
@@ -92,8 +94,10 @@ You can embed these language code into your document and compile it into target 
 
 
 .$ Download
-	.* if you have installed RubyGems, just type `{{,gem install --remote erubis,}}' to install Erubis
-	.* Or download from {{<RubyForge|http://rubyforge.org/projects/erubis/>}}
+	.* if you have installed RubyGems, just type `{{,gem install -r erubis,}}' to install Erubis
+	.* Or {{<download|download.cgi>}}.^
+	   (Erubis requires {{<abstract|http://rubyforge.org/projects/abstract>}} library.
+	    Download and install it at first.)
 
 .$ Documents
 	.#.* {{<README|README.en.html>}}

@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.22 (2005-05-20)
+	.- [update] website/* updated
+
 .: Rev.21 (2005-05-19)
 	.- [change] '_out' is changed to '_buf'
 	.- [change] option '-s' is obsolete
