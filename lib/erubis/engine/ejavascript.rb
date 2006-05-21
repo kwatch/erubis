@@ -39,12 +39,10 @@ module Erubis
       return text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] } || text
     end
 
-    #--
-    #def escaped_expr(code)
-    #  @escape ||= 'escape'
-    #  return "#{@escape}(#{code.strip})"
-    #end
-    #++
+    def escaped_expr(code)
+      @escape ||= 'escape'
+      return "#{@escape}(#{code.strip})"
+    end
 
     def add_indent(src, indent)
       src << (src.empty? || src[-1] == ?\n ? indent : ' ')

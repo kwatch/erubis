@@ -28,6 +28,7 @@ module Erubis
     end
 
     def add_preamble(src)
+      # empty
     end
 
     def escape_text(text)
@@ -38,12 +39,10 @@ module Erubis
       src << @func << "('" << escape_text(text) << "'); " unless text.empty?
     end
 
-    #--
-    #def escaped_expr(code)
-    #  @escape ||= 'escape'
-    #  return "escape(#{code.strip})"
-    #end
-    #++
+    def escaped_expr(code)
+      @escape ||= 'escape'
+      return "escape(#{code.strip})"
+    end
 
     def add_expr_literal(src, code)
       src << @func << "(" << code.strip << "); "

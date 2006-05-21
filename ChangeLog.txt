@@ -2,6 +2,13 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.24 (2005-05-21)
+	.- [change] Engine#escape_text() and Engine#escaped_expr() are now abstract method
+	.- [bugfix] in Engine#compile(), rspace may be printed even if rspace is nil
+
+.: Rev.23 (2005-05-20)
+	.- [release] 2.0.0
+
 .: Rev.22 (2005-05-20)
 	.- [update] website/* updated
 

@@ -40,12 +40,10 @@ module Erubis
       return text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] } || text
     end
 
-    #--
-    #def escaped_expr(code)
-    #  @escape ||= 'escape'
-    #  return "#{@escape}(#{code.strip})"
-    #end
-    #++
+    def escaped_expr(code)
+      @escape ||= 'escape'
+      return "#{@escape}(#{code.strip})"
+    end
 
     def add_text(src, text)
       return if text.empty?

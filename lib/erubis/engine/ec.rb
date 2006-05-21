@@ -88,6 +88,7 @@ module Erubis
     end
 
     def add_postamble(src)
+      # empty
     end
 
   end

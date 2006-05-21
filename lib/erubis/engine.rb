@@ -61,7 +61,7 @@ module Erubis
 
 
   ##
-  ## [abstract] base engine class
+  ## .[abstract] base engine class
   ##
   class Engine
 
@@ -78,7 +78,7 @@ module Erubis
 
     def initialize(input, properties={})
       #@input    = input
-      @pattern   = properties[:pattern]  || '<% %>'
+      @pattern   = properties[:pattern]
       @filename  = properties[:filename]
       @trim      = properties[:trim] != false
       @preamble  = properties[:preamble]
@@ -98,7 +98,7 @@ module Erubis
       return engine
     end
 
-    ## eval(@src) with binding
+    ## eval(@src) with binding object
     def result(_binding_or_hash=TOPLEVEL_BINDING)
       _arg = _binding_or_hash
       if _arg.is_a?(Hash)
@@ -109,7 +109,7 @@ module Erubis
       return eval(@src, _arg, (@filename || '(erubis)'))
     end
 
-    ## call context.instance_eval(@src)
+    ## invoke context.instance_eval(@src)
     def evaluate(context=Context.new)
       context = Context.new(context) if context.is_a?(Hash)
       return context.instance_eval(@src, (@filename || '(erubis)'))
@@ -119,7 +119,7 @@ module Erubis
 
     ## return regexp of pattern to parse eRuby script
     def pattern_regexp(pattern=@pattern)
-      if pattern == '<% %>'
+      if pattern.nil? || pattern == '<% %>'
         return DEFAULT_REGEXP
       else
         prefix, postfix = pattern.split()
@@ -152,7 +152,7 @@ module Erubis
           else
             add_text(src, lspace) if lspace
             add_stmt(src, "\n" * n)
-            add_text(src, rspace) if lspace
+            add_text(src, rspace) if rspace
           end
           #flag_trim = @trim && lspace && rspace
           #add_text(src, lspace) if !flag_trim && lspace
@@ -196,20 +196,31 @@ module Erubis
 
     protected
 
-    ## escape text string
+    ## .[abstract] escape text string
+    ##
+    ## ex.
+    ##   def escape_text(text)
+    ##     return text.dump
+    ##     # or return "'" + text.gsub(/['\\]/, '\\\\\&') + "'"
+    ##   end
     def escape_text(text)
-      return text
+      not_implemented
     end
 
-    ## return escaped expression code
+    ## .[abstract] return escaped expression code
+    ##
+    ## ex.
+    ##   def escaped_expr(code)
+    ##     @escape ||= 'escape'
+    ##     return "#{@escape}(#{code.strip})"
+    ##   end
     def escaped_expr(code)
-      @escape ||= 'escape'
-      return "#{@escape}(#{code.strip})"
+      not_implemented
     end
 
-    ## .[empty] add @preamble to src
+    ## .[abstract] add @preamble to src
     def add_preamble(src)
-      # empty
+      not_implemented
     end
 
     ## .[abstract] add text string to src
@@ -244,14 +255,14 @@ module Erubis
       not_implemented
     end
 
-    ## .[empty] add expression code to src for debug. this is called by add_expr().
+    ## .[abstract] add expression code to src for debug. this is called by add_expr().
     def add_expr_debug(src, code)
-      # empty
+      not_implemented
     end
 
-    ## .[empty] add @postamble to src
+    ## .[abstract] add @postamble to src
     def add_postamble(src)
-      # empty
+      not_implemented
     end
 
   end  # end of class Engine

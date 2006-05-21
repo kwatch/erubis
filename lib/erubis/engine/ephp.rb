@@ -20,10 +20,9 @@ module Erubis
       return super
     end
 
-    #--
-    #def add_preamble(src)
-    #end
-    #++
+    def add_preamble(src)
+      # empty
+    end
 
     def escape_text(text)
       return text.gsub!(/<\?xml\b/, '<<?php ?>?xml') || text
@@ -63,10 +62,9 @@ module Erubis
       end
     end
 
-    #--
-    #def add_postamble(src)
-    #end
-    #++
+    def add_postamble(src)
+      # empty
+    end
 
   end
 

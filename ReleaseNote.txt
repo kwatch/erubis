@@ -1,4 +1,15 @@
 
+$ [ANN] Erubis 2.0.1 release - a fast eRuby implementation
+
+I have released Erubis 2.0.0.
+http://rubyforge.org/projects/erubis/
+
+Erubis is a pure ruby implementation of eRuby.
+
+This is a minor bugfix version.
+
+
+
 $ [ANN] Erubis 2.0.0 release - a fast eRuby implementation
 
 I have released Erubis 2.0.0.
