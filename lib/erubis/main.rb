@@ -176,7 +176,7 @@ module Erubis
 
     def usage
       command = File.basename($0)
-      s = <<'END'
+      s = <<END
 erubis - embedded program compiler for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
@@ -196,6 +196,7 @@ Usage: #{command} [..options..] [file ...]
   -B            : invoke 'result(binding)' instead of 'evaluate(context)'
 
 END
+      #'
       #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
       #  -a            : action (compile/execute)
@@ -283,13 +284,13 @@ END
       return options, context
     end
 
-    def untabify(text, width=8)
+    def untabify(str, width=8)
       sb = ''
-      text.scan(/(.*?)\t/m) do |s, |
+      str.scan(/(.*?)\t/m) do |s, |
         len = (n = s.rindex(?\n)) ? s.length - n - 1 : s.length
         sb << s << (" " * (width - len % width))
       end
-      return $' ? (sb << $') : text
+      return $' ? (sb << $') : str
     end
 
     def get_classobj(classname, lang)
@@ -342,25 +343,30 @@ END
         unless ydoc.is_a?(Hash)
           raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
         end
-        convert_mapping_key_from_string_to_symbol(ydoc) if opts.intern
+        intern_hash_keys(ydoc) if opts.intern
         hash.update(ydoc)
       end
       context = hash
       return context
     end
 
-    def convert_mapping_key_from_string_to_symbol(ydoc)
-      if ydoc.is_a?(Hash)
-        ydoc.each do |key, val|
-          ydoc[key.intern] = ydoc.delete(key) if key.is_a?(String)
-          convert_mapping_key_from_string_to_symbol(val)
+    def intern_hash_keys(obj, done={})
+      return if done.key?(obj.__id__)
+      case obj
+      when Hash
+        done[obj.__id__] = obj
+        obj.keys.each do |key|
+          obj[key.intern] = obj.delete(key) if key.is_a?(String)
         end
-      elsif ydoc.is_a?(Array)
-        ydoc.each do |val|
-          convert_mapping_key_from_string_to_symbol(val)
+        obj.values.each do |val|
+          intern_hash_keys(val, done) if val.is_a?(Hash) || val.is_a?(Array)
+        end
+      when Array
+        done[obj.__id__] = obj
+        obj.each do |val|
+          intern_hash_keys(val, done) if val.is_a?(Hash) || val.is_a?(Array)
         end
       end
-      return ydoc
     end
 
   end

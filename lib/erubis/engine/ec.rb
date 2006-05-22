@@ -42,11 +42,7 @@ module Erubis
     def escaped_expr(code)
       @escape ||= "escape"
       code.strip!
-      if code =~ /\A(\".*?\")\s*,\s*(.*)/
-        return "#{$1}, #{@escape}(#{$2})"
-      else
-        return "#{@escape}(#{code})"
-      end
+      return "#{@escape}(#{code}, #{@out})"
     end
 
     def add_text(src, text)
@@ -74,7 +70,7 @@ module Erubis
 
     def add_expr_escaped(src, code)
       src << @indent if src.empty? || src[-1] == ?\n
-      src << " fprintf(#{@out}, " << escaped_expr(code) << ');'
+      src << " " << escaped_expr(code) << ';'
     end
 
     def add_expr_debug(src, code)

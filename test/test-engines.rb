@@ -117,7 +117,7 @@ __END__
       <%  for (i = 0; i < list; i++) { %>
         <tr>
          <td><%= "%d", i %></td>
-         <td><%== "%s", list[i] %></td>
+         <td><%== list[i] %></td>
         </tr>
       <%  } %>
        </tbody>
@@ -130,7 +130,7 @@ __END__
         for (i = 0; i < list; i++) { 
         fputs("  <tr>\n"
               "   <td>", stdout); fprintf(stdout, "%d", i); fputs("</td>\n"
-              "   <td>", stdout); fprintf(stdout, "%s", escape(list[i])); fputs("</td>\n"
+              "   <td>", stdout); escape(list[i], stdout); fputs("</td>\n"
               "  </tr>\n", stdout);
         } 
         fputs(" </tbody>\n"

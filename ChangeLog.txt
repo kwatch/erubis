@@ -2,6 +2,16 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.26 (2005-05-22)
+	.- [change] Ec#escaped_expr() changed to use 'escape(expr, out)'
+	.- [change] 'examples/example.ec' changed to include escape() function
+	.- [change] include 'bin/notext' into archive
+	.- [bugfix] command name was not displayed in help message
+	.- [bugfix] option '-S' currently support nested collection
+
+.: Rev.25 (2005-05-21)
+	.- [release] 2.0.1
+
 .: Rev.24 (2005-05-21)
 	.- [change] Engine#escape_text() and Engine#escaped_expr() are now abstract method
 	.- [bugfix] in Engine#compile(), rspace may be printed even if rspace is nil
