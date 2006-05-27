@@ -6,65 +6,55 @@
 
 require 'yaml'
 
-
-module TestEnhancer
-
-
-  module_function
+require 'test/unit/testcase'
 
 
-  def load_testdata(filename, options={}, &block)
-    _load_yaml(filename, :doc, options, &block)
-  end
+class Test::Unit::TestCase
 
 
-  def load_yaml_document(filename, options={}, &block)
-    _load_yaml(filename, :doc, options, &block)
-  end
-
-
-  def load_yaml_documents(filename, options={}, &block)
-    _load_yaml(filename, :docs, options, &block)
-  end
-
-
-  def _load_yaml(filename, type, options={}, &block) # :nodoc:
+  def self.load_yaml_datafile(filename, options={}, &block)  # :nodoc:
+    # read datafile
     s = File.read(filename)
     if filename =~ /\.rb$/
       s =~ /^__END__$/   or raise "*** error: __END__ is not found in '#{filename}'."
       s = $'
     end
+    # untabify
     unless options[:tabify] == false
       s = s.inject('') do |sb, line|
         sb << line.gsub(/([^\t]{8})|([^\t]*)\t/n) { [$+].pack("A8") }
       end
     end
-    #
-    case type
-    when :docs
-      hash_list = []
-      YAML.load_documents(s) do |hash| hash_list << hash end
-    when :doc
-      hash_list = YAML.load(s)
-    else
-      raise "*** internal error"
+    # load yaml document
+    testdata_list = []
+    YAML.load_documents(s) do |ydoc|
+      if ydoc.is_a?(Hash)
+        testdata_list << ydoc
+      elsif ydoc.is_a?(Array)
+        ydoc.each do |hash|
+          raise "testdata should be a mapping." unless hash.is_a?(Hash)
+          testdata_list << hash
+        end
+      else
+        raise "testdata should be a mapping."
+      end
     end
-    #
+    # data check
     identkey = options[:identkey] || 'name'
     table = {}
-    hash_list.each do |hash|
+    testdata_list.each do |hash|
       ident = hash[identkey]
-      ident          or  raise "*** #{identkey} is not found."
+      ident          or  raise "*** key '#{identkey}' is required but not found."
       table[ident]   and raise "*** #{identkey} '#{ident}' is duplicated."
       table[ident] = hash
       yield(hash) if block
     end
     #
-    return hash_list
+    return testdata_list
   end
 
 
-  def define_testmethods(testdata_list, options={}, &block)
+  def self.define_testmethods(testdata_list, options={}, &block)
     identkey   = options[:identkey]   || 'name'
     testmethod = options[:testmethod] || '_test'
     testdata_list.each do |hash|
@@ -72,7 +62,6 @@ module TestEnhancer
       ident = hash[identkey]
       s  =   "def test_#{ident}\n"
       hash.each do |key, val|
-        code = "  @#{key} = #{val.inspect}\n"
         s << "  @#{key} = #{val.inspect}\n"
       end
       s  <<  "  #{testmethod}\n"

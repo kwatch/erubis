@@ -2,6 +2,13 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.27 (2005-05-27)
+	.- [change] 'bin/noitem' uses pattern '<? !>' when lang is eperl
+	.- [enhance] new enhancer NoCodeEnhander
+	.- [change] Erubis::Eperl#escaped_expr() prints 'encode_entities()' which is avairlable with HTML::Entities module
+	.- [bugfix] define_testmethods() (in 'test/testutil.rb') use 'module_eval' instead of 'eval'
+	.- [update] doc/users-guide.txt updated
+
 .: Rev.26 (2005-05-22)
 	.- [change] Ec#escaped_expr() changed to use 'escape(expr, out)'
 	.- [change] 'examples/example.ec' changed to include escape() function

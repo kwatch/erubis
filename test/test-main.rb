@@ -6,22 +6,16 @@
 
 require  "#{File.dirname(__FILE__)}/test.rb"
 
-bindir  = File.dirname(TESTDIR) + '/bin'
-$script = bindir + '/erubis'
-if test(?f, 'bin/erubis')
-  $script = 'bin/erubis'
-elsif test(?f, '../bin/erubis')
-  $script = '../bin/erubis'
-end
-
-
-require 'test/unit'
-require 'assert-text-equal'
-require 'yaml'
 require 'tempfile'
-
-require 'erubis'
 require 'erubis/main'
+
+
+$script = File.dirname(TESTDIR) + '/bin/erubis'
+#if test(?f, 'bin/erubis')
+#  $script = 'bin/erubis'
+#elsif test(?f, '../bin/erubis')
+#  $script = '../bin/erubis'
+#end
 
 
 class StringWriter < String
@@ -46,9 +40,9 @@ END
 #  SRC = <<'END'
 #_buf = ''; _buf << "list:\n"
 # list = ['<aaa>', 'b&b', '"ccc"']
-#   for item in list 
+#   for item in list
 #_buf << "  - "; _buf << ( item ).to_s; _buf << "\n"
-# end 
+# end
 #_buf << "user: "; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << "\n"
 #_buf
 #END
@@ -86,7 +80,7 @@ END
       name = (caller()[0] =~ /in `test_(.*?)'/) && $1
       return unless name == $target
     end
-    if @filename == nil
+    if @filename.nil?
       method = (caller[0] =~ /in `(.*)'/) && $1    #'
       @filename = "tmp.#{method}"
     end

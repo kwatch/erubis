@@ -89,6 +89,8 @@ It has the following features.
     </li>
     <li><a href="#notext-enhancer">NoTextEnhancer</a>
     </li>
+    <li><a href="#nocode-enhancer">NoCodeEnhancer</a>
+    </li>
     <li><a href="#simplify-enhancer">SimplifyEnhancer</a>
     </li>
     <li><a href="#bipattern-enhancer">BiPatternEnhancer</a>
@@ -119,7 +121,7 @@ It has the following features.
   <ul>
     <li><a href="#topics-tinyeruby">TinyEruby class</a>
     </li>
-    <li><a href="#topics-php">NoTextEnhancer in PHP</a>
+    <li><a href="#topics-php">NoTextEnhancer and NoCodeEnhancer in PHP</a>
     </li>
     <li><a href="#topics-benchmark">Benchmark</a>
     </li>
@@ -811,6 +813,11 @@ The following is an example to use some enhancers in command-line.
 	Print embedded code only and ignore normal text.
 </dd>
 <dt class="dt1">
+<a href="#nocode-enhancer">NoCodeEnhancer</a> (language-independent)</dt>
+<dd class="dd1">
+	Print normal text only and ignore code.
+</dd>
+<dt class="dt1">
 <a href="#simplify-enhancer">SimplifyEnhancer</a> (language-independent)</dt>
 <dd class="dd1">
 	Make compile faster but don't trim spaces around '&lt;% %&gt;'.
@@ -1038,6 +1045,52 @@ _buf = [];
 _buf.join
 </pre>
 <p>NoTextEnhancer is language-independent. It is useful even if you are PHP user, see <a href="#topics-php">this section</a>.
+</p>
+<br>
+
+
+<a name="nocode-enhancer"></a>
+<h3 class="section2">NoCodeEnhancer</h3>
+<p>NoCodeEnhancer suppress output of embedded code and prints only normal text.
+This is useful especially when validating HTML tags.
+</p>
+<a name="nocode-example.eruby"></a>
+<div class="program_caption">
+nocode-example.eruby</div>
+<pre class="program">&lt;h3&gt;List&lt;/h3&gt;
+&lt;% if !@list || @list.empty? %&gt;
+&lt;p&gt;not found.&lt;/p&gt;
+&lt;% else %&gt;
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;% @list.each_with_index do |item, i| %&gt;
+    &lt;tr bgcolor="&lt;%= i%2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;"&gt;
+      &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;% end %&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;% end %&gt;
+</pre>
+<div class="terminal_caption">
+output example of NoTextEnhancer</div>
+<pre class="terminal">$ erubis -TxE NoCode notext-example.eruby
+&lt;h3&gt;List&lt;/h3&gt;
+
+&lt;p&gt;not found.&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;tbody&gt;
+    
+    &lt;tr bgcolor=""&gt;
+      &lt;td&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+</pre>
+<p>NoCodeEnhancer is language-independent. It is useful even if you are PHP user, see <a href="#topics-php">this section</a>.
 </p>
 <br>
 
@@ -1704,9 +1757,10 @@ try TinyEruby class.
 
 
 <a name="topics-php"></a>
-<h3 class="section2">NoTextEnhancer in PHP</h3>
-<p>NoTextEnhancer is quite useful not only for eRuby but also for PHP.
-It can "drop" HTML text and show up embedded Ruby/PHP code.
+<h3 class="section2">NoTextEnhancer and NoCodeEnhancer in PHP</h3>
+<p>NoTextEnhancer and NoCodEnahncer are quite useful not only for eRuby but also for PHP.
+The former "drops" HTML text and show up embedded Ruby/PHP code
+and the latter drops embedded Ruby/PHP code and leave HTML text.
 </p>
 <p>For example, see the following PHP script.
 </p>
@@ -1738,21 +1792,51 @@ NoTextEnhancer can separate PHP code from HTML document.
 </p>
 <div class="terminal_caption">
 example of using NoTextEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -T -l php -E NoText -p '&lt;\?php \?&gt;' notext-example.php | uniq
-
-    &lt;?php if (!$list || count($list) == 0) { ?&gt;
-
-    &lt;?php } else { ?&gt;
-
-        &lt;?php $i = 0; ?&gt;
-        &lt;?php foreach ($list as $item) { ?&gt;
-                     &lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;
-              &lt;?php echo $item; ?&gt;
-
-        &lt;?php } ?&gt;
-
-    &lt;?php } ?&gt;
-
+<pre class="terminal">$ erubis -T -l php -E NoText -p '&lt;\?php \?&gt;' notext-example.php | cat -n
+     1	
+     2	
+     3	
+     4	    &lt;?php if (!$list || count($list) == 0) { ?&gt;
+     5	
+     6	    &lt;?php } else { ?&gt;
+     7	
+     8	
+     9	        &lt;?php $i = 0; ?&gt;
+    10	        &lt;?php foreach ($list as $item) { ?&gt;
+    11	                     &lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;
+    12	              &lt;?php echo $item; ?&gt;
+    13	
+    14	        &lt;?php } ?&gt;
+    15	
+    16	
+    17	    &lt;?php } ?&gt;
+    18	
+    19	
+</pre>
+<p>In the same way, NoCodeEnhancer can extract HTML tags.
+</p>
+<div class="terminal_caption">
+example of using NoCodeEnhancer with PHP file</div>
+<pre class="terminal">$ erubis -T -l php -E NoCode -p '&lt;\?php \?&gt;' notext-example.php | cat -n
+     1	&lt;html&gt;
+     2	  &lt;body&gt;
+     3	    &lt;h3&gt;List&lt;/h3&gt;
+     4	    
+     5	    &lt;p&gt;not found.&lt;/p&gt;
+     6	    
+     7	    &lt;table&gt;
+     8	      &lt;tbody&gt;
+     9	        
+    10	        
+    11	        &lt;tr bgcolor=""&gt;
+    12	          &lt;td&gt;&lt;/td&gt;
+    13	        &lt;/tr&gt;
+    14	        
+    15	      &lt;/tbody&gt;
+    16	    &lt;/table&gt;
+    17	    
+    18	  &lt;/body&gt;
+    19	&lt;/html&gt;
 </pre>
 <br>
 

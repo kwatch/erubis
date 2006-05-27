@@ -38,7 +38,8 @@ recipes:
     method: |
 	sys "ruby test/test-erubis.rb"
 	sys "ruby test/test-engines.rb"
-	sys "ruby test/test-bin.rb"
+	sys "ruby test/test-main.rb"
+	sys "ruby test/test-notext.rb"
 
   - product:	:clear
     method: |

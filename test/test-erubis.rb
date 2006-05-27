@@ -15,9 +15,8 @@ require 'erubis/tiny'
 
 
 class ErubisTest < Test::Unit::TestCase
-  extend TestEnhancer
 
-  testdata_list = load_yaml_document(__FILE__)
+  testdata_list = load_yaml_datafile(__FILE__)
   define_testmethods(testdata_list)
 
 
@@ -53,7 +52,7 @@ class ErubisTest < Test::Unit::TestCase
     end
     assert_text_equal(@src, eruby.src)
 
-    return if @testopt == 'skip_bufput'
+    return if @testopt == 'skip_output'
 
     list = ['<aaa>', 'b&b', '"ccc"']
     context = @testopt == 'context' ? Erubis::Context.new : {}
@@ -109,7 +108,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: &basic1_bufput|
+  output: &basic1_output|
       <ul>
         <li><aaa></li>
         <li>b&b</li>
@@ -137,7 +136,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -177,7 +176,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: *basic1_bufput
+  output: *basic1_output
 ##
 - name:  ignore1
   input: |
@@ -243,7 +242,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -267,7 +266,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -303,7 +302,7 @@ __END__
       </ul>
 ##
 - name:  bodyonly1
-  testopt:  skip_bufput
+  testopt:  skip_output
   options: { :preamble: no, :postamble: no }
   input: *basic1_input
   src: |4
@@ -389,7 +388,7 @@ __END__
 ##
 - name:  xml2
   class: XmlEruby
-  testopt:  skip_bufput
+  testopt:  skip_output
   input: |
       <% for item in list %>
         <%= item["var#{n}"] %>
@@ -418,7 +417,7 @@ __END__
       ';  end 
        print '</ul>
       ';
-  output: *basic1_bufput
+  output: *basic1_output
 ##
 - name:  printenabled1
   class: PrintEnabledEruby
@@ -436,7 +435,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.join
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -460,7 +459,7 @@ __END__
        _buf << '</ul>
       ';
       ''
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -512,7 +511,7 @@ __END__
        _buf << '</ul>
       ';
       _buf
-  output: *basic1_bufput
+  output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
 #        <li>b&b</li>
@@ -530,6 +529,18 @@ __END__
       
       _buf.join
   output:  '<aaa>b&b"ccc"'
+##
+- name:  nocode1
+  class: NoCodeEruby
+  testopt: skip_output
+  input: *basic1_input
+  src: |
+      <ul>
+
+        <li></li>
+
+      </ul>
+  output: 
 ##
 - name:  simplified
   class: SimplifiedEruby

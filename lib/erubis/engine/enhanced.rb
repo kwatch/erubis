@@ -67,6 +67,11 @@ module Erubis
   end
 
 
+  class NoCodeEruby < Eruby
+    include NoCodeEnhancer
+  end
+
+
   class SimplifiedEruby < Eruby
     include SimplifyEnhancer
   end

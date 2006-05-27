@@ -593,6 +593,8 @@ The following is the list of enhancers.
 	Use string buffer. It is a little slower than ArrayBufferEnhancer.
 .: {{<NoTextEnhancer|#notext-enhancer>}} (language-independent)
 	Print embedded code only and ignore normal text.
+.: {{<NoCodeEnhancer|#nocode-enhancer>}} (language-independent)
+	Print normal text only and ignore code.
 .: {{<SimplifyEnhancer|#simplify-enhancer>}} (language-independent)
 	Make compile faster but don't trim spaces around '<% %>'.
 .: {{<BiPatternEnhancer|#bipattern-enhancer>}} (language-independent)
@@ -855,6 +857,39 @@ $ erubis -TxE NoText notext-example.eruby
 .====================
 
 NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
+
+
+
+.$$ NoCodeEnhancer	| nocode-enhancer
+
+NoCodeEnhancer suppress output of embedded code and prints only normal text.
+This is useful especially when validating HTML tags.
+
+.? nocode-example.eruby
+.-------------------- nocode-example.eruby
+<h3>List</h3>
+<% if !@list || @list.empty? %>
+<p>not found.</p>
+<% else %>
+<table>
+  <tbody>
+    <% @list.each_with_index do |item, i| %>
+    <tr bgcolor="<%= i%2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
+      <td><%= item %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<% end %>
+.--------------------
+
+.? output example of NoTextEnhancer
+.====================
+$ erubis -TxE NoCode notext-example.eruby
+.<<<:! (cd guide.d; erubis -TxE NoCode nocode-example.eruby)
+.====================
+
+NoCodeEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
 
 
 
@@ -1363,10 +1398,11 @@ try TinyEruby class.
 
 
 
-.$$ NoTextEnhancer in PHP	| topics-php
+.$$ NoTextEnhancer and NoCodeEnhancer in PHP	| topics-php
 
-NoTextEnhancer is quite useful not only for eRuby but also for PHP.
-It can "drop" HTML text and show up embedded Ruby/PHP code.
+NoTextEnhancer and NoCodEnahncer are quite useful not only for eRuby but also for PHP.
+The former "drops" HTML text and show up embedded Ruby/PHP code
+and the latter drops embedded Ruby/PHP code and leave HTML text.
 
 For example, see the following PHP script.
 
@@ -1398,8 +1434,16 @@ NoTextEnhancer can separate PHP code from HTML document.
 
 .? example of using NoTextEnhancer with PHP file
 .====================
-$ erubis -T -l php -E NoText -p '<\?php \?>' notext-example.php | uniq
-.<<<:! erubis -T -l php -E NoText -p '<\?php \?>' guide.d/notext-example.php | uniq
+$ erubis -T -l php -E NoText -p '<\?php \?>' notext-example.php | cat -n
+.<<<:! erubis -T -l php -E NoText -p '<\?php \?>' guide.d/notext-example.php | cat -n
+.====================
+
+In the same way, NoCodeEnhancer can extract HTML tags.
+
+.? example of using NoCodeEnhancer with PHP file
+.====================
+$ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
+.<<<:! erubis -T -l php -E NoCode -p '<\?php \?>' guide.d/notext-example.php | cat -n
 .====================
 
 

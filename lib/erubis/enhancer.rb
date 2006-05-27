@@ -252,7 +252,7 @@ module Erubis
   ## remove text and leave code, especially useful when debugging.
   ##
   ## ex.
-  ##   $ erubis -s -e NoText file.eruby | more
+  ##   $ erubis -s -E NoText file.eruby | more
   ##
   ## this is language independent.
   ##
@@ -268,6 +268,41 @@ module Erubis
         text =~ /^(.*?)\z/
         src << (' ' * $1.length)
       end
+    end
+
+  end
+
+
+  ##
+  ## remove code and leave text, especially useful when validating HTML tags.
+  ##
+  ## ex.
+  ##   $ erubis -s -E NoCode file.eruby | tidy -errors
+  ##
+  ## this is language independent.
+  ##
+  module NoCodeEnhancer
+
+    def self.desc   # :nodoc:
+      "remove code and leave text (useful when validating HTML)"
+    end
+
+    def add_preamble(src)
+    end
+
+    def add_postamble(src)
+    end
+
+    def add_text(src, text)
+      src << text
+    end
+
+    def add_expr(src, code, indicator)
+      src << "\n" * code.count("\n")
+    end
+
+    def add_stmt(src, code)
+      src << "\n" * code.count("\n")
     end
 
   end

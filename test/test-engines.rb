@@ -17,10 +17,9 @@ require 'erubis/engine/ejavascript'
 
 
 class EnginesTest < Test::Unit::TestCase
-  extend TestEnhancer
 
   #load_yaml_documents(__FILE__)
-  testdata_list = load_yaml_document(__FILE__)
+  testdata_list = load_yaml_datafile(__FILE__)
   define_testmethods(testdata_list)
 
   def _test()
@@ -291,7 +290,7 @@ __END__
            for $item (@list) { 
       print('    <tr bgcolor='); print(++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); print('">
             <td>'); print($i); print('</td>
-            <td>'); print(escape($item)); print('</td>
+            <td>'); print(encode_entities($item)); print('</td>
           </tr>
       ');      } 
       print('  </tbody>

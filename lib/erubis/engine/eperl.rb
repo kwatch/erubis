@@ -40,8 +40,8 @@ module Erubis
     end
 
     def escaped_expr(code)
-      @escape ||= 'escape'
-      return "escape(#{code.strip})"
+      @escape ||= 'encode_entities'
+      return "#{@escape}(#{code.strip})"
     end
 
     def add_expr_literal(src, code)
