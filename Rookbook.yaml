@@ -8,7 +8,7 @@ properties:
   - release    :  0.0.0
 
 
-variables:
+parameters:
   - project    :  erubis
   - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
   - text_files :  [ChangeLog, README.txt, COPYING, setup.rb, erubis.gemspec]
@@ -35,14 +35,14 @@ recipes:
     ingreds:	[ $(base).tar.gz, $(base).tar.bz2, $(base).zip, $(base2).gem ]
 
   - product:	:test
-    method: |
+    method*: |
 	sys "ruby test/test-erubis.rb"
 	sys "ruby test/test-engines.rb"
 	sys "ruby test/test-main.rb"
 	sys "ruby test/test-notext.rb"
 
   - product:	:clear
-    method: |
+    method*: |
 	rm_rf '$(project)_*.*', '$(project)-*.gem', apidocdir
 
   - product:	:apidoc
@@ -51,7 +51,7 @@ recipes:
 
   - product:	$(apidocdir)/index.html
     ingreds:	[ $(libfiles) ]
-    method: |
+    method*: |
         rm_rf '$(apidocdir)'
 	opts = "-o ../$(apidocdir) -S -m ../README.txt"
 	opts << exclude_libs.collect { |f| " -x erubis/#{f}" }.join(" ")
@@ -61,7 +61,7 @@ recipes:
 
   - product:	:chmod
     desc:	chmod files
-    method: |
+    method*: |
         chmod 0644, '**/*', :filetype=>'file'
 	chmod 0755, 'bin/*'
 
@@ -69,21 +69,21 @@ recipes:
   - product:    $(project)_*.tar.bz2
     desc:	create *.tar.bz2
     ingreds:    [ $(project)_$(1) ]
-    method: |
+    method*: |
         rm_f @product if test(?f, @product)
         tar_cjf @product, @ingred
 
   - product:	$(project)_*.tar.gz
     desc:	create *.tar.gz
     ingreds:	[ $(project)_$(1) ]
-    method: |
+    method*: |
         rm_f @product if test(?f, @product)
         tar_czf @product, @ingred
 
   - product:	$(project)_*.zip
     desc:	create *.zip
     ingreds:	[ $(project)_$(1) ]
-    method: |
+    method*: |
         rm_f @product if test(?f, @product)
         zip_r @product, @ingred
 
@@ -91,7 +91,7 @@ recipes:
   - product:    $(project)-*.gem
     desc:	create *.gem
     ingreds:	[ $(project)_$(1) ]
-    method: |
+    method*: |
         dir = @ingred
 	cd dir do
           Gem.manage_gems
@@ -100,12 +100,12 @@ recipes:
 	mv "#{dir}/#{@product}", "."
 
   - product:	$(guide)
-    method: |
+    method*: |
 	chdir "doc" do sys "rook :all" end
 
   - product:    $(project)_*
     ingreds:	[ $(text_files), $(doc_files), :apidoc ]
-    method: |
+    method*: |
         comment 'delete and create directory'
 	release = '$(1)'      # @matches[1]
 	dir = "$(project)_#{release}"
@@ -148,7 +148,7 @@ recipes:
 	chmod 0755, "#{dir}/{bin,contrib}/*", :filetype=>'file'
 
   - product:	:duplicate
-    method: |
+    method*: |
 	files = []
 	files += Dir.glob('lib/**/*.rb')
 	files += Dir.glob('benchmark/erubybench.{rb,rhtml,yaml}')

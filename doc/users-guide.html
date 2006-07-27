@@ -187,10 +187,10 @@ $ contrib/inline-require -I lib bin/erubis &gt; contrib/erubis
 <div class="program_caption">
 example1.eruby</div>
 <pre class="program">&lt;ul&gt;
-  <b>&lt;% for item in list %&gt;</b>
-  &lt;li&gt;<b>&lt;%= item %&gt;</b>&lt;/li&gt;
-  <b>&lt;% end %&gt;</b>
-  <b>&lt;%# here is ignored because starting with '#' %&gt;</b>
+  <strong>&lt;% for item in list %&gt;</strong>
+  &lt;li&gt;<strong>&lt;%= item %&gt;</strong>&lt;/li&gt;
+  <strong>&lt;% end %&gt;</strong>
+  <strong>&lt;%# here is ignored because starting with '#' %&gt;</strong>
 &lt;/ul&gt;
 </pre>
 <a name="example1.rb"></a>
@@ -198,14 +198,14 @@ example1.eruby</div>
 example1.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example1.eruby')
-eruby = <b>Erubis::Eruby.new(input)</b>    # create Eruby object
+eruby = <strong>Erubis::Eruby.new(input)</strong>    # create Eruby object
 
 puts "---------- script source ---"
-puts <b>eruby.src</b>                      # print script source
+puts <strong>eruby.src</strong>                      # print script source
 
 puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
-puts <b>eruby.result(binding())</b>        # get result
+puts <strong>eruby.result(binding())</strong>        # get result
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -230,7 +230,7 @@ _buf.join
 </p>
 <div class="terminal_caption">
 example of command-line option '-x'</div>
-<pre class="terminal">$ erubis <b>-x</b> example1.eruby
+<pre class="terminal">$ erubis <strong>-x</strong> example1.eruby
 _buf = []; _buf &lt;&lt; '&lt;ul&gt;
 ';   for item in list 
  _buf &lt;&lt; '  &lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
@@ -275,7 +275,7 @@ _buf.join
 </p>
 <div class="terminal_caption">
 compiled source code with command-line option '-T'</div>
-<pre class="terminal">$ erubis -x <b>-T</b> example2.eruby
+<pre class="terminal">$ erubis -x <strong>-T</strong> example2.eruby
 _buf = []; _buf &lt;&lt; '&lt;ul&gt;
 '; _buf &lt;&lt; '  '; for item in list ; _buf &lt;&lt; '
 '; _buf &lt;&lt; '  &lt;li&gt;
@@ -293,7 +293,7 @@ _buf.join
 example2.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example2.eruby')
-eruby = Erubis::Eruby.new(input<b>, :trim=&gt;false</b>)
+eruby = Erubis::Eruby.new(input<strong>, :trim=&gt;false</strong>)
 
 puts "---------- script source ---"
 puts eruby.src                            # print script source
@@ -341,13 +341,13 @@ _buf.join
 Erubis::Eruby class act as the following:
 </p>
 <ul type="disc">
-<li><code>&lt;%= <i>expr</i> %&gt;</code> -  not escaped.
+<li><code>&lt;%= <em>expr</em> %&gt;</code> -  not escaped.
 </li>
-<li><code>&lt;%== <i>expr</i> %&gt;</code> - escaped.
+<li><code>&lt;%== <em>expr</em> %&gt;</code> - escaped.
 </li>
-<li><code>&lt;%=== <i>expr</i> %&gt;</code> - out to $stderr.
+<li><code>&lt;%=== <em>expr</em> %&gt;</code> - out to $stderr.
 </li>
-<li><code>&lt;%==== <i>expr</i> %&gt;</code> - ignored.
+<li><code>&lt;%==== <em>expr</em> %&gt;</code> - ignored.
 </li>
 </ul>
 <p>Erubis::EscapedEruby<sup>(<a href="#fnref:1" name="fnlink:1">*1</a>)</sup> class handle '&lt;%= %&gt;' as escaped and '&lt;%== %&gt;' as not escaped.
@@ -358,9 +358,9 @@ Also Erubis::XmlEruby class (which is equivalent to Erubis::EscapedEruby) is pro
 <div class="program_caption">
 example3.eruby</div>
 <pre class="program">&lt;% for item in list %&gt;
-  &lt;p&gt;<b>&lt;%=</b> item <b>%&gt;</b>&lt;/p&gt;
-  &lt;p&gt;<b>&lt;%==</b> item <b>%&gt;</b>&lt;/p&gt;
-  &lt;p&gt;<b>&lt;%===</b> item <b>%&gt;</b>&lt;/p&gt;
+  &lt;p&gt;<strong>&lt;%=</strong> item <strong>%&gt;</strong>&lt;/p&gt;
+  &lt;p&gt;<strong>&lt;%==</strong> item <strong>%&gt;</strong>&lt;/p&gt;
+  &lt;p&gt;<strong>&lt;%===</strong> item <strong>%&gt;</strong>&lt;/p&gt;
 
 &lt;% end %&gt;
 </pre>
@@ -369,13 +369,13 @@ example3.eruby</div>
 example3.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example3.eruby')
-eruby = Erubis::<b>EscapedEruby</b>.new(input)    # or Erubis::XmlEruby
+eruby = Erubis::<strong>EscapedEruby</strong>.new(input)    # or Erubis::XmlEruby
 
 puts "---------- script source ---"
 puts eruby.src                             # print script source
 
 puts "---------- result ----------"
-<b>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</b>
+<strong>list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']</strong>
 puts eruby.result(binding())               # get result
 </pre>
 <div class="terminal_caption">
@@ -383,9 +383,9 @@ output</div>
 <pre class="terminal">$ ruby example3.rb 2&gt; stderr.log
 ---------- script source ---
 _buf = []; for item in list 
- _buf &lt;&lt; '  &lt;p&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>$stderr.puts("*** debug: item=#{(item).inspect}");</b> _buf &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; <strong>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</strong> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <strong>_buf &lt;&lt; ( item ).to_s;</strong> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <strong>$stderr.puts("*** debug: item=#{(item).inspect}");</strong> _buf &lt;&lt; '&lt;/p&gt;
 
 '; end 
 _buf.join
@@ -410,7 +410,7 @@ $ cat stderr.log
 <p>The command-line option '-e'<sup>(<a href="#fnref:2" name="fnlink:2">*2</a>)</sup> will do the same action as Erubis::EscapedEruby.
 This option is available for any language.
 </p>
-<pre class="terminal">$ erubis -l ruby <b>-e</b> example3.eruby
+<pre class="terminal">$ erubis -l ruby <strong>-e</strong> example3.eruby
 _buf = []; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
   &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
@@ -424,14 +424,14 @@ _buf.join
 <div class="program_caption">
 example to override Erubis::Eruby#escaped_expr()</div>
 <pre class="program">class CGIEruby &lt; Erubis::Eruby
-  def <b>escaped_expr(code)</b>
+  def <strong>escaped_expr(code)</strong>
     return "CGI.escapeHTML((#{code.strip}).to_s)"
     #return "h(#{code.strip})"
   end
 end
 
 class LatexEruby &lt; Erubi::Eruby
-  def <b>escaped_expr(code)</b>
+  def <strong>escaped_expr(code)</strong>
     return "(#{code}).gsub(/[%\\]/,'\\\\\&amp;')"
   end
 end
@@ -454,13 +454,13 @@ end
 <a name="example4.eruby"></a>
 <div class="program_caption">
 example4.eruby</div>
-<pre class="program"><b>&lt;!--%</b> for item in list <b>%--&gt;</b>
-  &lt;p&gt;<b>&lt;!--%=</b> item <b>%--&gt;</b>&lt;/p&gt;
-<b>&lt;!--%</b> end <b>%--&gt;</b>
+<pre class="program"><strong>&lt;!--%</strong> for item in list <strong>%--&gt;</strong>
+  &lt;p&gt;<strong>&lt;!--%=</strong> item <strong>%--&gt;</strong>&lt;/p&gt;
+<strong>&lt;!--%</strong> end <strong>%--&gt;</strong>
 </pre>
 <div class="terminal_caption">
 compiled source code with command-line option '-p'</div>
-<pre class="terminal">$ erubis -x <b>-p '&lt;!--% %--&gt;'</b> example4.eruby
+<pre class="terminal">$ erubis -x <strong>-p '&lt;!--% %--&gt;'</strong> example4.eruby
 _buf = []; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
 '; end 
@@ -471,7 +471,7 @@ _buf.join
 example4.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example4.eruby')
-eruby = Erubis::Eruby.new(input<b>, :pattern=&gt;'&lt;!--% %--&gt;'</b>)
+eruby = Erubis::Eruby.new(input<strong>, :pattern=&gt;'&lt;!--% %--&gt;'</strong>)
                                       # or '&lt;(?:!--)?% %(?:--)?&gt;'
 
 puts "---------- script source ---"
@@ -512,9 +512,9 @@ In Erubis, Hash object and Erubis::Context object are available as context objec
 <a name="example5.eruby"></a>
 <div class="program_caption">
 example5.eruby</div>
-<pre class="program">&lt;span&gt;&lt;%= <b>@val</b> %&gt;&lt;/span&gt;
+<pre class="program">&lt;span&gt;&lt;%= <strong>@val</strong> %&gt;&lt;/span&gt;
 &lt;ul&gt;
- &lt;% for item in <b>@list</b> %&gt;
+ &lt;% for item in <strong>@list</strong> %&gt;
   &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
  &lt;% end %&gt;
 &lt;/ul&gt;
@@ -528,16 +528,16 @@ eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## create context object
 ## (key means var name, which may be string or symbol.)
-<b>context = {
+<strong>context = {
   :val   =&gt; 'Erubis Example',
   'list' =&gt; ['aaa', 'bbb', 'ccc'],
-}</b>
+}</strong>
   # or
   #   context = Erubis::Context.new()
   #   context['val'] = 'Erubis Example'
   #   context[:list] = ['aaa', 'bbb', 'ccc'],
 
-puts <b>eruby.evaluate(context)</b>         # get result
+puts <strong>eruby.evaluate(context)</strong>         # get result
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -563,7 +563,7 @@ definition of result(binding) and evaluate(context)</div>
     eval _h.keys.inject("") {|s,k| s &lt;&lt; "#{k} = _h[#{k.inspect}];"}
     _binding = binding()
   end
-  return <b>eval(@src, _binding)</b>
+  return <strong>eval(@src, _binding)</strong>
 end
 
 def evaluate(context)
@@ -573,7 +573,7 @@ def evaluate(context)
     context = Erubis::Context.new
     hash.each { |key, val| context[key] = val }
   end
-  return <b>context.instance_eval(@src)</b>
+  return <strong>context.instance_eval(@src)</strong>
 end
 </pre>
 <p>instance_eval() is defined at Object class so it is able to use any object as a context object as well as Hash or Erubis::Context.
@@ -586,13 +586,13 @@ example6.rb</div>
 end
 
 ## any object can be a context object
-<b>mydata = MyData.new</b>
-<b>mydata.val = 'Erubis Example'</b>
-<b>mydata.list = ['aaa', 'bbb', 'ccc']</b>
+<strong>mydata = MyData.new</strong>
+<strong>mydata.val = 'Erubis Example'</strong>
+<strong>mydata.list = ['aaa', 'bbb', 'ccc']</strong>
 
 require 'erubis'
 eruby = Erubis::Eruby.new(File.read('example5.eruby'))
-puts eruby.evaluate(<b>mydata</b>)
+puts eruby.evaluate(<strong>mydata</strong>)
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -614,8 +614,8 @@ output</div>
 <a name="example7.yaml"></a>
 <div class="program_caption">
 example7.yaml</div>
-<pre class="program"><b>title:</b> Users List
-<b>users:</b>
+<pre class="program"><strong>title:</strong> Users List
+<strong>users:</strong>
   - name:  foo
     mail:  foo@mail.com
   - name:  bar
@@ -626,9 +626,9 @@ example7.yaml</div>
 <a name="example7.eruby"></a>
 <div class="program_caption">
 example7.eruby</div>
-<pre class="program">&lt;h1&gt;&lt;%= <b>@title</b> %&gt;&lt;/h1&gt;
+<pre class="program">&lt;h1&gt;&lt;%= <strong>@title</strong> %&gt;&lt;/h1&gt;
 &lt;ul&gt;
- &lt;% for user in <b>@users</b> %&gt;
+ &lt;% for user in <strong>@users</strong> %&gt;
   &lt;li&gt;
     &lt;a href="mailto:&lt;%= user['mail']%&gt;"&gt;&lt;%= user['name'] %&gt;&lt;/a&gt;
   &lt;/li&gt;
@@ -643,10 +643,10 @@ input = File.read('example7.eruby')
 eruby = Erubis::Eruby.new(input)      # create Eruby object
 
 ## load YAML document as context object
-<b>require 'yaml'</b>
-<b>context = YAML.load_file('example7.yaml')</b>
+<strong>require 'yaml'</strong>
+<strong>context = YAML.load_file('example7.yaml')</strong>
 
-puts <b>eruby.evaluate(context)</b>        # get result
+puts <strong>eruby.evaluate(context)</strong>        # get result
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -669,7 +669,7 @@ You don't have to write ruby script such as 'example7.rb'.
 </p>
 <div class="terminal_caption">
 example of command-line option '-f'</div>
-<pre class="terminal">$ erubis <b>-f example7.yaml</b> example7.eruby
+<pre class="terminal">$ erubis <strong>-f example7.yaml</strong> example7.eruby
 &lt;h1&gt;Users List&lt;/h1&gt;
 &lt;ul&gt;
   &lt;li&gt;
@@ -707,13 +707,13 @@ example8.eruby</div>
 </p>
 <pre class="terminal">## without '-b'
 $ erubis -x example8.eruby
-<b>_buf = [];</b> for item in @list 
+<strong>_buf = [];</strong> for item in @list 
  _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
-<b>_buf.join</b>
+<strong>_buf.join</strong>
 
 ## with '-b'
-$ erubis -x <b>-b</b> example8.eruby
+$ erubis -x <strong>-b</strong> example8.eruby
  for item in @list 
  _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
@@ -726,7 +726,7 @@ example8.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example8.eruby')
 eruby1 = Erubis::Eruby.new(input)
-eruby2 = Erubis::Eruby.new(input, <b>:preamble=&gt;false, :postamble=&gt;false</b>)
+eruby2 = Erubis::Eruby.new(input, <strong>:preamble=&gt;false, :postamble=&gt;false</strong>)
 
 puts eruby1.src   # print preamble and postamble
 puts "--------------"
@@ -860,8 +860,8 @@ compiled source code</div>
 <pre class="terminal">$ erubis -xE Escape example.eruby
 _buf = []; _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
- _buf &lt;&lt; '  &lt;p&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/p&gt;
-  &lt;p&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/p&gt;
+ _buf &lt;&lt; '  &lt;p&gt;'; <strong>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</strong> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <strong>_buf &lt;&lt; ( item ).to_s;</strong> _buf &lt;&lt; '&lt;/p&gt;
 '; end 
  _buf &lt;&lt; '&lt;/div&gt;
 ';
@@ -880,7 +880,7 @@ Therefore, you can use 'print' statement in embedded ruby code.
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE Stdout example.eruby
-<b>_buf = $stdout;</b> _buf &lt;&lt; '&lt;div&gt;
+<strong>_buf = $stdout;</strong> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
   &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
@@ -901,12 +901,12 @@ compiled source code</div>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE PrintOut example.eruby
- <b>print</b> '&lt;div&gt;
+ <strong>print</strong> '&lt;div&gt;
 '; for item in list 
- <b>print</b> '  &lt;p&gt;'; <b>print</b>(( item ).to_s); <b>print</b> '&lt;/p&gt;
-  &lt;p&gt;'; <b>print</b> Erubis::XmlHelper.escape_xml( item ); <b>print</b> '&lt;/p&gt;
+ <strong>print</strong> '  &lt;p&gt;'; <strong>print</strong>(( item ).to_s); <strong>print</strong> '&lt;/p&gt;
+  &lt;p&gt;'; <strong>print</strong> Erubis::XmlHelper.escape_xml( item ); <strong>print</strong> '&lt;/p&gt;
 '; end 
- <b>print</b> '&lt;/div&gt;
+ <strong>print</strong> '&lt;/div&gt;
 ';
 </pre>
 <p>PrintOutEnhancer is only for Eruby.
@@ -922,7 +922,7 @@ compiled source code</div>
 <div class="program_caption">
 printenabled-example.eruby</div>
 <pre class="program">&lt;% for item in @list %&gt;
-  &lt;b&gt;<b>&lt;% print item %&gt;</b>&lt;/b&gt;
+  &lt;b&gt;<strong>&lt;% print item %&gt;</strong>&lt;/b&gt;
 &lt;% end %&gt;
 </pre>
 <a name="printenabled-example.rb"></a>
@@ -958,14 +958,14 @@ because print() method in '&lt;% ... %&gt;' invokes not Kernel#print() but Print
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal"><b>_buf = [];</b> _buf &lt;&lt; '&lt;div&gt;
+<pre class="terminal"><strong>_buf = [];</strong> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
   &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
 '; end 
  _buf &lt;&lt; '&lt;/div&gt;
 ';
-<b>_buf</b>
+<strong>_buf</strong>
 </pre>
 <p>ArrayEnhancer is only for Eruby.
 </p>
@@ -988,14 +988,14 @@ Erubis::Eruby includes this enhancer by default.
 <p>StringBufferEnhancer makes Eruby to use string buffer.
 </p>
 <pre class="terminal">$ erubis -xE StringBuffer example.eruby
-<b>_buf = '';</b> _buf &lt;&lt; '&lt;div&gt;
+<strong>_buf = '';</strong> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
   &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
 '; end 
  _buf &lt;&lt; '&lt;/div&gt;
 ';
-<b>_buf</b>
+<strong>_buf</strong>
 </pre>
 <p>StringBufferEnhancer is only for Eruby.
 </p>
@@ -1126,16 +1126,16 @@ You can specify pattern by :bipattern property.
 <div class="program_caption">
 bipattern-example.rhtml</div>
 <pre class="program">&lt;% for item in list %&gt;
-  &lt;b&gt;<b>[= item =]</b>&lt;/b&gt;
-  &lt;b&gt;<b>[== item =]</b>&lt;/b&gt;
+  &lt;b&gt;<strong>[= item =]</strong>&lt;/b&gt;
+  &lt;b&gt;<strong>[== item =]</strong>&lt;/b&gt;
 &lt;% end %&gt;
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE BiPattern bipattern-example.rhtml
 _buf = []; for item in list 
- _buf &lt;&lt; '  &lt;b&gt;'; <b>_buf &lt;&lt; ( item ).to_s;</b> _buf &lt;&lt; '&lt;/b&gt;
-  &lt;b&gt;'; <b>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</b> _buf &lt;&lt; '&lt;/b&gt;
+ _buf &lt;&lt; '  &lt;b&gt;'; <strong>_buf &lt;&lt; ( item ).to_s;</strong> _buf &lt;&lt; '&lt;/b&gt;
+  &lt;b&gt;'; <strong>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</strong> _buf &lt;&lt; '&lt;/b&gt;
 '; end 
 _buf.join
 </pre>
@@ -1152,17 +1152,17 @@ This is for compatibility with eruby and ERB.
 <a name="percentline-example.rhtml"></a>
 <div class="program_caption">
 percentline-example.rhtml</div>
-<pre class="program"><b>% for item in list</b>
+<pre class="program"><strong>% for item in list</strong>
   &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
-<b>% end</b>
+<strong>% end</strong>
 %% lines with '%%'
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE PercentLine percentline-example.rhtml
-_buf = []; <b>for item in list</b>
+_buf = []; <strong>for item in list</strong>
  _buf &lt;&lt; '  &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
-'; <b>end</b>
+'; <strong>end</strong>
  _buf &lt;&lt; '% lines with \'%%\'
 ';
 _buf.join
@@ -1181,28 +1181,28 @@ _buf.join
 <a name="headerfooter-example.eruby"></a>
 <div class="program_caption">
 headerfooter-example.eruby</div>
-<pre class="program"><b>&lt;!--#header:</b>
-<b>def list_items(items)</b>
-<b>#--&gt;</b>
+<pre class="program"><strong>&lt;!--#header:</strong>
+<strong>def list_items(items)</strong>
+<strong>#--&gt;</strong>
 &lt;% for item in items %&gt;
   &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
 &lt;% end %&gt;
-<b>&lt;!--#footer:</b>
-<b>end</b>
-<b>#--&gt;</b>
+<strong>&lt;!--#footer:</strong>
+<strong>end</strong>
+<strong>#--&gt;</strong>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE HeaderFooter headerfooter-example.eruby
 
-<b>def list_items(items)</b>
+<strong>def list_items(items)</strong>
 
 _buf = []; for item in items 
  _buf &lt;&lt; '  &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
 _buf.join
 
-<b>end</b>
+<strong>end</strong>
 
 </pre>
 <p>Compare to the following:
@@ -1210,27 +1210,27 @@ _buf.join
 <a name="normal-eruby-test.eruby"></a>
 <div class="program_caption">
 normal-eruby-test.eruby</div>
-<pre class="program"><b>&lt;%</b>
-<b>def list_items(items)</b>
-<b>%&gt;</b>
+<pre class="program"><strong>&lt;%</strong>
+<strong>def list_items(items)</strong>
+<strong>%&gt;</strong>
 &lt;% for item in items %&gt;
 &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
 &lt;% end %&gt;
-<b>&lt;%</b>
-<b>end</b>
-<b>%&gt;</b>
+<strong>&lt;%</strong>
+<strong>end</strong>
+<strong>%&gt;</strong>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -x normal-eruby-test.eruby
 _buf = [];
-<b>def list_items(items)</b>
+<strong>def list_items(items)</strong>
 
  for item in items 
  _buf &lt;&lt; '&lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
 '; end 
 
-<b>end</b>
+<strong>end</strong>
 
 _buf.join
 </pre>
@@ -1242,20 +1242,20 @@ that is, header is no need to be in the head of eRuby script.
 headerfooter-example2.rhtml</div>
 <pre class="program">&lt;?xml version="1.0"?&gt;
 &lt;html&gt;
-<b>&lt;!--#header:</b>
-<b>def page(list)</b>
-<b>#--&gt;</b>
+<strong>&lt;!--#header:</strong>
+<strong>def page(list)</strong>
+<strong>#--&gt;</strong>
  :
-<b>&lt;!--#footer:</b>
-<b>end</b>
-<b>#--&gt;</b>
+<strong>&lt;!--#footer:</strong>
+<strong>end</strong>
+<strong>#--&gt;</strong>
 &lt;/html&gt;
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE HeaderFooter headerfooter-example2.rhtml
 
-<b>def page(list)</b>
+<strong>def page(list)</strong>
 
 _buf = []; _buf &lt;&lt; '&lt;?xml version="1.0"?&gt;
 &lt;html&gt;
@@ -1264,7 +1264,7 @@ _buf = []; _buf &lt;&lt; '&lt;?xml version="1.0"?&gt;
 ';
 _buf.join
 
-<b>end</b>
+<strong>end</strong>
 
 </pre>
 <p>HeaderFooterEnhancer is experimental and is language-independent.
@@ -1303,15 +1303,15 @@ example.ephp</div>
 <pre class="program">&lt;?xml version="1.0"?&gt;
 &lt;html&gt;
  &lt;body&gt;
-  &lt;p&gt;Hello <b>&lt;%= $user %&gt;</b>!&lt;/p&gt;
+  &lt;p&gt;Hello <strong>&lt;%= $user %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
    &lt;tbody&gt;
-    <b>&lt;% $i = 0; %&gt;</b>
-    <b>&lt;% foreach ($list as $item) { %&gt;</b>
-    <b>&lt;%   $i++; %&gt;</b>
-    &lt;tr bgcolor=<b>"&lt;%= $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;"</b>&gt;
-     &lt;td&gt;<b>&lt;%= $i %&gt;</b>&lt;/td&gt;
-     &lt;td&gt;<b>&lt;%== $item %&gt;</b>&lt;/td&gt;
+    <strong>&lt;% $i = 0; %&gt;</strong>
+    <strong>&lt;% foreach ($list as $item) { %&gt;</strong>
+    <strong>&lt;%   $i++; %&gt;</strong>
+    &lt;tr bgcolor=<strong>"&lt;%= $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;"</strong>&gt;
+     &lt;td&gt;<strong>&lt;%= $i %&gt;</strong>&lt;/td&gt;
+     &lt;td&gt;<strong>&lt;%== $item %&gt;</strong>&lt;/td&gt;
     &lt;/tr&gt;
     &lt;% } %&gt;
    &lt;/tbody&gt;
@@ -1349,33 +1349,33 @@ compiled source code</div>
 <a name="example.ec"></a>
 <div class="program_caption">
 example.ec</div>
-<pre class="program"><b>&lt;%
+<pre class="program"><strong>&lt;%
 #include &lt;stdio.h&gt;
 
 int main(int argc, char *argv[])
 {
     int i;
 
-%&gt;</b>
+%&gt;</strong>
 &lt;html&gt;
  &lt;body&gt;
-  &lt;p&gt;Hello <b>&lt;%= "%s", argv[0] %&gt;</b>!&lt;/p&gt;
+  &lt;p&gt;Hello <strong>&lt;%= "%s", argv[0] %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
    &lt;tbody&gt;
-    <b>&lt;% for (i = 1; i &lt; argc; i++) { %&gt;</b>
-    &lt;tr bgcolor="<b>&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;</b>"&gt;
-      &lt;td&gt;<b>&lt;%= "%d", i %&gt;</b>&lt;/td&gt;
-      &lt;td&gt;<b>&lt;%= "%s", argv[i] %&gt;</b>&lt;/td&gt;
+    <strong>&lt;% for (i = 1; i &lt; argc; i++) { %&gt;</strong>
+    &lt;tr bgcolor="<strong>&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;</strong>"&gt;
+      &lt;td&gt;<strong>&lt;%= "%d", i %&gt;</strong>&lt;/td&gt;
+      &lt;td&gt;<strong>&lt;%= "%s", argv[i] %&gt;</strong>&lt;/td&gt;
     &lt;/tr&gt;
-    <b>&lt;% } %&gt;</b>
+    <strong>&lt;% } %&gt;</strong>
    &lt;/tbody&gt;
   &lt;/table&gt;
  &lt;/body&gt;
 &lt;/html&gt;
-<b>&lt;%
+<strong>&lt;%
     return 0; 
 }
-%&gt;</b>
+%&gt;</strong>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
@@ -1417,7 +1417,7 @@ fputs("   &lt;/tbody&gt;\n"
 <a name="Example.ejava"></a>
 <div class="program_caption">
 Example.ejava</div>
-<pre class="program"><b>&lt;%
+<pre class="program"><strong>&lt;%
 import java.util.*;
 
 public class Example {
@@ -1430,23 +1430,23 @@ public class Example {
 
   public String view() {
     StringBuffer _buf = new StringBuffer();
-%&gt;</b>
+%&gt;</strong>
 &lt;html&gt;
  &lt;body&gt;
-  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+  &lt;p&gt;Hello <strong>&lt;%= user %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
    &lt;tbody&gt;
-    <b>&lt;% for (int i = 0; i &lt; list.length; i++) { %&gt;</b>
-    &lt;tr bgcolor=<b>"&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;"</b>&gt;
-     &lt;td&gt;<b>&lt;%= i + 1 %&gt;</b>&lt;/td&gt;
-     &lt;td&gt;<b>&lt;%== list[i] %&gt;</b>&lt;/td&gt;
+    <strong>&lt;% for (int i = 0; i &lt; list.length; i++) { %&gt;</strong>
+    &lt;tr bgcolor=<strong>"&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;"</strong>&gt;
+     &lt;td&gt;<strong>&lt;%= i + 1 %&gt;</strong>&lt;/td&gt;
+     &lt;td&gt;<strong>&lt;%== list[i] %&gt;</strong>&lt;/td&gt;
     &lt;/tr&gt;
-    <b>&lt;% } %&gt;</b>
+    <strong>&lt;% } %&gt;</strong>
    &lt;/tbody&gt;
   &lt;/table&gt;
  &lt;body&gt;
 &lt;/html&gt;
-<b>&lt;%
+<strong>&lt;%
     return _buf.toString();
   }
 
@@ -1471,7 +1471,7 @@ public class Example {
     return sb.toString();
   }
 }
-%&gt;</b>
+%&gt;</strong>
 </pre>
 <div class="terminal_caption">
 compiled source code</div>
@@ -1543,30 +1543,30 @@ return _buf.toString();
 example.escheme</div>
 <pre class="program">&lt;html&gt;
  &lt;body&gt;
-<b>&lt;%
+<strong>&lt;%
 (let ((user "Erubis")
       (items '("&lt;aaa&gt;" "b&amp;b" "\"ccc\""))
       (i 0))
- %&gt;</b>
-  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+ %&gt;</strong>
+  &lt;p&gt;Hello <strong>&lt;%= user %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
-<b>&lt;%
+<strong>&lt;%
   (for-each
    (lambda (item)
      (set! i (+ i 1))
- %&gt;</b>
-   &lt;tr bgcolor="<b>&lt;%= (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF") %&gt;</b>"&gt;
-    &lt;td&gt;<b>&lt;%= i %&gt;</b>&lt;/td&gt;
-    &lt;td&gt;<b>&lt;%= item %&gt;</b>&lt;/td&gt;
+ %&gt;</strong>
+   &lt;tr bgcolor="<strong>&lt;%= (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF") %&gt;</strong>"&gt;
+    &lt;td&gt;<strong>&lt;%= i %&gt;</strong>&lt;/td&gt;
+    &lt;td&gt;<strong>&lt;%= item %&gt;</strong>&lt;/td&gt;
    &lt;/tr&gt;
-<b>&lt;%
+<strong>&lt;%
    ) ; lambda end
    items) ; for-each end
- %&gt;</b>
+ %&gt;</strong>
   &lt;/table&gt;
-<b>&lt;%
+<strong>&lt;%
 ) ; let end
-%&gt;</b>
+%&gt;</strong>
  &lt;/body&gt;
 &lt;/html&gt;
 </pre>
@@ -1643,21 +1643,21 @@ compiled source code (with --func=display property)</div>
 <a name="example.eperl"></a>
 <div class="program_caption">
 example.eprl</div>
-<pre class="program"><b>&lt;%
+<pre class="program"><strong>&lt;%
    my $user = 'Erubis';
    my @list = ('&lt;aaa&gt;', 'b&amp;b', '"ccc"');
-%&gt;</b>
+%&gt;</strong>
 &lt;html&gt;
  &lt;body&gt;
-  &lt;p&gt;Hello <b>&lt;%= $user %&gt;</b>!&lt;/p&gt;
+  &lt;p&gt;Hello <strong>&lt;%= $user %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
-   <b>&lt;% $i = 0; %&gt;</b>
-   <b>&lt;% for $item (@list) { %&gt;</b>
-   &lt;tr bgcolor=<b>&lt;%= ++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</b>"&gt;
-    &lt;td&gt;<b>&lt;%= $i %&gt;</b>&lt;/td&gt;
-    &lt;td&gt;<b>&lt;%= $item %&gt;</b>&lt;/td&gt;
+   <strong>&lt;% $i = 0; %&gt;</strong>
+   <strong>&lt;% for $item (@list) { %&gt;</strong>
+   &lt;tr bgcolor=<strong>&lt;%= ++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</strong>"&gt;
+    &lt;td&gt;<strong>&lt;%= $i %&gt;</strong>&lt;/td&gt;
+    &lt;td&gt;<strong>&lt;%= $item %&gt;</strong>&lt;/td&gt;
    &lt;/tr&gt;
-   <b>&lt;% } %&gt;</b>
+   <strong>&lt;% } %&gt;</strong>
   &lt;/table&gt;
  &lt;/body&gt;
 &lt;/html&gt;
@@ -1693,22 +1693,22 @@ print('  &lt;/table&gt;
 <p>example.ejs
 </p>
 <a name="example.ejs"></a>
-<pre class="program"><b>&lt;%
+<pre class="program"><strong>&lt;%
    var user = 'Erubis';
    var list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"'];
- %&gt;</b>
+ %&gt;</strong>
 &lt;html&gt;
  &lt;body&gt;
-  &lt;p&gt;Hello <b>&lt;%= user %&gt;</b>!&lt;/p&gt;
+  &lt;p&gt;Hello <strong>&lt;%= user %&gt;</strong>!&lt;/p&gt;
   &lt;table&gt;
    &lt;tbody&gt;
-    <b>&lt;% var i; %&gt;</b>
-    <b>&lt;% for (i = 0; i &lt; list.length; i++) { %&gt;</b>
-    &lt;tr bgcolor="<b>&lt;%= i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</b>"&gt;
-     &lt;td&gt;<b>&lt;%= i + 1 %&gt;</b>&lt;/td&gt;
-     &lt;td&gt;<b>&lt;%= list[i] %&gt;</b>&lt;/td&gt;
+    <strong>&lt;% var i; %&gt;</strong>
+    <strong>&lt;% for (i = 0; i &lt; list.length; i++) { %&gt;</strong>
+    &lt;tr bgcolor="<strong>&lt;%= i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %&gt;</strong>"&gt;
+     &lt;td&gt;<strong>&lt;%= i + 1 %&gt;</strong>&lt;/td&gt;
+     &lt;td&gt;<strong>&lt;%= list[i] %&gt;</strong>&lt;/td&gt;
     &lt;/tr&gt;
-    <b>&lt;% } %&gt;</b>
+    <strong>&lt;% } %&gt;</strong>
    &lt;/tbody&gt;
   &lt;/table&gt;
  &lt;/body&gt;
@@ -1898,7 +1898,7 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 <h2 class="section1">Command Reference</h2>
 <a name="command-usage"></a>
 <h3 class="section2">Usage</h3>
-<p>erubis [..options..] [<i>file</i> ...]
+<p>erubis [..options..] [<em>file</em> ...]
 </p>
 <br>
 
@@ -1942,7 +1942,7 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 -p pattern    </b></dt>
   <dd class="dd3">
   	Embedded pattern (default '&lt;% %&gt;').
-			This is equivarent to '--pattern=<i>pattern</i>'.
+			This is equivarent to '--pattern=<em>pattern</em>'.
   </dd>
   <dt class="dt3"><b>
 -l lang       </b></dt>

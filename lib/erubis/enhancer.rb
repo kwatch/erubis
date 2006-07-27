@@ -319,14 +319,18 @@ module Erubis
       "get compile faster but leave spaces around '<% %>'"
     end
 
-    #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
-    SIMPLE_REGEXP = /(.*?)<%(=+|\#)?(.*?)-?%>/m
+    #DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    SIMPLE_REGEXP = /<%(=+|\#)?(.*?)-?%>/m
 
     def compile(input)
       src = ""
       add_preamble(src)
       #regexp = pattern_regexp(@pattern)
-      input.scan(SIMPLE_REGEXP) do |text, indicator, code|
+      pos = 0
+      input.scan(SIMPLE_REGEXP) do |indicator, code|
+        index = Regexp.last_match.begin(0)
+        text = input[pos, index - pos]
+        pos = index + $&.length()
         add_text(src, text)
         if !indicator              # <% %>
           add_stmt(src, code)

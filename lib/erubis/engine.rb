@@ -115,7 +115,8 @@ module Erubis
       return context.instance_eval(@src, (@filename || '(erubis)'))
     end
 
-    DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
 
     ## return regexp of pattern to parse eRuby script
     def pattern_regexp(pattern=@pattern)
@@ -123,7 +124,8 @@ module Erubis
         return DEFAULT_REGEXP
       else
         prefix, postfix = pattern.split()
-        return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+        #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+        return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       end
     end
     protected :pattern_regexp
@@ -133,7 +135,11 @@ module Erubis
       src = ""
       @preamble.nil? ? add_preamble(src) : (@preamble && (src << @preamble))
       regexp = pattern_regexp(@pattern)
-      input.scan(regexp) do |text, lspace, indicator, code, rspace|
+      pos = 0
+      input.scan(regexp) do |lspace, indicator, code, rspace|
+        index = Regexp.last_match.begin(0)
+        text = input[pos, index - pos]
+        pos = index + $&.length()
         add_text(src, text)
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'

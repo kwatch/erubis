@@ -2,34 +2,38 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-.: Rev.27 (2005-05-27)
+.: Rev.28 (2006-07-27)
+	.- [refactor] untabify() function is improved to use String#split() instead of String#scan()
+	.- [refactor] Engine#compile() is improved by scanning regexp tuning
+
+.: Rev.27 (2006-05-27)
 	.- [change] 'bin/noitem' uses pattern '<? !>' when lang is eperl
 	.- [enhance] new enhancer NoCodeEnhander
 	.- [change] Erubis::Eperl#escaped_expr() prints 'encode_entities()' which is avairlable with HTML::Entities module
 	.- [bugfix] define_testmethods() (in 'test/testutil.rb') use 'module_eval' instead of 'eval'
 	.- [update] doc/users-guide.txt updated
 
-.: Rev.26 (2005-05-22)
+.: Rev.26 (2006-06-22)
 	.- [change] Ec#escaped_expr() changed to use 'escape(expr, out)'
 	.- [change] 'examples/example.ec' changed to include escape() function
 	.- [change] include 'bin/notext' into archive
 	.- [bugfix] command name was not displayed in help message
 	.- [bugfix] option '-S' currently support nested collection
 
-.: Rev.25 (2005-05-21)
+.: Rev.25 (2006-06-21)
 	.- [release] 2.0.1
 
-.: Rev.24 (2005-05-21)
+.: Rev.24 (2006-06-21)
 	.- [change] Engine#escape_text() and Engine#escaped_expr() are now abstract method
 	.- [bugfix] in Engine#compile(), rspace may be printed even if rspace is nil
 
-.: Rev.23 (2005-05-20)
+.: Rev.23 (2006-06-20)
 	.- [release] 2.0.0
 
-.: Rev.22 (2005-05-20)
+.: Rev.22 (2006-06-20)
 	.- [update] website/* updated
 
-.: Rev.21 (2005-05-19)
+.: Rev.21 (2006-06-19)
 	.- [change] '_out' is changed to '_buf'
 	.- [change] option '-s' is obsolete
 	.- [change] option '-E' is obsolete
@@ -38,19 +42,19 @@
 	.- [refact] Helper#escape_xml() is changed to call String#gsub a time
 	.- [change] test-bin.rb invoke Main.new.execute(), not 'ruby $script'
 
-.: Rev.20 (2005-05-18)
+.: Rev.20 (2006-06-18)
 	.- [bugfix] test/test-erubis.rb fixed
 
-.: Rev.19 (2005-05-18)
+.: Rev.19 (2006-06-18)
 	.- [change] engine/xxx.rb is renamed to engine/exxx.rb
 	.- [enhance] add 'bin/notext' command
 
-.: Rev.18 (2005-05-07)
+.: Rev.18 (2006-06-07)
 	.- [enhance] new module NoTextEnhancer added
 	.- [change] Eruby#add_stmt() desn't add ';' when the last character is ?\n
 	.- [bugfix] PrintEnableEnhancer#evaluate() added to evaluate with it's context
 
-.: Rev.17 (2005-05-06)
+.: Rev.17 (2006-06-06)
 	.- [enhance] Context#initialize() can take a hash object
 	.- [enhance] Engine#result() can take a hash object
 	.- [enhance] TinyEruby#evaluate() added
@@ -58,7 +62,7 @@
 	.- [change] command-line option '-X' removed and add '-B' (invoke result(binding))
 	.- [enhance] add 'website/' directory
 
-.: Rev.16 (2005-05-03)
+.: Rev.16 (2006-06-03)
 	.- [change] 'simplest.rb' is renamed to 'tiny.rb'
 	.- [enhance] add Context class
 	.- [enahnce] Engine#enhacne() now support Context object
@@ -150,25 +154,25 @@
 .: Rev.5 (2006-03-04)
 	.- [enhance] add PrintEnhancer, PrintEruby, and PrintXmlEruby
 
-.: Rev.4 (2005-02-01)
+.: Rev.4 (2006-02-01)
 	.- [bugifx] bin/erubis run with RubyGems
 	.- [release] 1.0.1
 
-.: Rev.3 (2005-01-31)
+.: Rev.3 (2006-01-31)
 	.- [bufix] XmlEruby outs <%=== expr %> to $stdout, it changed to $stderr
 	.- [change] rename var name 'kind' to 'indicator' in Eruby#compile()
 	.- [enhance] add doc/users-guide.txt
 	.- [enhance] add command-line option '-I lib'
 	.- [release] 1.0.0
 
-.: Rev.2 (2005-01-29)
+.: Rev.2 (2006-01-29)
 	.- [bugfix] FastEruby prints empty text
 	.- [bugfix] error occurs when input has no embedded pattern
 	.- [enhance] add bin/erubis
 	.- [enhance] add test/test-bin.rb
 	.- [change] rename XxxFixture to XxxEnhancer
 
-.: Rev.1 (2005-01-29)
+.: Rev.1 (2006-01-29)
 	.- initial commit
 
 .-document:

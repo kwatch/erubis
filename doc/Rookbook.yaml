@@ -2,7 +2,7 @@
 properties:
   - tagfile    : html-css
 
-variables:
+parameters:
   - u          : users-guide
   - all        : [ $(u).html ]
 
@@ -12,11 +12,11 @@ recipes:
     ingreds:	[ :all ]
 
   - product:    :clear
-    method: |
+    method*: |
 	rm_rf 'guide.d', '*.html'
 
   - product:	:clean
-    method: |
+    method*: |
 	rm_rf 'guide.d', '*.toc.html'
 
   - product:	:all
@@ -25,12 +25,12 @@ recipes:
   - product:	$(u).html
     ingreds:	[ $(u).txt ]
     byprods:	[ $(u).toc.html ]
-    method: |
+    method*: |
 	rm_rf "guide.d"
 	mkdir_p "guide.d"
-	cmd "retrieve -d guide.d #{@ingred}"
-	cmd "kwaser -t $(tagfile) -T #{@ingred} > #{@byprod}"
-	cmd "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
+	sys "retrieve -d guide.d #{@ingred}"
+	sys "kwaser -t $(tagfile) -T #{@ingred} > #{@byprod}"
+	sys "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
 	rm "#{@byprod}"
 
 
