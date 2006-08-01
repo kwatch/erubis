@@ -36,8 +36,15 @@ module Erubis
 
       @@engine_class = Erubis::Eruby                   ## *** change here if you want! ***
 
+      def self.engine_class
+        @@engine_class
+      end
 
-      cattr_accessor :engine_class
+      def self.engine_class=(klass)
+        @@engine_class = klass
+      end
+
+      #cattr_accessor :engine_class
 
 
       def convert(template)

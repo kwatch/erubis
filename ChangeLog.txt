@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.30 (2006-08-01)
+	.- [change] move 'piengine.rb' to 'pi/enhancer.rb'
+	.- [enhance] add 'pi/{eruby,ejava,ec,ejavascript,ephp,eperl,escheme}.rb'
+	.- [change] PIEnhancer supports '<%= ... %>' for Rails
+
 .: Rev.29 (2006-08-01)
 	.- [enhance] add PIEngine
 	.- [enhance] support rails
