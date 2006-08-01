@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.29 (2006-08-01)
+	.- [enhance] add PIEngine
+	.- [enhance] support rails
+
 .: Rev.28 (2006-07-27)
 	.- [refactor] untabify() function is improved to use String#split() instead of String#scan()
 	.- [refactor] Engine#compile() is improved by scanning regexp tuning

@@ -1849,15 +1849,13 @@ Here is an example result of benchmark.
 <div class="output_caption">
 Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4</div>
 <pre class="output">                                        user     system      total        real
-ERuby                             138.280000   1.900000 140.180000 (141.470426)
-ERB                               402.220000   3.190000 405.410000 (408.886894)
-Erubis::Eruby                     147.080000   2.400000 149.480000 (150.752255)
-Erubis::StringBufferEruby         186.130000   2.600000 188.730000 (190.374098)
-Erubis::SimplifiedEruby           130.100000   2.210000 132.310000 (133.426010)
-Erubis::StdoutEruby               106.010000   2.130000 108.140000 (108.999193)
-Erubis::StdoutSimplifiedEruby      97.130000   2.180000  99.310000 (100.104433)
-Erubis::TinyEruby                 118.740000   2.360000 121.100000 (122.141380)
-Erubis::TinyStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
+ERuby                             131.990000   1.900000 133.890000 (135.061456)
+ERB                               385.040000   3.180000 388.220000 (391.570653)
+Erubis::Eruby                     127.750000   2.520000 130.270000 (131.385922)
+Erubis::StringBufferEruby         167.610000   2.600000 170.210000 (171.712798)
+Erubis::StdoutEruby                92.790000   2.000000  94.790000 ( 95.532633)
+Erubis::TinyEruby                 118.720000   2.250000 120.970000 (122.022996)
+Erubis::TinyStdoutEruby            87.130000   2.030000  89.160000 ( 89.879538)
 </pre>
 <div class="output_caption">
 Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4</div>
@@ -1866,24 +1864,20 @@ ERuby                              55.040000   2.120000  57.160000 ( 89.311397)
 ERB                               103.960000   3.480000 107.440000 (159.231792)
 Erubis::Eruby                      36.130000   1.570000  37.700000 ( 52.188574)
 Erubis::StringBufferEruby          47.270000   1.980000  49.250000 ( 73.867537)
-Erubis::SimplifiedEruby            34.310000   1.600000  35.910000 ( 51.762841)
 Erubis::StdoutEruby                26.240000   1.490000  27.730000 ( 41.840430)
-Erubis::StdoutSimplifiedEruby      25.380000   1.340000  26.720000 ( 37.231918)
 Erubis::TinyEruby                  31.690000   1.590000  33.280000 ( 49.862091)
 Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 </pre>
 <p>This shows that:
 </p>
 <ul type="disc">
-<li>Erubis::Eruby is about 2.7 or 2.9 times faster than ERB.
+<li>Erubis::Eruby is about 3 times faster than ERB.
 </li>
-<li>Erubis::Eruby is about 6% slower in linux or 1.5 times faster than ERuby in Mac.
-</li>
-<li>Erubis::SimplifiedEruby (which incudes SimplifiedEnhander) is faster than ERuby.
+<li>Erubis::Eruby is about 3% faster than ERuby in linux or 1.5 times faster in Mac.
 </li>
 <li>String buffer (StringBufferEnhancer) is slower than array buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
 </li>
-<li>Using print statement or $stdout is faster than array buffer and string buffer.
+<li>Using $stdout is faster than array buffer and string buffer.
 </li>
 <li>Erubis::TinyEruby (at 'erubis/tiny.rb') and it's subclasses are the fastest in all eRuby implementation.
 </li>

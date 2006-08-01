@@ -137,9 +137,10 @@ module Erubis
       regexp = pattern_regexp(@pattern)
       pos = 0
       input.scan(regexp) do |lspace, indicator, code, rspace|
-        index = Regexp.last_match.begin(0)
-        text = input[pos, index - pos]
-        pos = index + $&.length()
+        match = Regexp.last_match()
+        index = match.begin(0)
+        text  = input[pos, index - pos]
+        pos   = match.end(0)
         add_text(src, text)
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
