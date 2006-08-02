@@ -40,6 +40,11 @@ module Erubis
       return text
     end
 
+    def escaped_expr(code)
+      code.strip!
+      return "(#{@escapefunc} #{code})"
+    end
+
     def add_text(src, text)
       return if text.empty?
       t = escape_text(text)
@@ -61,8 +66,7 @@ module Erubis
     end
 
     def add_expr_escaped(src, code)
-      code.strip!
-      src << "(#{@func} (#{@escapefunc} #{code}))"
+      add_expr_literal(src, escaped_expr(code))
     end
 
     def add_expr_debug(src, code)

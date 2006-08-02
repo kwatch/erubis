@@ -33,6 +33,10 @@ module Erubis
       text.gsub(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
     end
 
+    def escaped_expr(code)
+      return "#{@escapefunc}(#{code})"
+    end
+
     #--
     #def add_preamble(src)
     #  src << "_buf = [];"
@@ -54,7 +58,7 @@ module Erubis
     end
 
     def add_expr_escaped(src, code)
-      src << " _buf << #{@escapefunc}(#{code});"
+      src << ' _buf << ' << escaped_expr(code) << ';'
     end
 
     def add_expr_debug(src, code)

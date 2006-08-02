@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.33 (2006-08-03)
+	.- [bugfix] action_view_support.rb had contained invalid class name.
+	.- [update] users-guide update
+
 .: Rev.32 (2006-08-03)
 	.- [refactor] split engine.rb into converter.rb, generator.rb, evaluator.rb, context.rb, and error.rb
 

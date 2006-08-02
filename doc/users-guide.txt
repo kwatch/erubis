@@ -9,14 +9,16 @@
 
 Erubis is an implementation of eRuby.
 It has the following features.
-.* Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
+.* Very fast, almost three times faster than ERB and even faster than eruby (implemented in C)
 .* Auto escaping support
 .* Auto trimming spaces around '<% %>'
 .* Embedded pattern changeable (default '<% %>')
+.* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
 .* Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 .* Context object available and easy to combine eRuby template with YAML datafile
 .* Print statement available
 .* Easy to extend in subclass
+.* Ruby on Rails support
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -105,6 +107,12 @@ puts {{*eruby.src*}}                      # print script source
 puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
 puts {{*eruby.result(binding())*}}        # get result
+
+## # or
+## eruby = Erubis::Eruby.new
+## input = File.read('example1.eruby')
+## src = eruby.convert(input)
+## eval src
 .--------------------
 
 .? output
@@ -274,15 +282,16 @@ $ cat stderr.log
 .#** erubis: item = "\"ccc\""
 .====================
 
-The command-line option '-e'{{(Command-line option '-e' is equivarent to '-E Escape'.)}} will do the same action as Erubis::EscapedEruby.
+The command-line option '-e' will do the same action as Erubis::EscapedEruby.
 This option is available for any language.
+.#{{(Command-line option '-e' is equivarent to '-E Escape'.)}}
 
 .====================
 $ erubis -l ruby {{*-e*}} example3.eruby
 .<<<:! (cd guide.d; erubis -e -l ruby example3.eruby)
 .====================
 
-Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
+Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escapefunc=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
 
 .? example to override Erubis::Eruby#escaped_expr()
 .--------------------
@@ -304,7 +313,7 @@ end
 
 .$$ Embedded Pattern	| tut-pattern
 
-You can change embedded pattern '{{,<% %>,}}' to another with command-line option '-p' or option '{{,:pattern=>...,}}' of Erubis::Eruby.new().
+You can change embedded pattern '{{,<% %>,}}' to another by command-line option '-p' or option '{{,:pattern=>...,}}' of Erubis::Eruby.new().
 
 .? example4.eruby
 .-------------------- example4.eruby
@@ -551,6 +560,82 @@ $ ruby example8.rb
 .====================
 
 .#The command-line option '-b' specify both :preamble and :postamble to false.
+
+
+
+.$$ Processing Instruction (PI) Converter  | tut-pi
+
+Erubis can parse Processing Instructions (PI) as embedded pattern.
+
+.* '{{,<?rb {{/.../}} ?>,}}' represents Ruby statement.
+.* '{{,${{{/.../}}},}}' represents escaped expression value.
+.* '{{,$!{{{/.../}}},}}' represents normal expression value.
+.* '{{,$!!{{{/.../}}},}}' prints expression value to standard output.
+.* (experimental) '{{,<%= {{/.../}} %>,}}' is also available to print expression value.
+
+This is more useful than basic embedded pattern ('{{,<% ... >,}}') because PI doesn't break XML or HTML at all.
+For example the following XHTML file is well-formed and HTML validator got no errors on this example.
+
+.? example9.xhtml
+.-------------------- example9.xhtml
+<?xml version="1.0" ?>
+{{*<?rb
+  lang = 'en'
+  list = ['<aaa>', 'b&b', '"ccc"']
+?>*}}
+<html lang="{{*${lang}*}}">
+ <body>
+  <ul>
+  {{*<?rb for item in list ?>*}}
+   <li>{{*${item}*}}</li>
+  {{*<?rb end ?>*}}
+  </ul>
+ </body>
+</html>
+.--------------------
+
+If the command-line property '--pi={{/name/}}' is specified, erubis command parses input with PI converter.
+If {{/name/}} is omitted then the following name is used according to '-l {{/lang/}}'.
+
+.? mapping of '-l' option and PI name
+.+--------------------
+ '-l' option ., PI name
+.--------------------
+-l ruby  .,  <?rb ... ?>
+-l php   .,  <?php ... ?>
+-l perl  .,  <?perl ... ?>
+-l java  .,  <?java ... ?>
+-l javascript ., <?js ... ?>
+-l scheme ., <?scheme ... ?>
+.+--------------------
+	mapping of '-l' option and PI name
+
+.? output
+.====================
+$ erubis {{*--pi*}} example9.xhtml
+.<<<:! (cd guide.d; erubis --pi example9.xhtml)
+.====================
+
+Expression prefix character can be changeable by command-line property '--prefix={{/char/}}. Default is '{{,$,}}'.
+
+{{*(experimental)*}} Erubis supports '<%= ... %>' pattern with PI pattern.
+It is useful if you are Rails user to write helper methods which contains '}' character.
+
+.? example of Rails view template
+.--------------------
+<table>
+  <tr>
+<?rb for item in @list ?>
+    <td>${item.id}</td>
+    <td>${item.name}</td>
+    <td>
+       {{*<%=*}} link_to 'Destroy', {{*{*}} :action=>'destroy', :id=>item.id {{*}*}},
+                       :confirm=>'Are you OK?' {{*%>*}}
+    </td>
+<?rb end ?>
+  </tr>
+</table>
+.--------------------
 
 
 
@@ -1397,6 +1482,22 @@ If you don't need any enhancements of Erubis and only require simple eRuby imple
 try TinyEruby class.
 
 
+.$$ Rails Support	| topics-rails
+
+Erubis supports Ruby on Rails.
+Add the following code to your 'app/controllers/application.rb'.
+
+.? app/controllers/application.rb
+.--------------------
+require 'erubis/rails/action_view_support'
+suffix = 'erubis' 
+ActionView::Base.register_template_handler("erubis", Erubis::Rails::ViewTemplate)
+Erubis::Rails::ViewTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+.--------------------
+
+If you specify Erubis::Rails::CachedViewTemplate class instead of Erubis::Rails::ViewTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
+
+
 
 .$$ NoTextEnhancer and NoCodeEnhancer in PHP	| topics-php
 
@@ -1453,7 +1554,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
 Here is an example result of benchmark.
 
-.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4
+.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4, eruby1.0.5
 .____________________
                                         user     system      total        real
 ERuby                             131.990000   1.900000 133.890000 (135.061456)
@@ -1485,7 +1586,7 @@ Erubis::TinyStdoutEruby            87.130000   2.030000  89.160000 ( 89.879538)
 .#.#Erubis::TinyPrintEruby           86.540000   1.970000  88.510000 ( 89.208078)
 .#.____________________
 
-.? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4
+.? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4, eruby1.0.5
 .____________________
                                         user     system      total        real
 ERuby                              55.040000   2.120000  57.160000 ( 89.311397)

@@ -23,13 +23,15 @@
 It has the following features.
 </p>
 <ul type="disc">
-<li>Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
+<li>Very fast, almost three times faster than ERB and even faster than eruby (implemented in C)
 </li>
 <li>Auto escaping support
 </li>
 <li>Auto trimming spaces around '&lt;% %&gt;'
 </li>
 <li>Embedded pattern changeable (default '&lt;% %&gt;')
+</li>
+<li>Enable to handle Processing Instructions (PI) as embedded pattern (ex. '&lt;?rb ... ?&gt;')
 </li>
 <li>Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 </li>
@@ -68,6 +70,8 @@ It has the following features.
     <li><a href="#tut-datafile">Context Data File</a>
     </li>
     <li><a href="#tut-preamble">Preamble and Postamble</a>
+    </li>
+    <li><a href="#tut-pi">Processing Instruction (PI) Converter</a>
     </li>
   </ul>
   </li>
@@ -120,6 +124,8 @@ It has the following features.
   <li><a href="#topics">Other Topics</a>
   <ul>
     <li><a href="#topics-tinyeruby">TinyEruby class</a>
+    </li>
+    <li><a href="#topics-rails">Rails Support</a>
     </li>
     <li><a href="#topics-php">NoTextEnhancer and NoCodeEnhancer in PHP</a>
     </li>
@@ -419,7 +425,7 @@ _buf = []; for item in list
 '; end 
 _buf.join
 </pre>
-<p>Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escape=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
+<p>Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escapefunc=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
 </p>
 <div class="program_caption">
 example to override Erubis::Eruby#escaped_expr()</div>
@@ -449,7 +455,7 @@ end
 
 <a name="tut-pattern"></a>
 <h3 class="section2">Embedded Pattern</h3>
-<p>You can change embedded pattern '<code>&lt;% %&gt;</code>' to another with command-line option '-p' or option '<code>:pattern=&gt;...</code>' of Erubis::Eruby.new().
+<p>You can change embedded pattern '<code>&lt;% %&gt;</code>' to another by command-line option '-p' or option '<code>:pattern=&gt;...</code>' of Erubis::Eruby.new().
 </p>
 <a name="example4.eruby"></a>
 <div class="program_caption">
@@ -743,6 +749,119 @@ _buf.join
  for item in @list 
  _buf &lt;&lt; ' &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
 '; end 
+</pre>
+<br>
+
+
+<a name="tut-pi"></a>
+<h3 class="section2">Processing Instruction (PI) Converter</h3>
+<p>Erubis can parse Processing Instructions (PI) as embedded pattern.
+</p>
+<ul type="disc">
+<li>'<code>&lt;?rb <em>...</em> ?&gt;</code>' represents Ruby statement.
+</li>
+<li>'<code>${<em>...</em>}</code>' represents escaped expression value.
+</li>
+<li>'<code>$!{<em>...</em>}</code>' represents normal expression value.
+</li>
+<li>'<code>$!!{<em>...</em>}</code>' prints expression value to standard output.
+</li>
+<li>(experimental) '<code>&lt;%= <em>...</em> %&gt;</code>' is also available to print expression value.
+</li>
+</ul>
+<p>This is more useful than basic embedded pattern ('<code>&lt;% ... &gt;</code>') because PI doesn't break XML or HTML at all.
+For example the following XHTML file is well-formed and HTML validator got no errors on this example.
+</p>
+<a name="example9.xhtml"></a>
+<div class="program_caption">
+example9.xhtml</div>
+<pre class="program">&lt;?xml version="1.0" ?&gt;
+<strong>&lt;?rb
+  lang = 'en'
+  list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']
+?&gt;</strong>
+&lt;html lang="<strong>${lang}</strong>"&gt;
+ &lt;body&gt;
+  &lt;ul&gt;
+  <strong>&lt;?rb for item in list ?&gt;</strong>
+   &lt;li&gt;<strong>${item}</strong>&lt;/li&gt;
+  <strong>&lt;?rb end ?&gt;</strong>
+  &lt;/ul&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>If the command-line property '--pi=<em>name</em>' is specified, erubis command parses input with PI converter.
+If <em>name</em> is omitted then the following name is used according to '-l <em>lang</em>'.
+</p>
+<div align="center">
+<table class="table1" border="1" cellspacing="0" summary="	mapping of '-l' option and PI name
+">
+ <caption class="caption1">
+	mapping of '-l' option and PI name
+ </caption>
+ <tr class="tr1">
+  <th class="th1">'-l' option</th>
+  <th class="th1">PI name</th>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l ruby</td>
+  <td class="td1">&lt;?rb ... ?&gt;</td>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l php</td>
+  <td class="td1">&lt;?php ... ?&gt;</td>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l perl</td>
+  <td class="td1">&lt;?perl ... ?&gt;</td>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l java</td>
+  <td class="td1">&lt;?java ... ?&gt;</td>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l javascript</td>
+  <td class="td1">&lt;?js ... ?&gt;</td>
+ </tr>
+ <tr class="tr1">
+  <td class="td1">-l scheme</td>
+  <td class="td1">&lt;?scheme ... ?&gt;</td>
+ </tr>
+</table>
+</div>
+<div class="terminal_caption">
+output</div>
+<pre class="terminal">$ erubis <strong>--pi</strong> example9.xhtml
+&lt;?xml version="1.0" ?&gt;
+&lt;html lang="en"&gt;
+ &lt;body&gt;
+  &lt;ul&gt;
+   &lt;li&gt;&amp;lt;aaa&amp;gt;&lt;/li&gt;
+   &lt;li&gt;b&amp;amp;b&lt;/li&gt;
+   &lt;li&gt;&amp;quot;ccc&amp;quot;&lt;/li&gt;
+  &lt;/ul&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>Expression prefix character can be changeable by command-line property '--prefix=<em>char</em>. Default is '<code>$</code>'.
+</p>
+<p><strong>(experimental)</strong> Erubis supports '&lt;%= ... %&gt;' pattern with PI pattern.
+It is useful if you are Rails user to write helper methods which contains '}' character.
+</p>
+<div class="program_caption">
+example of Rails view template</div>
+<pre class="program">&lt;table&gt;
+  &lt;tr&gt;
+&lt;?rb for item in @list ?&gt;
+    &lt;td&gt;${item.id}&lt;/td&gt;
+    &lt;td&gt;${item.name}&lt;/td&gt;
+    &lt;td&gt;
+       <strong>&lt;%=</strong> link_to 'Destroy', <strong>{</strong> :action=&gt;'destroy', :id=&gt;item.id <strong>}</strong>,
+                       :confirm=&gt;'Are you OK?' <strong>%&gt;</strong>
+    &lt;/td&gt;
+&lt;?rb end ?&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
 </pre>
 <br>
 
@@ -1752,6 +1871,23 @@ document.write(_buf.join(""));
 <p>TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
 If you don't need any enhancements of Erubis and only require simple eRuby implementation,
 try TinyEruby class.
+</p>
+<br>
+
+
+<a name="topics-rails"></a>
+<h3 class="section2">Rails Support</h3>
+<p>Erubis supports Ruby on Rails.
+Add the following code to your 'app/controllers/application.rb'.
+</p>
+<div class="program_caption">
+app/controllers/application.rb</div>
+<pre class="program">require 'erubis/rails/action_view_support'
+suffix = 'erubis' 
+ActionView::Base.register_template_handler("erubis", Erubis::Rails::ViewTemplate)
+Erubis::Rails::ViewTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+</pre>
+<p>If you specify Erubis::Rails::CachedViewTemplate class instead of Erubis::Rails::ViewTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
 </p>
 <br>
 

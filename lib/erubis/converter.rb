@@ -165,6 +165,7 @@ module Erubis
               [:trim,      true,   "trim spaces around <% ... %>"],
               [:pi,        'rb',   "PI (Processing Instrunctions) name"],
               [:prefix,    '$',    "prefix char of expression pattern('${...}')"],
+              [:pattern,  '<% %>', "embed pattern"],
              ]
     end
 
@@ -175,6 +176,8 @@ module Erubis
       @trim    = !(properties[:trim] == false)
       @pi      = properties[:pi] if properties[:pi]
       @prefix  = properties[:prefix]  || '$'
+      @pattern = properties[:pattern]
+      @pattern = '<% %>' if @pattern.nil?  #|| @pattern == true
     end
 
     def convert(input)
@@ -212,9 +215,15 @@ module Erubis
     end
 
     def parse_exprs(codebuf, input)
-      @prefix ||= '$'
-      #@expr_pattern ||= /#{Regexp.escape(@prefix)}(!*)?\{(.*?)\}/
-      @expr_pattern ||= /#{Regexp.escape(@prefix)}(!*)?\{(.*?)\}|<%(=+)(.*?)%>/
+      unless @expr_pattern
+        ch = Regexp.escape(@prefix)
+        if @pattern
+          left, right = @pattern.split(' ')
+          @expr_pattern = /#{ch}(!*)?\{(.*?)\}|#{left}(=+)(.*?)#{right}/
+        else
+          @expr_pattern = /#{ch}(!*)?\{(.*?)\}/
+        end
+      end
       pos = 0
       input.scan(@expr_pattern) do |indicator1, code1, indicator2, code2|
         indicator = indicator1 || indicator2

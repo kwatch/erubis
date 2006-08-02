@@ -34,7 +34,8 @@ module Erubis
       end
 
 
-      @@engine_class = Erubis::Eruby                   ## *** change here if you want! ***
+      @@engine_class = Erubis::Eruby
+      @@engine_instance = @@engine_class.new
 
       def self.engine_class
         @@engine_class
@@ -42,14 +43,14 @@ module Erubis
 
       def self.engine_class=(klass)
         @@engine_class = klass
+        @@engine_instance = klass.new
       end
 
       #cattr_accessor :engine_class
 
 
       def convert(template)
-        engine = @@engine_class.new(template)
-        code = engine.src
+        code = @@engine_instance.convert(template)
         return code
       end
 
@@ -89,14 +90,15 @@ module Erubis
 
 
 
-    class CachedErubisTemplate < ErubisTemplate
+    class CachedViewTemplate < ViewTemplate
 
 
       @@cache_table = {}
 
 
       def render(template, assigns)
-        ## template path
+        ## template path without suffix
+        ## (how to get template path name with suffix? I can't find...)
         template_basename = @view.base_path + '/' + @view.controller.action_name
 
         ## cache template
