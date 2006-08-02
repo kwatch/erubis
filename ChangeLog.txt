@@ -2,7 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-.: Rev.30 (2006-08-02)
+.: Rev.32 (2006-08-03)
+	.- [refactor] split engine.rb into converter.rb, generator.rb, evaluator.rb, context.rb, and error.rb
+
+.: Rev.31 (2006-08-02)
 	.- [refactor] divide Engine class into Converter, Generator, and Evaluator
 	.- [refactor] merge 'pi/enhancer.rb' into 'engine.rb'
 	.- [refacotr] remove 'pi/*.rb'

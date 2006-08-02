@@ -5,9 +5,6 @@
 ##
 
 
-require 'erubis/engine'
-
-
 module Erubis
 
 
@@ -139,11 +136,11 @@ module Erubis
       end
     end
 
-    def evaluate(context=Context.new)
+    def evaluate(context=nil)
       _src = @src
       if context.is_a?(Hash)
         context.each do |key, val| instance_variable_set("@#{key}", val) end
-      else
+      elsif context
         context.instance_variables.each do |name|
           instance_variable_set(name, context.instance_variable_get(name))
         end

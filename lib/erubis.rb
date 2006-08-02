@@ -53,6 +53,11 @@
 
 
 require 'erubis/engine'
+#require 'erubis/generator'
+#require 'erubis/converter'
+#require 'erubis/evaluator'
+#require 'erubis/error'
+#require 'erubis/context'
 require 'erubis/helper'
 require 'erubis/enhancer'
 #require 'erubis/tiny'
@@ -65,6 +70,5 @@ require 'erubis/engine/eruby'
 #require 'erubis/engine/escheme'
 #require 'erubis/engine/eperl'
 #require 'erubis/engine/ejavascript'
-
 
 require 'erubis/local-setting'
