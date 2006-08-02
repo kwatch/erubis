@@ -11,20 +11,19 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for Scheme
-  ##
-  class Escheme < Engine
+  module SchemeGenerator
+    include Generator
 
     def self.supported_properties()  # :nodoc:
-      list = super
-      list << [:func,  '_add',   "function name (ex. 'display')"]
-      return list
+      return [
+              [:func,  '_add',   "function name (ex. 'display')"],
+              ]
     end
 
-    def initialize(input, properties={})
-      @func = properties[:func] || '_add'   # or 'display'
+    def init_generator(properties={})
       super
+      @escapefunc ||= 'escape'
+      @func = properties[:func] || '_add'   # or 'display'
     end
 
     def add_preamble(src)
@@ -39,11 +38,6 @@ module Erubis
       @table_ ||= { '"'=>'\\"', '\\'=>'\\\\' }
       text.gsub!(/["\\]/) { |m| @table_[m] }
       return text
-    end
-
-    def escaped_expr(code)
-      @escape ||= 'escape'
-      return "(#{@escape} #{code.strip})"
     end
 
     def add_text(src, text)
@@ -62,11 +56,13 @@ module Erubis
     end
 
     def add_expr_literal(src, code)
-      src << "(#{@func} " << code.strip << ')'
+      code.strip!
+      src << "(#{@func} #{code})"
     end
 
     def add_expr_escaped(src, code)
-      src << "(#{@func} " << escaped_expr(code) << ')'
+      code.strip!
+      src << "(#{@func} (#{@escapefunc} #{code}))"
     end
 
     def add_expr_debug(src, code)
@@ -83,6 +79,14 @@ module Erubis
   end
 
 
+  ##
+  ## engine for Scheme
+  ##
+  class Escheme < Basic::Engine
+    include SchemeGenerator
+  end
+
+
   class EscapedEscheme < Escheme
     include EscapeEnhancer
   end
@@ -91,6 +95,17 @@ module Erubis
   #class XmlEscheme < Escheme
   #  include EscapeEnhancer
   #end
+
+
+  class PI::Escheme < PI::Engine
+    include SchemeGenerator
+
+    def init_converter(properties={})
+      @pi = 'scheme'
+      super(properties)
+    end
+
+  end
 
 
 end

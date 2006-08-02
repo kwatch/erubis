@@ -75,7 +75,7 @@ __END__
       <%
           $i = 0;
           foreach ($list as $item) {
-  	    $i++;
+            $i++;
        %>
         <tr>
          <td><%= $i %></td>

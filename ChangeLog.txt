@@ -2,6 +2,14 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.30 (2006-08-02)
+	.- [refactor] divide Engine class into Converter, Generator, and Evaluator
+	.- [refactor] merge 'pi/enhancer.rb' into 'engine.rb'
+	.- [refacotr] remove 'pi/*.rb'
+	.- [enhance] add PI::TinyEruby
+	.- [change] property ':escape' is renamed to ':escapefunc'
+	.- [enhance] new property '--escape={true|false}'
+
 .: Rev.30 (2006-08-01)
 	.- [change] move 'piengine.rb' to 'pi/enhancer.rb'
 	.- [enhance] add 'pi/{eruby,ejava,ec,ejavascript,ephp,eperl,escheme}.rb'

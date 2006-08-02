@@ -11,24 +11,23 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for Java
-  ##
-  class Ejava < Engine
+  module JavaGenerator
+    include Generator
 
     def self.supported_properties()   # :nodoc:
-      list = super
-      list << [:indent,   '',       "indent spaces (ex. '  ')"]
-      list << [:buf,      '_buf',   "output buffer name"]
-      list << [:bufclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"]
-      return list
+      return [
+              [:indent,   '',       "indent spaces (ex. '  ')"],
+              [:buf,      '_buf',   "output buffer name"],
+              [:bufclass, 'StringBuffer', "output buffer class (ex. 'StringBuilder')"],
+            ]
     end
 
-    def initialize(input, properties={})
+    def init_generator(properties={})
+      super
+      @escapefunc ||= 'escape'
       @indent = properties[:indent] || ''
       @buf = properties[:buf] || '_buf'
       @bufclass = properties[:bufclass] || 'StringBuffer'
-      super
     end
 
     def add_preamble(src)
@@ -38,11 +37,6 @@ module Erubis
     def escape_text(text)
       @@table_ ||= { "\r"=>"\\r", "\n"=>"\\n", "\t"=>"\\t", '"'=>'\\"', "\\"=>"\\\\" }
       return text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] } || text
-    end
-
-    def escaped_expr(code)
-      @escape ||= 'escape'
-      return "#{@escape}(#{code.strip})"
     end
 
     def add_text(src, text)
@@ -64,12 +58,12 @@ module Erubis
 
     def add_expr_literal(src, code)
       src << @indent if src.empty? || src[-1] == ?\n
-      src << ' ' << @buf << '.append(' << code.strip << ');'
+      code.strip!
+      src << " #{@buf}.append(#{code});"
     end
 
     def add_expr_escaped(src, code)
-      src << @indent if src.empty? || src[-1] == ?\n
-      src << ' ' << @buf << '.append(' << escaped_expr(code) << ');'
+      add_expr_literal(src, escaped_expr(code))
     end
 
     def add_expr_debug(src, code)
@@ -81,8 +75,17 @@ module Erubis
     def add_postamble(src)
       src << "\n" if src[-1] == ?;
       src << @indent << "return " << @buf << ".toString();\n"
+      #src << @indent << "System.out.print(" << @buf << ".toString());\n"
     end
 
+  end
+
+
+  ##
+  ## engine for Java
+  ##
+  class Ejava < Basic::Engine
+    include JavaGenerator
   end
 
 
@@ -95,5 +98,14 @@ module Erubis
   #  include EscapeEnhancer
   #end
 
+  class PI::Ejava < PI::Engine
+    include JavaGenerator
+
+    def init_converter(properties={})
+      @pi = 'java'
+      super(properties)
+    end
+
+  end
 
 end

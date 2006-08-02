@@ -23,7 +23,13 @@ class ErubisTest < Test::Unit::TestCase
   def _test()
     @src.gsub!(/\^/, ' ')
     @output.gsub!(/\^/, ' ') if @output.is_a?(String)
-    @klass = @class ? Erubis.const_get(@class) : Erubis::Eruby
+    if @class
+      k = Erubis
+      @class.split('::').each do |name| k = k.const_get(name) end
+      @klass = k
+    else
+      @klass = Erubis::Eruby
+    end
     @options ||= {}
     @chomp.each do |target|
       case target
@@ -59,7 +65,7 @@ class ErubisTest < Test::Unit::TestCase
     context[:list] = list
 
     case @testopt
-    when/\Aeval\(/
+    when /\Aeval\(/
       eval eruby.src
       actual = eval @testopt
       assert_text_equal(@output, actual)
@@ -114,6 +120,7 @@ __END__
         <li>b&b</li>
         <li>"ccc"</li>
       </ul>
+
 ##
 - name:  basic2
   input: |
@@ -142,6 +149,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  basic3
   input: |
@@ -159,6 +167,7 @@ __END__
   output: |
       <ul><li><aaa></li><li>b&b</li><li>"ccc"</li>
       </ul>
+
 ##
 - name:  context1
   testopt:  context
@@ -177,6 +186,7 @@ __END__
       ';
       _buf.join
   output: *basic1_output
+
 ##
 - name:  ignore1
   input: |
@@ -209,6 +219,7 @@ __END__
         <li>    :  b&b  </li>
         <li>    :  "ccc"  </li>
       </ul>
+
 ##
 - name:  quotation1
   desc:  single quotation and backslash
@@ -224,6 +235,7 @@ __END__
       ';
       _buf.join
   output: *quotation1_input
+
 ##
 - name:  pattern1
   options:
@@ -248,6 +260,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  pattern2
   options:
@@ -272,6 +285,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  trim1
   options:
@@ -300,6 +314,7 @@ __END__
         <li>"ccc"</li>
       ^
       </ul>
+
 ##
 - name:  bodyonly1
   testopt:  skip_output
@@ -314,6 +329,7 @@ __END__
       ';
   chomp:  [src]
   expected: null  
+
 ##
 - name:  loadfile1
   testopt: load_file
@@ -343,6 +359,7 @@ __END__
   output:
       "<ul>\n  <li><aaa></li>\n  <li>b&b</li>\n  <li>\"ccc\"</li>\n</ul>\n"
   #    "<ul>\r\n  <li><aaa></li>\r\n  <li>b&b</li>\r\n  <li>\"ccc\"</li>\r\n</ul>\r\n"
+
 ##
 - name:  nomatch1
   desc:  bug
@@ -357,6 +374,24 @@ __END__
       ';
       _buf.join
   output: *nomatch1
+
+##
+- name:  escape1
+  options: { :escape: true }
+  input: |
+      <% str = '<>&"' %>
+      <%= str %>
+      <%== str %>
+  src: |
+      _buf = []; str = '<>&"' 
+       _buf << Erubis::XmlHelper.escape_xml( str ); _buf << '
+      '; _buf << ( str ).to_s; _buf << '
+      ';
+      _buf.join
+  output: |
+      &lt;&gt;&amp;&quot;
+      <>&"
+
 ##
 - name:  xml1
   class: XmlEruby
@@ -385,6 +420,7 @@ __END__
         &quot;ccc&quot;
         "ccc"
       </pre>
+
 ##
 - name:  xml2
   class: XmlEruby
@@ -405,6 +441,7 @@ __END__
       '; end 
       _buf.join
   output: |
+
 ##
 - name:  printout1
   class: PrintOutEruby
@@ -418,6 +455,7 @@ __END__
        print '</ul>
       ';
   output: *basic1_output
+
 ##
 - name:  printenabled1
   class: PrintEnabledEruby
@@ -441,6 +479,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  stdout1
   class: StdoutEruby
@@ -465,6 +504,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  array1
   class: ArrayEruby
@@ -494,6 +534,7 @@ __END__
       - "\"ccc\""
       - "</li>\n"
       - "</ul>\n"
+
 ##
 - name:  stringbuffer1
   class: StringBufferEruby
@@ -517,6 +558,7 @@ __END__
 #        <li>b&b</li>
 #        <li>"ccc"</li>
 #      </ul>
+
 ##
 - name:  notext1
   class: NoTextEruby
@@ -529,6 +571,7 @@ __END__
       
       _buf.join
   output:  '<aaa>b&b"ccc"'
+
 ##
 - name:  nocode1
   class: NoCodeEruby
@@ -541,6 +584,7 @@ __END__
 
       </ul>
   output: 
+
 ##
 - name:  simplified
   class: SimplifiedEruby
@@ -578,6 +622,7 @@ __END__
         </li>
       ^
       </ul>
+
 ##
 - name:  bipattern1
   class: BiPatternEruby
@@ -600,6 +645,7 @@ __END__
         b&b = b&amp;b
         "ccc" % &quot;ccc&quot;
         "ccc" = &quot;ccc&quot;
+
 ##
 - name:  bipattern2
   class: BiPatternEruby
@@ -622,6 +668,7 @@ __END__
         b&b = b&amp;b
         "ccc" % &quot;ccc&quot;
         "ccc" = &quot;ccc&quot;
+
 ##
 - name:  percentline1
   class: PercentLineEruby
@@ -673,6 +720,7 @@ __END__
       % double percent
        % spaced percent
       </pre>
+
 ##
 - name:  headerfooter1
   class: HeaderFooterEruby
@@ -706,6 +754,7 @@ __END__
         <li>b&amp;b</li>
         <li>&quot;ccc&quot;</li>
       </ol>
+
 ##
 - name:  optimized1
   class: OptimizedEruby
@@ -747,6 +796,7 @@ __END__
         </tr>
       </table>
       <ul><li><aaa></li><li>b&b</li><li>"ccc"</li></ul>
+
 ##
 - name:  optimized2
   class: OptimizedXmlEruby
@@ -788,6 +838,7 @@ __END__
         </tr>
       </table>
       <ul><li>&lt;aaa&gt;</li><li>b&amp;b</li><li>&quot;ccc&quot;</li></ul>
+
 ##
 - name:  optimized3
   desc:  bug
@@ -809,6 +860,7 @@ __END__
         <aaa>
         b&b
         "ccc"
+
 ##
 - name:  optimized4
   desc:  single quotation and backslash
@@ -824,6 +876,7 @@ __END__
       ';
       _buf
   output: *optimized4_input
+
 ##
 - name:  tiny1
   class: TinyEruby
@@ -852,6 +905,7 @@ __END__
         <li>"ccc"</li>
       ^
       </ul>
+
 ##
 - name:  tiny2
   class: TinyEruby
@@ -880,4 +934,117 @@ __END__
         <li>"ccc"</li>
       ^
       </ul>
+
 ##
+- name:  pi1
+  class:  PI::Eruby
+  testopt:  evaluate
+  input: &input_pi1|
+      <ul>
+       <?rb for item in @list ?>
+        <li>${item} / $!{item}</li>
+        <li><%= item %> / <%== item %></li>
+       <?rb end ?>
+      </ul>
+  src: &src_pi1|
+      _buf = []; _buf << '<ul>
+      ';  for item in @list 
+       _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '</li>
+        <li>'; _buf << ( item ).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</li>
+      ';  end 
+       _buf << '</ul>
+      ';
+      _buf.join
+  output: &output_pi1|
+      <ul>
+        <li>&lt;aaa&gt; / <aaa></li>
+        <li><aaa> / &lt;aaa&gt;</li>
+        <li>b&amp;b / b&b</li>
+        <li>b&b / b&amp;b</li>
+        <li>&quot;ccc&quot; / "ccc"</li>
+        <li>"ccc" / &quot;ccc&quot;</li>
+      </ul>
+
+##
+- name:  pi2
+  class:  PI::Eruby
+  options: { :escape: false }
+  testopt:  evaluate
+  input: *input_pi1
+  src: |
+      _buf = []; _buf << '<ul>
+      ';  for item in @list 
+       _buf << '  <li>'; _buf << (item).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '</li>
+        <li>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << ' / '; _buf << ( item ).to_s; _buf << '</li>
+      ';  end 
+       _buf << '</ul>
+      ';
+      _buf.join
+  output: |
+      <ul>
+        <li><aaa> / &lt;aaa&gt;</li>
+        <li>&lt;aaa&gt; / <aaa></li>
+        <li>b&b / b&amp;b</li>
+        <li>b&amp;b / b&b</li>
+        <li>"ccc" / &quot;ccc&quot;</li>
+        <li>&quot;ccc&quot; / "ccc"</li>
+      </ul>
+
+##
+- name:  pi3
+  class:  PI::Eruby
+  options: { :pi: hoge, :prefix: '@' }
+  testopt:  evaluate
+  input: |
+      <ul>
+       <?hoge for item in @list ?>
+        <li>@{item} / @!{item}</li>
+        <li><%= item %> / <%== item %></li>
+       <?hoge end ?>
+      </ul>
+  src: *src_pi1
+  output: *output_pi1
+
+- name:  pi4
+  class:  PI::Eruby
+  testopt: evaluate
+  input: |
+      <?rb-header
+        def show(list)
+      ?>
+      <ul>
+       <?rb for item in list ?>
+         <?rb-value item ?>
+       <?rb end ?>
+       <?rb-comment
+       # comment
+       # comment
+       ?>
+      </ul>
+      <?rb-footer
+        end
+	show(@list) ?>
+
+  src: |4
+      
+        def show(list)
+      
+      _buf = []; _buf << '<ul>
+      ';  for item in list 
+       _buf << (    item 
+      ).to_s;  end 
+      
+      
+      
+
+       _buf << '</ul>
+      ';
+      _buf.join
+      
+        end
+	show(@list) 
+
+  output: |
+      <ul>
+      <aaa>b&b"ccc"</ul>
+      

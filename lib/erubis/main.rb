@@ -112,15 +112,15 @@ module Erubis
 
       ## action
       action = opts.action
-      action ||= 'compile' if opts.source
+      action ||= 'convert' if opts.source
 
       ## lang
       lang = opts.lang || 'ruby'
-      action ||= 'compile' if opts.lang
+      action ||= 'convert' if opts.lang
 
       ## class name of Eruby
       classname = opts.class
-      klass = get_classobj(classname, lang)
+      klass = get_classobj(classname, lang, properties[:pi])
 
       ## kanji code
       $KCODE = opts.kanji if opts.kanji
@@ -130,31 +130,33 @@ module Erubis
       context = load_yamlfiles(yamlfiles, opts)
 
       ## properties for engine
+      properties[:escape]   = true         if opts.escape && !properties.key?(:escape)
       properties[:pattern]  = opts.pattern if opts.pattern
       properties[:trim]     = false        if opts.notrim
       properties[:preamble] = properties[:postamble] = false if opts.bodyonly
+      properties[:pi]       = nil          if properties[:pi] == true
 
       ## create engine and extend enhancers
       engine = klass.new(nil, properties)
       enhancers = get_enhancers(opts.enhancers)
-      enhancers.push(Erubis::EscapeEnhancer) if opts.escape
+      #enhancers.push(Erubis::EscapeEnhancer) if opts.escape
       enhancers.each do |enhancer|
         engine.extend(enhancer)
         engine.bipattern = properties[:bipattern] if enhancer == Erubis::BiPatternEnhancer
       end
 
-      ## compile and execute
+      ## convert and execute
       val = nil
       if filenames && !filenames.empty?
         filenames.each do |filename|
           test(?f, filename)  or raise CommandOptionError.new("#{filename}: file not found.")
           engine.filename = filename
-          engine.compile!(File.read(filename))
+          engine.convert!(File.read(filename))
           print val if val = do_action(action, engine, context, opts)
         end
       else
         engine.filename = '(stdin)'
-        engine.compile!($stdin.read())
+        engine.convert!($stdin.read())
         print val if val = do_action(action, engine, context, opts)
       end
 
@@ -164,7 +166,7 @@ module Erubis
 
     def do_action(action, engine, context, opts)
       case action
-      when 'compile'
+      when 'convert'
         s = engine.src
       when nil, 'exec', 'execute'
         s = opts.binding ? engine.result(context) : engine.evaluate(context)
@@ -177,42 +179,60 @@ module Erubis
     def usage
       command = File.basename($0)
       s = <<END
-erubis - embedded program compiler for multi-language
+erubis - embedded program convertr for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
-  -x            : compiled code
+  -x            : converted code
   -T            : don't trim spaces around '<% %>'
   -b            : body only (no preamble nor postamble)
   -e            : escape (equal to '--E Escape')
   -p pattern    : embedded pattern (default '<% %>')
-  -l lang       : compile but no execute (ruby/php/c/java/scheme/perl/js)
-  -E enhancer,... : enhancer name (Escape, PercentLine, BiPattern, ...)
+  -l lang       : convert but no execute (ruby/php/c/java/scheme/perl/js)
+  -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
   -B            : invoke 'result(binding)' instead of 'evaluate(context)'
+  --pi=name     : parse '<?name ... ?>' instead of '<% ... %>'
 
 END
       #'
       #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
-      #  -a            : action (compile/execute)
+      #  -a            : action (convert/execute)
       return s
+    end
+
+
+    def collect_supported_properties(erubis_klass)
+      list = []
+      erubis_klass.ancestors.each do |klass|
+        if klass.respond_to?(:supported_properties)
+          list.concat(klass.supported_properties)
+        end
+      end
+      return list
     end
 
     def show_properties
       s = "supported properties:\n"
-      %w[(common) ruby php c java scheme perl javascript].each do |lang|
-        list = Erubis::Engine.supported_properties
-        if lang != '(common)'
-          klass = Erubis.const_get("E#{lang}")
-          list = klass.supported_properties - list
-        end
+      basic_props = collect_supported_properties(Erubis::Basic::Engine)
+      pi_props    = collect_supported_properties(Erubis::PI::Engine)
+      list = []
+      common_props = basic_props & pi_props
+      list << ['(common)', common_props]
+      list << ['(basic)',  basic_props - common_props]
+      list << ['(pi)',     pi_props    - common_props]
+      %w[ruby php c java scheme perl javascript].each do |lang|
+        klass = Erubis.const_get("E#{lang}")
+        list << [lang, collect_supported_properties(klass) - basic_props]
+      end
+      list.each do |lang, props|
         s << "  * #{lang}\n"
-        list.each do |name, default_val, desc|
+        props.each do |name, default_val, desc|
           s << ("     --%-23s : %s\n" % ["#{name}=#{default_val.inspect}", desc])
         end
       end
@@ -309,18 +329,17 @@ END
     #++
 
 
-    def get_classobj(classname, lang)
-      unless classname
-        classname = lang =~ /\Axml(.*)/ ? "EscapedE#{$1}" : "E#{lang}"
-      end
+    def get_classobj(classname, lang, pi)
+      classname ||= "E#{lang}"
+      base_module = pi ? Erubis::PI : Erubis
       begin
-        klass = Erubis.const_get(classname)
+        klass = base_module.const_get(classname)
       rescue NameError
         klass = nil
       end
       unless klass
         if lang
-          msg = "-l #{lang}: invalid language name (class Erubis::#{classname} not found)."
+          msg = "-l #{lang}: invalid language name (class #{base_module.name}::#{classname} not found)."
         else
           msg = "-c #{classname}: invalid class name."
         end

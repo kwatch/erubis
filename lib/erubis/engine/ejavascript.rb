@@ -11,23 +11,21 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for JavaScript
-  ##
-  class Ejavascript < Engine
+  module JavascriptGenerator
+    include Generator
 
     def self.supported_properties()   # :nodoc:
-      list = super
+      list = []
       #list << [:indent,   '',       "indent spaces (ex. '  ')"]
       #list << [:buf,      '_buf',   "output buffer name"]
       return list
     end
 
-    def initialize(input, properties={})
+    def init_generator(properties={})
+      super
+      @escapefunc ||= 'escape'
       @indent = properties[:indent] || ''
       @buf = properties[:out] || '_buf'
-      #@bufclass = properties[:outclass] || 'StringBuffer'
-      super
     end
 
     def add_preamble(src)
@@ -37,11 +35,6 @@ module Erubis
     def escape_text(text)
       @@table_ ||= { "\r"=>"\\r", "\n"=>"\\n\\\n", "\t"=>"\\t", '"'=>'\\"', "\\"=>"\\\\" }
       return text.gsub!(/[\r\n\t"\\]/) { |m| @@table_[m] } || text
-    end
-
-    def escaped_expr(code)
-      @escape ||= 'escape'
-      return "#{@escape}(#{code.strip})"
     end
 
     def add_indent(src, indent)
@@ -67,12 +60,12 @@ module Erubis
 
     def add_expr_literal(src, code)
       add_indent(src, @indent)
-      src << @buf << '.push(' << code.strip << ');'
+      code.strip!
+      src << "#{@buf}.push(#{code});"
     end
 
     def add_expr_escaped(src, code)
-      add_indent(src, @indent)
-      src << @buf << '.push(' << escaped_expr(code) << ');'
+      add_expr_literal(src, escaped_expr(code))
     end
 
     def add_expr_debug(src, code)
@@ -89,6 +82,14 @@ module Erubis
   end
 
 
+  ##
+  ## engine for JavaScript
+  ##
+  class Ejavascript < Basic::Engine
+    include JavascriptGenerator
+  end
+
+
   class EscapedEjavascript < Ejavascript
     include EscapeEnhancer
   end
@@ -97,6 +98,17 @@ module Erubis
   #class XmlEjavascript < Ejavascript
   #  include EscapeEnhancer
   #end
+
+
+  class PI::Ejavascript < PI::Engine
+    include JavascriptGenerator
+
+    def init_converter(properties={})
+      @pi = 'js'
+      super(properties)
+    end
+
+  end
 
 
 end

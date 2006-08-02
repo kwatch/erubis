@@ -11,19 +11,18 @@ require 'erubis/engine/eruby'
 module Erubis
 
 
-  ##
-  ## Eruby class which generates optimized ruby code
-  ##
-  class OptimizedEruby < Engine    # Eruby
+  module OptimizedGenerator
+    include Generator
 
     def self.supported_properties()  # :nodoc:
-      return super
+      return []
     end
 
-    def initialize(input, properties={})
+    def init_generator(properties={})
+      super
+      @escapefunc ||= "Erubis::XmlHelper.escape_xml"
       @initialized = false
       @prev_is_expr = false
-      super
     end
 
     protected
@@ -33,8 +32,8 @@ module Erubis
     end
 
     def escaped_expr(code)
-      @escape ||= 'Erubis::XmlHelper.escape_xml'
-      return "#{@escape}(#{code})"
+      @escapefunc ||= 'Erubis::XmlHelper.escape_xml'
+      return "#{@escapefunc}(#{code})"
     end
 
     def switch_to_expr(src)
@@ -96,6 +95,21 @@ module Erubis
     end
 
   end  # end of class OptimizedEruby
+
+
+  ##
+  ## Eruby class which generates optimized ruby code
+  ##
+  class OptimizedEruby < Basic::Engine    # Eruby
+    include RubyEvaluator
+    include OptimizedGenerator
+
+    def init_converter(properties={})
+      @pi = 'rb'
+      super(properties)
+    end
+
+  end
 
 
   ##

@@ -11,13 +11,16 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for PHP
-  ##
-  class Ephp < Engine
+  module PhpGenerator
+    include Generator
 
     def self.supported_properties()  # :nodoc:
-      return super
+      return []
+    end
+
+    def init_generator(properties={})
+      super
+      @escapefunc ||= 'htmlspecialchars'
     end
 
     def add_preamble(src)
@@ -32,17 +35,13 @@ module Erubis
       src << escape_text(text)
     end
 
-    def escaped_expr(code)
-      @escape ||= 'htmlspecialchars'
-      return "#{@escape}(#{code.strip})"
-    end
-
     def add_expr_literal(src, code)
-      src << "<?php echo #{code.strip}; ?>"
+      code.strip!
+      src << "<?php echo #{code}; ?>"
     end
 
     def add_expr_escaped(src, code)
-      src << "<?php echo #{escaped_expr(code)}; ?>"
+      add_expr_literal(src, escaped_expr(code))
     end
 
     def add_expr_debug(src, code)
@@ -69,6 +68,14 @@ module Erubis
   end
 
 
+  ##
+  ## engine for PHP
+  ##
+  class Ephp < Basic::Engine
+    include PhpGenerator
+  end
+
+
   class EscapedEphp < Ephp
     include EscapeEnhancer
   end
@@ -77,6 +84,17 @@ module Erubis
   #class XmlEphp < Ephp
   #  include EscapeEnhancer
   #end
+
+
+  class PI::Ephp < PI::Engine
+    include PhpGenerator
+
+    def init_converter(properties={})
+      @pi = 'php'
+      super(properties)
+    end
+
+  end
 
 
 end

@@ -1,0 +1,514 @@
+---
+- name:   notext_eruby
+  options:  ''
+  filename:  ex-notext.rhtml
+  document: |
+
+	.$$ Command 'notext'	| cmd-notext
+	
+	Command 'notext' is a utility to extract only program code from eRuby/PHP/ePerl script.
+	It is an application of NoTextEnhancer.
+	
+	For example, see the following eRuby script.
+	This is some complex, so it is difficult to grasp the program code.
+	
+	.? ex-notext.rhtml
+	.-------------------- ex-notext.rhtml
+	[%= ydoc['notext_eruby']['input'].chomp %]
+	.--------------------
+
+	Command 'notext' extracts the ruby code from eRuby script.
+
+	.? result
+	.====================
+	$ notext ex-notext.rhtml
+	[%= ydoc['notext_eruby']['output'].chomp %]
+	.====================
+
+	Option '-c' ({{*c*}}ompact) deletes empty lines.
+
+	.? result
+	.====================
+	$ notext -c ex-notext.rhtml
+	[%= ydoc['notext_eruby_c']['output'].chomp %]
+	.====================
+	
+	Option '-u' ({{*u*}}nique) replace some empty lines with a empty line.
+
+	.? result
+	.====================
+	$ notext -u ex-notext.rhtml
+	[%= ydoc['notext_eruby_u']['output'].chomp %]
+	.====================
+
+	Option '-n' ({{*n*}}umber) adds line number.
+	It is available with '-c' or '-n'.
+
+	.? result
+	.====================
+	$ notext -nu ex-notext.rhtml
+	[%= ydoc['notext_eruby_nu']['output'].chomp %]
+	.====================
+
+	'notext' is available with PHP or ePerl script.
+	Language is automatically detected by suffix of filename.
+	And you can specify language with option '-l' ({{*l*}}anguage).
+
+	.? ex-notext.php
+	.--------------------
+	[%= ydoc['notext_php']['input'].chomp %]
+	.--------------------
+
+	.? result
+	.====================
+	$ notext -nu ex-notext.php
+	[%= ydoc['notext_php_nu']['output'].chomp %]
+	.====================
+
+	.? ex-notext.eperl
+	.--------------------
+	[%= ydoc['notext_eperl']['input'] %].chomp
+	.--------------------
+
+	.? result
+	.====================
+	$ notext -nul eperl ex-notext.eperl
+	[%= ydoc['notext_eperl_nu']['input'].chomp %]
+	.====================
+
+  input: &input_eruby |
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<?xml version="1.0"?>
+	<!DOCTYPE html
+	<html>
+	  <body>
+	    <h3>List</h3>
+	    <% if @list.nil? || @list.empty? %>
+	    <p>not found.</p>
+	    <% else %>
+	    <table>
+	      <tbody>
+	        <% @list.each_with_index do |item, i| %>
+	        <tr bgcolor="<%= i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
+	          <td><%= item %></td>
+	        </tr>
+	        <% end %>
+	      </tbody>
+	    </table>
+	    <% end %>
+	  </body>
+	</html>
+  output: |
+	._buf = [];
+	.
+	.
+	.
+	.
+	.
+	.
+	.
+	.
+	.     if @list.nil? || @list.empty? ;
+	.
+	.     else ;
+	.
+	.
+	.         @list.each_with_index do |item, i| ;
+	.                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	.               _buf << ( item ).to_s;
+	.
+	.         end ;
+	.
+	.
+	.     end ;
+	.
+	.
+	._buf.join
+
+##
+- name:   notext_eruby_n
+  options:  '-n'
+  filename:  ex-notext.rhtml
+  input:  *input_eruby
+  output: |
+	.  1: _buf = [];
+	.  2: 
+	.  3: 
+	.  4: 
+	.  5: 
+	.  6: 
+	.  7: 
+	.  8: 
+	.  9: 
+	. 10:      if @list.nil? || @list.empty? ;
+	. 11: 
+	. 12:      else ;
+	. 13: 
+	. 14: 
+	. 15:          @list.each_with_index do |item, i| ;
+	. 16:                       _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	. 17:                _buf << ( item ).to_s;
+	. 18: 
+	. 19:          end ;
+	. 20: 
+	. 21: 
+	. 22:      end ;
+	. 23: 
+	. 24: 
+	. 25: _buf.join
+
+##
+- name:   notext_eruby_c
+  options:  '-c'
+  filename:  ex-notext.rhtml
+  input: *input_eruby
+  output: |
+	._buf = [];
+	.     if @list.nil? || @list.empty? ;
+	.     else ;
+	.         @list.each_with_index do |item, i| ;
+	.                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	.               _buf << ( item ).to_s;
+	.         end ;
+	.     end ;
+	._buf.join
+
+##
+- name:   notext_eruby_u
+  options:  '-u'
+  filename:  ex-notext.rhtml
+  input: &input_eruby |
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<?xml version="1.0"?>
+	<!DOCTYPE html
+	<html>
+	  <body>
+	    <h3>List</h3>
+	    <% if @list.nil? || @list.empty? %>
+	    <p>not found.</p>
+	    <% else %>
+	    <table>
+	      <tbody>
+	        <% @list.each_with_index do |item, i| %>
+	        <tr bgcolor="<%= i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
+	          <td><%= item %></td>
+	        </tr>
+	        <% end %>
+	      </tbody>
+	    </table>
+	    <% end %>
+	  </body>
+	</html>
+  output: |
+	._buf = [];
+	.
+	.     if @list.nil? || @list.empty? ;
+	.
+	.     else ;
+	.
+	.         @list.each_with_index do |item, i| ;
+	.                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	.               _buf << ( item ).to_s;
+	.
+	.         end ;
+	.
+	.     end ;
+	.
+	._buf.join
+
+##
+- name:   notext_eruby_nc
+  options:  '-nc'
+  filename:  ex-notext.rhtml
+  input:  *input_eruby
+  output: |
+	.  1: _buf = [];
+	. 10:      if @list.nil? || @list.empty? ;
+	. 12:      else ;
+	. 15:          @list.each_with_index do |item, i| ;
+	. 16:                       _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	. 17:                _buf << ( item ).to_s;
+	. 19:          end ;
+	. 22:      end ;
+	. 25: _buf.join
+
+##
+- name:   notext_eruby_nu
+  options:  '-un'
+  filename:  ex-notext.rhtml
+  input:  *input_eruby
+  output: |
+	.  1: _buf = [];
+	.
+	. 10:      if @list.nil? || @list.empty? ;
+	.
+	. 12:      else ;
+	.
+	. 15:          @list.each_with_index do |item, i| ;
+	. 16:                       _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+	. 17:                _buf << ( item ).to_s;
+	.
+	. 19:          end ;
+	.
+	. 22:      end ;
+	.
+	. 25: _buf.join
+##
+---
+- name:  notext_php
+  options:   ''
+  filename:  ex-notext.php
+  input: &input_php |
+	<?xml version="1.0"?>
+	<html>
+	  <body>
+	    <h3>List</h3>
+	    <?php if (!$list) { ?>
+	    <p>not found.</p>
+	    <?php } else { ?>
+	    <table>
+	      <tbody>
+	        <?php $i = 0; ?>
+	        <?php foreach ($list as $item) { ?>
+	        <tr bgcolor="<?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>">
+	          <td><?php echo $item; ?></td>
+	        </tr>
+	        <?php } ?>
+	      </tbody>
+	    </table>
+	    <?php } ?>
+	  </body>
+	</html>
+  output: &output_php |
+	.
+	.
+	.
+	.
+	.    <?php if (!$list) { ?>
+	.
+	.    <?php } else { ?>
+	.
+	.
+	.        <?php $i = 0; ?>
+	.        <?php foreach ($list as $item) { ?>
+	.                     <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	.              <?php echo $item; ?>
+	.
+	.        <?php } ?>
+	.
+	.
+	.    <?php } ?>
+	.
+	.
+
+##
+- name:  notext_php_n
+  options:   '-n'
+  filename:  ex-notext.php
+  input: *input_php
+  output: &output_php |
+	.  1: 
+	.  2: 
+	.  3: 
+	.  4: 
+	.  5:     <?php if (!$list) { ?>
+	.  6: 
+	.  7:     <?php } else { ?>
+	.  8: 
+	.  9: 
+	. 10:         <?php $i = 0; ?>
+	. 11:         <?php foreach ($list as $item) { ?>
+	. 12:                      <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	. 13:               <?php echo $item; ?>
+	. 14: 
+	. 15:         <?php } ?>
+	. 16: 
+	. 17: 
+	. 18:     <?php } ?>
+	. 19: 
+	. 20: 
+
+##
+- name:  notext_php_c
+  options:   '-c'
+  filename:  ex-notext.php
+  input: *input_php
+  output: &output_php |
+	.    <?php if (!$list) { ?>
+	.    <?php } else { ?>
+	.        <?php $i = 0; ?>
+	.        <?php foreach ($list as $item) { ?>
+	.                     <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	.              <?php echo $item; ?>
+	.        <?php } ?>
+	.    <?php } ?>
+
+##
+- name:  notext_php_u
+  options:   '-u'
+  filename:  ex-notext.php
+  input: *input_php
+  output: &output_php |
+	.
+	.    <?php if (!$list) { ?>
+	.
+	.    <?php } else { ?>
+	.
+	.        <?php $i = 0; ?>
+	.        <?php foreach ($list as $item) { ?>
+	.                     <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	.              <?php echo $item; ?>
+	.
+	.        <?php } ?>
+	.
+	.    <?php } ?>
+	.
+
+##
+- name:  notext_php_nc
+  options:   '-nc'
+  filename:  ex-notext.php
+  input: *input_php
+  output: &output_php |
+	.  5:     <?php if (!$list) { ?>
+	.  7:     <?php } else { ?>
+	. 10:         <?php $i = 0; ?>
+	. 11:         <?php foreach ($list as $item) { ?>
+	. 12:                      <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	. 13:               <?php echo $item; ?>
+	. 15:         <?php } ?>
+	. 18:     <?php } ?>
+
+##
+- name:  notext_php_nu
+  options:   '-nu'
+  filename:  ex-notext.php
+  input: *input_php
+  output: &output_php |
+	.
+	.  5:     <?php if (!$list) { ?>
+	.
+	.  7:     <?php } else { ?>
+	.
+	. 10:         <?php $i = 0; ?>
+	. 11:         <?php foreach ($list as $item) { ?>
+	. 12:                      <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	. 13:               <?php echo $item; ?>
+	.
+	. 15:         <?php } ?>
+	.
+	. 18:     <?php } ?>
+	.
+
+##
+- name:  notext_php_shortnotation
+  options:  ''
+  filename:  ex-short-notation.php
+  input: |
+	. <table>
+	.   <? $i = 0; ?>
+	.   <? foreach ($list as $item) { ?>
+	.   <tr bgcolor="<?= ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF' ?>">
+	.     <td><?= $item ?></td>
+	.   </tr>
+	.   <? } ?>
+	. </table>
+  output: |
+	.
+	.    <?php $i = 0; ?>
+	.    <?php foreach ($list as $item) { ?>
+	.                 <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+	.          <?php echo $item; ?>
+	.
+	.    <?php } ?>
+	.
+
+##
+---
+- name:   notext_eperl
+  options:  ''
+  filename:  ex-notext.eperl
+  input: &input_eperl |
+	<?xml version="1.0"?>
+	<html>
+	  <body>
+	    <h3>List</h3>
+	    <? if (!@list) { !>
+	    <p>not found.</p>
+	    <? } else { !>
+	    <table>
+	      <tbody>
+	        <? $i = 0; !>
+	        <? foreach ($item in @list) { !>
+	        <tr bgcolor="<?= ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF' !>">
+	          <td><?= $item !></td>
+	        </tr>
+	        <? } !>
+	      </tbody>
+	    </table>
+	    <? } !>
+	  </body>
+	</html>
+  output: |
+	.
+	.
+	.
+	.
+	.     if (!@list) { 
+	.
+	.     } else { 
+	.
+	.
+	.         $i = 0; 
+	.         foreach ($item in @list) { 
+	.                     print(++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'); 
+	.              print($item); 
+	.
+	.         } 
+	.
+	.
+	.     } 
+	.
+	.
+
+##
+- name:   notext_eperl_nc
+  options:  '-nc'
+  filename:  ex-notext.eperl
+  input: *input_eperl
+  output: |
+	.  5:      if (!@list) { 
+	.  7:      } else { 
+	. 10:          $i = 0; 
+	. 11:          foreach ($item in @list) { 
+	. 12:                      print(++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'); 
+	. 13:               print($item); 
+	. 15:          } 
+	. 18:      } 
+
+##
+- name:   notext_eperl_nu
+  options:  '-nu'
+  filename:  ex-notext.eperl
+  input: *input_eperl
+  output: |
+	.
+	.  5:      if (!@list) { 
+	.
+	.  7:      } else { 
+	.
+	. 10:          $i = 0; 
+	. 11:          foreach ($item in @list) { 
+	. 12:                      print(++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'); 
+	. 13:               print($item); 
+	.
+	. 15:          } 
+	.
+	. 18:      } 
+	.

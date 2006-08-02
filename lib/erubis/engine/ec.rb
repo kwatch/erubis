@@ -11,22 +11,21 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for C
-  ##
-  class Ec < Engine
+  module CGenerator
+    include Generator
 
     def self.supported_properties()  # :nodoc:
-      list = super
-      list << [:indent, '',       "indent spaces (ex. '  ')"]
-      list << [:out,    'stdout', "output file pointer name"]
-      return list
+      return [
+              [:indent, '',       "indent spaces (ex. '  ')"],
+              [:out,    'stdout', "output file pointer name"],
+            ]
     end
 
-    def initialize(input, properties={})
+    def init_generator(properties={})
+      super
+      @escapefunc ||= "escape"
       @indent = properties[:indent] || ''
       @out = properties[:out] || 'stdout'
-      super
     end
 
     def add_preamble(src)
@@ -39,11 +38,6 @@ module Erubis
       return text
     end
 
-    def escaped_expr(code)
-      @escape ||= "escape"
-      code.strip!
-      return "#{@escape}(#{code}, #{@out})"
-    end
 
     def add_text(src, text)
       return if text.empty?
@@ -70,7 +64,7 @@ module Erubis
 
     def add_expr_escaped(src, code)
       src << @indent if src.empty? || src[-1] == ?\n
-      src << " " << escaped_expr(code) << ';'
+      src << " #{@escapefunc}(#{code.strip}, #{@out});"
     end
 
     def add_expr_debug(src, code)
@@ -90,6 +84,14 @@ module Erubis
   end
 
 
+  ##
+  ## engine for C
+  ##
+  class Ec < Basic::Engine
+    include CGenerator
+  end
+
+
   class EscapedEc < Ec
     include EscapeEnhancer
   end
@@ -98,6 +100,16 @@ module Erubis
   #class XmlEc < Ec
   #  include EscapeEnhancer
   #end
+
+  class PI::Ec < PI::Engine
+    include CGenerator
+
+    def init_converter(properties={})
+      @pi = 'c'
+      super(properties)
+    end
+
+  end
 
 
 end

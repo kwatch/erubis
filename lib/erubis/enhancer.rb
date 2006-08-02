@@ -41,11 +41,9 @@ module Erubis
     def add_expr(src, code, indicator)
       case indicator
       when '='
-        add_expr_escaped(src, code)
-        #add_expr_literal(src, code)
+        @escape ? add_expr_literal(src, code) : add_expr_escaped(src, code)
       when '=='
-        add_expr_literal(src, code)
-        #add_expr_escaped(src, code)
+        @escape ? add_expr_escaped(src, code) : add_expr_literal(src, code)
       when '==='
         add_expr_debug(src, code)
       end
@@ -309,20 +307,20 @@ module Erubis
 
 
   ##
-  ## get compile faster, but spaces around '<%...%>' are not trimmed.
+  ## get convert faster, but spaces around '<%...%>' are not trimmed.
   ##
   ## this is language-independent.
   ##
   module SimplifyEnhancer
 
     def self.desc   # :nodoc:
-      "get compile faster but leave spaces around '<% %>'"
+      "get convert faster but leave spaces around '<% %>'"
     end
 
     #DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
     SIMPLE_REGEXP = /<%(=+|\#)?(.*?)-?%>/m
 
-    def compile(input)
+    def convert(input)
       src = ""
       add_preamble(src)
       #regexp = pattern_regexp(@pattern)
@@ -515,7 +513,7 @@ module Erubis
 
     attr_accessor :header, :footer
 
-    def compile(input)
+    def convert(input)
       source = super
       return @src = "#{@header}#{source}#{@footer}"
     end

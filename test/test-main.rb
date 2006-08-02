@@ -75,6 +75,62 @@ user: (none)
 END
 
 
+  PI_INPUT = <<'END'
+<ul>
+  <?rb @list = ['<aaa>', 'b&b', '"ccc"']
+   for item in @list ?>
+  <li>${item} / $!{item}
+      <%= item %> / <%== item %></li>
+  <?rb end ?>
+<ul>
+END
+
+  PI_SRC = <<'END'
+_buf = []; _buf << '<ul>
+';   @list = ['<aaa>', 'b&b', '"ccc"']
+   for item in @list 
+ _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '
+      '; _buf << ( item ).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</li>
+';   end 
+ _buf << '<ul>
+';
+_buf.join
+END
+
+  PI_ESCAPED_SRC = <<'END'
+_buf = []; _buf << '<ul>
+';   @list = ['<aaa>', 'b&b', '"ccc"']
+   for item in @list 
+ _buf << '  <li>'; _buf << (item).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '
+      '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << ' / '; _buf << ( item ).to_s; _buf << '</li>
+';   end 
+ _buf << '<ul>
+';
+_buf.join
+END
+
+  PI_OUTPUT = <<'END'
+<ul>
+  <li>&lt;aaa&gt; / <aaa>
+      <aaa> / &lt;aaa&gt;</li>
+  <li>b&amp;b / b&b
+      b&b / b&amp;b</li>
+  <li>&quot;ccc&quot; / "ccc"
+      "ccc" / &quot;ccc&quot;</li>
+<ul>
+END
+
+  PI_ESCAPED_OUTPUT = <<'END'
+<ul>
+  <li><aaa> / &lt;aaa&gt;
+      &lt;aaa&gt; / <aaa></li>
+  <li>b&b / b&amp;b
+      b&amp;b / b&b</li>
+  <li>"ccc" / &quot;ccc&quot;
+      &quot;ccc&quot; / "ccc"</li>
+<ul>
+END
+
   def _test()
     if $target
       name = (caller()[0] =~ /in `test_(.*?)'/) && $1
@@ -393,6 +449,58 @@ END
     @input = INPUT
     @expected = SRC.gsub(/<< \((.*?)\).to_s;/, '<< Erubis::XmlHelper.escape_xml(\1);')
     @options = '-ex'
+    _test()
+  end
+
+
+  def test_pi1  # --pi -x
+    @input = PI_INPUT
+    @expected = PI_SRC
+    @options = '-x --pi'
+    _test()
+  end
+
+  def test_pi2  # --pi -x --escape=false
+    @input = PI_INPUT
+    @expected = PI_ESCAPED_SRC
+    @options = '-x --pi --escape=false'
+    _test()
+  end
+
+  def test_pi3  # --pi
+    @input = PI_INPUT
+    @expected = PI_OUTPUT
+    @options = '--pi'
+    _test()
+  end
+
+  def test_pi4  # --pi --escape=false
+    @input = PI_INPUT
+    @expected = PI_ESCAPED_OUTPUT
+    @options = '--pi --escape=false'
+    _test()
+  end
+
+  def test_pi5  # --pi=ruby -x
+    @input = PI_INPUT.gsub(/<\?rb/, '<?ruby')
+    @expected = PI_SRC
+    @options = '--pi=ruby -x'
+    _test()
+  end
+
+  def test_pi6  # --pi -xl java
+    @input = <<'END'
+<?java for (int i = 0; i < arr.length; i++) { ?>
+  - ${arr[i]} / $!{arr[i]}
+<?java } ?>
+END
+    @expected = <<'END'
+StringBuffer _buf = new StringBuffer(); for (int i = 0; i < arr.length; i++) { 
+_buf.append("  - "); _buf.append(escape(arr[i])); _buf.append(" / "); _buf.append(arr[i]); _buf.append("\n");
+ } 
+return _buf.toString();
+END
+    @options = '--pi -xl java'
     _test()
   end
 

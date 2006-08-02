@@ -11,20 +11,19 @@ require 'erubis/enhancer'
 module Erubis
 
 
-  ##
-  ## engine for Perl
-  ##
-  class Eperl < Engine
+  module PerlGenerator
+    include Generator
 
     def self.supported_properties()  # :nodoc:
-      list = super
-      list << [:func, 'print', "function name"]
-      return list
+      return [
+              [:func, 'print', "function name"],
+              ]
     end
 
-    def initialize(input, properties={})
-      @func = properties[:func] || 'print'
+    def init_generator(properties={})
       super
+      @escapefunc ||= 'encode_entities'
+      @func = properties[:func] || 'print'
     end
 
     def add_preamble(src)
@@ -39,17 +38,13 @@ module Erubis
       src << @func << "('" << escape_text(text) << "'); " unless text.empty?
     end
 
-    def escaped_expr(code)
-      @escape ||= 'encode_entities'
-      return "#{@escape}(#{code.strip})"
-    end
-
     def add_expr_literal(src, code)
-      src << @func << "(" << code.strip << "); "
+      code.strip!
+      src << @func << "(" << code << "); "
     end
 
     def add_expr_escaped(src, code)
-      src << @func << "(" << escaped_expr(code) << "); "
+      add_expr_literal(src, escaped_expr(code))
     end
 
     def add_expr_debug(src, code)
@@ -69,6 +64,14 @@ module Erubis
   end
 
 
+  ##
+  ## engine for Perl
+  ##
+  class Eperl < Basic::Engine
+    include PerlGenerator
+  end
+
+
   class EscapedEperl < Eperl
     include EscapeEnhancer
   end
@@ -77,6 +80,17 @@ module Erubis
   #class XmlEperl < Eperl
   #  include EscapeEnhancer
   #end
+
+
+  class PI::Eperl < PI::Engine
+    include PerlGenerator
+
+    def init_converter(properties={})
+      @pi = 'perl'
+      super(properties)
+    end
+
+  end
 
 
 end

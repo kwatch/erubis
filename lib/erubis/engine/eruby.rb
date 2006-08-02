@@ -6,29 +6,31 @@
 
 require 'erubis/engine'
 require 'erubis/enhancer'
+require 'abstract'
 
 
 module Erubis
 
 
   ##
-  ## engine for Ruby
+  ## code generator for Ruby
   ##
-  class Eruby < Engine
+  module RubyGenerator
+    include Generator
     #include StringBufferEnhancer
     include ArrayBufferEnhancer
 
+    def init_generator(properties={})
+      super
+      @escapefunc ||= "Erubis::XmlHelper.escape_xml"
+    end
+
     def self.supported_properties()  # :nodoc:
-      return super
+      return []
     end
 
     def escape_text(text)
       text.gsub(/['\\]/, '\\\\\&')   # "'" => "\\'",  '\\' => '\\\\'
-    end
-
-    def escaped_expr(code)
-      @escape ||= "Erubis::XmlHelper.escape_xml"
-      return "#{@escape}(#{code})"
     end
 
     #--
@@ -52,7 +54,7 @@ module Erubis
     end
 
     def add_expr_escaped(src, code)
-      src << ' _buf << ' << escaped_expr(code) << ';'
+      src << " _buf << #{@escapefunc}(#{code});"
     end
 
     def add_expr_debug(src, code)
@@ -71,6 +73,15 @@ module Erubis
 
 
   ##
+  ## engine for Ruby
+  ##
+  class Eruby < Basic::Engine
+    include RubyEvaluator
+    include RubyGenerator
+  end
+
+
+  ##
   ## swtich '<%= %>' to escaped and '<%== %>' to not escaped
   ##
   class EscapedEruby < Eruby
@@ -85,6 +96,18 @@ module Erubis
   ##
   class XmlEruby < Eruby
     include EscapeEnhancer
+  end
+
+
+  class PI::Eruby < PI::Engine
+    include RubyEvaluator
+    include RubyGenerator
+
+    def init_converter(properties={})
+      @pi = 'rb'
+      super(properties)
+    end
+
   end
 
 
