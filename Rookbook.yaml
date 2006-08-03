@@ -19,9 +19,9 @@ parameters:
   - inline_require_script :  $(home)/src/inline-require/trunk/bin/inline-require
   - abstract_rb : $(home)/src/abstract/trunk/lib/abstract.rb
   - benchmark_files* : Dir.glob('benchmark/erubybench{-lib.rb,.rb,.rhtml,.yaml}')
+  - libfiles*  :  Dir.glob("lib/**/*")
   - base       :  $(project)_$(release)
   - base2      :  $(project)-$(release)
-  - libfiles*  :  Dir.glob("lib/**/*")
   #
   - exclude_libs : [piengine.rb, evaluator.rb]
 
@@ -32,6 +32,7 @@ recipes:
     ingreds:	[ $(text_files), $(doc_files) ]
 
   - product:	:packages
+    desc:       create packages
     ingreds:	[ $(base).tar.gz, $(base).tar.bz2, $(base).zip, $(base2).gem ]
 
   - product:	:test
@@ -112,15 +113,16 @@ recipes:
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#
-	store 'lib/**/*', 'bin/notext', 'test/**/*', text_files, dir do |f|
+	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)
 	  !exclude_libs.include?(base)
 	end
 	#
 	store 'benchmark/erubybench.{rb,rhtml,yaml}', 'benchmark/erubybench-lib.rb', dir
 	#
-	chdir 'examples' do sys 'make clean' end
+	Dir.glob('examples/*').each { |d| chdir d do sys 'make clean' end }
 	store 'examples/**/*', dir
+	#
 	store '$(apidocdir)/**/*', dir
 	#
 	chdir 'doc' do sys 'rook :all' end

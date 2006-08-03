@@ -10,10 +10,10 @@ example.php:  example.ephp
 	erubis -l php example.ephp > example.php
 
 example.c:    example.ec
-	erubis -l c example.ec > example.c
+	erubis -bl c example.ec > example.c
 
 example.java: example.ejava
-	erubis -l java example.ejava > example.java
+	erubis -bl java example.ejava > example.java
 
 example.scm:  example.escheme
 	erubis -l scheme --func=display example.escheme > example.scm

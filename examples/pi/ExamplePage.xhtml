@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<?java-header
+//package my;
+
+import java.util.*;
+
+import my.User;
+import static my.Util.escapeXml;
+
+public class ExamplePage {
+
+    private String title = "Users list";
+    private List<User> users;
+
+    public ExamplePage(List<User> users) {
+        this.users = users;
+    }
+
+    public String createView() {
+        StringBuilder _buf = new StringBuilder();
+?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>${title}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+  <body>
+    <h1>${title}</h1>
+
+    <table>
+<?java
+       int i = 0;
+       for (User user: users) {
+           String color = ++i % 2 == 0 ? "#FFCCCC" : "#CCCCFF";
+?>
+      <tr bgcolor="$!{color}">
+	<td>${user.getName()}</td>
+	<td>${user.getEmail()}</td>
+      </tr>
+<?java
+       }
+?>
+<?java /***** ?>
+      <tr class="odd">
+        <td>foo</td>
+        <td>foo@mail.com</td>
+      </tr>
+      <tr class="even">
+        <td>bar</td>
+        <td>bar@mail.org</td>
+      </tr>
+<?java *****/ ?>
+    </table>
+
+  </body>
+</html>
+<?java-footer
+        return _buf.toString();
+    }//createView()
+
+
+    public static void main(String[] args) {
+        // create users list
+        List<User> users = new ArrayList<User>();
+        users.add(new User("<aaa>",   "aaa@mail.com"));
+        users.add(new User("b&b",     "bbb@mail.net"));
+        users.add(new User("\"ccc\"", "ccc@mail.org"));
+
+        // create users page
+        ExamplePage page = new ExamplePage(users);
+
+        // print page
+        System.out.print(page.createView());
+    }//main()
+
+
+}//class
+?>
