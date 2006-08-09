@@ -99,7 +99,8 @@ module Erubis
       def render(template, assigns)
         ## template path without suffix
         ## (how to get template path name with suffix? I can't find...)
-        template_basename = @view.base_path + '/' + @view.controller.action_name
+        c = @view.controller
+        template_basename = c.template_root + "/" + c.controller_name + "/" + c.action_name
 
         ## cache template
         proc_obj = @@cache_table[template_basename]

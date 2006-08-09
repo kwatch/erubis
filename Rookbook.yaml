@@ -153,7 +153,9 @@ recipes:
     method*: |
 	files = []
 	files += Dir.glob('lib/**/*.rb')
+	files += Dir.glob('bin/*')
 	files += Dir.glob('benchmark/erubybench.{rb,rhtml,yaml}')
+	files += Dir.glob('benchmark/pibench.*')
 	archive = "#{@product}.tar.gz"
 	tar_czf archive, files
 	dir = '/Volumes/WORKGROUP;DENEB/src/erubis/trunk'

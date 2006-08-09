@@ -17,8 +17,8 @@ module Erubis
   ##
   class TinyEruby
 
-    def initialize(input)
-      @src = convert(input)
+    def initialize(input=nil)
+      @src = convert(input) if input
     end
     attr_reader :src
 

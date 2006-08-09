@@ -40,17 +40,17 @@ thead {
     </tr>
    </thead>
    <tbody>
-<% data.each_with_index do |h, i| %>
+<% data.each_with_index do |hash, i| %>
 <%  n = i + 1 %>
     <tr class="<%= n % 2 == 0 ? 'even' : 'odd' %>">
      <td style="text-align: center">
       <span><%= n %></span>
      </td>
      <td>
-      <a href="/stock/<%= h[:code] %>"><%= h[:code] %></a>
+      <a href="/stock/<%= hash[:code] %>"><%= hash[:code] %></a>
      </td>
      <td>
-      <a href="<%= h[:url] %>"><%= h[:name] %></a>
+      <a href="<%= hash[:url] %>"><%= hash[:name] %></a>
      </td>
     </tr>
 <% end %>

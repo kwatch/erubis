@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.35 (2006-08-05)
+	.- [enhance] add PI::Converter#parse_stmt2()
+
 .: Rev.34 (2006-08-04)
 	.- [enhance] add 'examples/pi'
 	.- [update] Rookbook.yaml

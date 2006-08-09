@@ -41,7 +41,6 @@ module Erubis
 
     protected
 
-
     ##
     ## (abstract) convert input to code
     ##
@@ -50,7 +49,6 @@ module Erubis
     end
 
   end
-
 
 
   module Basic
@@ -156,7 +154,7 @@ module Erubis
   module PI::Converter
     include Erubis::Converter
 
-    def self.desc
+    def self.desc   # :nodoc:
       "use processing instructions (PI) instead of '<% %>'"
     end
 
@@ -188,7 +186,8 @@ module Erubis
     protected
 
     def convert_input(codebuf, input)
-      parse_stmts(codebuf, input)
+      #parse_stmts(codebuf, input)
+      parse_stmts2(codebuf, input)
     end
 
     def parse_stmts(codebuf, input)
@@ -239,7 +238,7 @@ module Erubis
       add_text(codebuf, rest)
     end
 
-    def add_pi_stmt(codebuf, code, pi_arg)
+    def add_pi_stmt(codebuf, code, pi_arg)  # :nodoc:
       case pi_arg
       when 'header' ;  @header = code
       when 'footer' ;  @footer = code
@@ -249,7 +248,7 @@ module Erubis
       end
     end
 
-    def add_pi_expr(codebuf, code, indicator)
+    def add_pi_expr(codebuf, code, indicator)  # :nodoc:
       case indicator
       when  nil, '', '=='    # ${...} or <%== ... %>
         @escape == false ? add_expr_literal(codebuf, code) : add_expr_escaped(codebuf, code)
@@ -260,6 +259,46 @@ module Erubis
       else
         # ignore
       end
+    end
+
+    ## (obsolete) equivarent to parse_stmts(), but a little slower than it.
+    def parse_stmts2(codebuf, input)   # :nodoc:
+      #regexp = pattern_regexp(@pattern)
+      @pi ||= 'e'
+      unless @embedded_pattern
+        ch = Regexp.escape(@prefix)
+        if @pattern
+          left, right = @pattern.split(' ')
+          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}|#{left}(=+)(.*?)#{right}/m
+        else
+          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}/m
+        end
+      end
+      pos = 0
+      input.scan(@embedded_pattern) do |lspace, pi_arg, stmt, rspace,
+                                    indicator1, expr1, indicator2, expr2|
+        match = Regexp.last_match
+        index = match.begin(0)
+        text = input[pos, index - pos]
+        pos = match.end(0)
+        add_text(codebuf, text)  # unless text.empty?
+        if stmt
+          code = stmt
+          if @trim && lspace && rspace
+            add_pi_stmt(codebuf, "#{lspace}#{code}#{rspace}", pi_arg)
+          else
+            add_text(codebuf, lspace)
+            add_pi_stmt(codebuf, code, pi_arg)
+            add_text(codebuf, rspace)
+          end
+        else
+          code = expr1 || expr2
+          indicator = indicator1 || indicator2
+          add_pi_expr(codebuf, code, indicator)
+        end
+      end
+      rest = $' || input
+      add_text(codebuf, rest)
     end
 
   end
