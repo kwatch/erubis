@@ -14,10 +14,10 @@ It has the following features.
 .* Auto trimming spaces around '<% %>'
 .* Embedded pattern changeable (default '<% %>')
 .* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
-.* Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 .* Context object available and easy to combine eRuby template with YAML datafile
 .* Print statement available
-.* Easy to extend in subclass
+.* Easy to expand and customize in subclass
 .* Ruby on Rails support
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
@@ -1489,13 +1489,14 @@ Add the following code to your 'app/controllers/application.rb'.
 
 .? app/controllers/application.rb
 .--------------------
-require 'erubis/rails/action_view_support'
+require 'erubis/helper/rails'
 suffix = 'erubis' 
-ActionView::Base.register_template_handler("erubis", Erubis::Rails::ViewTemplate)
-Erubis::Rails::ViewTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+ActionView::Base.register_template_handler("erubis", Erubis::Helper::RailsTemplate)
+#Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+#Erubis::Helper::RailsTemplate.default_properties = { :escape=>true, :escapefunc=>'h' }
 .--------------------
 
-If you specify Erubis::Rails::CachedViewTemplate class instead of Erubis::Rails::ViewTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
+If you specify Erubis::Helper::CachedRailsTemplate class instead of Erubis::Helper::RailsTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
 
 
 

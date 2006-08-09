@@ -7,10 +7,11 @@
 ###
 ### 1. add the folliwng code in your 'app/controllers/application.rb'.
 ###      --------------------
-###      require 'erubis/rails/action_view_support'
+###      require 'erubis/helper/rails'
 ###      suffix = 'erubis'
-###      ActionView::Base.register_template_handler(suffix, Erubis::Rails::ViewTemplate)
-###      Erubis::Rails::ViewTemplate.engine_class = Erubis::EscapedEruby ## if you want
+###      ActionView::Base.register_template_handler(suffix, Erubis::Helper::RailsTemplate)
+###      #Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## if you want
+###      #Erubis::Helper::RailsTemplate.default_class = { :escape=>true, :escapefunc='h' }
 ###      --------------------
 ### 2. restart web server.
 ### 3. change view template filename from 'file.rhtml' to 'file.erubis'.
@@ -24,18 +25,12 @@ require 'erubis'
 
 module Erubis
 
-  module Rails
+  module Helper
 
-    class ViewTemplate
-
-
-      def initialize(view)
-        @view = view
-      end
+    class RailsTemplate
 
 
       @@engine_class = Erubis::Eruby
-      @@engine_instance = @@engine_class.new
 
       def self.engine_class
         @@engine_class
@@ -47,6 +42,25 @@ module Erubis
       end
 
       #cattr_accessor :engine_class
+
+
+      @@default_properties = { }
+
+      def self.default_properties
+        return @@default_properties
+      end
+
+      def self.default_properties=(properties)
+        @@default_properties = properties
+      end
+
+      #cattr_accessor :default_properties
+
+
+      def initialize(view)
+        @view = view
+        @@engine_instance = @@engine_class.new(nil, @@default_properties)
+      end
 
 
       def convert(template)
@@ -73,6 +87,9 @@ module Erubis
       end
 
 
+      protected
+
+
       def _localvar_code(_localvars)
         list = _localvars.collect { |_name| "#{_name} = _localvars[#{_name.inspect}]\n" }
         code = list.join()
@@ -90,7 +107,7 @@ module Erubis
 
 
 
-    class CachedViewTemplate < ViewTemplate
+    class CachedRailsTemplate < RailsTemplate
 
 
       @@cache_table = {}
@@ -122,6 +139,9 @@ module Erubis
           return context.instance_eval(&proc_obj)
         end
       end
+
+
+      protected
 
 
       def _evaluate_proc(_proc_obj, _context, _localvars)

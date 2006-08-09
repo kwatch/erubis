@@ -33,13 +33,15 @@ It has the following features.
 </li>
 <li>Enable to handle Processing Instructions (PI) as embedded pattern (ex. '&lt;?rb ... ?&gt;')
 </li>
-<li>Support multi-language (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+<li>Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 </li>
 <li>Context object available and easy to combine eRuby template with YAML datafile
 </li>
 <li>Print statement available
 </li>
-<li>Easy to extend in subclass
+<li>Easy to expand and customize in subclass
+</li>
+<li>Ruby on Rails support
 </li>
 </ul>
 <p>Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
@@ -212,6 +214,12 @@ puts <strong>eruby.src</strong>                      # print script source
 puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
 puts <strong>eruby.result(binding())</strong>        # get result
+
+## # or
+## eruby = Erubis::Eruby.new
+## input = File.read('example1.eruby')
+## src = eruby.convert(input)
+## eval src
 </pre>
 <div class="terminal_caption">
 output</div>
@@ -413,7 +421,7 @@ $ cat stderr.log
 *** debug: item="b&amp;b"
 *** debug: item="\"ccc\""
 </pre>
-<p>The command-line option '-e'<sup>(<a href="#fnref:2" name="fnlink:2">*2</a>)</sup> will do the same action as Erubis::EscapedEruby.
+<p>The command-line option '-e' will do the same action as Erubis::EscapedEruby.
 This option is available for any language.
 </p>
 <pre class="terminal">$ erubis -l ruby <strong>-e</strong> example3.eruby
@@ -446,8 +454,6 @@ end
  <dl compact>
   <dt>(<a name="fnref:1" href="#fnlink:1">*1</a>)</dt>
   <dd>Erubis::EscapedEruby class includes Erubis::EscapeEnhancer which swtches the action of '&lt;%= %&gt;' and '&lt;%== %&gt;'.</dd>
-  <dt>(<a name="fnref:2" href="#fnlink:2">*2</a>)</dt>
-  <dd>Command-line option '-e' is equivarent to '-E Escape'.</dd>
  </dl>
 </div>
 <br>
@@ -1882,12 +1888,13 @@ Add the following code to your 'app/controllers/application.rb'.
 </p>
 <div class="program_caption">
 app/controllers/application.rb</div>
-<pre class="program">require 'erubis/rails/action_view_support'
+<pre class="program">require 'erubis/helper/rails'
 suffix = 'erubis' 
-ActionView::Base.register_template_handler("erubis", Erubis::Rails::ViewTemplate)
-Erubis::Rails::ViewTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+ActionView::Base.register_template_handler("erubis", Erubis::Helper::RailsTemplate)
+#Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+#Erubis::Helper::RailsTemplate.default_properties = { :escape=&gt;true, :escapefunc=&gt;'h' }
 </pre>
-<p>If you specify Erubis::Rails::CachedViewTemplate class instead of Erubis::Rails::ViewTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
+<p>If you specify Erubis::Helper::CachedRailsTemplate class instead of Erubis::Helper::RailsTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
 </p>
 <br>
 
@@ -1983,7 +1990,7 @@ example of using NoCodeEnhancer with PHP file</div>
 Here is an example result of benchmark.
 </p>
 <div class="output_caption">
-Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4</div>
+Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4, eruby1.0.5</div>
 <pre class="output">                                        user     system      total        real
 ERuby                             131.990000   1.900000 133.890000 (135.061456)
 ERB                               385.040000   3.180000 388.220000 (391.570653)
@@ -1994,7 +2001,7 @@ Erubis::TinyEruby                 118.720000   2.250000 120.970000 (122.022996)
 Erubis::TinyStdoutEruby            87.130000   2.030000  89.160000 ( 89.879538)
 </pre>
 <div class="output_caption">
-Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4</div>
+Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4, eruby1.0.5</div>
 <pre class="output">                                        user     system      total        real
 ERuby                              55.040000   2.120000  57.160000 ( 89.311397)
 ERB                               103.960000   3.480000 107.440000 (159.231792)

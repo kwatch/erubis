@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.36 (2006-08-10)
+	.- [change] 'rails/action_view_support.rb' is renamed to 'helper/rails.rb'
+	.- [update] users-guide updated
+
 .: Rev.35 (2006-08-05)
 	.- [enhance] add PI::Converter#parse_stmt2()
 

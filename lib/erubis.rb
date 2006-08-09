@@ -24,12 +24,15 @@
 ##    </ul>
 ##   END
 ##   list = ['<aaa>', 'b&b', '"ccc"']
-##   eruby = Erubis::Eruby.new(input)
-##   puts "--- source ---"
-##   puts eruby.src
+##   eruby = Erubis::Eruby.new()
+##   code = eruby.convert(input)
+##   puts "--- code ---"
+##   puts code
 ##   puts "--- result ---"
-##   puts eruby.evaluate(:list=>list)
-##   # or puts eruby.result(binding())
+##   context = Object.new
+##   context.instance_variable_set("@list", list)
+##   puts context.instance_eval(code)
+##   # or @list = list; puts eval(code, binding())
 ##
 ## result:
 ##   --- source ---

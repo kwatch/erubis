@@ -8,13 +8,16 @@ copyright::	$Copyright$
 == About Erubis
 
 Erubis is an implementation of eRuby. It has the following features.
-* Very fast (about three times faster than ERB and almost as fast as eruby)
+* Very fast, almost three times faster than ERB and even faster than eruby (implemented in C)
+* Auto escaping support
 * Auto trimming spaces around '<% %>'
-* Auto escape (sanitizing)
-* Changeable embedded pattern (default '<% %>')
-* Context object available
-* Easy to expand and customize in subclass
+* Embedded pattern changeable (default '<% %>')
+* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
 * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+* Context object available and easy to combine eRuby template with YAML datafile
+* Print statement available
+* Easy to expand and customize in subclass
+* Ruby on Rails support
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
