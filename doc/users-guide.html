@@ -766,11 +766,11 @@ _buf.join
 <ul type="disc">
 <li>'<code>&lt;?rb <em>...</em> ?&gt;</code>' represents Ruby statement.
 </li>
-<li>'<code>${<em>...</em>}</code>' represents escaped expression value.
+<li>'<code>@{<em>...</em>}@</code>' represents escaped expression value.
 </li>
-<li>'<code>$!{<em>...</em>}</code>' represents normal expression value.
+<li>'<code>@!{<em>...</em>}@</code>' represents normal expression value.
 </li>
-<li>'<code>$!!{<em>...</em>}</code>' prints expression value to standard output.
+<li>'<code>@!!{<em>...</em>}@</code>' prints expression value to standard output.
 </li>
 <li>(experimental) '<code>&lt;%= <em>...</em> %&gt;</code>' is also available to print expression value.
 </li>
@@ -786,11 +786,11 @@ example9.xhtml</div>
   lang = 'en'
   list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"']
 ?&gt;</strong>
-&lt;html lang="<strong>${lang}</strong>"&gt;
+&lt;html lang="<strong>@!{lang}@</strong>"&gt;
  &lt;body&gt;
   &lt;ul&gt;
   <strong>&lt;?rb for item in list ?&gt;</strong>
-   &lt;li&gt;<strong>${item}</strong>&lt;/li&gt;
+   &lt;li&gt;<strong>@{item}@</strong>&lt;/li&gt;
   <strong>&lt;?rb end ?&gt;</strong>
   &lt;/ul&gt;
  &lt;/body&gt;
@@ -849,20 +849,19 @@ output</div>
  &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<p>Expression prefix character can be changeable by command-line property '--prefix=<em>char</em>. Default is '<code>$</code>'.
+<p>Expression character can be changeable by command-line property '--embchar=<em>char</em>. Default is '<code>@</code>'.
 </p>
 <p><strong>(experimental)</strong> Erubis supports '&lt;%= ... %&gt;' pattern with PI pattern.
-It is useful if you are Rails user to write helper methods which contains '}' character.
 </p>
 <div class="program_caption">
 example of Rails view template</div>
 <pre class="program">&lt;table&gt;
   &lt;tr&gt;
 &lt;?rb for item in @list ?&gt;
-    &lt;td&gt;${item.id}&lt;/td&gt;
-    &lt;td&gt;${item.name}&lt;/td&gt;
+    &lt;td&gt;@{item.id}@&lt;/td&gt;
+    &lt;td&gt;@{item.name}@&lt;/td&gt;
     &lt;td&gt;
-       <strong>&lt;%=</strong> link_to 'Destroy', <strong>{</strong> :action=&gt;'destroy', :id=&gt;item.id <strong>}</strong>,
+       <strong>&lt;%=</strong> link_to 'Destroy', {:action=&gt;'destroy', :id=&gt;item.id},
                        :confirm=&gt;'Are you OK?' <strong>%&gt;</strong>
     &lt;/td&gt;
 &lt;?rb end ?&gt;

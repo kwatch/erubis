@@ -568,9 +568,9 @@ $ ruby example8.rb
 Erubis can parse Processing Instructions (PI) as embedded pattern.
 
 .* '{{,<?rb {{/.../}} ?>,}}' represents Ruby statement.
-.* '{{,${{{/.../}}},}}' represents escaped expression value.
-.* '{{,$!{{{/.../}}},}}' represents normal expression value.
-.* '{{,$!!{{{/.../}}},}}' prints expression value to standard output.
+.* '{{,@{{{/.../}}}@,}}' represents escaped expression value.
+.* '{{,@!{{{/.../}}}@,}}' represents normal expression value.
+.* '{{,@!!{{{/.../}}}@,}}' prints expression value to standard output.
 .* (experimental) '{{,<%= {{/.../}} %>,}}' is also available to print expression value.
 
 This is more useful than basic embedded pattern ('{{,<% ... >,}}') because PI doesn't break XML or HTML at all.
@@ -583,11 +583,11 @@ For example the following XHTML file is well-formed and HTML validator got no er
   lang = 'en'
   list = ['<aaa>', 'b&b', '"ccc"']
 ?>*}}
-<html lang="{{*${lang}*}}">
+<html lang="{{*@!{lang}@*}}">
  <body>
   <ul>
   {{*<?rb for item in list ?>*}}
-   <li>{{*${item}*}}</li>
+   <li>{{*@{item}@*}}</li>
   {{*<?rb end ?>*}}
   </ul>
  </body>
@@ -616,20 +616,20 @@ $ erubis {{*--pi*}} example9.xhtml
 .<<<:! (cd guide.d; erubis --pi example9.xhtml)
 .====================
 
-Expression prefix character can be changeable by command-line property '--prefix={{/char/}}. Default is '{{,$,}}'.
+Expression character can be changeable by command-line property '--embchar={{/char/}}. Default is '{{,@,}}'.
 
 {{*(experimental)*}} Erubis supports '<%= ... %>' pattern with PI pattern.
-It is useful if you are Rails user to write helper methods which contains '}' character.
+.#It is useful if you are Rails user to write helper methods which contains '}' character.
 
 .? example of Rails view template
 .--------------------
 <table>
   <tr>
 <?rb for item in @list ?>
-    <td>${item.id}</td>
-    <td>${item.name}</td>
+    <td>@{item.id}@</td>
+    <td>@{item.name}@</td>
     <td>
-       {{*<%=*}} link_to 'Destroy', {{*{*}} :action=>'destroy', :id=>item.id {{*}*}},
+       {{*<%=*}} link_to 'Destroy', {:action=>'destroy', :id=>item.id},
                        :confirm=>'Are you OK?' {{*%>*}}
     </td>
 <?rb end ?>

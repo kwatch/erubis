@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.37 (2006-09-19)
+	.- [change] embedded expr pattern of piengine is changed from '${...}' to '@{...}@'
+	.- [update] users-guide.txt updated
+
 .: Rev.36 (2006-08-10)
 	.- [change] 'rails/action_view_support.rb' is renamed to 'helper/rails.rb'
 	.- [update] users-guide updated

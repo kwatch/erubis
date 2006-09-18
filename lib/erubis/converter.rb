@@ -162,7 +162,7 @@ module Erubis
       return [
               [:trim,      true,   "trim spaces around <% ... %>"],
               [:pi,        'rb',   "PI (Processing Instrunctions) name"],
-              [:prefix,    '$',    "prefix char of expression pattern('${...}')"],
+              [:embchar,   '@',    "char for embedded expression pattern('@{...}@')"],
               [:pattern,  '<% %>', "embed pattern"],
              ]
     end
@@ -173,7 +173,7 @@ module Erubis
       super(properties)
       @trim    = !(properties[:trim] == false)
       @pi      = properties[:pi] if properties[:pi]
-      @prefix  = properties[:prefix]  || '$'
+      @embchar = properties[:embchar]  || '@'
       @pattern = properties[:pattern]
       @pattern = '<% %>' if @pattern.nil?  #|| @pattern == true
     end
@@ -186,8 +186,8 @@ module Erubis
     protected
 
     def convert_input(codebuf, input)
-      #parse_stmts(codebuf, input)
-      parse_stmts2(codebuf, input)
+      parse_stmts(codebuf, input)
+      #parse_stmts2(codebuf, input)
     end
 
     def parse_stmts(codebuf, input)
@@ -215,12 +215,12 @@ module Erubis
 
     def parse_exprs(codebuf, input)
       unless @expr_pattern
-        ch = Regexp.escape(@prefix)
+        ch = Regexp.escape(@embchar)
         if @pattern
           left, right = @pattern.split(' ')
-          @expr_pattern = /#{ch}(!*)?\{(.*?)\}|#{left}(=+)(.*?)#{right}/
+          @expr_pattern = /#{ch}(!*)?\{(.*?)\}#{ch}|#{left}(=+)(.*?)#{right}/
         else
-          @expr_pattern = /#{ch}(!*)?\{(.*?)\}/
+          @expr_pattern = /#{ch}(!*)?\{(.*?)\}#{ch}/
         end
       end
       pos = 0
@@ -250,11 +250,11 @@ module Erubis
 
     def add_pi_expr(codebuf, code, indicator)  # :nodoc:
       case indicator
-      when  nil, '', '=='    # ${...} or <%== ... %>
+      when  nil, '', '=='    # @{...}@ or <%== ... %>
         @escape == false ? add_expr_literal(codebuf, code) : add_expr_escaped(codebuf, code)
-      when  '!', '='         # $!{...} or <%= ... %>
+      when  '!', '='         # @!{...}@ or <%= ... %>
         @escape == false ? add_expr_escaped(codebuf, code) : add_expr_literal(codebuf, code)
-      when  '!!', '==='      # $!!{...} or <%=== ... %>
+      when  '!!', '==='      # @!!{...}@ or <%=== ... %>
         add_expr_debug(codebuf, code)
       else
         # ignore
@@ -266,12 +266,12 @@ module Erubis
       #regexp = pattern_regexp(@pattern)
       @pi ||= 'e'
       unless @embedded_pattern
-        ch = Regexp.escape(@prefix)
+        ch = Regexp.escape(@embchar)
         if @pattern
           left, right = @pattern.split(' ')
-          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}|#{left}(=+)(.*?)#{right}/m
+          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}#{ch}|#{left}(=+)(.*?)#{right}/m
         else
-          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}/m
+          @embedded_pattern = /(^[ \t]*)?<\?#{@pi}(?:-(\w+))?(\s.*?)\?>([ \t]*\r?\n)?|#{ch}(!*)?\{(.*?)\}#{ch}/m
         end
       end
       pos = 0

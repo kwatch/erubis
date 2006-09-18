@@ -942,7 +942,7 @@ __END__
   input: &input_pi1|
       <ul>
        <?rb for item in @list ?>
-        <li>${item} / $!{item}</li>
+        <li>@{item}@ / @!{item}@</li>
         <li><%= item %> / <%== item %></li>
        <?rb end ?>
       </ul>
@@ -993,12 +993,12 @@ __END__
 ##
 - name:  pi3
   class:  PI::Eruby
-  options: { :pi: hoge, :prefix: '@' }
+  options: { :pi: hoge, :embchar: '$' }
   testopt:  evaluate
   input: |
       <ul>
        <?hoge for item in @list ?>
-        <li>@{item} / @!{item}</li>
+        <li>${item}$ / $!{item}$</li>
         <li><%= item %> / <%== item %></li>
        <?hoge end ?>
       </ul>

@@ -79,7 +79,7 @@ END
 <ul>
   <?rb @list = ['<aaa>', 'b&b', '"ccc"']
    for item in @list ?>
-  <li>${item} / $!{item}
+  <li>@{item}@ / @!{item}@
       <%= item %> / <%== item %></li>
   <?rb end ?>
 <ul>
@@ -491,7 +491,7 @@ END
   def test_pi6  # --pi -xl java
     @input = <<'END'
 <?java for (int i = 0; i < arr.length; i++) { ?>
-  - ${arr[i]} / $!{arr[i]}
+  - @{arr[i]}@ / @!{arr[i]}@
 <?java } ?>
 END
     @expected = <<'END'

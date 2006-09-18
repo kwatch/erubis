@@ -308,14 +308,14 @@ END
     def untabify(str, width=8)
       list = str.split(/\t/)
       last = list.pop
-      buf = []
+      sb = ''
       list.each do |s|
         column = (n = s.rindex(?\n)) ? s.length - n - 1 : s.length
         n = width - (column % width)
-        buf << s << (" " * n)
+        sb << s << (' ' * n)
       end
-      buf << last
-      return buf.join
+      sb << last
+      return sb
     end
     #--
     #def untabify(str, width=8)
