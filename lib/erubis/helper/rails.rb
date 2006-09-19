@@ -59,12 +59,15 @@ module Erubis
 
       def initialize(view)
         @view = view
-        @@engine_instance = @@engine_class.new(nil, @@default_properties)
+        #@@engine_instance ||= @@engine_class.new(nil, @@default_properties)
       end
 
 
       def convert(template)
-        code = @@engine_instance.convert(template)
+        #code = @@engine_instance.convert(template)
+        #return code
+        engine = @@engine_class.new(nil, @@default_properties)
+        code = engine.convert(template)
         return code
       end
 
@@ -74,8 +77,7 @@ module Erubis
         code = convert(template)
 
         ## use @view as context object
-        @view.__send__(:evaluate_assigns)
-        #or @view.instance_eval("evaluate_assigns()")
+        @view.__send__(:evaluate_assigns)  #or @view.instance_eval("evaluate_assigns()")
         context = @view
 
         ## evaluate ruby code with context object

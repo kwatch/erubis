@@ -1482,7 +1482,7 @@ If you don't need any enhancements of Erubis and only require simple eRuby imple
 try TinyEruby class.
 
 
-.$$ Rails Support	| topics-rails
+.$$ Ruby on Rails Support	| topics-rails
 
 Erubis supports Ruby on Rails.
 Add the following code to your 'app/controllers/application.rb'.
@@ -1491,12 +1491,28 @@ Add the following code to your 'app/controllers/application.rb'.
 .--------------------
 require 'erubis/helper/rails'
 suffix = 'erubis' 
-ActionView::Base.register_template_handler("erubis", Erubis::Helper::RailsTemplate)
+ActionView::Base.register_template_handler(suffix, Erubis::Helper::RailsTemplate)
 #Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
 #Erubis::Helper::RailsTemplate.default_properties = { :escape=>true, :escapefunc=>'h' }
 .--------------------
 
 If you specify Erubis::Helper::CachedRailsTemplate class instead of Erubis::Helper::RailsTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
+
+You may got the followign error:
+.--------------------
+(eval):10:in `render': no block given
+.--------------------
+
+It is because layout file scaffold created contains 'yield' method.
+Use '@content_for_layout' instead 'yield'.
+
+.? app/views/layouts/xxx.erubis
+.--------------------
+  ...
+  <%{{*#*}}= yield %>
+  {{*<%= @content_for_layout %>*}}
+  ...
+.--------------------
 
 
 

@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.38 (2006-09-19)
+	.- [update] ReleaseNote.txt, README.txt, doc/users-guide.txt
+	.- [change] 'examples/pi' is renamed to 'examples/pi-xhtml'
+
 .: Rev.37 (2006-09-19)
 	.- [change] embedded expr pattern of piengine is changed from '${...}' to '@{...}@'
 	.- [update] users-guide.txt updated

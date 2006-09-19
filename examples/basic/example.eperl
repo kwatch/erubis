@@ -9,7 +9,7 @@
     <% for $item (@list) { %>
     <tr bgcolor=<%= ++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' %>">
       <td><%= $i %></td>
-      <td><%= $item %></td>
+      <td><%== $item %></td>
     </tr>
     <% } %>
   </tbody>

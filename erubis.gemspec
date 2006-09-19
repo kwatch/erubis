@@ -18,13 +18,17 @@ spec = Gem::Specification.new do |s|
   s.summary     = "a fast and extensible eRuby implementation which supports multi-language"
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
-  * Very fast (about three times faster than ERB)
+
+  * Very fast, almost three times faster than ERB and even as fast as eruby.
   * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+  * Auto escaping support
   * Auto trimming spaces around '<% %>'
-  * Auto sanitizing
-  * Change embedded pattern (default '<% %>')
-  * Context object available
-  * Easy to expand in subclass
+  * Embedded pattern changeable (default '<% %>')
+  * Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
+  * Context object available and easy to combine eRuby template with YAML datafile
+  * Print statement available
+  * Easy to extend and customize in subclass
+  * Ruby on Rails support
   END
 
   ## files

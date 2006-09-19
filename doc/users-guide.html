@@ -127,7 +127,7 @@ It has the following features.
   <ul>
     <li><a href="#topics-tinyeruby">TinyEruby class</a>
     </li>
-    <li><a href="#topics-rails">Rails Support</a>
+    <li><a href="#topics-rails">Ruby on Rails Support</a>
     </li>
     <li><a href="#topics-php">NoTextEnhancer and NoCodeEnhancer in PHP</a>
     </li>
@@ -1881,7 +1881,7 @@ try TinyEruby class.
 
 
 <a name="topics-rails"></a>
-<h3 class="section2">Rails Support</h3>
+<h3 class="section2">Ruby on Rails Support</h3>
 <p>Erubis supports Ruby on Rails.
 Add the following code to your 'app/controllers/application.rb'.
 </p>
@@ -1889,12 +1889,26 @@ Add the following code to your 'app/controllers/application.rb'.
 app/controllers/application.rb</div>
 <pre class="program">require 'erubis/helper/rails'
 suffix = 'erubis' 
-ActionView::Base.register_template_handler("erubis", Erubis::Helper::RailsTemplate)
+ActionView::Base.register_template_handler(suffix, Erubis::Helper::RailsTemplate)
 #Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
 #Erubis::Helper::RailsTemplate.default_properties = { :escape=&gt;true, :escapefunc=&gt;'h' }
 </pre>
 <p>If you specify Erubis::Helper::CachedRailsTemplate class instead of Erubis::Helper::RailsTemplate class, template string is cached in memory (but template is not reloaded when it is modified).
 </p>
+<p>You may got the followign error:
+</p>
+<pre class="program">(eval):10:in `render': no block given
+</pre>
+<p>It is because layout file scaffold created contains 'yield' method.
+Use '@content_for_layout' instead 'yield'.
+</p>
+<div class="program_caption">
+app/views/layouts/xxx.erubis</div>
+<pre class="program">  ...
+  &lt;%<strong>#</strong>= yield %&gt;
+  <strong>&lt;%= @content_for_layout %&gt;</strong>
+  ...
+</pre>
 <br>
 
 
