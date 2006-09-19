@@ -1,4 +1,4 @@
-<%
+<?java
 import java.util.*;
 
 public class example {
@@ -7,19 +7,19 @@ public class example {
     String user = "Erubis";
     String[] list = { "<aaa>", "b&b", "\"ccc\"" };
     StringBuffer _buf = new StringBuffer();
-%>
-<p>Hello <%== user %>!</p>
+?>
+<p>Hello @{user}@!</p>
 <table>
   <tbody>
-    <% for (int i = 0; i < list.length; i++) { %>
-    <tr bgcolor="<%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %>">
-      <td><%= i + 1 %></td>
-      <td><%== list[i] %></td>
+    <?java for (int i = 0; i < list.length; i++) { ?>
+    <tr bgcolor="@{i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"}@">
+      <td>@!{i + 1}@</td>
+      <td>@{list[i]}@</td>
     </tr>
-    <% } %>
+    <?java } ?>
   </tbody>
 </table>
-<%
+<?java
     System.out.print(_buf.toString());
   }
 
@@ -42,4 +42,4 @@ public class example {
     return Integer.toString(i);
   }
 }
-%>
+?>

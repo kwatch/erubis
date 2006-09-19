@@ -22,31 +22,31 @@ example.scm:  example.escheme
 example.pl:   example.eperl
 	erubis -l perl example.eperl > example.pl
 
-example.js:   example.ejavascript
-	erubis -l javascript example.ejavascript > example.js
+example.js:   example.ejs
+	erubis -l javascript example.ejs > example.js
 
 
 ###----------
 
-src = example.eruby example.ephp example.ec example.ejava example.escheme example.eperl example.ejavascript Makefile
+src = example.eruby example.ephp example.ec example.ejava example.escheme example.eperl example.ejs Makefile
 
 clean:
 	rm -f `ruby -e 'puts(Dir.glob("*.*") - %w[$(src)])'`
 #	rm -f $(all)
 
-compile:  a.out example.class
+compile:  example.bin example.class
 
-a.out:   example.c
-	cc example.c
+example.bin:   example.c
+	cc -o example.bin example.c
 
 example.class:  example.java
 	jikes example.java
 
-output:  $(all) a.out example.class
+output:  $(all) example.bin example.class
 	erubis example.eruby > example.ruby.out
 	php example.php > example.php.out
-	./a.out foo bar baz > example.c.out
-	java example > example.java.out
+	./example.bin '<aaa>' 'b&b' '"ccc"' > example.c.out
+	java example > example.javexample.bin
 	gosh example.scm > example.scm.out
 #	guile example.scm > example.scm.out
 	perl example.pl > example.pl.out

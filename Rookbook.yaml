@@ -11,7 +11,7 @@ properties:
 parameters:
   - project    :  erubis
   - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
-  - text_files :  [ChangeLog, README.txt, COPYING, setup.rb, erubis.gemspec]
+  - text_files :  [ChangeLog, README.txt, LGPL, setup.rb, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]
   - apidocdir  :  doc-api
@@ -23,7 +23,7 @@ parameters:
   - base       :  $(project)_$(release)
   - base2      :  $(project)-$(release)
   #
-  - exclude_libs : [piengine.rb, evaluator.rb]
+  - exclude_libs : [ ]   # [cache.rb]
 
 
 recipes:
@@ -113,6 +113,7 @@ recipes:
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#
+	#store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir
 	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)
 	  !exclude_libs.include?(base)
@@ -122,6 +123,8 @@ recipes:
 	#
 	Dir.glob('examples/*').each { |d| chdir d do sys 'make clean' end }
 	store 'examples/**/*', dir
+	f = "#{dir}/examples/pi-xhtml"
+	rm_rf f if test(?e, f)
 	#
 	store '$(apidocdir)/**/*', dir
 	#

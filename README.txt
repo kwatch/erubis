@@ -76,8 +76,9 @@ Try 'ruby erubybenchmark.rb' in benchmark directory.
 
 == License
 
-LGPL
+LGPL version 2.1
 
+If you need looser license, please suggest me.
 
 
 == Author

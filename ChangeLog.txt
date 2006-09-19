@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.39 (2006-09-19)
+	.- [update] doc/users-guide.txt: add documentation about 'notext' command
+	.- [update] release preparation
+	.- [enhance] add 'examples/pi'
+
 .: Rev.38 (2006-09-19)
 	.- [update] ReleaseNote.txt, README.txt, doc/users-guide.txt
 	.- [change] 'examples/pi' is renamed to 'examples/pi-xhtml'

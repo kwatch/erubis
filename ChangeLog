@@ -2,6 +2,150 @@
 # $Release$
 # $Copyright$
 
+
+#
+- release:   2.1.0
+  date:      2006-09-23
+  enhances:
+    - |
+      Ruby on Rails support. Add the following code to
+      your 'app/controllers/application.rb' and restart web server.
+      
+      --------------------
+      require 'erubis/helper/rails'
+      suffix = 'erubis' 
+      ActionView::Base.register_template_handler(suffix, Erubis::Helper::RailsTemplate)
+      #Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## or Erubis::PI::Eruby
+      #Erubis::Helper::RailsTemplate.default_properties = { :escape=>true, :escapefunc=>'h' }
+      --------------------
+      
+      And rename your view template as 'xxx.erubis'.
+      If you got the "(eval):10:in `render': no block given" error,
+      use '@content_for_layout' instead 'yield' in your layout template.
+
+    - |
+      Another eRuby engine (PIEngine) support. This engine doesn't
+      break HTML design because it uses Processing Instructions (PI)
+      '<?rb .. ?>' as embedded pattern instead of '<% .. %>'.
+      
+      example.rhtml
+      --------------------
+      <table>
+      <?rb @list.each_with_index do |item, i| ?>
+      <?rb   klass = i % 2 == 0 ? 'odd' : 'even' ?>
+        <tr class="@{klass}@">
+          <td>@!{item}@</td>
+        </tr>
+      <?rb end ?>
+      </table>
+      --------------------
+      
+      compile:
+      ====================
+      $ erubis -x --pi example.rhtml
+      _buf = []; _buf << '<table>
+      '; @list.each_with_index do |item, i| 
+         klass = i % 2 == 0 ? 'odd' : 'even' 
+       _buf << '  <tr class="'; _buf << Erubis::XmlHelper.escape_xml(klass); _buf << '">
+          <td>'; _buf << (item).to_s; _buf << '</td>
+        </tr>
+      '; end 
+       _buf << '</table>
+      ';
+      _buf.join
+      ====================
+ 
+    - |
+      Add new command 'notext' which remove text part from eRuby
+      script and leaves only Ruby code.
+      This is very useful for debug of eRuby script.
+      
+      example2.rhtml
+      --------------------
+      <html>
+       <body>
+        <table>
+      <% @list.each_with_index do |item, i| %>
+      <%   klass = i % 2 == 0 ? 'odd' : 'even' %>
+         <tr class="<%= klass %>">
+          <td><%== item %></td>
+         </tr>
+      <% end %>
+        </table>
+       </body>
+      </html>
+      --------------------
+      
+      command line example:
+      ====================
+      $ notext example2.rhtml
+      _buf = [];
+      
+      
+       @list.each_with_index do |item, i| ;
+         klass = i % 2 == 0 ? 'odd' : 'even' ;
+                     _buf << ( klass ).to_s;
+               _buf << Erubis::XmlHelper.escape_xml( item );
+      
+       end ;
+      
+      
+      
+      _buf.join
+      $ notext -nc example2.rhtml
+        1: _buf = [];
+        4:  @list.each_with_index do |item, i| ;
+        5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+        6:                _buf << ( klass ).to_s;
+        7:          _buf << Erubis::XmlHelper.escape_xml( item );
+        9:  end ;
+       13: _buf.join
+      ====================
+ 
+    - |
+      Add new enhance 'NoCode' which removes ruby code from
+      eRuby script and leaves only HTML text part.
+      It is very useful to validate HTML of eRuby script.
+      
+      command-line example:
+      ====================
+      $ erubis -x -E NoCode example2.rhtml
+      <html>
+       <body>
+        <table>
+      
+      
+         <tr class="">
+          <td></td>
+         </tr>
+      
+        </table>
+       </body>
+      </html>
+      ====================
+
+  changes:
+    - License is changed to LGPL.
+    - Command-line property '--escape=name' is renamed to
+      '--escapefunc=name'.
+    - When command-line option '-l perl' is specified, function
+      'encode_entities()' is used ad escaping function which is
+      available wth HTML::Entities module.
+
+  bugfix:
+    - There is a certain pattern which makes Engine#convert()
+      too slow. Now Engne#convert() is fixed not to be slown.
+    - Command name is now displayed when '-h' is specified.
+
+
+#
+- release:   2.0.1
+  date:      2006-06-21
+  bugfix:
+    - some minor bugs are fixed
+
+
+#
 - release:   2.0.0
   date:      2006-05-20
   changes:
@@ -34,6 +178,8 @@
     - command-line option '-S' (string to symbol) added
     - command-line option '-B' (call result(binding())) added
 
+
+#
 - release:   1.1.0
   date:      2006-03-05
   enhances:
@@ -45,6 +191,8 @@
   bugfixes:
     - bin/erubis is available with RubyGems
 
+
+#
 - release:   1.0.0
   date:      2006-02-01
   bugfixes:

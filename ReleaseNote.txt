@@ -22,9 +22,7 @@ See users' guide (erubis_2.1.0/doc/users-guide.html)
 for details.
 
 
-Changes from 2.0:
-
-  * License is changed to LGPL.
+Enhancements from 2.0:
 
   * Ruby on Rails support. Add the following code to
     your 'app/controllers/application.rb' and restart web server.
@@ -74,7 +72,7 @@ Changes from 2.0:
  
   * Add new command 'notext' which remove text part from eRuby
     script and leaves only Ruby code.
-    This is very useful for debug of eRuby script.
+    This is very useful when debugging eRuby script.
  
     example2.rhtml
     --------------------
@@ -138,7 +136,12 @@ Changes from 2.0:
      </body>
     </html>
     ====================
+
+
+Changes from 2.0:
  
+  * License is changed to LGPL.
+
   * Command-line property '--escape=name' is renamed to
     '--escapefunc=name'.
  
@@ -152,6 +155,11 @@ Bugfix:
     too slow. Now Engne#convert() is fixed not to be slown.
   * Command name is now displayed when '-h' is specified.
 
+
+Have fun!
+
+--
+kwa
 
 
 $ [ANN] Erubis 2.0.1 release - a fast eRuby implementation

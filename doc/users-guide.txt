@@ -1566,6 +1566,104 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 
 
 
+.$$ Command {{,notext,}}  | topics-notext
+
+Command 'notext' removes text part from eRuby script and leaves only embedded Ruby code.
+This is very useful when debugging eRuby script.
+ 
+
+.? notext-ex.rhtml
+--------------------
+<html>
+ <body>
+  <table>
+<% @list.each_with_index do |item, i| %>
+<%   klass = i % 2 == 0 ? 'odd' : 'even' %>
+   <tr class="<%= klass %>">
+    <td><%== item %></td>
+   </tr>
+<% end %>
+  </table>
+ </body>
+</html>
+--------------------
+ 
+.? command line example
+====================
+$ notext notext-ex.rhtml
+_buf = [];
+
+
+ @list.each_with_index do |item, i| ;
+   klass = i % 2 == 0 ? 'odd' : 'even' ;
+               _buf << ( klass ).to_s;
+         _buf << Erubis::XmlHelper.escape_xml( item );
+
+ end ;
+
+
+_buf.join
+.====================
+
+Command-line option '-u' deletes continuous empty lines to one empty line.
+
+.? command-line example
+.====================
+$ notext {{*-u*}} notext-ex.rhtml
+_buf = [];
+
+ @list.each_with_index do |item, i| ;
+   klass = i % 2 == 0 ? 'odd' : 'even' ;
+               _buf << ( klass ).to_s;
+         _buf << Erubis::XmlHelper.escape_xml( item );
+
+ end ;
+
+_buf.join
+.====================
+
+Command-line option '-c' deletes all empty lines.
+
+.? command-line example
+.====================
+$ notext {{*-c*}} notext-ex.rhtml
+_buf = [];
+ @list.each_with_index do |item, i| ;
+   klass = i % 2 == 0 ? 'odd' : 'even' ;
+               _buf << ( klass ).to_s;
+         _buf << Erubis::XmlHelper.escape_xml( item );
+ end ;
+_buf.join
+.====================
+
+Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
+
+.====================
+$ notext {{*-nu*}} example2.rhtml
+  1: _buf = [];
+
+  4:  @list.each_with_index do |item, i| ;
+  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  6:                _buf << ( klass ).to_s;
+  7:          _buf << Erubis::XmlHelper.escape_xml( item );
+
+  9:  end ;
+
+ 13: _buf.join
+$ notext {{*-nc*}} example2.rhtml
+  1: _buf = [];
+  4:  @list.each_with_index do |item, i| ;
+  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  6:                _buf << ( klass ).to_s;
+  7:          _buf << Erubis::XmlHelper.escape_xml( item );
+  9:  end ;
+ 13: _buf.join
+====================
+
+Command 'notext' supports '-l {{/lang/}}' options. For example, command-line option '-l php' retrieves embedded PHP code from PHP file.
+
+
+
 .$$ Benchmark		| topics-benchmark
 
 A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
