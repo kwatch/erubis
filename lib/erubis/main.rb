@@ -179,7 +179,7 @@ module Erubis
     def usage
       command = File.basename($0)
       s = <<END
-erubis - embedded program convertr for multi-language
+erubis - embedded program converter for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version

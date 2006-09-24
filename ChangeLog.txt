@@ -2,7 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-.: Rev.40 (2006-09-23)
+
+.: Rev.41 (2006-09-24)
+	.- [bugfix] main.rb: typo fixed
+
+.: Rev.40 (2006-09-24)
 	.- [enhance] engine/eperl.rb: add 'use HTML::Entities;' to add_preamble()
 	.- [update] website updated
 
