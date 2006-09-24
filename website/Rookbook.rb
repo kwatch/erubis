@@ -1,7 +1,7 @@
 U = 'users-guide' unless defined?(U)
 docdir = '../doc'
 #website_tagfile = 'kuwata-lab'
-website_tagfile = 'xhtml-css'
+website_tagfile = 'site-design.ktag'
 html_tagfile    = 'html-css_i'
 
 material 'index.txt'

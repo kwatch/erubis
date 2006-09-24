@@ -1791,7 +1791,7 @@ example.eprl</div>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -l perl example.eperl
-
+use HTML::Entities; 
    my $user = 'Erubis';
    my @list = ('&lt;aaa&gt;', 'b&amp;b', '"ccc"');
 
@@ -1816,9 +1816,9 @@ print('  &lt;/table&gt;
 
 <a name="lang-javascript"></a>
 <h3 class="section2">JavaScript</h3>
-<p>example.ejs
-</p>
 <a name="example.ejs"></a>
+<div class="program_caption">
+example.ejs</div>
 <pre class="program"><strong>&lt;%
    var user = 'Erubis';
    var list = ['&lt;aaa&gt;', 'b&amp;b', '"ccc"'];
@@ -2004,8 +2004,12 @@ example of using NoCodeEnhancer with PHP file</div>
 <p>Command 'notext' removes text part from eRuby script and leaves only embedded Ruby code.
 This is very useful when debugging eRuby script.
 </p>
-<p>--------------------
-&lt;html&gt;
+<div class="program_caption">
+notext-ex.rhtml</div>
+<pre class="program">&lt;html&gt;
+ &lt;head&gt;
+  &lt;title&gt;notext example&lt;/title&gt;
+ &lt;/head&gt;
  &lt;body&gt;
   &lt;table&gt;
 &lt;% @list.each_with_index do |item, i| %&gt;
@@ -2017,44 +2021,47 @@ This is very useful when debugging eRuby script.
   &lt;/table&gt;
  &lt;/body&gt;
 &lt;/html&gt;
---------------------
-</p>
-<p>====================
-$ notext notext-ex.rhtml
+</pre>
+<div class="terminal_caption">
+command line example</div>
+<pre class="terminal">$ notext notext-ex.rhtml
 _buf = [];
-</p>
-<p> @list.each_with_index do |item, i| ;
+
+
+
+
+
+ @list.each_with_index do |item, i| ;
    klass = i % 2 == 0 ? 'odd' : 'even' ;
                _buf &lt;&lt; ( klass ).to_s;
          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-</p>
-<p> end ;
-</p>
-<p>_buf.join
-</p>
-<pre class="terminal">
-Command-line option '-u' deletes continuous empty lines to one empty line.
 
-.? command-line example
+ end ;
+
+
+_buf.join
 </pre>
-<p>$ notext <strong>-u</strong> notext-ex.rhtml
-_buf = [];
+<p>Command-line option '-u' deletes continuous empty lines to one empty line.
 </p>
-<p> @list.each_with_index do |item, i| ;
+<div class="terminal_caption">
+command-line example</div>
+<pre class="terminal">$ notext <strong>-u</strong> notext-ex.rhtml
+_buf = [];
+
+ @list.each_with_index do |item, i| ;
    klass = i % 2 == 0 ? 'odd' : 'even' ;
                _buf &lt;&lt; ( klass ).to_s;
          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-</p>
-<p> end ;
-</p>
-<p>_buf.join
-</p>
-<pre class="terminal">
-Command-line option '-c' deletes all empty lines.
 
-.? command-line example
+ end ;
+
+_buf.join
 </pre>
-<p>$ notext <strong>-c</strong> notext-ex.rhtml
+<p>Command-line option '-c' deletes all empty lines.
+</p>
+<div class="terminal_caption">
+command-line example</div>
+<pre class="terminal">$ notext <strong>-c</strong> notext-ex.rhtml
 _buf = [];
  @list.each_with_index do |item, i| ;
    klass = i % 2 == 0 ? 'odd' : 'even' ;
@@ -2062,32 +2069,29 @@ _buf = [];
          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
  end ;
 _buf.join
-</p>
-<pre class="terminal">
-Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
-
 </pre>
-<p>$ notext <strong>-nu</strong> example2.rhtml
+<p>Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
+</p>
+<pre class="terminal">$ notext <strong>-nu</strong> example2.rhtml
   1: _buf = [];
-</p>
-<p>  4:  @list.each_with_index do |item, i| ;
-  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  6:                _buf &lt;&lt; ( klass ).to_s;
-  7:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-</p>
-<p>  9:  end ;
-</p>
-<p> 13: _buf.join
+
+  7:  @list.each_with_index do |item, i| ;
+  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  9:                _buf &lt;&lt; ( klass ).to_s;
+ 10:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
+
+ 12:  end ;
+
+ 16: _buf.join
 $ notext <strong>-nc</strong> example2.rhtml
   1: _buf = [];
-  4:  @list.each_with_index do |item, i| ;
-  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  6:                _buf &lt;&lt; ( klass ).to_s;
-  7:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-  9:  end ;
- 13: _buf.join
-====================
-</p>
+  7:  @list.each_with_index do |item, i| ;
+  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  9:                _buf &lt;&lt; ( klass ).to_s;
+ 10:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
+ 12:  end ;
+ 16: _buf.join
+</pre>
 <p>Command 'notext' supports '-l <em>lang</em>' options. For example, command-line option '-l php' retrieves embedded PHP code from PHP file.
 </p>
 <br>
@@ -2236,6 +2240,11 @@ Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
 -B		   </b></dt>
   <dd class="dd3">
   	invoke Eruby#result() instead of Eruby#evaluate()
+  </dd>
+  <dt class="dt3"><b>
+--pi[=name]   </b></dt>
+  <dd class="dd3">
+  	parse '&lt;?name ... ?&gt;' instead of '&lt;% ... %&gt;'
   </dd>
   </dl>
 <br>

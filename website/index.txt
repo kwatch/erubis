@@ -1,10 +1,12 @@
 .=title:	Erubis
 .#.?lastupdate:	$Date$
-.?stylesheet:	docstyle.css
+.#.?stylesheet:	docstyle.css
+.#.?stylesheet:	site-design.css
 
 
 .$ News
 
+.* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
 .* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
 .* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
 .#.* [2006-05-20] {{<erubis_2.0.0|http://rubyforge.org/projects/erubis/>}} released.
@@ -13,47 +15,45 @@
 
 .$ Introduction
 
-.#.+++++
-.#<p></p>   <!-- escape IE Bug -->
-.#<table style="float:right; width:424px; margin:0px 0px 10px 10px">
-.# <tr>
-.#  <td style="padding:10px 0px 0px 0px">
-.#  Fig1. Business layer and presentation layer have their own data and logic.
-.#  </td>
-.# </tr>
-.# <tr>
-.#  <td style="border-width:1px; border-style:solid; border-color:#999999">
-.#   <img src="img/fig02.png" alt="figure of kwartz"/>
-.#  </td>
-.# </tr>
-.# <tr>
-.#  <td style="padding:20px 0px 0px 0px">
-.#  Fig2. Kwartz vs. Other template system: Kwartz separates presentation logic from presentaion data(=HTML).
-.#  </td>
-.# </tr>
-.# <tr>
-.#  <td style="border-width:1px; border-style:solid; border-color:#999999">
-.#   <img src="img/fig03.png" alt="figure of kwartz"/>
-.#  </td>
-.# </tr>
-.#</table>
-.#.+++++
+.+++++
+<p></p>   <!-- escape IE Bug -->
+<table class="fig-entry" summary="">
+ <tr>
+  <td class="fig-caption">
+  Fig: Erubis is the fastest eRuby implementation.
+  </td>
+ </tr>
+ <tr>
+  <td class="fig-body">
+   <img src="img/erubis01.png" alt="figure of Erubis" />
+  </td>
+ </tr>
+</table>
+.+++++
 
-Erubis is a pure Ruby implementation of eRuby.
+Erubis is a fast, secure, and very extensible implementation of eRuby.
 It has the following features.
-.* Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
-.* Auto escaping (sanitizing) support
-.* Auto trimming spaces around '<% %>'
-.* Embedded pattern changeable (default '<% %>')
-.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* Very fast, almost three times faster than ERB and even faster than eruby (implemented in C).
+.* Auto escaping (sanitizing) support, it means that '<%= %>' can be escaped in default.
+   It is desirable for web application.
+.* Spaces around '<% %>' are trimmed automatically only when '<%' is at the beginning of line and '%>' is at the end of line.
+.* Embedded pattern changeable (default '<% %>'), for example '[% %]' or '<? ?>' are available.
+.* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>').
+   This is desirable for XML/HTML than '<% .. %>' because the latter breaks HTML design
+   but the former doesn't.
+.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript).
 .* Context object available and easy to combine eRuby template with YAML datafile
-.* Easy to expand in subclass, for example:
+   (see the below example).
+.* Print statement available.
+.* Easy to expand and customize in subclass
   .- Print statement support
   .- Lines starting with percent character ('%') support
   .- Another embedded pattern support
   .- etc...
+.* Ruby on Rails support.
 
-eRuby is "embedded Ruby" in documents.
+eRuby means "embedded Ruby" in documents.
+Embedded patterns are '{{,<% {{/statement/}} %>,}}' and '{{,<%= {{/expression/}} %>,}}'.
 The following is an example of eRuby. '<% ... %>' means Ruby statement and '<%= ... %>' means Ruby expression.
 
 .? example.eruby
@@ -88,9 +88,15 @@ list:
 .--------------------
 .#---
 
+.#In addition, Erubis supports '{{,<?rb {{/statement/}} ?>,}}' and '{{,@{{{/expression/}}}@,}}' which is more desirable for XML/HTML than ordinaly pattern because they don't break HTML desgin.
+.#The following is an example of '{{,<?rb ?>,}}' and '{{,@{ }@,}}'.
 
-Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
-You can embed these language code into your document and compile it into target program code.
+.#Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
+.#You can embed these language code into your document and compile it into target program code.
+
+.#Erubis is implemented in Ruby and is now ported into Java.
+.#You can use Erubis in Java with Rhino.
+
 
 
 .$ Download
@@ -103,9 +109,9 @@ You can embed these language code into your document and compile it into target 
 	.#.* {{<README|README.en.html>}}
 	.* {{<Users' guide|users-guide.html>}}
 	.* {{<Changelog|ChangeLog>}}
+	.* {{<ReleaseNote|ReleaseNote.txt>}}
 
 .$ License
-	.* {{<GNU General Public License ver.2|http://www.gnu.org/copyleft/gpl.html>}}
+	.* {{<LGPL ver.2|http://www.gnu.org/copyleft/lgpl.html>}}
 	   
-	   If you need looser license, please contact me.
-
+	   If you need other license, please suggest me.

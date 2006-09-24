@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+.: Rev.40 (2006-09-23)
+	.- [enhance] engine/eperl.rb: add 'use HTML::Entities;' to add_preamble()
+	.- [update] website updated
+
 .: Rev.39 (2006-09-19)
 	.- [update] doc/users-guide.txt: add documentation about 'notext' command
 	.- [update] release preparation

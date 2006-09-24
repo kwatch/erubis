@@ -27,7 +27,7 @@ module Erubis
     end
 
     def add_preamble(src)
-      # empty
+      src << "use HTML::Entities; ";
     end
 
     def escape_text(text)

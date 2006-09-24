@@ -1439,7 +1439,7 @@ $ erubis -l perl example.eperl
 
 .$$ JavaScript	| lang-javascript
 
-example.ejs
+.? example.ejs
 .-------------------- example.ejs
 {{*<%
    var user = 'Erubis';
@@ -1566,15 +1566,235 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 
 
 
+.#
+.#.$$ Command 'notext'    | cmd-notext
+.#
+.#Command 'notext' is a utility to extract only program code from eRuby/PHP/ePerl script.
+.#It is an application of NoTextEnhancer.
+.#
+.#For example, see the following eRuby script.
+.#This is some complex, so it is difficult to grasp the program code.
+.#
+.#.? ex-notext.rhtml
+.#.-------------------- ex-notext.rhtml
+.#<?xml version="1.0" encoding="UTF-8"?>
+.#<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+.#          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+.#<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+.#  <body>
+.#    <h3>List</h3>
+.#    <% if @list.nil? || @list.empty? %>
+.#    <p>not found.</p>
+.#    <% else %>
+.#    <table>
+.#      <tbody>
+.#        <% @list.each_with_index do |item, i| %>
+.#        <tr bgcolor="<%= i % 2 == 0 ? '#FCC' : '#CCF' %>">
+.#          <td><%= item %></td>
+.#        </tr>
+.#        <% end %>
+.#      </tbody>
+.#    </table>
+.#    <% end %>
+.#  </body>
+.#</html>
+.#.--------------------
+.#
+.#Command 'notext' extracts the ruby code from eRuby script.
+.#
+.#.? result
+.#.==================== notext_eruby.output
+.#$ notext ex-notext.rhtml
+.#_buf = [];
+.#
+.#
+.#
+.#
+.#
+.#     if @list.nil? || @list.empty? ;
+.#
+.#     else ;
+.#
+.#
+.#         @list.each_with_index do |item, i| ;
+.#                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+.#               _buf << ( item ).to_s;
+.#
+.#         end ;
+.#
+.#
+.#     end ;
+.#
+.#
+.#_buf.join
+.#.====================
+.#
+.#Option '-c' ({{*c*}}ompact) deletes empty lines.
+.#
+.#.? result
+.#.==================== notext_eruby_c.output
+.#$ notext -c ex-notext.rhtml
+.#_buf = [];
+.#     if @list.nil? || @list.empty? ;
+.#     else ;
+.#         @list.each_with_index do |item, i| ;
+.#                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+.#               _buf << ( item ).to_s;
+.#         end ;
+.#     end ;
+.#_buf.join
+.#.====================
+.#
+.#Option '-u' ({{*u*}}nique) replace some empty lines with a empty line.
+.#
+.#.? result
+.#.==================== notext_eruby_u.output
+.#$ notext -u ex-notext.rhtml
+.#_buf = [];
+.#
+.#     if @list.nil? || @list.empty? ;
+.#
+.#     else ;
+.#
+.#         @list.each_with_index do |item, i| ;
+.#                      _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+.#               _buf << ( item ).to_s;
+.#
+.#         end ;
+.#
+.#     end ;
+.#
+.#_buf.join
+.#.====================
+.#
+.#Option '-n' ({{*n*}}umber) adds line number.
+.#It is available with '-c' or '-n'.
+.#
+.#.? result
+.#.==================== notext_eruby_nu.output
+.#$ notext -nu ex-notext.rhtml
+.#  1: _buf = [];
+.#
+.# 10:      if @list.nil? || @list.empty? ;
+.#
+.# 12:      else ;
+.#
+.# 15:          @list.each_with_index do |item, i| ;
+.# 16:                       _buf << ( i % 2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+.# 17:                _buf << ( item ).to_s;
+.#
+.# 19:          end ;
+.#
+.# 22:      end ;
+.#
+.# 25: _buf.join
+.#.====================
+.#
+.#'notext' is available with PHP or ePerl script.
+.#Language is automatically detected by suffix of filename.
+.#And you can specify language with option '-l' ({{*l*}}anguage).
+.#
+.#.? ex-notext.php
+.#.-------------------- notext_php.input
+.#<?xml version="1.0"?>
+.#<html>
+.#  <body>
+.#    <h3>List</h3>
+.#    <?php if (!$list) { ?>
+.#    <p>not found.</p>
+.#    <?php } else { ?>
+.#    <table>
+.#      <tbody>
+.#        <?php $i = 0; ?>
+.#        <?php foreach ($list as $item) { ?>
+.#        <tr bgcolor="<?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>">
+.#          <td><?php echo $item; ?></td>
+.#        </tr>
+.#        <?php } ?>
+.#      </tbody>
+.#    </table>
+.#    <?php } ?>
+.#  </body>
+.#</html>
+.#.--------------------
+.#
+.#.? result
+.#.==================== notext_php_nu.output
+.#$ notext -nu ex-notext.php
+.#
+.#  5:     <?php if (!$list) { ?>
+.#
+.#  7:     <?php } else { ?>
+.#
+.# 10:         <?php $i = 0; ?>
+.# 11:         <?php foreach ($list as $item) { ?>
+.# 12:                      <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+.# 13:               <?php echo $item; ?>
+.#
+.# 15:         <?php } ?>
+.#
+.# 18:     <?php } ?>
+.#
+.#.====================
+.#
+.#.? ex-notext.eperl
+.#.-------------------- notext_eperl.input
+.#<?xml version="1.0"?>
+.#<html>
+.#  <body>
+.#    <h3>List</h3>
+.#    <? if (!@list) { !>
+.#    <p>not found.</p>
+.#    <? } else { !>
+.#    <table>
+.#      <tbody>
+.#        <? $i = 0; !>
+.#        <? foreach ($item in @list) { !>
+.#        <tr bgcolor="<?= ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF' !>">
+.#          <td><?= $item !></td>
+.#        </tr>
+.#        <? } !>
+.#      </tbody>
+.#    </table>
+.#    <? } !>
+.#  </body>
+.#</html>
+.#.chomp
+.#.--------------------
+.#
+.#.? result
+.#.==================== notext_eperl_nu.output
+.#$ notext -nul eperl ex-notext.eperl
+.#  1: use HTML::Entities; 
+.#
+.#  5:      if (!@list) { 
+.#
+.#  7:      } else { 
+.#
+.# 10:          $i = 0; 
+.# 11:          foreach ($item in @list) { 
+.# 12:                      print(++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'); 
+.# 13:               print($item); 
+.#
+.# 15:          } 
+.#
+.# 18:      } 
+.#
+.#.====================
+.#
+
+
 .$$ Command {{,notext,}}  | topics-notext
 
 Command 'notext' removes text part from eRuby script and leaves only embedded Ruby code.
 This is very useful when debugging eRuby script.
- 
 
 .? notext-ex.rhtml
---------------------
+.--------------------
 <html>
+ <head>
+  <title>notext example</title>
+ </head>
  <body>
   <table>
 <% @list.each_with_index do |item, i| %>
@@ -1586,12 +1806,15 @@ This is very useful when debugging eRuby script.
   </table>
  </body>
 </html>
---------------------
+.--------------------
  
 .? command line example
-====================
+.====================
 $ notext notext-ex.rhtml
 _buf = [];
+
+
+
 
 
  @list.each_with_index do |item, i| ;
@@ -1642,23 +1865,23 @@ Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
 $ notext {{*-nu*}} example2.rhtml
   1: _buf = [];
 
-  4:  @list.each_with_index do |item, i| ;
-  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  6:                _buf << ( klass ).to_s;
-  7:          _buf << Erubis::XmlHelper.escape_xml( item );
+  7:  @list.each_with_index do |item, i| ;
+  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  9:                _buf << ( klass ).to_s;
+ 10:          _buf << Erubis::XmlHelper.escape_xml( item );
 
-  9:  end ;
+ 12:  end ;
 
- 13: _buf.join
+ 16: _buf.join
 $ notext {{*-nc*}} example2.rhtml
   1: _buf = [];
-  4:  @list.each_with_index do |item, i| ;
-  5:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  6:                _buf << ( klass ).to_s;
-  7:          _buf << Erubis::XmlHelper.escape_xml( item );
-  9:  end ;
- 13: _buf.join
-====================
+  7:  @list.each_with_index do |item, i| ;
+  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
+  9:                _buf << ( klass ).to_s;
+ 10:          _buf << Erubis::XmlHelper.escape_xml( item );
+ 12:  end ;
+ 16: _buf.join
+.====================
 
 Command 'notext' supports '-l {{/lang/}}' options. For example, command-line option '-l php' retrieves embedded PHP code from PHP file.
 
@@ -1766,6 +1989,7 @@ erubis [..options..] [{{/file/}} ...]
   .[ -t            ]	Expand tab characters in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
   .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()
+  .[ --pi[=name]   ]	parse '<?name ... ?>' instead of '<% ... %>'
 
 
 

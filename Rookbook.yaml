@@ -138,6 +138,7 @@ recipes:
 	edit "#{dir}/**/*" do |content|
 	  content.gsub!(/\$Release.*?\$/, "$Release: $(1) $")
 	  content.gsub!(/\$Copyright.*?\$/, '$(copyright)')
+	  content
 	end
 	#
 	begin

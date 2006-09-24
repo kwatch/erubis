@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >
 <html xmlns="http://www.w3.org/1999/xhtml">
  <head>
   <meta http-equiv="Content-Type" content="text/xhtml" />
   <title>Erubis</title>
   <meta name="generator" content="kwaser" />
-  <link rel="stylesheet" href="docstyle.css" type="text/css" />
+  <link rel="stylesheet" href="site-design.css" type="text/css" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
  </head>
  <body>
@@ -24,6 +24,8 @@
 <a name="News"></a>
 <h2 class="section">News</h2>
 <ul class="ul1">
+<li>[2006-09-24] <a href="download.cgi">erubis_2.1.0</a> released.
+</li>
 <li>[2006-05-20] <a href="download.cgi">erubis_2.0.0</a> released.
 </li>
 <li>[2006-03-05] <a href="download.cgi">erubis_1.1.0</a> released.
@@ -34,23 +36,44 @@
 
 <a name="Introduction"></a>
 <h2 class="section">Introduction</h2>
-<p>Erubis is a pure Ruby implementation of eRuby.
+<p></p>   <!-- escape IE Bug -->
+<table class="fig-entry" summary="">
+ <tr>
+  <td class="fig-caption">
+  Fig: Erubis is the fastest eRuby implementation.
+  </td>
+ </tr>
+ <tr>
+  <td class="fig-body">
+   <img src="img/erubis01.png" alt="figure of Erubis" />
+  </td>
+ </tr>
+</table>
+<p>Erubis is a fast, secure, and very extensible implementation of eRuby.
 It has the following features.
 </p>
 <ul class="ul1">
-<li>Very fast, almost three times faster than ERB and even as fast as eruby (implemented in C)
+<li>Very fast, almost three times faster than ERB and even faster than eruby (implemented in C).
 </li>
-<li>Auto escaping (sanitizing) support
+<li>Auto escaping (sanitizing) support, it means that '&lt;%= %&gt;' can be escaped in default.
+   It is desirable for web application.
 </li>
-<li>Auto trimming spaces around '&lt;% %&gt;'
+<li>Spaces around '&lt;% %&gt;' are trimmed automatically only when '&lt;%' is at the beginning of line and '%&gt;' is at the end of line.
 </li>
-<li>Embedded pattern changeable (default '&lt;% %&gt;')
+<li>Embedded pattern changeable (default '&lt;% %&gt;'), for example '[% %]' or '&lt;? ?&gt;' are available.
 </li>
-<li>Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+<li>Enable to handle Processing Instructions (PI) as embedded pattern (ex. '&lt;?rb ... ?&gt;').
+   This is desirable for XML/HTML than '&lt;% .. %&gt;' because the latter breaks HTML design
+   but the former doesn't.
+</li>
+<li>Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript).
 </li>
 <li>Context object available and easy to combine eRuby template with YAML datafile
+   (see the below example).
 </li>
-<li>Easy to expand in subclass, for example:
+<li>Print statement available.
+</li>
+<li>Easy to expand and customize in subclass
   <ul class="ul2">
   <li>Print statement support
   </li>
@@ -62,8 +85,11 @@ It has the following features.
   </li>
   </ul>
 </li>
+<li>Ruby on Rails support.
+</li>
 </ul>
-<p>eRuby is "embedded Ruby" in documents.
+<p>eRuby means "embedded Ruby" in documents.
+Embedded patterns are '<code>&lt;% <em>statement</em> %&gt;</code>' and '<code>&lt;%= <em>expression</em> %&gt;</code>'.
 The following is an example of eRuby. '&lt;% ... %&gt;' means Ruby statement and '&lt;%= ... %&gt;' means Ruby expression.
 </p>
 <a name="example.eruby"></a>
@@ -96,9 +122,6 @@ Hello Erubis!
  * bbb
  * ccc
 </pre>
-<p>Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
-You can embed these language code into your document and compile it into target program code.
-</p>
 
 
 
@@ -122,6 +145,8 @@ You can embed these language code into your document and compile it into target 
 	</li>
 	<li><a href="ChangeLog">Changelog</a>
 	</li>
+	<li><a href="ReleaseNote.txt">ReleaseNote</a>
+	</li>
 	</ul>
 
 
@@ -129,8 +154,8 @@ You can embed these language code into your document and compile it into target 
 <a name="License"></a>
 <h2 class="section">License</h2>
 	<ul class="ul1">
-	<li><a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License ver.2</a>
-<p>	   If you need looser license, please contact me.
+	<li><a href="http://www.gnu.org/copyleft/lgpl.html">LGPL ver.2</a>
+<p>	   If you need other license, please suggest me.
 </p>
 	</li>
 	</ul>

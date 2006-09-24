@@ -279,7 +279,7 @@ __END__
       </table>
       <%=== $i %>
   expected: |4
-      
+      use HTML::Entities; 
          my $user = 'Erubis';
          my @list = ('<aaa>', 'b&b', '"ccc"');
       

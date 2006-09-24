@@ -1,10 +1,26 @@
+preparation*: |
+    def untabify(str, width=8)
+      list = str.split(/\t/)
+      last = list.pop
+      sb = ''
+      list.each do |s|
+        column = (n = s.rindex(?\n)) ? s.length - n - 1 : s.length
+        n = width - (column % width)
+        sb << s << (' ' * n)
+      end
+      sb << last
+      return sb
+    end
+
 
 properties:
   - tagfile    : html-css
 
+
 parameters:
   - u          : users-guide
   - all        : [ $(u).html ]
+
 
 recipes:
 
@@ -33,5 +49,27 @@ recipes:
 	sys "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
 	rm "#{@byprod}"
 
-
-
+  - product:	notext.txt
+    ingreds:	[ ../test/test-notext.yaml, Rookbook.yaml ]
+    desc:       create 'notext.txt' from 'test-notext.yaml'
+    method*: |
+	require 'yaml'
+	s = untabify(File.read(@ingred))
+	list = []
+	YAML.load_documents(s) { |ydoc| list << ydoc }
+	list.flatten!
+	entry = list.first
+	ydoc = {}
+	list.each do |hash|
+	  %w[input output].each do |key|
+	    hash[key].gsub!(/^\./, '') if hash.key?(key)
+	  end
+	  ydoc[hash['name']] = hash
+	end
+	text = entry['document']
+	require 'erubis'
+	eruby = Erubis::Eruby.new(text, :pattern=>'\[% %\]')
+	#p ydoc.keys
+	#puts eruby.src
+	result = eruby.result(binding())
+	File.open(@product, 'w') { |f| f.write(result) }
