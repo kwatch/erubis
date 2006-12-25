@@ -1,7 +1,7 @@
 $ [ANN] Erubis 2.1.0 release - a fast eRuby implementation
 
 I have released Erubis 2.1.0.
-http://rubyforge.org/projects/erubis/
+http://www.kuwata-lab.com/erubis/
 
 Erubis is a pure ruby implementation of eRuby.
 
@@ -159,7 +159,7 @@ Bugfix:
 Have fun!
 
 --
-kwa
+kwatch
 
 
 $ [ANN] Erubis 2.0.1 release - a fast eRuby implementation

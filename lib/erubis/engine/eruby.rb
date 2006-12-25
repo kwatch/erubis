@@ -6,7 +6,6 @@
 
 require 'erubis/engine'
 require 'erubis/enhancer'
-require 'abstract'
 
 
 module Erubis

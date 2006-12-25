@@ -26,7 +26,6 @@ module Erubis
       #table = ESCAPE_TABLE
       #obj.to_s.gsub(/[&<>"]/) { |s| table[s] }    # or /[&<>"']/
       obj.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }   # or /[&<>"']/
-      #obj.to_s.gsub(SCAN_REGEXP) { |s| ESCAPE_TABLE[s] }
       #obj.to_s.gsub(/[&<>"]/) { ESCAPE_TABLE[$&] }
     end
 

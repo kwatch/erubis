@@ -29,6 +29,7 @@ module Erubis
   ##   print eruby.evaluate(context)
   ##
   class Context
+    include Enumerable
 
     def initialize(hash=nil)
       hash.each do |name, value|
@@ -45,7 +46,15 @@ module Erubis
     end
 
     def keys
-      return instance_variables.collect { |name| name[1,name.length-1] }
+      return instance_variables.collect { |name| name[1..-1] }
+    end
+
+    def each
+      instance_variables.each do |name|
+        key = name[1..-1]
+        value = instance_variable_get(name)
+        yield(key, value)
+      end
     end
 
   end

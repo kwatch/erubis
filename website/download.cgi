@@ -5,7 +5,12 @@
  * redirecto url
  */
 #$redirect_url = "http://sourceforge.net/projects/kwaff/";
-$redirect_url = "http://rubyforge.net/projects/erubis/";
+if ($_REQUEST['project'] == 'erubisj') {
+    $redirect_url = "http://sourceforge.net/project/showfiles.php?group_id=178490";
+} else {
+    //$redirect_url = "http://rubyforge.net/projects/erubis/";
+    $redirect_url = "http://rubyforge.org/frs/?group_id=1320&release_id=7090";
+}
 
 
 /*

@@ -9,6 +9,9 @@ require 'abstract'
 module Erubis
 
 
+  ##
+  ## code generator, called by Converter module
+  ##
   module Generator
 
     def self.supported_properties()  # :nodoc:

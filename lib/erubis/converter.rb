@@ -96,9 +96,9 @@ module Erubis
       pos = 0
       input.scan(regexp) do |lspace, indicator, code, rspace|
         match = Regexp.last_match()
-        index = match.begin(0)
-        text  = input[pos, index - pos]
-        pos   = match.end(0)
+        len  = match.begin(0) - pos
+        text = input[pos, len]
+        pos  = match.end(0)
         add_text(src, text)
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
@@ -171,7 +171,7 @@ module Erubis
 
     def init_converter(properties={})
       super(properties)
-      @trim    = !(properties[:trim] == false)
+      @trim    = properties[:trim] != false
       @pi      = properties[:pi] if properties[:pi]
       @embchar = properties[:embchar]  || '@'
       @pattern = properties[:pattern]
@@ -197,9 +197,9 @@ module Erubis
       pos = 0
       input.scan(@stmt_pattern) do |lspace, pi_arg, code, rspace|
         match = Regexp.last_match
-        index = match.begin(0)
-        text = input[pos, index - pos]
-        pos = match.end(0)
+        len  = match.begin(0) - pos
+        text = input[pos, len]
+        pos  = match.end(0)
         parse_exprs(codebuf, text) # unless text.empty?
         if @trim && lspace && rspace
           add_pi_stmt(codebuf, "#{lspace}#{code}#{rspace}", pi_arg)
@@ -228,9 +228,9 @@ module Erubis
         indicator = indicator1 || indicator2
         code = code1 || code2
         match = Regexp.last_match
-        index = match.begin(0)
-        text = input[pos, index - pos]
-        pos = match.end(0)
+        len  = match.begin(0) - pos
+        text = input[pos, len]
+        pos  = match.end(0)
         add_text(codebuf, text) # unless text.empty?
         add_pi_expr(codebuf, code, indicator)
       end
@@ -278,9 +278,9 @@ module Erubis
       input.scan(@embedded_pattern) do |lspace, pi_arg, stmt, rspace,
                                     indicator1, expr1, indicator2, expr2|
         match = Regexp.last_match
-        index = match.begin(0)
-        text = input[pos, index - pos]
-        pos = match.end(0)
+        len  = match.begin(0) - pos
+        text = input[pos, len]
+        pos  = match.end(0)
         add_text(codebuf, text)  # unless text.empty?
         if stmt
           code = stmt

@@ -6,6 +6,7 @@
 
 .$ News
 
+.* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.
 .* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
 .* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
 .* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
@@ -94,22 +95,30 @@ list:
 .#Erubis supports not only Ruby but also PHP, C, Java, Scheme, Perl, and Javascript.
 .#You can embed these language code into your document and compile it into target program code.
 
-.#Erubis is implemented in Ruby and is now ported into Java.
-.#You can use Erubis in Java with Rhino.
+Erubis is implemented in Ruby and is now ported into Java.
+You can use Erubis in Java with Rhino.
 
 
 
 .$ Download
-	.* if you have installed RubyGems, just type `{{,gem install -r erubis,}}' to install Erubis
-	.* Or {{<download|download.cgi>}}.^
-	   (Erubis requires {{<abstract|http://rubyforge.org/projects/abstract>}} library.
-	    Download and install it at first.)
+	.* Erubis (implemented in Ruby)
+	    .- if you have installed RubyGems, just type `{{,gem install -r erubis,}}' to install Erubis
+	    .- Or {{<download|download.cgi>}}.^
+	       (Erubis requires {{<abstract|http://rubyforge.org/projects/abstract>}} library.
+	        Download and install it at first.)
+	.* Erubis-J (implemented in Java) {{!(New!)!}}
+	    .- {{<download|download.cgi?project=erubisj>}}
 
 .$ Documents
 	.#.* {{<README|README.en.html>}}
-	.* {{<Users' guide|users-guide.html>}}
-	.* {{<Changelog|ChangeLog>}}
-	.* {{<ReleaseNote|ReleaseNote.txt>}}
+	.* Erubis (implemented in Ruby)
+	    .- {{<Users' guide|users-guide.html>}}
+	    .- {{<CHANGES|CHANGES>}}
+	    .- {{<ReleaseNote|ReleaseNote.txt>}}
+	.* Erubis-J (implemented in Java)
+	    .- {{<Users' guide|erubisj-users-guide.html>}}
+	    .#.- {{<Changelog|erubisj-ChangeLog>}}
+	    .#.- {{<ReleaseNote|erubisj-ReleaseNote.txt>}}
 
 .$ License
 	.* {{<LGPL ver.2|http://www.gnu.org/copyleft/lgpl.html>}}

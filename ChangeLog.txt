@@ -3,6 +3,10 @@
 .?version:	$Rev$
 
 
+.: Rev.42 (2006-12-26)
+	.- [enhance] add Context#each() method
+	.- [change] rename ChangeLog to CHANGES
+
 .: Rev.41 (2006-09-24)
 	.- [bugfix] main.rb: typo fixed
 
