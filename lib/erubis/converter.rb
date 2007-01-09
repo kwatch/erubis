@@ -72,12 +72,13 @@ module Erubis
 
     def init_converter(properties={})
       super(properties)
-      @pattern   = properties[:pattern]
-      @trim      = properties[:trim] != false
+      @pattern = properties[:pattern]
+      @trim    = properties[:trim] != false
     end
 
     #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
-    DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    #DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    DEFAULT_REGEXP = /<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
 
     ## return regexp of pattern to parse eRuby script
     def pattern_regexp(pattern=@pattern)
@@ -86,7 +87,8 @@ module Erubis
       else
         prefix, postfix = pattern.split()
         #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-        return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+        #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+        return /#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       end
     end
     protected :pattern_regexp
@@ -94,12 +96,39 @@ module Erubis
     def convert_input(src, input)
       regexp = pattern_regexp(@pattern)
       pos = 0
-      input.scan(regexp) do |lspace, indicator, code, rspace|
+      is_bol = true
+      input.scan(regexp) do |indicator, code, rspace|
         match = Regexp.last_match()
         len  = match.begin(0) - pos
         text = input[pos, len]
         pos  = match.end(0)
-        add_text(src, text)
+        ## set lspace (spaces at beginning of line)
+        lspace = nil
+        if text.empty?
+          lspace = "" if is_bol
+        elsif text[-1] == ?\n
+          lspace = ""
+        else
+          rindex = text.rindex(?\n)
+          if rindex
+            s = text[rindex+1..-1]
+            if s =~ /\A[ \t]*\z/
+              lspace = s
+              text = text[0..rindex]
+              #text[rindex+1..-1] = ''
+            end
+          else
+            if is_bol && text =~ /\A[ \t]*\z/
+              lspace = text
+              text = nil
+              #lspace = text.dup
+              #text[0..-1] = ''
+            end
+          end
+        end
+        is_bol = rspace ? true : false
+        ## add text
+        add_text(src, text) if text && !text.empty?
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
         if !indicator               # <% %>
