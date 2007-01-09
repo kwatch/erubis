@@ -27,7 +27,7 @@ defaults = {
 def usage(defaults)
   script = File.basename($0)
   s =  <<END
-Usage: ruby #{script} [..options..]
+Usage: ruby #{script} [..options..] > /dev/null 2> bench.log
   -h             :  help
   -n N           :  number of times to loop (default #{defaults[:ntimes]})
   -F erubyfile   :  eruby filename (default '#{defaults[:filename]}')
@@ -47,8 +47,8 @@ require 'optparse'
 optparser = OptionParser.new
 options = {}
 ['-h', '-n N', '-F erubyfile', '-f datafile', '-t targets', '-x exclude',
- '-T testtype', '-C compiler', '-X', '-S'].each do |opt|
-  optparser.on(opt) { |val| options[opt[1]] = val }
+ '-T testtype', '-X', '-S', '-D'].each do |opt|
+  optparser.on(opt) { |val| options[opt[1].chr] = val }
 end
 begin
   filenames = optparser.parse!(ARGV)
@@ -58,20 +58,20 @@ rescue => ex
 end
 
 
-flag_help = options[?h]
-ntimes    = (options[?n] || defaults[:ntimes]).to_i
-erubyfile = options[?F] || defaults[:erubyfile]
-datafile  = options[?f] || defaults[:datafile]
-targets   = options[?t]
-testtype  = options[?T]
-compiler_name = options[?C] || 'ErubisOptimized'
-excludes  = options[?x]
-$expand   = options[?X] ? true : false
-use_devnull = options[?S] ? true : false
+flag_help = options['h']
+ntimes    = (options['n'] || defaults[:ntimes]).to_i
+erubyfile = options['F'] || defaults[:erubyfile]
+datafile  = options['f'] || defaults[:datafile]
+targets   = options['t']
+testtype  = options['T']
+excludes  = options['x']
+$expand   = options['X'] ? true : false
+use_devnull = options['S'] ? true : false
+$debug    = options['D']
 
 $ntimes = ntimes
 
-$stderr.puts "** $ntimes=#{$ntimes.inspect}, erubyfile=#{erubyfile.inspect}, datafile=#{datafile.inspect}"
+$stderr.puts "** $ntimes=#{$ntimes.inspect}, $expand=#{$expand}, use_devnull=#{use_devnull}, options=#{options.inspect}" if $debug
 
 
 ## help
@@ -220,21 +220,6 @@ testdefs.each do |testdef|
   require 'pp'
   #pp testdef
 end
-
-### create file for load
-#if testdefs.find { |h| h['name'] == 'load' }
-#  $load_erubyfile = erubyfile + ".tmp"   # for load
-#  $data = data
-#  str = File.read(erubyfile)
-#  str.gsub!(/\bdata\b/, '$data')
-#  hash = testdefs.find { |h| h['name'] == compiler_name }
-#  code = eval hash['compile']
-#  code.sub!(/_buf\s*\z/, 'print \&')
-#  File.open($load_erubyfile, 'w') { |f| f.write(code) }
-#  at_exit do
-#    File.unlink $load_erubyfile if test(?f, $load_erubyfile)
-#  end
-#end
 
 
 ## select test target

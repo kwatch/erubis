@@ -2,6 +2,8 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.45 (2007-01-09)
+	.- [change] erubybench.rb: add option '-D'
 
 : Rev.44 (2007-01-09)
 	.- [change] add '-S' (use /dev/null) option to 'benchmark/erubybench.rb'
