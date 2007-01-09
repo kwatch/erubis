@@ -323,9 +323,10 @@ module Erubis
       #regexp = pattern_regexp(@pattern)
       pos = 0
       input.scan(SIMPLE_REGEXP) do |indicator, code|
-        index = Regexp.last_match.begin(0)
-        text = input[pos, index - pos]
-        pos = index + $&.length()
+        match = Regexp.last_match
+        index = match.begin(0)
+        text  = input[pos, index - pos]
+        pos   = match.end(0)
         add_text(src, text)
         if !indicator              # <% %>
           add_stmt(src, code)

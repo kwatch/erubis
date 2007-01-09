@@ -76,60 +76,64 @@ module Erubis
       @trim    = properties[:trim] != false
     end
 
-    #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
-    #DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
-    DEFAULT_REGEXP = /<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    protected
 
     ## return regexp of pattern to parse eRuby script
-    def pattern_regexp(pattern=@pattern)
-      if pattern.nil? || pattern == '<% %>'
-        return DEFAULT_REGEXP
-      else
-        prefix, postfix = pattern.split()
-        #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-        #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-        return /#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-      end
+    def pattern_regexp(pattern)
+      prefix, postfix = pattern.split()   # '<% %>' => '<%', '%>'
+      #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+      #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+      return /#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
     end
-    protected :pattern_regexp
+    module_function :pattern_regexp
+
+    #DEFAULT_REGEXP = /(.*?)(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    #DEFAULT_REGEXP = /(^[ \t]*)?<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    #DEFAULT_REGEXP = /<%(=+|\#)?(.*?)-?%>([ \t]*\r?\n)?/m
+    DEFAULT_REGEXP = pattern_regexp('<% %>')
+
+    def detect_lspace(text, is_bol)
+      lspace = nil
+      if text.empty?
+        lspace = "" if is_bol
+      elsif text[-1] == ?\n
+        lspace = ""
+      else
+        rindex = text.rindex(?\n)
+        if rindex
+          s = text[rindex+1..-1]
+          if s =~ /\A[ \t]*\z/
+            lspace = s
+            #text = text[0..rindex]
+            text[rindex+1..-1] = ''
+          end
+        else
+          if is_bol && text =~ /\A[ \t]*\z/
+            #lspace = text
+            #text = nil
+            lspace = text.dup
+            text[0..-1] = ''
+          end
+        end
+      end
+      return lspace
+    end
+
+    public
 
     def convert_input(src, input)
-      regexp = pattern_regexp(@pattern)
+      pat = @pattern
+      regexp = pat.nil? || pat == '<% %>' ? DEFAULT_REGEXP : pattern_regexp(pat)
       pos = 0
-      is_bol = true
+      is_bol = true     # is beginning of line
       input.scan(regexp) do |indicator, code, rspace|
         match = Regexp.last_match()
         len  = match.begin(0) - pos
         text = input[pos, len]
         pos  = match.end(0)
-        ## set lspace (spaces at beginning of line)
-        lspace = nil
-        if indicator && indicator[0] == ?=
-          # do nothing when '<%= %>'
-        elsif text.empty?
-          lspace = "" if is_bol
-        elsif text[-1] == ?\n
-          lspace = ""
-        else
-          rindex = text.rindex(?\n)
-          if rindex
-            s = text[rindex+1..-1]
-            if s =~ /\A[ \t]*\z/
-              lspace = s
-              text = text[0..rindex]
-              #text[rindex+1..-1] = ''
-            end
-          else
-            if is_bol && text =~ /\A[ \t]*\z/
-              lspace = text
-              text = nil
-              #lspace = text.dup
-              #text[0..-1] = ''
-            end
-          end
-        end
+        is_expr = indicator && indicator[0] == ?=
+        lspace = is_expr ? nil : detect_lspace(text, is_bol)
         is_bol = rspace ? true : false
-        ## add text
         add_text(src, text) if text && !text.empty?
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'

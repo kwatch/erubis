@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+
+: Rev.49 (2007-01-10)
+	.- [refactor] add Converter#detect_lspace()
+	.- [refacotr] SimplifyEnhancer#convert()
+
 : Rev.48 (2007-01-10)
 	.- [enhance] Converter#convert_input() is more performance tuned
 
