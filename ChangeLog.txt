@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+
+: Rev.44 (2007-01-09)
+	.- [change] add '-S' (use /dev/null) option to 'benchmark/erubybench.rb'
+	.- [change] use STDOUT instead of /dev/null by default in erubybench.rb
+
 : Rev.43 (2007-01-09)
 	.- [refactor] add '-X' (expand) option to 'benchmark/erubybench.rb'
 

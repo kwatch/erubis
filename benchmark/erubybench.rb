@@ -26,11 +26,18 @@ defaults = {
 ## usage
 def usage(defaults)
   script = File.basename($0)
-  s =  "Usage: ruby #{script} [-h] [-n N] [-f file] [-d file] [-t testname ...]\n"
-  s << "  -h      :  help\n"
-  s << "  -n N    :  number of times to loop (default #{defaults[:ntimes]})\n"
-  s << "  -f file :  eruby filename (default '#{defaults[:filename]}')\n"
-  s << "  -d file :  data filename (default '#{defaults[:datafile]}')\n"
+  s =  <<END
+Usage: ruby #{script} [..options..]
+  -h             :  help
+  -n N           :  number of times to loop (default #{defaults[:ntimes]})
+  -F erubyfile   :  eruby filename (default '#{defaults[:filename]}')
+  -f datafile    :  data filename (default '#{defaults[:datafile]}')
+  -t testname,.. :  target testnames
+  -x testname,.. :  exclude testnames
+  -T testtype    :  basic/cache/func
+  -X             :  expand loop
+  -S             :  use /dev/null instead of stdout
+END
   return s
 end
 
@@ -40,7 +47,7 @@ require 'optparse'
 optparser = OptionParser.new
 options = {}
 ['-h', '-n N', '-F erubyfile', '-f datafile', '-t targets', '-x exclude',
- '-T testtype', '-C compiler', '-X'].each do |opt|
+ '-T testtype', '-C compiler', '-X', '-S'].each do |opt|
   optparser.on(opt) { |val| options[opt[1]] = val }
 end
 begin
@@ -59,30 +66,12 @@ targets   = options[?t]
 testtype  = options[?T]
 compiler_name = options[?C] || 'ErubisOptimized'
 excludes  = options[?x]
-$expand = options[?X] ? true : false
+$expand   = options[?X] ? true : false
+use_devnull = options[?S] ? true : false
 
 $ntimes = ntimes
 
-
-#flag_help = false
-#flag_all = false
-#targets = nil
-#test_type = nil
-#compiler_name = 'ErubisOptimized'
-#while !ARGV.empty? && ARGV[0][0] == ?-
-#  opt = ARGV.shift
-#  case opt
-#  when '-n'  ;  n = ARGV.shift.to_i
-#  when '-f'  ;  filename = ARGV.shift
-#  when '-d'  ;  datafile = ARGV.shift
-#  when '-h', '--help'  ;  flag_help = true
-#  when '-A'  ;  test_all = true
-#  when '-C'  ;  compiler_name = ARGV.shift
-#  when '-t'  ;  test_type = ARGV.shift
-#  else       ;  raise "#{opt}: invalid option."
-#  end
-#end
-#puts "** n=#{n.inspect}, filename=#{filename.inspect}, datafile=#{datafile.inspect}"
+$stderr.puts "** $ntimes=#{$ntimes.inspect}, erubyfile=#{erubyfile.inspect}, datafile=#{datafile.inspect}"
 
 
 ## help
@@ -270,7 +259,7 @@ testdefs.each do |h|
   ## define test functions for each classes
   s = ''
   s << "def test_#{h['name']}(erubyfile, data)\n"
-  s << "  $stdout = $devnull\n"
+  s << "  $stdout = $outstream\n"
   if $expand
     $ntimes.times do
       s << '  ' << h['code']  #<< "\n"
@@ -308,7 +297,7 @@ testdefs.each do |h|
   pr = h['return'] ? 'print ' : ''
   s = ''
   s << "def test_view_#{h['name']}(data)\n"
-  s << "  $stdout = $devnull\n"
+  s << "  $stdout = $outstream\n"
   if $expand
     $ntimes.times do
       s << "  #{pr}view_#{h['name']}(data)\n"
@@ -338,7 +327,7 @@ testdefs.each do |h|
     pr = h['return'] ? 'print ' : ''
     s = ''
     s << "def test_cache_#{h['name']}(erubyfile, data)\n"
-    s << "  $stdout = $devnull\n"
+    s << "  $stdout = $outstream\n"
     s << "  $ntimes.times do\n"
     s << "    #{pr}eval(File.read(\"\#{erubyfile}.#{h['name']}\"))\n"
     s << "  end\n"
@@ -354,11 +343,11 @@ end
 
 
 ## open /dev/null
-$devnull = File.open("/dev/null", 'w')
+$outstream = use_devnull ? File.open("/dev/null", 'w') : STDOUT
 
 
 ## rehearsal
-$stdout = $devnull
+$stdout = $outstream
 testdefs.each do |h|
   ## execute test code
   eval h['code']
@@ -373,8 +362,22 @@ end
 $stdout = STDOUT
 
 
-## do benchmark
+## change benchmark library to use $stderr instead of $stdout
 require 'benchmark'
+module Benchmark
+  class Report
+    def print(*args)
+      $stderr.print(*args)
+    end
+  end
+  module_function
+  def print(*args)
+    $stderr.print(*args)
+  end
+end
+
+
+## do benchmark
 begin
   Benchmark.bm(30) do |job|
     ## basic test
@@ -411,5 +414,5 @@ begin
 
   end
 ensure
-  $devnull.close()
+  $outstream.close() if use_devnull
 end
