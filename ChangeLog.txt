@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.48 (2007-01-10)
+	.- [enhance] Converter#convert_input() is more performance tuned
+
 : Rev.47 (2007-01-10)
 	.- [enhance] Converter#convert_input() is performance tuned
 

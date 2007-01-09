@@ -104,7 +104,9 @@ module Erubis
         pos  = match.end(0)
         ## set lspace (spaces at beginning of line)
         lspace = nil
-        if text.empty?
+        if indicator && indicator[0] == ?=
+          # do nothing when '<%= %>'
+        elsif text.empty?
           lspace = "" if is_bol
         elsif text[-1] == ?\n
           lspace = ""
