@@ -15,49 +15,79 @@ require 'erubis/tiny'
 require 'erubybench-lib'
 
 
-
-## default values
-filename = 'erubybench.rhtml'
-datafile = 'erubybench.yaml'
-n = 10000
+## default value
+defaults = {
+  :ntimes    => 1000,
+  :erubyfile => 'erubybench.rhtml',
+  :datafile  => 'erubybench.yaml',
+}
 
 
 ## usage
-def usage(n, filename, datafile)
-  s =  "Usage: ruby #{$0} [-h] [-n N] [-f file] [-d file] [testname ...]\n"
+def usage(defaults)
+  script = File.basename($0)
+  s =  "Usage: ruby #{script} [-h] [-n N] [-f file] [-d file] [-t testname ...]\n"
   s << "  -h      :  help\n"
-  s << "  -n N    :  number of times to loop (default #{n})\n"
-  s << "  -f file :  eruby filename (default '#{filename}')\n"
-  s << "  -d file :  data filename (default '#{datafile}')\n"
+  s << "  -n N    :  number of times to loop (default #{defaults[:ntimes]})\n"
+  s << "  -f file :  eruby filename (default '#{defaults[:filename]}')\n"
+  s << "  -d file :  data filename (default '#{defaults[:datafile]}')\n"
   return s
 end
 
 
 ## parse command-line options
-flag_help = false
-flag_all = false
-targets = nil
-test_type = nil
-compiler_name = 'ErubisOptimized'
-while !ARGV.empty? && ARGV[0][0] == ?-
-  opt = ARGV.shift
-  case opt
-  when '-n'  ;  n = ARGV.shift.to_i
-  when '-f'  ;  filename = ARGV.shift
-  when '-d'  ;  datafile = ARGV.shift
-  when '-h', '--help'  ;  flag_help = true
-  when '-A'  ;  test_all = true
-  when '-C'  ;  compiler_name = ARGV.shift
-  when '-t'  ;  test_type = ARGV.shift
-  else       ;  raise "#{opt}: invalid option."
-  end
+require 'optparse'
+optparser = OptionParser.new
+options = {}
+['-h', '-n N', '-F erubyfile', '-f datafile', '-t targets', '-x exclude',
+ '-T testtype', '-C compiler', '-X'].each do |opt|
+  optparser.on(opt) { |val| options[opt[1]] = val }
 end
-puts "** n=#{n.inspect}, filename=#{filename.inspect}, datafile=#{datafile.inspect}"
+begin
+  filenames = optparser.parse!(ARGV)
+rescue => ex
+  $stderr.puts "#{command}: #{ex.to_s}"
+  exit(1)
+end
+
+
+flag_help = options[?h]
+ntimes    = (options[?n] || defaults[:ntimes]).to_i
+erubyfile = options[?F] || defaults[:erubyfile]
+datafile  = options[?f] || defaults[:datafile]
+targets   = options[?t]
+testtype  = options[?T]
+compiler_name = options[?C] || 'ErubisOptimized'
+excludes  = options[?x]
+$expand = options[?X] ? true : false
+
+$ntimes = ntimes
+
+
+#flag_help = false
+#flag_all = false
+#targets = nil
+#test_type = nil
+#compiler_name = 'ErubisOptimized'
+#while !ARGV.empty? && ARGV[0][0] == ?-
+#  opt = ARGV.shift
+#  case opt
+#  when '-n'  ;  n = ARGV.shift.to_i
+#  when '-f'  ;  filename = ARGV.shift
+#  when '-d'  ;  datafile = ARGV.shift
+#  when '-h', '--help'  ;  flag_help = true
+#  when '-A'  ;  test_all = true
+#  when '-C'  ;  compiler_name = ARGV.shift
+#  when '-t'  ;  test_type = ARGV.shift
+#  else       ;  raise "#{opt}: invalid option."
+#  end
+#end
+#puts "** n=#{n.inspect}, filename=#{filename.inspect}, datafile=#{datafile.inspect}"
 
 
 ## help
 if flag_help
-  puts usage(n, filename, datafile)
+  puts usage(defaults)
   exit()
 end
 
@@ -74,16 +104,12 @@ data = data.sort_by { |h| h[:code] }
 #require 'pp'; pp data
 
 
-## open /dev/null
-$devnull = File.open("/dev/null", 'w')
-
-
 ## test definitions
 testdefs_str = <<END
 - name:   ERuby
   class:  ERuby
   code: |
-    ERuby.import(filename)
+    ERuby.import(erubyfile)
   compile: |
     ERuby::Compiler.new.compile_string(str)
   return: null
@@ -91,8 +117,8 @@ testdefs_str = <<END
 - name:   ERB
   class:  ERB
   code: |
-    print ERB.new(File.read(filename)).result(binding())
-#    eruby = ERB.new(File.read(filename))
+    print ERB.new(File.read(erubyfile)).result(binding())
+#    eruby = ERB.new(File.read(erubyfile))
 #    print eruby.result(binding())
   compile: |
     ERB.new(str).src
@@ -106,8 +132,8 @@ testdefs_str = <<END
   desc:   print _buf    #, no binding()
   class:  Erubis::Eruby2
   code: |
-    #Erubis::Eruby2.new(File.read(filename)).result()
-    Erubis::Eruby2.new(File.read(filename)).result(binding())
+    #Erubis::Eruby2.new(File.read(erubyfile)).result()
+    Erubis::Eruby2.new(File.read(erubyfile)).result(binding())
   return: null
   skip:   yes
 
@@ -130,7 +156,7 @@ testdefs_str = <<END
 #- name:   ErubisArrayBuffer
 #  class:  Erubis::ArrayBufferEruby
 #  code: |
-#    Erubis::ArrayBufferEruby.new(File.read(filename)).result(binding())
+#    Erubis::ArrayBufferEruby.new(File.read(erubyfile)).result(binding())
 #  compile: |
 #    Erubis::ArrayBufferEruby.new(str).src
 #  return: str
@@ -189,7 +215,7 @@ testdefs_str = <<END
 #- name:    load
 #  class:   load
 #  code: |
-#    load($load_filename)
+#    load($load_erubyfile)
 #  compile: null
 #  return: null
 #  skip:    yes
@@ -200,49 +226,59 @@ testdefs = YAML.load(testdefs_str)
 ## manipulate
 testdefs.each do |testdef|
   c = testdef['class']
-  testdef['code']    ||= "print #{c}.new(File.read(filename)).result(binding())\n"
+  testdef['code']    ||= "print #{c}.new(File.read(erubyfile)).result(binding())\n"
   testdef['compile'] ||= "#{c}.new(str).src\n"
   require 'pp'
   #pp testdef
 end
 
-
 ### create file for load
 #if testdefs.find { |h| h['name'] == 'load' }
-#  $load_filename = filename + ".tmp"   # for load
+#  $load_erubyfile = erubyfile + ".tmp"   # for load
 #  $data = data
-#  str = File.read(filename)
+#  str = File.read(erubyfile)
 #  str.gsub!(/\bdata\b/, '$data')
 #  hash = testdefs.find { |h| h['name'] == compiler_name }
 #  code = eval hash['compile']
 #  code.sub!(/_buf\s*\z/, 'print \&')
-#  File.open($load_filename, 'w') { |f| f.write(code) }
+#  File.open($load_erubyfile, 'w') { |f| f.write(code) }
 #  at_exit do
-#    File.unlink $load_filename if test(?f, $load_filename)
+#    File.unlink $load_erubyfile if test(?f, $load_erubyfile)
 #  end
 #end
 
 
 ## select test target
-if test_all
-  #testdefs.each { |h| h['skip'] = false }
-elsif !ARGV.empty?
-  #testdefs.each { |h| h['skip'] = ARGV.include?(h['name']) }
-  testdefs.delete_if { |h| !ARGV.include?(h['name']) }
-else
+if targets.nil?
   testdefs.delete_if { |h| h['skip'] }
+elsif targets.downcase != 'all'
+  targets = targets.split(/,/)
+  testdefs.delete_if { |h| !targets.include?(h['name']) }
 end
-#require 'pp'
-#pp testdefs
+
+## exclude target
+if excludes
+  excludes = excluces.split(/,/)
+  testdefs.delete_if { |h| excludes.include?(h['name']) }
+end
+
+#require 'pp'; pp testdefs
 
 
-## define test functions for each classes
+str = File.read(erubyfile)
 testdefs.each do |h|
+  ## define test functions for each classes
   s = ''
-  s << "def test_#{h['name']}(filename, data)\n"
+  s << "def test_#{h['name']}(erubyfile, data)\n"
   s << "  $stdout = $devnull\n"
-  n.times do
-    s << '  ' << h['code']  #<< "\n"
+  if $expand
+    $ntimes.times do
+      s << '  ' << h['code']  #<< "\n"
+    end
+  else
+    s << "  $ntimes.times do\n"
+    s << "    #{h['code']}\n"
+    s << "  end\n"
   end
   s << "  $stdout = STDOUT\n"
   s << "end\n"
@@ -252,17 +288,18 @@ end
 
 
 ## define view functions for each classes
-str = File.read(filename)
+str = File.read(erubyfile)
 testdefs.each do |h|
-  next unless h['compile']
-  code = eval h['compile']
-  s = <<-END
-    def view_#{h['name']}(data)
-      #{code}
-    end
-  END
-  #puts s
-  eval s
+  if h['compile']
+    code = eval h['compile']
+    s = <<-END
+      def view_#{h['name']}(data)
+        #{code}
+      end
+    END
+    #puts s
+    eval s
+  end
 end
 
 
@@ -272,8 +309,14 @@ testdefs.each do |h|
   s = ''
   s << "def test_view_#{h['name']}(data)\n"
   s << "  $stdout = $devnull\n"
-  n.times do
-    s << "  #{pr}view_#{h['name']}(data)\n"
+  if $expand
+    $ntimes.times do
+      s << "  #{pr}view_#{h['name']}(data)\n"
+    end
+  else
+    s << "  $ntimes.times do\n"
+    s << "    #{pr}view_#{h['name']}(data)\n"
+    s << "  end\n"
   end
   s << "  $stdout = STDOUT\n"
   s << "end\n"
@@ -283,27 +326,35 @@ end
 
 
 ## define tests for caching
-str = File.read(filename)
+str = File.read(erubyfile)
 testdefs.each do |h|
-  next unless h['compile']
-  # create file to read
-  code = eval h['compile']
-  fname = "#{filename}.#{h['name']}"
-  File.open(fname, 'w') { |f| f.write(code) }
-  #at_exit do File.unlink fname if test(?f, fname) end
-  # define function
-  pr = h['return'] ? 'print ' : ''
-  s = ''
-  s << "def test_cache_#{h['name']}(filename, data)\n"
-  s << "  $stdout = $devnull\n"
-  n.times do
-    s << "  #{pr}eval(File.read(\"\#{filename}.#{h['name']}\"))\n"
+  if h['compile']
+    # create file to read
+    code = eval h['compile']
+    fname = "#{erubyfile}.#{h['name']}"
+    File.open(fname, 'w') { |f| f.write(code) }
+    #at_exit do File.unlink fname if test(?f, fname) end
+    # define function
+    pr = h['return'] ? 'print ' : ''
+    s = ''
+    s << "def test_cache_#{h['name']}(erubyfile, data)\n"
+    s << "  $stdout = $devnull\n"
+    s << "  $ntimes.times do\n"
+    s << "    #{pr}eval(File.read(\"\#{erubyfile}.#{h['name']}\"))\n"
+    s << "  end\n"
+    #ntimes.times do
+    #  s << "  #{pr}eval(File.read(\"\#{erubyfile}.#{h['name']}\"))\n"
+    #end
+    s << "  $stdout = STDOUT\n"
+    s << "end\n"
+    #puts s
+    eval s
   end
-  s << "  $stdout = STDOUT\n"
-  s << "end\n"
-  #puts s
-  eval s
 end
+
+
+## open /dev/null
+$devnull = File.open("/dev/null", 'w')
 
 
 ## rehearsal
@@ -316,7 +367,7 @@ testdefs.each do |h|
   v = __send__("view_#{h['name']}", data)
   print v if h['return']
   ## execute caching function
-  v = eval(File.read("#{filename}.#{h['name']}"))
+  v = eval(File.read("#{erubyfile}.#{h['name']}"))
   print v if h['return']
 end
 $stdout = STDOUT
@@ -325,16 +376,16 @@ $stdout = STDOUT
 ## do benchmark
 require 'benchmark'
 begin
-  Benchmark.bmbm(25) do |job|
+  Benchmark.bm(30) do |job|
     ## basic test
     testdefs.each do |h|
       title = h['class']
       func = 'test_' + h['name']
       GC.start
       job.report(title) do
-        __send__(func, filename, data)
+        __send__(func, erubyfile, data)
       end
-    end if !test_type || test_type == 'basic'
+    end if !testtype || testtype == 'basic'
 
     ## caching function
     testdefs.each do |h|
@@ -343,9 +394,9 @@ begin
       func = 'test_cache_' + h['name']
       GC.start
       job.report(title) do
-        __send__(func, filename, data)
+        __send__(func, erubyfile, data)
       end
-    end if !test_type || test_type == 'eval'
+    end if !testtype || testtype == 'cache'
 
     ## view-function test
     testdefs.each do |h|
@@ -356,7 +407,7 @@ begin
       job.report(title) do
         __send__(func, data)
       end
-    end if !test_type || test_type == 'func'
+    end if !testtype || testtype == 'func'
 
   end
 ensure

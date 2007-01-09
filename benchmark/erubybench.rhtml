@@ -33,24 +33,26 @@ thead {
 
   <h1>Companies</h1>
 
-  <table>
+  <table summary="">
    <thead>
     <tr>
      <th>index</th><th>code</th><th>name</th>
     </tr>
    </thead>
    <tbody>
-<% data.each_with_index do |hash, i| %>
-<%  n = i + 1 %>
-    <tr class="<%= n % 2 == 0 ? 'even' : 'odd' %>">
+<% n = 0 %>
+<% data.each do |h| %>
+<%   n += 1 %>
+<%   klass = n % 2 == 0 ? 'even' : 'odd' %>
+    <tr class="<%= klass %>">
      <td style="text-align: center">
       <span><%= n %></span>
      </td>
      <td>
-      <a href="/stock/<%= hash[:code] %>"><%= hash[:code] %></a>
+      <a href="/stock/<%= h[:code] %>"><%= h[:code] %></a>
      </td>
      <td>
-      <a href="<%= hash[:url] %>"><%= hash[:name] %></a>
+      <a href="<%= h[:url] %>"><%= h[:name] %></a>
      </td>
     </tr>
 <% end %>

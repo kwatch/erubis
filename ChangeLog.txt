@@ -2,6 +2,8 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.43 (2007-01-09)
+	.- [refactor] add '-X' (expand) option to 'benchmark/erubybench.rb'
 
 .: Rev.42 (2006-12-26)
 	.- [enhance] add Context#each() method
