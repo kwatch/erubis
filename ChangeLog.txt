@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.46 (2007-01-09)
+	.- [change] erubybench.rb: create 'src' directory for cache file
+
 : Rev.45 (2007-01-09)
 	.- [change] erubybench.rb: add option '-D'
 

@@ -217,8 +217,7 @@ testdefs.each do |testdef|
   c = testdef['class']
   testdef['code']    ||= "print #{c}.new(File.read(erubyfile)).result(binding())\n"
   testdef['compile'] ||= "#{c}.new(str).src\n"
-  require 'pp'
-  #pp testdef
+  #require 'pp'; pp testdef
 end
 
 
@@ -243,7 +242,7 @@ str = File.read(erubyfile)
 testdefs.each do |h|
   ## define test functions for each classes
   s = ''
-  s << "def test_#{h['name']}(erubyfile, data)\n"
+  s << "def test_basic_#{h['name']}(erubyfile, data)\n"
   s << "  $stdout = $outstream\n"
   if $expand
     $ntimes.times do
@@ -281,7 +280,7 @@ end
 testdefs.each do |h|
   pr = h['return'] ? 'print ' : ''
   s = ''
-  s << "def test_view_#{h['name']}(data)\n"
+  s << "def test_func_#{h['name']}(data)\n"
   s << "  $stdout = $outstream\n"
   if $expand
     $ntimes.times do
@@ -301,24 +300,28 @@ end
 
 ## define tests for caching
 str = File.read(erubyfile)
+Dir.mkdir('src') unless test(?d, 'src')
 testdefs.each do |h|
   if h['compile']
     # create file to read
     code = eval h['compile']
-    fname = "#{erubyfile}.#{h['name']}"
+    fname = "src/erubybench.#{h['name']}.rb"
     File.open(fname, 'w') { |f| f.write(code) }
     #at_exit do File.unlink fname if test(?f, fname) end
     # define function
-    pr = h['return'] ? 'print ' : ''
+    pr = h['return'] ? 'print' : ''
     s = ''
     s << "def test_cache_#{h['name']}(erubyfile, data)\n"
     s << "  $stdout = $outstream\n"
-    s << "  $ntimes.times do\n"
-    s << "    #{pr}eval(File.read(\"\#{erubyfile}.#{h['name']}\"))\n"
-    s << "  end\n"
-    #ntimes.times do
-    #  s << "  #{pr}eval(File.read(\"\#{erubyfile}.#{h['name']}\"))\n"
-    #end
+    if $expand
+      ntimes.times do
+        s << "  #{pr} eval(File.read('#{fname}'))\n"
+      end
+    else
+      s << "  $ntimes.times do\n"
+      s << "    #{pr} eval(File.read('#{fname}'))\n"
+      s << "  end\n"
+    end
     s << "  $stdout = STDOUT\n"
     s << "end\n"
     #puts s
@@ -341,7 +344,8 @@ testdefs.each do |h|
   v = __send__("view_#{h['name']}", data)
   print v if h['return']
   ## execute caching function
-  v = eval(File.read("#{erubyfile}.#{h['name']}"))
+  fname = "src/erubybench.#{h['name']}.rb"
+  v = eval(File.read(fname))
   print v if h['return']
 end
 $stdout = STDOUT
@@ -368,7 +372,7 @@ begin
     ## basic test
     testdefs.each do |h|
       title = h['class']
-      func = 'test_' + h['name']
+      func = 'test_basic_' + h['name']
       GC.start
       job.report(title) do
         __send__(func, erubyfile, data)
@@ -390,7 +394,7 @@ begin
     testdefs.each do |h|
       next unless h['compile']
       title = 'func_' + h['name']
-      func = 'test_view_' + h['name']
+      func = 'test_func_' + h['name']
       GC.start
       job.report(title) do
         __send__(func, data)
