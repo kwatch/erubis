@@ -29,8 +29,8 @@ module Erubis
       pos = 0
       input.scan(EMBEDDED_PATTERN) do |indicator, code|
         match = Regexp.last_match
-        index = match.begin(0)
-        text  = input[pos, index - pos]
+        len   = match.begin(0) - pos
+        text  = input[pos, len]
         pos   = match.end(0)
         src << " _buf << '" << escape_text(text) << "';"
         if !indicator              # <% %>
@@ -81,32 +81,30 @@ module Erubis
 
     attr_reader :src
 
-    EMBEDDED_PATTERN = /(^[ \t]*)?<\?rb(\s.*?)\?>([ \t]*\r?\n)?|\$(!*)?\{(.*?)\}/
+    EMBEDDED_PATTERN = /(^[ \t]*)?<\?rb(\s.*?)\?>([ \t]*\r?\n)?|@(!*)?\{(.*?)\}@/m
 
     def convert(input)
       src = "_buf = [];"           # preamble
       pos = 0
-      input.scan(EMBEDDED_PATTERN) do |lspace, stmtcode, rspace, indicator, exprcode|
+      input.scan(EMBEDDED_PATTERN) do |lspace, stmt, rspace, indicator, expr|
         match = Regexp.last_match
-        index = match.begin(0)
-        text  = input[pos, index - pos]
+        len   = match.begin(0) - pos
+        text  = input[pos, len]
         pos   = match.end(0)
-        if stmtcode                # <?rb ... ?>
-          code = stmtcode
-          src << " _buf << '" << escape_text(text) << "';"
+        src << " _buf << '" << escape_text(text) << "';"
+        if stmt                # <?rb ... ?>
           if lspace && rspace
-            src << "#{lspace}#{code}#{rspace}"
+            src << "#{lspace}#{stmt}#{rspace}"
           else
-            src << " _buf << '#{lspace}';" if lspace
-            src << code << ";"
-            src << " _buf << '#{rspace}';" if rspace
+            src << " _buf << '" << lspace << "';" if lspace
+            src << stmt << ";"
+            src << " _buf << '" << rspace << "';" if rspace
           end
         else                       # ${...}, $!{...}
-          code = exprcode
           if indicator.nil? || indicator.empty?
-            src << " _buf << #{@escape}(" << code << ");"
+            src << " _buf << " << @escape << "(" << expr << ");"
           elsif indicator == '!'
-            src << " _buf << (" << code << ").to_s;"
+            src << " _buf << (" << expr << ").to_s;"
           end
         end
       end

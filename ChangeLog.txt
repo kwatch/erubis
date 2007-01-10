@@ -2,9 +2,13 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.50 (2007-01-10)
+	.- [refactor] tiny.rb: PI::TinyEruby
+	.- [change] Basic::Converter#detect_lspace() is renamed to Converter::detect_spaces_at_bol()
+	.- [refactor] remove PI::Converter#parse_stmts(), parse_exprs() and parse_stmts2()
 
 : Rev.49 (2007-01-10)
-	.- [refactor] add Converter#detect_lspace()
+	.- [refactor] add Basic::Converter#detect_lspace()
 	.- [refacotr] SimplifyEnhancer#convert()
 
 : Rev.48 (2007-01-10)
