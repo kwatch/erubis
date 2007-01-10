@@ -40,22 +40,30 @@ thead {
     </tr>
    </thead>
    <tbody>
-<% n = 0 %>
-<% data.each do |h| %>
-<%   n += 1 %>
-<%   klass = n % 2 == 0 ? 'even' : 'odd' %>
+<%
+n = 0
+data.each do |d|
+  n += 1
+  klass = n % 2 == 0 ? 'even' : 'odd'
+ %>
     <tr class="<%= klass %>">
      <td style="text-align: center">
       <span><%= n %></span>
      </td>
      <td>
-      <a href="/stock/<%= h[:code] %>"><%= h[:code] %></a>
+      <a href="/stock/<%= d[:code] %>"><%= d[:code] %></a>
      </td>
      <td>
-      <a href="<%= h[:url] %>"><%= h[:name] %></a>
+      <% if d[:url] %>
+      <a href="<%= d[:url] %>"><%= d[:name] %></a>
+      <% else %>
+      <%= d[:name] %>
+      <% end %>
      </td>
     </tr>
-<% end %>
+<%
+end
+ %>
    </tbody>
   </table>
 

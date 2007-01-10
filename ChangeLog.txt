@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.51 (2007-01-10)
+	.- [change] erubybench.rb: option '-A' and '-O' added, '-t' obsoleted
+	.- [change] erubybench.rhtml changed to include 'if-then-else' statement
+	.- [enhance] add 'benchmark/pibench.rb'
+
 : Rev.50 (2007-01-10)
 	.- [refactor] tiny.rb: PI::TinyEruby
 	.- [change] Basic::Converter#detect_lspace() is renamed to Converter::detect_spaces_at_bol()
