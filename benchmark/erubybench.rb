@@ -20,6 +20,7 @@ defaults = {
   :ntimes    => 1000,
   :erubyfile => 'erubybench.rhtml',
   :datafile  => 'erubybench.yaml',
+  :outfile   => 'output.tmp',
 }
 
 
@@ -32,12 +33,12 @@ Usage: ruby #{script} [..options..] [..testnames..] > /dev/null 2> bench.log
   -n N           :  number of times to loop (default #{defaults[:ntimes]})
   -F erubyfile   :  eruby filename (default '#{defaults[:filename]}')
   -f datafile    :  data filename (default '#{defaults[:datafile]}')
+  -o outfile     :  output filename (default '#{defaults[:outfile]}')
   -A             :  test all targets
   -x testname,.. :  exclude testnames
   -T testtype    :  basic/cache/func
   -X             :  expand loop
-  -S             :  use /dev/null instead of stdout
-  -O             :  print output
+  -p             :  print output
 END
   return s
 end
@@ -47,8 +48,8 @@ end
 require 'optparse'
 optparser = OptionParser.new
 options = {}
-['-h', '-n N', '-F erubyfile', '-f datafile', '-A', '-x exclude',
- '-T testtype', '-X', '-S', '-O', '-D'].each do |opt|
+['-h', '-n N', '-F erubyfile', '-f datafile', '-o outfile', '-A',
+  '-x exclude', '-T testtype', '-X', '-p', '-D'].each do |opt|
   optparser.on(opt) { |val| options[opt[1].chr] = val }
 end
 begin
@@ -63,12 +64,12 @@ flag_help = options['h']
 ntimes    = (options['n'] || defaults[:ntimes]).to_i
 erubyfile = options['F'] || defaults[:erubyfile]
 datafile  = options['f'] || defaults[:datafile]
+outfile   = options['o'] || defaults[:outfile]
 flag_all  = options['A']
 testtype  = options['T']
 excludes  = options['x']
 $expand   = options['X'] ? true : false
-use_devnull = options['S'] ? true : false
-flag_output = options['O'] ? true : false
+flag_output = options['p'] ? true : false
 $debug    = options['D']
 
 $ntimes = ntimes
@@ -166,7 +167,6 @@ testdefs.each do |h|
   pr = h['return'] ? 'print ' : ''
   s = ''
   s << "def test_func_#{h['name']}(data)\n"
-  s << "  $stdout = $outstream\n"
   if $expand
     $ntimes.times do
       s << "  #{pr}view_#{h['name']}(data)\n"
@@ -176,7 +176,6 @@ testdefs.each do |h|
     s << "    #{pr}view_#{h['name']}(data)\n"
     s << "  end\n"
   end
-  s << "  $stdout = STDOUT\n"
   s << "end\n"
   #puts s
   eval s
@@ -197,7 +196,6 @@ testdefs.each do |h|
     pr = h['return'] ? 'print' : ''
     s = ''
     s << "def test_cache_#{h['name']}(erubyfile, data)\n"
-    s << "  $stdout = $outstream\n"
     if $expand
       ntimes.times do
         s << "  #{pr} eval(File.read('#{fname}'))\n"
@@ -207,7 +205,6 @@ testdefs.each do |h|
       s << "    #{pr} eval(File.read('#{fname}'))\n"
       s << "  end\n"
     end
-    s << "  $stdout = STDOUT\n"
     s << "end\n"
     #puts s
     eval s
@@ -228,12 +225,8 @@ if flag_output
 end
 
 
-## open /dev/null
-$outstream = use_devnull ? File.open("/dev/null", 'w') : STDOUT
-
-
 ## rehearsal
-$stdout = $outstream
+$stdout = StringIO.new
 testdefs.each do |h|
   ## execute test code
   eval h['code']
@@ -247,6 +240,10 @@ testdefs.each do |h|
   print v if h['return']
 end
 $stdout = STDOUT
+
+
+## open output file
+$stdout = outfile == '-' ? STDOUT : File.open(outfile, 'w')
 
 
 ## change benchmark library to use $stderr instead of $stdout
@@ -287,7 +284,7 @@ begin
 
   ## caching
   if !testtype || testtype == 'cache'
-    $stderr.puts "## evaluate with cache"
+    $stderr.puts "## evaluate cache file"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
         next unless h['compile']
@@ -305,7 +302,7 @@ begin
 
   ## function
   if !testtype || testtype == 'func'
-    $stderr.puts "## evaluate with function"
+    $stderr.puts "## evaluate function"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
         next unless h['compile']
@@ -357,7 +354,7 @@ begin
   #end
 
 ensure
-  $outstream.close() if use_devnull
+  $stdout.close() unless outfile == '-'
 end
 
 __END__

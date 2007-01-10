@@ -3,6 +3,11 @@
 .?version:	$Rev$
 
 : Rev.51 (2007-01-10)
+	.- [change] erubybench.rb: option '-S' obsoleted
+	.- [change] erubybench.rb: option '-o' (outfile) added
+	.- [change] erubybench.rb: option '-O' is changed to '-p'
+
+: Rev.51 (2007-01-10)
 	.- [change] erubybench.rb: option '-A' and '-O' added, '-t' obsoleted
 	.- [change] erubybench.rhtml changed to include 'if-then-else' statement
 	.- [enhance] add 'benchmark/pibench.rb'
