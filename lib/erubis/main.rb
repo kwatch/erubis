@@ -50,7 +50,7 @@ module Erubis
 
     def initialize
       @single_options = "hvxTtSbeB"
-      @arg_options    = "pcrfKIlaE"
+      @arg_options    = "pcrfKIlaEC"
       @option_names   = {
         ?h => :help,
         ?v => :version,
@@ -61,7 +61,8 @@ module Erubis
         ?b => :bodyonly,
         ?B => :binding,
         ?p => :pattern,
-        ?c => :class,
+        ?c => :context,
+        ?C => :class,
         ?e => :escape,
         ?r => :requires,
         ?f => :yamlfiles,
@@ -129,6 +130,11 @@ module Erubis
       yamlfiles = opts.yamlfiles
       context = load_yamlfiles(yamlfiles, opts)
 
+      ## parse context data
+      if opts.context
+        context = parse_context_data(opts.context, opts)
+      end
+
       ## properties for engine
       properties[:escape]   = true         if opts.escape && !properties.key?(:escape)
       properties[:pattern]  = opts.pattern if opts.pattern
@@ -192,6 +198,7 @@ Usage: #{command} [..options..] [file ...]
   -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
+  -c context    : context data (yaml inline style or ruby code)
   -f file.yaml  : YAML file for context values (read stdin if filename is '-')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
@@ -383,6 +390,22 @@ END
       end
       context = hash
       return context
+    end
+
+    def parse_context_data(context_str, opts)
+      if context_str[0] == ?{
+        require 'yaml'
+        ydoc = YAML.load(context_str)
+        unless ydoc.is_a?(Hash)
+          raise CommandOptionError.new("-c: root object is not a mapping.")
+        end
+        intern_hash_keys(ydoc) if opts.intern
+        return ydoc
+      else
+        context = Erubis::Context.new
+        context.instance_eval(context_str, '-c')
+        return context
+      end
     end
 
     def intern_hash_keys(obj, done={})

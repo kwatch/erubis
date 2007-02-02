@@ -1048,3 +1048,28 @@ __END__
       <ul>
       <aaa>b&b"ccc"</ul>
       
+
+- name:  pitiny1
+  class:  PI::TinyEruby
+  testopt: evaluate
+  input: |
+	<ul>
+	 <?rb for item in @list ?>
+	  <li>@{item}@ / @!{item}@</li>
+	 <?rb end ?>
+	</ul>
+  src: |
+	_buf = []; _buf << '<ul>
+	';  for item in @list 
+	 _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '</li>
+	';  end 
+	 _buf << '</ul>
+	';
+	_buf.join
+  output: |
+	<ul>
+	  <li>&lt;aaa&gt; / <aaa></li>
+	  <li>b&amp;b / b&b</li>
+	  <li>&quot;ccc&quot; / "ccc"</li>
+	</ul>
+

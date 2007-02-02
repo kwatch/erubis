@@ -20,7 +20,7 @@ defaults = {
   :ntimes    => 1000,
   :erubyfile => 'erubybench.rhtml',
   :datafile  => 'erubybench.yaml',
-  :outfile   => 'output.tmp',
+  :outfile   => '/dev/null',
 }
 
 
@@ -31,12 +31,12 @@ def usage(defaults)
 Usage: ruby #{script} [..options..] [..testnames..] > /dev/null 2> bench.log
   -h             :  help
   -n N           :  number of times to loop (default #{defaults[:ntimes]})
-  -F erubyfile   :  eruby filename (default '#{defaults[:filename]}')
+  -t erubyfile   :  eruby filename (default '#{defaults[:erubyfile]}')
   -f datafile    :  data filename (default '#{defaults[:datafile]}')
   -o outfile     :  output filename (default '#{defaults[:outfile]}')
   -A             :  test all targets
   -x testname,.. :  exclude testnames
-  -T testtype    :  basic/cache/func
+  -m testmode    :  basic/cache/func
   -X             :  expand loop
   -p             :  print output
 END
@@ -48,8 +48,8 @@ end
 require 'optparse'
 optparser = OptionParser.new
 options = {}
-['-h', '-n N', '-F erubyfile', '-f datafile', '-o outfile', '-A',
-  '-x exclude', '-T testtype', '-X', '-p', '-D'].each do |opt|
+['-h', '-n N', '-t erubyfile', '-f datafile', '-o outfile', '-A',
+  '-x exclude', '-m testmode', '-X', '-p', '-D'].each do |opt|
   optparser.on(opt) { |val| options[opt[1].chr] = val }
 end
 begin
@@ -62,19 +62,19 @@ end
 
 flag_help = options['h']
 ntimes    = (options['n'] || defaults[:ntimes]).to_i
-erubyfile = options['F'] || defaults[:erubyfile]
+erubyfile = options['t'] || defaults[:erubyfile]
 datafile  = options['f'] || defaults[:datafile]
 outfile   = options['o'] || defaults[:outfile]
 flag_all  = options['A']
-testtype  = options['T']
+testmode  = options['m']
 excludes  = options['x']
-$expand   = options['X'] ? true : false
+flag_expand = options['X'] ? true : false
 flag_output = options['p'] ? true : false
 $debug    = options['D']
 
 $ntimes = ntimes
 
-$stderr.puts "** $ntimes=#{$ntimes.inspect}, $expand=#{$expand}, use_devnull=#{use_devnull}, options=#{options.inspect}" if $debug
+$stderr.puts "** $ntimes=#{$ntimes.inspect}, flag_expand=#{flag_expand}, options=#{options.inspect}" if $debug
 
 
 ## help
@@ -87,20 +87,18 @@ end
 ## load data file
 require 'yaml'
 ydoc = YAML.load_file(datafile)
-data = []
-ydoc['data'].each do |hash|
-  data << hash.inject({}) { |h, t| h[t[0].intern] = t[1]; h }
-  #h = {}; hash.each { |k, v| h[k.intern] = v } ; data << h
-end
-data = data.sort_by { |h| h[:code] }
-#require 'pp'; pp data
+context = ydoc
+list = context['list']
+#list = []
+#ydoc['list'].each do |hash|
+#  list << hash.inject({}) { |h, t| h[t[0].intern] = t[1]; h }
+#  #h = {}; hash.each { |k, v| h[k.intern] = v } ; data << h
+#end
+#require 'pp'; pp list
 
 
 ## test definitions
 testdefs = YAML.load(DATA)
-
-
-## manipulate
 testdefs.each do |testdef|
   c = testdef['class']
   testdef['code']    ||= "print #{c}.new(File.read(erubyfile)).result(binding())\n"
@@ -127,12 +125,13 @@ end
 #require 'pp'; pp testdefs
 
 
+## define test functions for each classes
 str = File.read(erubyfile)
 testdefs.each do |h|
-  ## define test functions for each classes
   s = ''
-  s << "def test_basic_#{h['name']}(erubyfile, data)\n"
-  if $expand
+  s   << "def test_basic_#{h['name']}(erubyfile, context)\n"
+  s   << "  list = context['list']\n"
+  if flag_expand
     $ntimes.times do
       s << '  ' << h['code']  #<< "\n"
     end
@@ -141,7 +140,7 @@ testdefs.each do |h|
     s << "    #{h['code']}\n"
     s << "  end\n"
   end
-  s << "end\n"
+  s   << "end\n"
   #puts s
   eval s
 end
@@ -152,7 +151,8 @@ testdefs.each do |h|
   if h['compile']
     code = eval h['compile']
     s = <<-END
-      def view_#{h['name']}(data)
+      def view_#{h['name']}(context)
+        list = context['list']
         #{code}
       end
     END
@@ -166,17 +166,18 @@ end
 testdefs.each do |h|
   pr = h['return'] ? 'print ' : ''
   s = ''
-  s << "def test_func_#{h['name']}(data)\n"
-  if $expand
+  s   << "def test_func_#{h['name']}(context)\n"
+  s   << "  list = context['list']\n"
+  if flag_expand
     $ntimes.times do
-      s << "  #{pr}view_#{h['name']}(data)\n"
+      s << "  #{pr}view_#{h['name']}(context)\n"
     end
   else
     s << "  $ntimes.times do\n"
-    s << "    #{pr}view_#{h['name']}(data)\n"
+    s << "    #{pr}view_#{h['name']}(context)\n"
     s << "  end\n"
   end
-  s << "end\n"
+  s   << "end\n"
   #puts s
   eval s
 end
@@ -195,8 +196,9 @@ testdefs.each do |h|
     # define function
     pr = h['return'] ? 'print' : ''
     s = ''
-    s << "def test_cache_#{h['name']}(erubyfile, data)\n"
-    if $expand
+    s   << "def test_cache_#{h['name']}(erubyfile, context)\n"
+    s   << "  list = context['list']\n"
+    if flag_expand
       ntimes.times do
         s << "  #{pr} eval(File.read('#{fname}'))\n"
       end
@@ -205,7 +207,7 @@ testdefs.each do |h|
       s << "    #{pr} eval(File.read('#{fname}'))\n"
       s << "  end\n"
     end
-    s << "end\n"
+    s   << "end\n"
     #puts s
     eval s
   end
@@ -232,7 +234,7 @@ testdefs.each do |h|
   eval h['code']
   ## execute view function
   next unless h['compile']
-  v = __send__("view_#{h['name']}", data)
+  v = __send__("view_#{h['name']}", context)
   print v if h['return']
   ## execute caching function
   fname = "src/erubybench.#{h['name']}.rb"
@@ -266,7 +268,7 @@ width = 30
 begin
 
   ## evaluate
-  if !testtype || testtype == 'basic'
+  if !testmode || testmode == 'basic'
     $stderr.puts "## evaluate"
     Benchmark.bm(width) do |job|
       ## basic test
@@ -275,7 +277,7 @@ begin
         func = 'test_basic_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, erubyfile, data)
+          __send__(func, erubyfile, context)
         end
       end
     end
@@ -283,7 +285,7 @@ begin
   end
 
   ## caching
-  if !testtype || testtype == 'cache'
+  if !testmode || testmode == 'cache'
     $stderr.puts "## evaluate cache file"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
@@ -293,7 +295,7 @@ begin
         func = 'test_cache_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, erubyfile, data)
+          __send__(func, erubyfile, context)
         end
       end
     end
@@ -301,7 +303,7 @@ begin
   end
 
   ## function
-  if !testtype || testtype == 'func'
+  if !testmode || testmode == 'func'
     $stderr.puts "## evaluate function"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
@@ -311,7 +313,7 @@ begin
         func = 'test_func_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, data)
+          __send__(func, context)
         end
       end
     end
@@ -325,9 +327,9 @@ begin
   #    func = 'test_basic_' + h['name']
   #    GC.start
   #    job.report(title) do
-  #      __send__(func, erubyfile, data)
+  #      __send__(func, erubyfile, context)
   #    end
-  #  end if !testtype || testtype == 'basic'
+  #  end if !testmode || testmode == 'basic'
   #
   #  ## caching function
   #  testdefs.each do |h|
@@ -336,9 +338,9 @@ begin
   #    func = 'test_cache_' + h['name']
   #    GC.start
   #    job.report(title) do
-  #      __send__(func, erubyfile, data)
+  #      __send__(func, erubyfile, context)
   #    end
-  #  end if !testtype || testtype == 'cache'
+  #  end if !testmode || testmode == 'cache'
   #
   #  ## view-function test
   #  testdefs.each do |h|
@@ -347,9 +349,9 @@ begin
   #    func = 'test_func_' + h['name']
   #    GC.start
   #    job.report(title) do
-  #      __send__(func, data)
+  #      __send__(func, list)
   #    end
-  #  end if !testtype || testtype == 'func'
+  #  end if !testmode || testmode == 'func'
   #
   #end
 

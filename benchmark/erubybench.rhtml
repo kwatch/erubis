@@ -1,8 +1,9 @@
+---
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
           "http://www.w3.org/TR/html4/loose.dtd">
 <html>
  <head>
-  <title>benchmark example</title>
+  <title>Stock Prices</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <style type="text/css">
   <!--
@@ -24,6 +25,10 @@ thead {
 .even {
     background-color: #CCCCFF;
 }
+
+.minus {
+    color: #FF0000;
+}
   -->
   </style>
 
@@ -31,38 +36,41 @@ thead {
 
  <body>
 
-  <h1>Companies</h1>
+  <h1>Stock Prices</h1>
 
-  <table summary="">
+  <table>
    <thead>
     <tr>
-     <th>index</th><th>code</th><th>name</th>
+     <th>#</th><th>code</th><th>name</th><th>price</th><th>change</th><th>ratio</th>
     </tr>
    </thead>
    <tbody>
 <%
-n = 0
-data.each do |d|
-  n += 1
-  klass = n % 2 == 0 ? 'even' : 'odd'
+   n = 0
+   for item in list
+     n += 1
  %>
-    <tr class="<%= klass %>">
-     <td style="text-align: center">
-      <span><%= n %></span>
+    <tr class="<%= n % 2 == 0 ? 'even' : 'odd' %>">
+     <td style="text-align: center"><%= n %></td>
+     <td>
+      <a href="/stocks/<%= item['code'] %>"><%= item['code'] %></a>
      </td>
      <td>
-      <a href="/stock/<%= d[:code] %>"><%= d[:code] %></a>
+      <a href="<%= item['url'] %>"><%= item['name'] %></a>
      </td>
      <td>
-      <% if d[:url] %>
-      <a href="<%= d[:url] %>"><%= d[:name] %></a>
-      <% else %>
-      <%= d[:name] %>
-      <% end %>
+      <strong><%= item['price'] %></strong>
      </td>
+     <% if item['change'] < 0.0 %>
+     <td class="minus"><%= item['change'] %></td>
+     <td class="minus"><%= item['ratio'] %></td>
+     <% else %>
+     <td><%= item['change'] %></td>
+     <td><%= item['ratio'] %></td>
+     <% end %>
     </tr>
 <%
-end
+   end
  %>
    </tbody>
   </table>

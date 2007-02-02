@@ -2,7 +2,20 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-: Rev.51 (2007-01-10)
+: Rev.53 (2007-02-02)
+	.- [change] main.rb: option '-c class' is renamed to '-C'
+	.- [enhance] main.rb: option '-c context' supported
+	.- [refactor] tiny.rb: prefix '_' is aded to local vars in TinyEruby#evaluate() and PI::TinyEruby#evaluate()
+	.- [refactor] tiny.rb: method 'escape_text() is inlined in TinyEruby and PI::TinyEruby classes
+	.- [enhance] add test for PI::TinyEruby
+	.- [change] erubybench.rb: default output file is changed to '/dev/null'
+	.- [change] erubybench.rb: options '-F' is changed to '-t'
+	.- [change] erubybench.rb: options '-T' is changed to '-m'
+	.- [change] erubybench.rb: don't convert string keys of context data into symbol
+	.- [change] erubybench.yaml: add price, change, and ratio
+	.- [change] erubybench.rhtml: add price, change, and ratio
+
+: Rev.52 (2007-01-10)
 	.- [change] erubybench.rb: option '-S' obsoleted
 	.- [change] erubybench.rb: option '-o' (outfile) added
 	.- [change] erubybench.rb: option '-O' is changed to '-p'

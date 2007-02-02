@@ -32,37 +32,40 @@ module Erubis
         len   = match.begin(0) - pos
         text  = input[pos, len]
         pos   = match.end(0)
-        src << " _buf << '" << escape_text(text) << "';"
+        #src << " _buf << '" << escape_text(text) << "';"
+        text.gsub!(/['\\]/, '\\\\\&')
+        src << " _buf << '" << text << "';" unless text.empty?
         if !indicator              # <% %>
           src << code << ";"
-        elsif indicator[0] == ?\#  # <%# %>
-          n = code.count("\n")
-          add_stmt(src, "\n" * n)
+        elsif indicator == '#'     # <%# %>
+          src << ("\n" * code.count("\n"))
         else                       # <%= %>
           src << " _buf << (" << code << ").to_s;"
         end
       end
       rest = $' || input
-      src << " _buf << '" << escape_text(rest) << "';"
+      #src << " _buf << '" << escape_text(rest) << "';"
+      rest.gsub!(/['\\]/, '\\\\\&')
+      src << " _buf << '" << rest << "';" unless rest.empty?
       src << "\n_buf.join\n"       # postamble
       return src
     end
 
-    def escape_text(text)
-      return text.gsub!(/['\\]/, '\\\\\&') || text
+    #def escape_text(text)
+    #  return text.gsub!(/['\\]/, '\\\\\&') || text
+    #end
+
+    def result(_binding=TOPLEVEL_BINDING)
+      eval @src, _binding
     end
 
-    def result(binding=TOPLEVEL_BINDING)
-      eval @src, binding
-    end
-
-    def evaluate(context=Object.new)
-      if context.is_a?(Hash)
-        obj = Object.new
-        context.each do |k, v| obj.instance_variable_set("@#{k}", v) end
-        context = obj
+    def evaluate(_context=Object.new)
+      if _context.is_a?(Hash)
+        _obj = Object.new
+        _context.each do |k, v| _obj.instance_variable_set("@#{k}", v) end
+        _context = _obj
       end
-      context.instance_eval @src
+      _context.instance_eval @src
     end
 
   end
@@ -81,7 +84,7 @@ module Erubis
 
     attr_reader :src
 
-    EMBEDDED_PATTERN = /(^[ \t]*)?<\?rb(\s.*?)\?>([ \t]*\r?\n)?|@(!*)?\{(.*?)\}@/m
+    EMBEDDED_PATTERN = /(^[ \t]*)?<\?rb(\s.*?)\?>([ \t]*\r?\n)?|@(!+)?\{(.*?)\}@/m
 
     def convert(input)
       src = "_buf = [];"           # preamble
@@ -91,7 +94,9 @@ module Erubis
         len   = match.begin(0) - pos
         text  = input[pos, len]
         pos   = match.end(0)
-        src << " _buf << '" << escape_text(text) << "';"
+        #src << " _buf << '" << escape_text(text) << "';"
+        text.gsub!(/['\\]/, '\\\\\&')
+        src << " _buf << '" << text << "';" unless text.empty?
         if stmt                # <?rb ... ?>
           if lspace && rspace
             src << "#{lspace}#{stmt}#{rspace}"
@@ -101,7 +106,7 @@ module Erubis
             src << " _buf << '" << rspace << "';" if rspace
           end
         else                       # ${...}, $!{...}
-          if indicator.nil? || indicator.empty?
+          if !indicator
             src << " _buf << " << @escape << "(" << expr << ");"
           elsif indicator == '!'
             src << " _buf << (" << expr << ").to_s;"
@@ -109,26 +114,28 @@ module Erubis
         end
       end
       rest = $' || input
-      src << " _buf << '" << escape_text(rest) << "';"
+      #src << " _buf << '" << escape_text(rest) << "';"
+      rest.gsub!(/['\\]/, '\\\\\&')
+      src << " _buf << '" << rest << "';" unless rest.empty?
       src << "\n_buf.join\n"       # postamble
       return src
     end
 
-    def escape_text(text)
-      return text.gsub!(/['\\]/, '\\\\\&') || text
+    #def escape_text(text)
+    #  return text.gsub!(/['\\]/, '\\\\\&') || text
+    #end
+
+    def result(_binding=TOPLEVEL_BINDING)
+      eval @src, _binding
     end
 
-    def result(binding=TOPLEVEL_BINDING)
-      eval @src, binding
-    end
-
-    def evaluate(context=Object.new)
-      if context.is_a?(Hash)
-        obj = Object.new
-        context.each do |k, v| obj.instance_variable_set("@#{k}", v) end
-        context = obj
+    def evaluate(_context=Object.new)
+      if _context.is_a?(Hash)
+        _obj = Object.new
+        _context.each do |k, v| _obj.instance_variable_set("@#{k}", v) end
+        _context = _obj
       end
-      context.instance_eval @src
+      _context.instance_eval @src
     end
 
   end

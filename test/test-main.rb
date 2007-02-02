@@ -196,10 +196,10 @@ END
   end
 
 
-  def test_class1     # -c
+  def test_class1     # -C
     @input    = INPUT
     @expected = OUTPUT.gsub(/<aaa>/, '&lt;aaa&gt;').gsub(/b&b/, 'b&amp;b').gsub(/"ccc"/, '&quot;ccc&quot;')
-    @options  = "-c XmlEruby"
+    @options  = "-C XmlEruby"
     _test()
   end
 
@@ -331,7 +331,7 @@ END
   end
 
 
-  def test_context1   # -B
+  def test_result1   # -B
     yamlfile = "test.context4.yaml"
     #
     @input = <<'END'
@@ -361,6 +361,27 @@ END
     ensure
       File.unlink(yamlfile) if test(?f, yamlfile)
     end
+  end
+
+
+  def test_context1   # -c
+    @input = <<'END'
+user = <%= @user %>
+<% for item in @list %>
+ - <%= item %>
+<% end %>
+END
+    @expected = <<'END'
+user = World
+ - aaa
+ - bbb
+ - ccc
+END
+    #
+    @options = ['-c', '{user: World, list: [aaa, bbb, ccc]}']
+    _test()
+    @options = ['-c', '@user="World"; @list=%w[aaa bbb ccc]']
+    _test()
   end
 
 
