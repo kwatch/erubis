@@ -25,7 +25,7 @@ module Erubis
     EMBEDDED_PATTERN = /<%(=+|\#)?(.*?)-?%>/m
 
     def convert(input)
-      src = "_buf = [];"           # preamble
+      src = "_buf = '';"           # preamble
       pos = 0
       input.scan(EMBEDDED_PATTERN) do |indicator, code|
         match = Regexp.last_match
@@ -47,7 +47,7 @@ module Erubis
       #src << " _buf << '" << escape_text(rest) << "';"
       rest.gsub!(/['\\]/, '\\\\\&')
       src << " _buf << '" << rest << "';" unless rest.empty?
-      src << "\n_buf.join\n"       # postamble
+      src << "\n_buf.to_s\n"       # postamble
       return src
     end
 
@@ -87,7 +87,7 @@ module Erubis
     EMBEDDED_PATTERN = /(^[ \t]*)?<\?rb(\s.*?)\?>([ \t]*\r?\n)?|@(!+)?\{(.*?)\}@/m
 
     def convert(input)
-      src = "_buf = [];"           # preamble
+      src = "_buf = '';"           # preamble
       pos = 0
       input.scan(EMBEDDED_PATTERN) do |lspace, stmt, rspace, indicator, expr|
         match = Regexp.last_match
@@ -117,7 +117,7 @@ module Erubis
       #src << " _buf << '" << escape_text(rest) << "';"
       rest.gsub!(/['\\]/, '\\\\\&')
       src << " _buf << '" << rest << "';" unless rest.empty?
-      src << "\n_buf.join\n"       # postamble
+      src << "\n_buf.to_s\n"       # postamble
       return src
     end
 

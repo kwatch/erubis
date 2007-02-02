@@ -107,13 +107,13 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: &basic1_output|
       <ul>
         <li><aaa></li>
@@ -133,7 +133,7 @@ __END__
         <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';   i = 0
            for item in list
              i += 1
@@ -142,7 +142,7 @@ __END__
       ';   end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
@@ -158,12 +158,12 @@ __END__
             i += 1 %><li><%= item %></li><% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>'; i = 0
+      _buf = ''; _buf << '<ul>'; i = 0
           for item in list
             i += 1 ; _buf << '<li>'; _buf << ( item ).to_s; _buf << '</li>'; end ; _buf << '
       '; _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul><li><aaa></li><li>b&b</li><li>"ccc"</li>
       </ul>
@@ -178,13 +178,13 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in @list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *basic1_output
 
 ##
@@ -201,7 +201,7 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';
         for item in list 
       
@@ -212,7 +212,7 @@ __END__
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
         <li>    :  <aaa>  </li>
@@ -229,11 +229,11 @@ __END__
       b = "\""
       c = '\''
   src: |
-      _buf = []; _buf << 'a = "\'"
+      _buf = ''; _buf << 'a = "\'"
       b = "\\""
       c = \'\\\'\'
       ';
-      _buf.join
+      _buf.to_s
   output: *quotation1_input
 
 ##
@@ -247,13 +247,13 @@ __END__
        [@ end @]
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
@@ -272,13 +272,13 @@ __END__
        <!--% end %-->
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
@@ -297,13 +297,13 @@ __END__
 #       <% end %>
 #      </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       '; _buf << ' '; for item in list ; _buf << '
       '; _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
       '; _buf << ' '; end ; _buf << '
       '; _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
       ^
@@ -349,7 +349,7 @@ __END__
   #    _buf << "</ul>\n"
   #    _buf
   src:
-    "_buf = []; _buf << '<ul>\r\n';  for item in list \r\n _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>\r\n';  end \r\n _buf << '</ul>\r\n';\n_buf.join\n"
+    "_buf = ''; _buf << '<ul>\r\n';  for item in list \r\n _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>\r\n';  end \r\n _buf << '</ul>\r\n';\n_buf.to_s\n"
   #output: |
   #    <ul>
   #      <li><aaa></li>
@@ -368,11 +368,11 @@ __END__
         <li>foo</li>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
         <li>foo</li>
       </ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *nomatch1
 
 ##
@@ -383,11 +383,11 @@ __END__
       <%= str %>
       <%== str %>
   src: |
-      _buf = []; str = '<>&"' 
+      _buf = ''; str = '<>&"' 
        _buf << Erubis::XmlHelper.escape_xml( str ); _buf << '
       '; _buf << ( str ).to_s; _buf << '
       ';
-      _buf.join
+      _buf.to_s
   output: |
       &lt;&gt;&amp;&quot;
       <>&"
@@ -403,14 +403,14 @@ __END__
        <% end %>
       </pre>
   src: |
-      _buf = []; _buf << '<pre>
+      _buf = ''; _buf << '<pre>
       ';  for item in list 
        _buf << '  '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '
       '; _buf << '  '; _buf << ( item ).to_s; _buf << '
       ';  end 
        _buf << '</pre>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <pre>
         &lt;aaa&gt;
@@ -433,13 +433,13 @@ __END__
         <%==== item["var#{n}"] %>
       <% end %>
   src: |
-      _buf = []; for item in list 
+      _buf = ''; for item in list 
        _buf << '  '; _buf << Erubis::XmlHelper.escape_xml( item["var#{n}"] ); _buf << '
       '; _buf << '  '; _buf << ( item["var#{n}"] ).to_s; _buf << '
       '; _buf << '  '; $stderr.puts("*** debug: item[\"var\#{n}\"]=#{(item["var#{n}"]).inspect}"); _buf << '
       '; _buf << '  '; _buf << '
       '; end 
-      _buf.join
+      _buf.to_s
   output: |
 
 ##
@@ -466,13 +466,13 @@ __END__
        <% end %>
       </ul>
   src: |
-      @_buf = _buf = []; _buf << '<ul>
+      @_buf = _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; print item ; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
@@ -536,6 +536,19 @@ __END__
       - "</ul>\n"
 
 ##
+- name:  arraybuffer1
+  class: ArrayBufferEruby
+  input: *basic1_input
+  src: |
+      _buf = []; _buf << '<ul>
+      ';  for item in list 
+       _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+      ';  end 
+       _buf << '</ul>
+      ';
+      _buf.join
+  output: *basic1_output
+
 - name:  stringbuffer1
   class: StringBufferEruby
   input: *basic1_input
@@ -551,7 +564,7 @@ __END__
       ';  end 
        _buf << '</ul>
       ';
-      _buf
+      _buf.to_s
   output: *basic1_output
 #      <ul>
 #        <li><aaa></li>
@@ -564,13 +577,14 @@ __END__
   class: NoTextEruby
   input: *basic1_input
   src: |
-      _buf = [];
+      _buf = '';
         for item in list 
              _buf << ( item ).to_s;
         end 
       
-      _buf.join
+      _buf.to_s
   output:  '<aaa>b&b"ccc"'
+
 
 ##
 - name:  nocode1
@@ -597,7 +611,7 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
        '; for item in list ; _buf << '
         <li>
          '; _buf << ( item ).to_s; _buf << '
@@ -605,7 +619,7 @@ __END__
        '; end ; _buf << '
       </ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
       ^
@@ -633,11 +647,11 @@ __END__
         [= item =] = [== item =]
       <% end %>
   src: |
-      _buf = []; for item in list 
+      _buf = ''; for item in list 
        _buf << '  '; _buf << ( item ).to_s; _buf << ' % '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '
       '; _buf << '  '; _buf << ( item ).to_s; _buf << ' = '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '
       '; end 
-      _buf.join
+      _buf.to_s
   output: |4
         <aaa> % &lt;aaa&gt;
         <aaa> = &lt;aaa&gt;
@@ -656,11 +670,11 @@ __END__
         ${item} = ${=item}
       <% end %>
   src: |
-      _buf = []; for item in list 
+      _buf = ''; for item in list 
        _buf << '  '; _buf << (item).to_s; _buf << ' % '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '
       '; _buf << '  '; _buf << (item).to_s; _buf << ' = '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '
       '; end 
-      _buf.join
+      _buf.to_s
   output: |4
         <aaa> % &lt;aaa&gt;
         <aaa> = &lt;aaa&gt;
@@ -687,7 +701,7 @@ __END__
        % spaced percent
       </pre>
   src: |
-      _buf = []; _buf << '<table>
+      _buf = ''; _buf << '<table>
       '; for item in list
        _buf << '  <tr>
           <td>'; _buf << ( item ).to_s; _buf << '</td>
@@ -700,7 +714,7 @@ __END__
       '; _buf << ' % spaced percent
       </pre>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <table>
         <tr>
@@ -740,13 +754,13 @@ __END__
       
       def ordered_list(list)
       
-      _buf = []; _buf << '<ol>
+      _buf = ''; _buf << '<ol>
       ';   for item in list 
        _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '</li>
       ';   end 
        _buf << '</ol>
       ';
-      _buf.join
+      _buf.to_s
        end 
   output: |
       <ol>
@@ -888,13 +902,13 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
        '; for item in list ; _buf << '
         <li>'; _buf << ( item ).to_s; _buf << '</li>
        '; end ; _buf << '
       </ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
       ^
@@ -917,13 +931,13 @@ __END__
        <% end %>
       </ul>
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
        '; for item in @list ; _buf << '
         <li>'; _buf << ( item ).to_s; _buf << '</li>
        '; end ; _buf << '
       </ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
       ^
@@ -947,14 +961,14 @@ __END__
        <?rb end ?>
       </ul>
   src: &src_pi1|
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in @list 
        _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '</li>
         <li>'; _buf << ( item ).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: &output_pi1|
       <ul>
         <li>&lt;aaa&gt; / <aaa></li>
@@ -972,14 +986,14 @@ __END__
   testopt:  evaluate
   input: *input_pi1
   src: |
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in @list 
        _buf << '  <li>'; _buf << (item).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '</li>
         <li>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << ' / '; _buf << ( item ).to_s; _buf << '</li>
       ';  end 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
   output: |
       <ul>
         <li><aaa> / &lt;aaa&gt;</li>
@@ -1029,7 +1043,7 @@ __END__
       
         def show(list)
       
-      _buf = []; _buf << '<ul>
+      _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << (    item 
       ).to_s;  end 
@@ -1039,7 +1053,7 @@ __END__
 
        _buf << '</ul>
       ';
-      _buf.join
+      _buf.to_s
       
         end
 	show(@list) 
@@ -1059,13 +1073,13 @@ __END__
 	 <?rb end ?>
 	</ul>
   src: |
-	_buf = []; _buf << '<ul>
+	_buf = ''; _buf << '<ul>
 	';  for item in @list 
 	 _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '</li>
 	';  end 
 	 _buf << '</ul>
 	';
-	_buf.join
+	_buf.to_s
   output: |
 	<ul>
 	  <li>&lt;aaa&gt; / <aaa></li>

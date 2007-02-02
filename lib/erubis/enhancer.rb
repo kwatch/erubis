@@ -214,7 +214,7 @@ module Erubis
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_buf\n"
+      src << "_buf.to_s\n"
     end
 
   end

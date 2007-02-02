@@ -4,6 +4,73 @@
 
 
 #
+- release:   2.2.0
+  date:
+  enhances:
+    - |
+      Performance tuned up about 8 % compared with 2.1.0.
+
+    - |
+      Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
+      instead of Erubis::ArrayBufferEnhancer.
+      (StringBufferEnhancer is a litte faster than ArrayBufferEnhancer.)
+
+      ex.
+      ====================
+      $ cat example.rhtml
+      <ul>
+      <% for item in @list %>
+        <li><%= item %></li>
+      <% end %>
+      </ul>
+      $ erubis -x example.rhtml
+      _buf = ''; _buf << '<ul>
+      '; for item in @list 
+       _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+      '; end 
+       _buf << '</ul>
+      ';
+      _buf.to_s
+      ====================
+
+    - |
+      Erubis::StringBufferEnhancer#add_postamble() prints "_buf.to_s"
+      instead of "_buf".
+      This is useful for 'erubis -x file.rhtml | ruby -wc'.
+
+    - |
+      New option '-c context' support. It takes context string in
+      YAML inline style or Ruby code style.
+      
+      ex.
+      ====================
+      $ cat example.rhtml
+      <h1><%= @title %></h1>
+      <ul>
+      <% for item in @list %>
+        <li><%= item %></li>
+      <% end %>
+      </ul>
+      ## YAML inline style
+      $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
+      <h1>Example</h1>
+      <ul>
+        <li>AAA</li>
+        <li>BBB</li>
+        <li>CCC</li>
+      </ul>
+      ## Ruby code styel
+      $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
+      <h1>Example</h1>
+      <ul>
+        <li>AAA</li>
+        <li>BBB</li>
+        <li>CCC</li>
+      </ul>
+      ====================
+	
+
+#
 - release:   2.1.0
   date:      2006-09-23
   enhances:

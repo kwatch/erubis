@@ -410,19 +410,19 @@ __END__
   return: str
   skip:   yes
 
-#- name:   ErubisArrayBuffer
-#  class:  Erubis::ArrayBufferEruby
+- name:   ErubisArrayBuffer
+  class:  Erubis::ArrayBufferEruby
 #  code: |
 #    Erubis::ArrayBufferEruby.new(File.read(erubyfile)).result(binding())
 #  compile: |
 #    Erubis::ArrayBufferEruby.new(str).src
-#  return: str
-#  skip:   no
+  return: str
+  skip:   no
 
 - name:   ErubisStringBuffer
   class:  Erubis::StringBufferEruby
   return: str
-  skip:   no
+  skip:   yes
 
 - name:   ErubisStringIO
   class:  Erubis::StringIOEruby

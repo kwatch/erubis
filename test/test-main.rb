@@ -47,14 +47,14 @@ END
 #_buf
 #END
   SRC = <<'END'
-_buf = []; _buf << 'list:
+_buf = ''; _buf << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list 
  _buf << '  - '; _buf << ( item ).to_s; _buf << '
 '; end 
  _buf << 'user: '; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << '
 ';
-_buf.join
+_buf.to_s
 END
 #  SRC2 = SRC.gsub(/\blist /, '@list ').gsub(/\buser /, '@user ')
 
@@ -86,7 +86,7 @@ END
 END
 
   PI_SRC = <<'END'
-_buf = []; _buf << '<ul>
+_buf = ''; _buf << '<ul>
 ';   @list = ['<aaa>', 'b&b', '"ccc"']
    for item in @list 
  _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '
@@ -94,11 +94,11 @@ _buf = []; _buf << '<ul>
 ';   end 
  _buf << '<ul>
 ';
-_buf.join
+_buf.to_s
 END
 
   PI_ESCAPED_SRC = <<'END'
-_buf = []; _buf << '<ul>
+_buf = ''; _buf << '<ul>
 ';   @list = ['<aaa>', 'b&b', '"ccc"']
    for item in @list 
  _buf << '  <li>'; _buf << (item).to_s; _buf << ' / '; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '
@@ -106,7 +106,7 @@ _buf = []; _buf << '<ul>
 ';   end 
  _buf << '<ul>
 ';
-_buf.join
+_buf.to_s
 END
 
   PI_OUTPUT = <<'END'
@@ -234,14 +234,14 @@ END
 #_buf
 #END
     @expected = <<'END'
-_buf = []; _buf << 'list:
+_buf = ''; _buf << 'list:
 '; list = ['<aaa>', 'b&b', '"ccc"']
    for item in list ; _buf << '
 '; _buf << '  - '; _buf << ( item ).to_s; _buf << '
 '; end ; _buf << '
 '; _buf << 'user: '; _buf << ( defined?(user) ? user : "(none)" ).to_s; _buf << '
 ';
-_buf.join
+_buf.to_s
 END
     @options = "-xT"
     _test()
@@ -460,7 +460,7 @@ END
 
   def test_bodyonly1  # -b
     @input = INPUT
-    @expected = SRC.sub(/\A_buf = \[\];/,'').sub(/\n_buf.join\n\z/,'')
+    @expected = SRC.sub(/\A_buf = '';/,'').sub(/\n_buf.to_s\n\z/,'')
     @options = '-b -x'
     _test()
   end

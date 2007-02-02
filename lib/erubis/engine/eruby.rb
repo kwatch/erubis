@@ -16,8 +16,8 @@ module Erubis
   ##
   module RubyGenerator
     include Generator
-    #include StringBufferEnhancer
-    include ArrayBufferEnhancer
+    #include ArrayBufferEnhancer
+    include StringBufferEnhancer
 
     def init_generator(properties={})
       super

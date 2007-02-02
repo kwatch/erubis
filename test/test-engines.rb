@@ -50,7 +50,7 @@ __END__
       </table>
       <%=== i+1 %>
   expected: |
-      _buf = []; _buf << '<table>
+      _buf = ''; _buf << '<table>
        <tbody>
       ';   i = 0
            list.each_with_index do |item, i| 
@@ -63,7 +63,7 @@ __END__
       </table>
       '; $stderr.puts("*** debug: i+1=#{(i+1).inspect}"); _buf << '
       ';
-      _buf.join
+      _buf.to_s
 ##
 - name:  php1
   lang:  php
