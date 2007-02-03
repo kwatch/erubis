@@ -41,19 +41,21 @@ class ErubisTest < Test::Unit::TestCase
       end
     end if @chomp
 
-    if @testopt != 'load_file'
-      if @klass == Erubis::TinyEruby
-        eruby = @klass.new(@input)
-      else
-        eruby = @klass.new(@input, @options)
-      end
-    else
+    if @testopt == 'load_file'
       filename = "tmp.#{@name}.eruby"
       begin
         File.open(filename, 'w') { |f| f.write(@input) }
         eruby = @klass.load_file(filename, @options)
       ensure
+        cachename = filename + '.cache'
+        File.unlink(cachename) if test(?f, cachename)
         File.unlink(filename) if test(?f, filename)
+      end
+    else
+      if @klass == Erubis::TinyEruby
+        eruby = @klass.new(@input)
+      else
+        eruby = @klass.new(@input, @options)
       end
     end
     assert_text_equal(@src, eruby.src)
@@ -95,6 +97,62 @@ class ErubisTest < Test::Unit::TestCase
       assert_text_equal(@output, actual)
     end
   end
+
+
+  def test_load_file_cache1
+    @input = <<END
+<ul>
+<% for item in @list %>
+  <li><%= item %></li>
+<% end %>
+</ul>
+END
+    @src = <<END
+_buf = ''; _buf << '<ul>
+'; for item in @list 
+ _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+'; end 
+ _buf << '</ul>
+';
+_buf.to_s
+END
+    @klass = Erubis::Eruby
+    filename = 'tmp.load_file_timestamp1'
+    cachename = filename + '.cache'
+    begin
+      File.open(filename, 'w') { |f| f.write(@input) }
+      assert_block() { !test(?f, cachename) }
+      engine = @klass.load_file(filename)
+      assert_block() { test(?f, cachename) }
+      assert_block() { File.mtime(filename) <= File.mtime(cachename) }
+      assert_text_equal(@src, engine.src)
+      #
+      input2 = @input.gsub(/ul>/, 'ol>')
+      src2   = @src.gsub(/ul>/, 'ol>')
+      mtime = File.mtime(filename)
+      File.open(filename, 'w') { |f| f.write(input2) }
+      t1 = Time.now()
+      sleep(1)
+      t2 = Time.now()
+      File.utime(t1, t1, filename)
+      File.utime(t2, t2, cachename)
+      assert_block('cache should be newer') { File.mtime(filename) < File.mtime(cachename) }
+      engine = @klass.load_file(filename)
+      assert_block('cache should be newer') { File.mtime(filename) < File.mtime(cachename) }
+      assert_text_equal(@src, engine.src)
+      #
+      File.utime(t2, t2, filename)
+      File.utime(t1, t1, cachename)
+      assert_block('cache should be older') { File.mtime(filename) > File.mtime(cachename) }
+      engine = @klass.load_file(filename)
+      assert_block('cache should be newer') { File.mtime(filename) <= File.mtime(cachename) }
+      assert_text_equal(src2, engine.src)
+    ensure
+      File.unlink(cachename) if File.file?(cachename)
+      File.unlink(filename) if File.file?(filename)
+    end
+  end
+
 
 end
 

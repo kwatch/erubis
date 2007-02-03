@@ -39,6 +39,11 @@
       This is useful for 'erubis -x file.rhtml | ruby -wc'.
 
     - |
+      Erubis::Engine.load_file(filename) creates cache file (filename +
+      '.cache') automatically if cache file is not exist or cache file
+      is old.
+
+    - |
       New option '-c context' support. It takes context string in
       YAML inline style or Ruby code style.
       

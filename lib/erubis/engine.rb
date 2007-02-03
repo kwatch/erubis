@@ -23,11 +23,6 @@ module Erubis
     #include Converter
     #include Generator
 
-    # convert input string and set it to @src
-    def convert!(input)
-      @src = convert(input)
-    end
-
     def initialize(input=nil, properties={})
       #@input = input
       init_generator(properties)
@@ -36,12 +31,34 @@ module Erubis
       @src    = convert(input) if input
     end
 
-    ## load file and create engine object
+
+    ##
+    ## convert input string and set it to @src
+    ##
+    def convert!(input)
+      @src = convert(input)
+    end
+
+
+    ##
+    ## load file, write cache file, and return engine object.
+    ## this method create cache file (filename + '.cache') automatically.
+    ##
     def self.load_file(filename, properties={})
-      input = File.open(filename, 'rb') { |f| f.read }
-      input.untaint   # is it ok?
+      cachename = filename + '.cache'
       properties[:filename] = filename
-      engine = self.new(input, properties)
+      if test(?f, cachename) && File.mtime(filename) <= File.mtime(cachename)
+        engine = self.new(nil, properties)
+        engine.src = File.read(cachename)
+      else
+        input = File.open(filename, 'rb') { |f| f.read }
+        engine = self.new(input, properties)
+        File.open(cachename, 'w') do |f|
+          f.flock(File::LOCK_EX)
+          f.write(engine.src)
+        end
+      end
+      engine.src.untaint   # ok?
       return engine
     end
 
