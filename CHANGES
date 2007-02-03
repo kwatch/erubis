@@ -1,5 +1,5 @@
 # $Rev$
-# $Release$
+# $Release: 0.0.0 $
 # $Copyright$
 
 
@@ -8,7 +8,20 @@
   date:
   enhances:
     - |
-      Performance tuned up about 8 % compared with 2.1.0.
+      Performance tuned up. Release 2.2.0 works about 8 percent faster
+      than 2.1.0.
+
+    - |
+      Erubis::Engine.load_file(filename) creates cache file (filename +
+      '.cache') automatically if cache file is old or not exist.
+      Caching makes Erubis about 40-50 percent faster.
+
+      ex.
+      --------------------
+      require 'erubis'
+      eruby = Erubis::Eruby.load_file('example.rhtml')
+         ## cache file 'example.rhtml.cache' is created automatically
+      --------------------
 
     - |
       Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
@@ -39,9 +52,29 @@
       This is useful for 'erubis -x file.rhtml | ruby -wc'.
 
     - |
-      Erubis::Engine.load_file(filename) creates cache file (filename +
-      '.cache') automatically if cache file is not exist or cache file
-      is old.
+      Command-line option '-f datafile' can take Ruby script ('*.rb')
+      as well as YAML file ('*.yaml' or '*.yml').
+
+      ex.
+      ====================
+      $ cat context.rb
+      @title = 'Example'
+      @list  = %w[AAA BBB CCC]
+      $ cat example.rhtml
+      <h1><%= @title %></h1>
+      <ul>
+      <% for item in @list %>
+        <li><%= item %></li>
+      <% end %>
+      </ul>
+      $ erubis -f context.rb example.rhtml
+      <h1>Example</h1>
+      <ul>
+        <li>AAA</li>
+        <li>BBB</li>
+        <li>CCC</li>
+      </ul>
+      ====================
 
     - |
       New option '-c context' support. It takes context string in

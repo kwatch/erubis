@@ -1,5 +1,6 @@
 .=title:	Erubis Users' Guide
 .?version:	$Release$
+.?release:	$Release$
 .?lastupdate:	$Date$
 .?stylesheet:	docstyle.css
 
@@ -9,7 +10,8 @@
 
 Erubis is an implementation of eRuby.
 It has the following features.
-.* Very fast, almost three times faster than ERB and even faster than eruby (implemented in C)
+.* Very fast, almost 3 times faster than ERB and about 10 percent faster than eruby (implemented in C)
+.* File caching of converted Ruby script support
 .* Auto escaping support
 .* Auto trimming spaces around '<% %>'
 .* Embedded pattern changeable (default '<% %>')
@@ -211,7 +213,7 @@ $ ruby example2.rb
 
 .$$ Escape		| tut-escape
 
-Erubis have ability to escape (sanitize) expression.
+Erubis has ability to escape (sanitize) expression.
 Erubis::Eruby class act as the following:
 .* {{,<%= {{/expr/}} %>,}} -  not escaped.
 .* {{,<%== {{/expr/}} %>,}} - escaped.
@@ -361,7 +363,7 @@ Context object is a set of data which are used in eRuby script.
 Using context object makes clear which data to be used.
 In Erubis, Hash object and Erubis::Context object are available as context object.
 
-Context data can be accessible via isntance variables in eRuby script.
+Context data can be accessible via instance variables in eRuby script.
 
 .? example5.eruby
 .-------------------- example5.eruby
@@ -385,10 +387,10 @@ eruby = Erubis::Eruby.new(input)      # create Eruby object
   :val   => 'Erubis Example',
   'list' => ['aaa', 'bbb', 'ccc'],
 }*}}
-  # or
-  #   context = Erubis::Context.new()
-  #   context['val'] = 'Erubis Example'
-  #   context[:list] = ['aaa', 'bbb', 'ccc'],
+## or
+# context = Erubis::Context.new()
+# context['val'] = 'Erubis Example'
+# context[:list] = ['aaa', 'bbb', 'ccc'],
 
 puts {{*eruby.evaluate(context)*}}         # get result
 .--------------------
@@ -400,7 +402,7 @@ $ ruby example5.rb
 .====================
 
 The difference between Erubis#result(binding) and Erubis#evaluate(context) is that the former invokes 'eval @src, binding' and the latter invokes 'context.instance_eval @src'.
-This means that data is passed into eRuby script via local variable when Eruby::binding() is called, or instance variable when Eruby::evaluate() is called.
+This means that data is passed into eRuby script via local variables when Eruby::binding() is called, or passed via instance variables when Eruby::evaluate() is called.
 
 Here is the definition of Erubis#result() and Erubis#evaluate().
 
@@ -416,14 +418,14 @@ def result(_binding)
   return {{*eval(@src, _binding)*}}
 end
 
-def evaluate(context)
-  if context.is_a?(Hash)
+def evaluate(_context)
+  if _context.is_a?(Hash)
     # convert hash object to Context object
-    hash = context
-    context = Erubis::Context.new
-    hash.each { |key, val| context[key] = val }
+    _hash = _context
+    _context = Erubis::Context.new
+    _hash.each { |key, val| _context[key] = val }
   end
-  return {{*context.instance_eval(@src)*}}
+  return {{*_context.instance_eval(@src)*}}
 end
 .--------------------
 
@@ -455,19 +457,11 @@ $ ruby example6.rb
 
 .$$ Context Data File	| tut-datafile
 
-It is very useful to import YAML document data into Hash context object.
-
-.? example7.yaml
-.-------------------- example7.yaml
-{{*title:*}} Users List
-{{*users:*}}
-  - name:  foo
-    mail:  foo@mail.com
-  - name:  bar
-    mail:  bar@mail.net
-  - name:  baz
-    mail:  baz@mail.org
-.--------------------
+Command-line option '-f' specifies context data file.
+Erubis load context data file and use it as context data.
+Context data file can be YAML file ('*.yaml' or '*.yml') or Ruby script ('*.rb').
+.#It is very useful to import YAML document data into Hash context object.
+.#You can specify YAML file as context data file with command-line option '-f'.
 
 .? example7.eruby
 .-------------------- example7.eruby
@@ -481,32 +475,56 @@ It is very useful to import YAML document data into Hash context object.
 </ul>
 .--------------------
 
-.? example7.rb
-.-------------------- example7.rb
-require 'erubis'
-input = File.read('example7.eruby')
-eruby = Erubis::Eruby.new(input)      # create Eruby object
-
-## load YAML document as context object
-{{*require 'yaml'*}}
-{{*context = YAML.load_file('example7.yaml')*}}
-
-puts {{*eruby.evaluate(context)*}}        # get result
+.? context.yaml
+.-------------------- context.yaml
+{{*title:*}} Users List
+{{*users:*}}
+  - name:  foo
+    mail:  foo@mail.com
+  - name:  bar
+    mail:  bar@mail.net
+  - name:  baz
+    mail:  baz@mail.org
 .--------------------
 
-.? output
-.====================
-$ ruby example7.rb
-.<<<:! (cd guide.d; ruby example7.rb)
-.====================
+.? context.rb
+.-------------------- context.rb
+@title = 'Users List'
+@users = [
+   { 'name'=>'foo', 'mail'=>'foo@mail.com' },
+   { 'name'=>'bar', 'mail'=>'bar@mail.net' },
+   { 'name'=>'baz', 'mail'=>'baz@mail.org' },
+]
+.--------------------
 
-It is able to specify YAML data file with the command-line option '-f'.
-You don't have to write ruby script such as 'example7.rb'.
+.#.? example7.rb
+.#.-------------------- example7.rb
+.#require 'erubis'
+.#input = File.read('example7.eruby')
+.#eruby = Erubis::Eruby.new(input)      # create Eruby object
+.#
+.### load YAML document as context object
+.#{{*require 'yaml'*}}
+.#{{*context = YAML.load_file('example7.yaml')*}}
+.#
+.#puts {{*eruby.evaluate(context)*}}        # get result
+.#.--------------------
+.#
+.#.? output
+.#.====================
+.#$ ruby example7.rb
+.#.<<<:! (cd guide.d; ruby example7.rb)
+.#.====================
+.#
+.#It is able to specify YAML data file with the command-line option '-f'.
+.#You don't have to write ruby script such as 'example7.rb'.
 
 .? example of command-line option '-f'
 .====================
-$ erubis {{*-f example7.yaml*}} example7.eruby
-.<<<:! (cd guide.d; erubis -f example7.yaml example7.eruby)
+$ erubis {{*-f context.yaml*}} example7.eruby
+.<<<:! (cd guide.d; erubis -f context.yaml example7.eruby)
+$ erubis {{*-f context.rb*}} example7.eruby
+.<<<:! (cd guide.d; erubis -f context.rb example7.eruby)
 .====================
 
 Command-line option '-S' converts keys of mapping in YAML data file from string into symbol.
@@ -514,37 +532,63 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 
 
 
-.$$ Preamble and Postamble   | tut-preamble
+.$$ Context Data String		| tut-datastr
 
-The first line ('_buf = [];') in the compiled source code is called preamble
-and the last line ('_buf.join') is called postamble.
-
-Command-line option '-b' skips the output of preamble and postamble.
+Command-line option '-c {{/str/}}' enables you to specify context data in command-line.
+{{/str/}} can be YAML inline style or Ruby code.
 
 .? example8.eruby
 .-------------------- example8.eruby
+<h1><%= @title %></h1>
+<ul>
+<% for item in @list %>
+ <li><%= item %></li>
+<% end %>
+</ul>
+.--------------------
+
+.? example of command-line option '-c'
+.====================
+### YAML inline style
+$ erubis {{*-c '{title: Example, list: [AAA, BBB, CCC]}'*}} example8.eruby
+.<<<:! (cd guide.d; erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example8.eruby)
+### Ruby code
+$ erubis {{*-c '@title="Example"; @list=%w[AAA BBB CCC]'*}} example8.eruby
+.<<<:! (cd guide.d; erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example8.eruby)
+.====================
+
+
+.$$ Preamble and Postamble   | tut-preamble
+
+The first line ('_buf = '';') in the compiled source code is called preamble
+and the last line ('_buf.to_s') is called postamble.
+
+Command-line option '-b' skips the output of preamble and postamble.
+
+.? example9.eruby
+.-------------------- example9.eruby
 <% for item in @list %>
  <b><%= item %></b>
 <% end %>
 .--------------------
 
-compiled source code with and without command-line option '-b'
+.? compiled source code with and without command-line option '-b'
 .====================
 ## without '-b'
-$ erubis -x example8.eruby
-.<<<:! erubis -x guide.d/example8.eruby | ruby -pe 'sub! /^_buf.*?(;|$)/, "{{*\\&*}}"'
+$ erubis -x example9.eruby
+.<<<:! erubis -x guide.d/example9.eruby | ruby -pe 'sub! /^_buf.*?(;|$)/, "{{*\\&*}}"'
 
 ## with '-b'
-$ erubis -x {{*-b*}} example8.eruby
-.<<<:! erubis -x -b guide.d/example8.eruby
+$ erubis -x {{*-b*}} example9.eruby
+.<<<:! erubis -x -b guide.d/example9.eruby
 .====================
 
 Erubis::Eruby.new option '{{,:preamble=>false,}}' and '{{,:postamble=>false,}}' also suppress output of preamble or postamle.
 
-.? example8.rb
-.-------------------- example8.rb
+.? example9.rb
+.-------------------- example9.rb
 require 'erubis'
-input = File.read('example8.eruby')
+input = File.read('example9.eruby')
 eruby1 = Erubis::Eruby.new(input)
 eruby2 = Erubis::Eruby.new(input, {{*:preamble=>false, :postamble=>false*}})
 
@@ -555,8 +599,8 @@ puts eruby2.src   # don't print preamble and postamble
 
 .? output
 .====================
-$ ruby example8.rb
-.<<<:! (cd guide.d; ruby example8.rb)
+$ ruby example9.rb
+.<<<:! (cd guide.d; ruby example9.rb)
 .====================
 
 .#The command-line option '-b' specify both :preamble and :postamble to false.
@@ -576,8 +620,8 @@ Erubis can parse Processing Instructions (PI) as embedded pattern.
 This is more useful than basic embedded pattern ('{{,<% ... >,}}') because PI doesn't break XML or HTML at all.
 For example the following XHTML file is well-formed and HTML validator got no errors on this example.
 
-.? example9.xhtml
-.-------------------- example9.xhtml
+.? example10.xhtml
+.-------------------- example10.xhtml
 <?xml version="1.0" ?>
 {{*<?rb
   lang = 'en'
@@ -608,15 +652,31 @@ If {{/name/}} is omitted then the following name is used according to '-l {{/lan
 -l javascript ., <?js ... ?>
 -l scheme ., <?scheme ... ?>
 .+--------------------
-	mapping of '-l' option and PI name
 
 .? output
 .====================
-$ erubis {{*--pi*}} example9.xhtml
-.<<<:! (cd guide.d; erubis --pi example9.xhtml)
+$ erubis -x {{*--pi*}} example10.xhtml
+.<<<:! (cd guide.d; erubis -x --pi example10.xhtml)
 .====================
 
 Expression character can be changeable by command-line property '--embchar={{/char/}}. Default is '{{,@,}}'.
+
+Use Erubis::PI::Eruby instead of Erubis::Eruby if you want to use PI as embedded pattern.
+
+.? example10.rb
+.-------------------- example10.rb
+require 'erubis'
+input = File.read('example10.xhtml')
+eruby = Erubis::PI::Eruby.new(input)
+print eruby.src
+.--------------------
+
+.? output
+.====================
+$ ruby example10.rb
+.<<<:! (cd guide.d; ruby example10.rb)
+.====================
+
 
 {{*(experimental)*}} Erubis supports '<%= ... %>' pattern with PI pattern.
 .#It is useful if you are Rails user to write helper methods which contains '}' character.
@@ -873,17 +933,24 @@ ArrayEnhancer is only for Eruby.
 
 .$$ ArrayBufferEnhancer	| arraybuffer-enhancer
 
-Arraybufferenhancer makes Eruby to use array buffer.
-Array buffer is a litte faster than String buffer.
-Erubis::Eruby includes this enhancer by default.
+ArrayBufferEnhancer makes Eruby to use array buffer.
+Array buffer is a litte slower than String buffer.
 
 ArrayBufferEnhancer is only for Eruby.
+
+.====================
+$ erubis -xE ArrayBuffer example.eruby
+.<<<:! erubis -xE ArrayBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;|\.to_s)?/,"{{*\\&*}}")'
+.====================
 
 
 
 .$$ StringBufferEnhancer | stringbuffer-enhancer
 
 StringBufferEnhancer makes Eruby to use string buffer.
+String buffer is a little faster than array buffer.
+Erubis::Eruby includes this enhancer by default.
+
 
 .#.? stringbuffer-example.rb
 .#.-------------------- stringbuffer-example.rb
@@ -901,11 +968,10 @@ StringBufferEnhancer makes Eruby to use string buffer.
 .#.<<<:! (cd guide.d; ruby stringbuffer-example.rb)
 .#.====================
 
-.====================
-$ erubis -xE StringBuffer example.eruby
-.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;)?/,"{{*\\&*}}")'
-.====================
-
+.#.====================
+.#$ erubis -xE StringBuffer example.eruby
+.#.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;)?/,"{{*\\&*}}")'
+.#.====================
 
 
 StringBufferEnhancer is only for Eruby.
@@ -1474,12 +1540,33 @@ $ erubis -l js example.ejs
 .$ Other Topics	| topics
 
 
+.$$ File Caching		| topics-caching
 
-.$$ TinyEruby class	| topics-tinyeruby
+Erubis::Eruby.convert_file(filename) convert file into Ruby script and return Eruby object.
+In addition, it caches converted Ruby script into cache file (filename + '.cache') if cache file is old or not exist.
+If cache file exists and is newer than eruby file, Erubis::Eruby.convert_file() loads cache file.
 
-TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
+.? example of Erubis::Eruby.convert_file()
+.--------------------
+require 'erubis'
+filename = 'example.rhtml'
+eruby = {{*Erubis::Eruby.convert_file(filename)*}}
+cachename = filename + '.cache'
+if test(?f, cachename)
+  puts "*** cache file '#{cachename}' created."
+end
+.--------------------
+
+Caching makes Erubis about 40-50 percent faster than no-caching.
+See {{benchmark|#topics-benchmark}} for details.
+
+
+
+.$$ Erubis::TinyEruby class	| topics-tinyeruby
+
+Erubis::TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
 If you don't need any enhancements of Erubis and only require simple eRuby implementation,
-try TinyEruby class.
+try Erubis::TinyEruby class.
 
 
 .$$ Ruby on Rails Support	| topics-rails
@@ -1605,7 +1692,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#.? result
 .#.==================== notext_eruby.output
 .#$ notext ex-notext.rhtml
-.#_buf = [];
+.#_buf = '';
 .#
 .#
 .#
@@ -1626,7 +1713,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#     end ;
 .#
 .#
-.#_buf.join
+.#_buf.to_s
 .#.====================
 .#
 .#Option '-c' ({{*c*}}ompact) deletes empty lines.
@@ -1634,7 +1721,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#.? result
 .#.==================== notext_eruby_c.output
 .#$ notext -c ex-notext.rhtml
-.#_buf = [];
+.#_buf = '';
 .#     if @list.nil? || @list.empty? ;
 .#     else ;
 .#         @list.each_with_index do |item, i| ;
@@ -1642,7 +1729,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#               _buf << ( item ).to_s;
 .#         end ;
 .#     end ;
-.#_buf.join
+.#_buf.to_s
 .#.====================
 .#
 .#Option '-u' ({{*u*}}nique) replace some empty lines with a empty line.
@@ -1650,7 +1737,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#.? result
 .#.==================== notext_eruby_u.output
 .#$ notext -u ex-notext.rhtml
-.#_buf = [];
+.#_buf = '';
 .#
 .#     if @list.nil? || @list.empty? ;
 .#
@@ -1664,7 +1751,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#
 .#     end ;
 .#
-.#_buf.join
+.#_buf.to_s
 .#.====================
 .#
 .#Option '-n' ({{*n*}}umber) adds line number.
@@ -1673,7 +1760,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#.? result
 .#.==================== notext_eruby_nu.output
 .#$ notext -nu ex-notext.rhtml
-.#  1: _buf = [];
+.#  1: _buf = '';
 .#
 .# 10:      if @list.nil? || @list.empty? ;
 .#
@@ -1687,7 +1774,7 @@ $ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
 .#
 .# 22:      end ;
 .#
-.# 25: _buf.join
+.# 25: _buf.to_s
 .#.====================
 .#
 .#'notext' is available with PHP or ePerl script.
@@ -1811,7 +1898,7 @@ This is very useful when debugging eRuby script.
 .? command line example
 .====================
 $ notext notext-ex.rhtml
-_buf = [];
+_buf = '';
 
 
 
@@ -1825,7 +1912,7 @@ _buf = [];
  end ;
 
 
-_buf.join
+_buf.to_s
 .====================
 
 Command-line option '-u' deletes continuous empty lines to one empty line.
@@ -1833,7 +1920,7 @@ Command-line option '-u' deletes continuous empty lines to one empty line.
 .? command-line example
 .====================
 $ notext {{*-u*}} notext-ex.rhtml
-_buf = [];
+_buf = '';
 
  @list.each_with_index do |item, i| ;
    klass = i % 2 == 0 ? 'odd' : 'even' ;
@@ -1842,7 +1929,7 @@ _buf = [];
 
  end ;
 
-_buf.join
+_buf.to_s
 .====================
 
 Command-line option '-c' deletes all empty lines.
@@ -1850,20 +1937,20 @@ Command-line option '-c' deletes all empty lines.
 .? command-line example
 .====================
 $ notext {{*-c*}} notext-ex.rhtml
-_buf = [];
+_buf = '';
  @list.each_with_index do |item, i| ;
    klass = i % 2 == 0 ? 'odd' : 'even' ;
                _buf << ( klass ).to_s;
          _buf << Erubis::XmlHelper.escape_xml( item );
  end ;
-_buf.join
+_buf.to_s
 .====================
 
 Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
 
 .====================
 $ notext {{*-nu*}} example2.rhtml
-  1: _buf = [];
+  1: _buf = '';
 
   7:  @list.each_with_index do |item, i| ;
   8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
@@ -1872,15 +1959,15 @@ $ notext {{*-nu*}} example2.rhtml
 
  12:  end ;
 
- 16: _buf.join
+ 16: _buf.to_s
 $ notext {{*-nc*}} example2.rhtml
-  1: _buf = [];
+  1: _buf = '';
   7:  @list.each_with_index do |item, i| ;
   8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
   9:                _buf << ( klass ).to_s;
  10:          _buf << Erubis::XmlHelper.escape_xml( item );
  12:  end ;
- 16: _buf.join
+ 16: _buf.to_s
 .====================
 
 Command 'notext' supports '-l {{/lang/}}' options. For example, command-line option '-l php' retrieves embedded PHP code from PHP file.
@@ -1889,66 +1976,91 @@ Command 'notext' supports '-l {{/lang/}}' options. For example, command-line opt
 
 .$$ Benchmark		| topics-benchmark
 
-A benchmark script is included in Erubis package at erubis-X.X.X/benchark directory.
+A benchmark script is included in Erubis package at 'erubis-X.X.X/benchark/' directory.
 Here is an example result of benchmark.
 
-.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4, eruby1.0.5
-.____________________
-                                        user     system      total        real
-ERuby                             131.990000   1.900000 133.890000 (135.061456)
-ERB                               385.040000   3.180000 388.220000 (391.570653)
-Erubis::Eruby                     127.750000   2.520000 130.270000 (131.385922)
-Erubis::StringBufferEruby         167.610000   2.600000 170.210000 (171.712798)
-.#Erubis::SimplifiedEruby         121.400000   2.210000 123.610000 (124.663233)
-Erubis::StdoutEruby                92.790000   2.000000  94.790000 ( 95.532633)
-.#Erubis::StdoutSimplifiedEruby    89.260000   2.190000  91.450000 ( 92.164058)
-.#Erubis::PrintOutEruby            92.730000   1.940000  94.670000 ( 95.417965)
-.#Erubis::PrintOutSimplifiedEruby  82.030000   2.190000  84.220000 ( 84.879534)
-Erubis::TinyEruby                 118.720000   2.250000 120.970000 (122.022996)
-Erubis::TinyStdoutEruby            87.130000   2.030000  89.160000 ( 89.879538)
-.#Erubis::TinyPrintEruby           84.160000   1.940000  86.100000 ( 86.774579)
-.____________________
-.#____________________
-.#                                        user     system      total        real
-.#ERuby                             138.280000   1.900000 140.180000 (141.470426)
-.#ERB                               402.220000   3.190000 405.410000 (408.886894)
-.#Erubis::Eruby                     147.080000   2.400000 149.480000 (150.752255)
-.#Erubis::StringBufferEruby         186.130000   2.600000 188.730000 (190.374098)
-.#Erubis::SimplifiedEruby           130.100000   2.210000 132.310000 (133.426010)
-.#Erubis::StdoutEruby               106.010000   2.130000 108.140000 (108.999193)
-.#Erubis::StdoutSimplifiedEruby      97.130000   2.180000  99.310000 (100.104433)
-.#.#Erubis::PrintOutEruby           109.900000   2.090000 111.990000 (112.854442)
-.#.#Erubis::PrintOutSimplifiedEruby  93.120000   2.140000  95.260000 ( 96.002970)
-.#Erubis::TinyEruby                 118.740000   2.360000 121.100000 (122.141380)
-.#Erubis::TinyStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
-.#.#Erubis::TinyPrintEruby           86.540000   1.970000  88.510000 ( 89.208078)
+.? MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.5, eruby1.0.5, gcc4.0.1
+.====================
+$ cd erubis-2.2.0/benchmark/
+$ ruby erubybench.rb -n 10000 -m execute
+## execute
+                                    user     system      total        real
+eruby                          24.460000   0.600000  25.060000 ( 29.248518)
+ERB                            65.190000   1.060000  66.250000 ( 77.053693)
+Erubis::Eruby                  21.450000   0.700000  22.150000 ( 26.237943)
+Erubis::Eruby(cached)          14.440000   0.850000  15.290000 ( 18.152723)
+Erubis::ArrayBufferEruby       21.730000   0.710000  22.440000 ( 26.861644)
+Erubis::SimplifiedEruby        19.620000   0.660000  20.280000 ( 23.159973)
+Erubis::StdoutEruby            22.810000   0.690000  23.500000 ( 26.590015)
+Erubis::PrintOutEruby          22.590000   0.680000  23.270000 ( 26.336551)
+Erubis::TinyEruby              18.370000   0.660000  19.030000 ( 21.475423)
+.====================
+
+This shows that...
+.* Erubis::Eruby works more than 10 percent faster than eruby.
+.* Erubis::Eruby works about 3 times faster than ERB.
+.* Caching (by Erubis::Eruby.load_file()) makes Erubis about 40-50 percent faster.
+.* Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
+.* $stdout and print() make Erubis a little slower.
+.* Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
+
+.#.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4, eruby1.0.5
 .#.____________________
-
-.? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4, eruby1.0.5
-.____________________
-                                        user     system      total        real
-ERuby                              55.040000   2.120000  57.160000 ( 89.311397)
-ERB                               103.960000   3.480000 107.440000 (159.231792)
-Erubis::Eruby                      36.130000   1.570000  37.700000 ( 52.188574)
-Erubis::StringBufferEruby          47.270000   1.980000  49.250000 ( 73.867537)
-.#Erubis::SimplifiedEruby            34.310000   1.600000  35.910000 ( 51.762841)
-Erubis::StdoutEruby                26.240000   1.490000  27.730000 ( 41.840430)
-.#Erubis::StdoutSimplifiedEruby      25.380000   1.340000  26.720000 ( 37.231918)
-.#Erubis::PrintOutEruby              26.850000   1.260000  28.110000 ( 38.378227)
-.#Erubis::PrintOutSimplifiedEruby    24.160000   1.280000  25.440000 ( 40.048199)
-Erubis::TinyEruby                  31.690000   1.590000  33.280000 ( 49.862091)
-Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
-.#Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
-.____________________
-
-This shows that:
-.* Erubis::Eruby is about 3 times faster than ERB.
-.* Erubis::Eruby is about 3% faster than ERuby in linux or 1.5 times faster in Mac.
-.#.* Erubis::SimplifiedEruby (which incudes SimplifiedEnhander) is faster than ERuby.
-.* String buffer (StringBufferEnhancer) is slower than array buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
-.* Using $stdout is faster than array buffer and string buffer.
-.* Erubis::TinyEruby (at 'erubis/tiny.rb') and it's subclasses are the fastest in all eRuby implementation.
-
+.#                                        user     system      total        real
+.#ERuby                             131.990000   1.900000 133.890000 (135.061456)
+.#ERB                               385.040000   3.180000 388.220000 (391.570653)
+.#Erubis::Eruby                     127.750000   2.520000 130.270000 (131.385922)
+.#Erubis::StringBufferEruby         167.610000   2.600000 170.210000 (171.712798)
+.#.#Erubis::SimplifiedEruby         121.400000   2.210000 123.610000 (124.663233)
+.#Erubis::StdoutEruby                92.790000   2.000000  94.790000 ( 95.532633)
+.#.#Erubis::StdoutSimplifiedEruby    89.260000   2.190000  91.450000 ( 92.164058)
+.#.#Erubis::PrintOutEruby            92.730000   1.940000  94.670000 ( 95.417965)
+.#.#Erubis::PrintOutSimplifiedEruby  82.030000   2.190000  84.220000 ( 84.879534)
+.#Erubis::TinyEruby                 118.720000   2.250000 120.970000 (122.022996)
+.#Erubis::TinyStdoutEruby            87.130000   2.030000  89.160000 ( 89.879538)
+.#.#Erubis::TinyPrintEruby           84.160000   1.940000  86.100000 ( 86.774579)
+.#.____________________
+.#.#____________________
+.#.#                                        user     system      total        real
+.#.#ERuby                             138.280000   1.900000 140.180000 (141.470426)
+.#.#ERB                               402.220000   3.190000 405.410000 (408.886894)
+.#.#Erubis::Eruby                     147.080000   2.400000 149.480000 (150.752255)
+.#.#Erubis::StringBufferEruby         186.130000   2.600000 188.730000 (190.374098)
+.#.#Erubis::SimplifiedEruby           130.100000   2.210000 132.310000 (133.426010)
+.#.#Erubis::StdoutEruby               106.010000   2.130000 108.140000 (108.999193)
+.#.#Erubis::StdoutSimplifiedEruby      97.130000   2.180000  99.310000 (100.104433)
+.#.#.#Erubis::PrintOutEruby           109.900000   2.090000 111.990000 (112.854442)
+.#.#.#Erubis::PrintOutSimplifiedEruby  93.120000   2.140000  95.260000 ( 96.002970)
+.#.#Erubis::TinyEruby                 118.740000   2.360000 121.100000 (122.141380)
+.#.#Erubis::TinyStdoutEruby            86.140000   1.840000  87.980000 ( 88.679196)
+.#.#.#Erubis::TinyPrintEruby           86.540000   1.970000  88.510000 ( 89.208078)
+.#.#.____________________
+.#
+.#.? Env: MacOS X 10.4, PowerPC 1.42GHz, Mem1.5GB, Ruby1.8.4, eruby1.0.5
+.#.____________________
+.#                                        user     system      total        real
+.#ERuby                              55.040000   2.120000  57.160000 ( 89.311397)
+.#ERB                               103.960000   3.480000 107.440000 (159.231792)
+.#Erubis::Eruby                      36.130000   1.570000  37.700000 ( 52.188574)
+.#Erubis::StringBufferEruby          47.270000   1.980000  49.250000 ( 73.867537)
+.#.#Erubis::SimplifiedEruby            34.310000   1.600000  35.910000 ( 51.762841)
+.#Erubis::StdoutEruby                26.240000   1.490000  27.730000 ( 41.840430)
+.#.#Erubis::StdoutSimplifiedEruby      25.380000   1.340000  26.720000 ( 37.231918)
+.#.#Erubis::PrintOutEruby              26.850000   1.260000  28.110000 ( 38.378227)
+.#.#Erubis::PrintOutSimplifiedEruby    24.160000   1.280000  25.440000 ( 40.048199)
+.#Erubis::TinyEruby                  31.690000   1.590000  33.280000 ( 49.862091)
+.#Erubis::TinyStdoutEruby            22.550000   1.230000  23.780000 ( 33.316978)
+.#.#Erubis::TinyPrintEruby             22.340000   1.150000  23.490000 ( 33.577150)
+.#.____________________
+.#
+.#This shows that:
+.#.* Erubis::Eruby is about 3 times faster than ERB.
+.#.* Erubis::Eruby is about 3% faster than ERuby in linux or 1.5 times faster in Mac.
+.#.#.* Erubis::SimplifiedEruby (which incudes SimplifiedEnhander) is faster than ERuby.
+.#.* String buffer (StringBufferEnhancer) is slower than array buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
+.#.* Using $stdout is faster than array buffer and string buffer.
+.#.* Erubis::TinyEruby (at 'erubis/tiny.rb') and it's subclasses are the fastest in all eRuby implementation.
+.#
 
 
 .$ Command Reference	| command
@@ -1975,7 +2087,7 @@ erubis [..options..] [{{/file/}} ...]
 			This is equivarent to '--pattern={{/pattern/}}'.
   .[ -l lang       ]	Language name.
 			This option makes erubis command to compile script but no execute.
-.#  .[ -c class      ]	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
+.#  .[ -C class      ]	Class name (Eruby, XmlEruby, ...) to compile. (default Eruby).
   .[ -E enhacers   ]	Enhancer name (Escape, PercentLine, ...).
 			It is able to specify several enhancer name separating with ','
 			(ex. -f Escape,PercentLine,HeaderFooter).
@@ -1983,9 +2095,11 @@ erubis [..options..] [{{/file/}} ...]
 			It is able to specify several paths separating with ','
 			(ex. -f path1,path2,path3).
   .[ -K kanji      ]	Kanji code (euc, sjis, utf8, or none) (default none).
-  .[ -f file.yaml  ]	YAML file for context values (read stdin if filename is '-').
+  .[ -f file.yaml  ]	Context data file in YAML format ('*.yaml', '*.yml') or
+                        Ruby script ('*.rb').
 			It is able to specify several filenames separating with ','
 			(ex. -f file1,file2,file3).
+  .[ -c context    ]    Context data string in YAML inline style or Ruby code.
   .[ -t            ]	Expand tab characters in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
   .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()

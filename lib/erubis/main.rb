@@ -65,7 +65,7 @@ module Erubis
         ?C => :class,
         ?e => :escape,
         ?r => :requires,
-        ?f => :yamlfiles,
+        ?f => :datafiles,
         ?K => :kanji,
         ?I => :includes,
         ?l => :lang,
@@ -127,8 +127,8 @@ module Erubis
       $KCODE = opts.kanji if opts.kanji
 
       ## read context values from yaml file
-      yamlfiles = opts.yamlfiles
-      context = load_yamlfiles(yamlfiles, opts)
+      datafiles = opts.datafiles
+      context = load_datafiles(datafiles, opts)
 
       ## parse context data
       if opts.context
@@ -198,8 +198,8 @@ Usage: #{command} [..options..] [file ...]
   -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)
   -I path       : library include path
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
-  -c context    : context data (yaml inline style or ruby code)
-  -f file.yaml  : YAML file for context values (read stdin if filename is '-')
+  -c context    : context data string (yaml inline style or ruby code)
+  -f datafile   : context data file ('*.yaml', '*.yml', or '*.rb')
   -t            : expand tab character in YAML file
   -S            : convert mapping key from string to symbol in YAML file
   -B            : invoke 'result(binding)' instead of 'evaluate(context)'
@@ -369,27 +369,36 @@ END
       return enhancers
     end
 
-    def load_yamlfiles(yamlfiles, opts)
-      hash = {}
-      return hash unless yamlfiles
-      yamlfiles.split(/,/).each do |yamlfile|
-        if yamlfile == '-'
-          str = $stdin.read()
+    def load_datafiles(filenames, opts)
+      context = Erubis::Context.new
+      return hash unless filenames
+      filenames.split(/,/).each do |filename|
+        filename.strip!
+        test(?f, filename) or raise CommandOptionError.new("#{filename}: file not found.")
+        if filename =~ /\.ya?ml$/
+          if opts.untabify
+            str = YAML.load(untabify(File.read(filename)))
+            ydoc = YAML.load(str)
+          else
+            ydoc = YAML.load_file(filename)
+          end
+          ydoc.is_a?(Hash) or raise CommandOptionError.new("#{filename}: root object is not a mapping.")
+          intern_hash_keys(ydoc) if opts.intern
+          context.update(ydoc)
+        elsif filename =~ /\.rb$/
+          str = File.read(filename)
+          context2 = Erubis::Context.new
+          _instance_eval(context2, str)
+          context.update(context2)
         else
-          test(?f, yamlfile)  or raise CommandOptionError.new("#{yamlfile}: file not found.")
-          str = File.read(yamlfile)
+          CommandOptionError.new("#{filename}: '*.yaml', '*.yml', or '*.rb' required.")
         end
-        str = yamlfile == '-' ? $stdin.read() : File.read(yamlfile)
-        str = untabify(str) if opts.untabify
-        ydoc = YAML.load(str)
-        unless ydoc.is_a?(Hash)
-          raise CommandOptionError.new("#{yamlfile}: root object is not a mapping.")
-        end
-        intern_hash_keys(ydoc) if opts.intern
-        hash.update(ydoc)
       end
-      context = hash
       return context
+    end
+
+    def _instance_eval(_context, _str)
+      _context.instance_eval(_str)
     end
 
     def parse_context_data(context_str, opts)

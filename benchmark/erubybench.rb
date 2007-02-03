@@ -20,6 +20,7 @@ defaults = {
   :ntimes    => 1000,
   :erubyfile => 'erubybench.rhtml',
   :datafile  => 'erubybench.yaml',
+  :testmode  => 'execute',
   :outfile   => '/dev/null',
 }
 
@@ -36,7 +37,7 @@ Usage: ruby #{script} [..options..] [..testnames..] > /dev/null 2> bench.log
   -o outfile     :  output filename (default '#{defaults[:outfile]}')
   -A             :  test all targets
   -x testname,.. :  exclude testnames
-  -m testmode    :  basic/cache/func
+  -m testmode    :  execute/convert/func (default '#{defaults[:testmode]}')
   -X             :  expand loop
   -p             :  print output
 END
@@ -66,7 +67,7 @@ erubyfile = options['t'] || defaults[:erubyfile]
 datafile  = options['f'] || defaults[:datafile]
 outfile   = options['o'] || defaults[:outfile]
 flag_all  = options['A']
-testmode  = options['m']
+testmode  = options['m'] || defaults[:testmode]
 excludes  = options['x']
 flag_expand = options['X'] ? true : false
 flag_output = options['p'] ? true : false
@@ -129,11 +130,11 @@ end
 str = File.read(erubyfile)
 testdefs.each do |h|
   s = ''
-  s   << "def test_basic_#{h['name']}(erubyfile, context)\n"
+  s   << "def test_execute_#{h['name']}(erubyfile, context)\n"
   s   << "  list = context['list']\n"
   if flag_expand
     $ntimes.times do
-      s << '  ' << h['code']  #<< "\n"
+      s << "  #{h['code']}\n"
     end
   else
     s << "  $ntimes.times do\n"
@@ -144,6 +145,7 @@ testdefs.each do |h|
   #puts s
   eval s
 end
+
 
 ## define view functions for each classes
 str = File.read(erubyfile)
@@ -160,7 +162,6 @@ testdefs.each do |h|
     eval s
   end
 end
-
 
 ## define tests for view functions
 testdefs.each do |h|
@@ -183,6 +184,28 @@ testdefs.each do |h|
 end
 
 
+## define test for convertion
+testdefs.each do |h|
+  if h['compile']
+    s = ''
+    s   << "def test_convert_#{h['name']}(erubyfile)\n"
+    s   << "  str = File.read(erubyfile)\n"
+    if flag_expand
+      $ntimes.times do
+        s << "  src = #{h['compile']}\n"
+      end
+    else
+      s << "  $ntimes.times do \n"
+      s << "    src = #{h['compile']}\n"
+      s << "  end\n"
+    end
+    s   << "end\n"
+    #puts s
+    eval s
+  end
+end
+
+  
 ## define tests for caching
 str = File.read(erubyfile)
 Dir.mkdir('src') unless test(?d, 'src')
@@ -268,13 +291,12 @@ width = 30
 begin
 
   ## evaluate
-  if !testmode || testmode == 'basic'
-    $stderr.puts "## evaluate"
+  if !testmode || testmode == 'execute'
+    $stderr.puts "## execute"
     Benchmark.bm(width) do |job|
-      ## basic test
       testdefs.each do |h|
-        title = h['class']
-        func = 'test_basic_' + h['name']
+        title = h['title'] || h['class']
+        func = 'test_execute_' + h['name']
         GC.start
         job.report(title) do
           __send__(func, erubyfile, context)
@@ -284,14 +306,30 @@ begin
     $stderr.puts
   end
 
+  ## convert
+  if testmode == 'convert'
+    $stderr.puts "## convert"
+    Benchmark.bm(width) do |job|
+      testdefs.each do |h|
+        next unless h['compile']
+        title = h['title'] || h['class']
+        func = 'test_convert_' + h['name']
+        GC.start
+        job.report(title) do
+          __send__(func, erubyfile)
+        end
+      end
+    end
+  end
+
   ## caching
-  if !testmode || testmode == 'cache'
+  if testmode == 'cache'
     $stderr.puts "## evaluate cache file"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
         next unless h['compile']
         #title = 'cache_' + h['name']
-        title = h['class']
+        title = h['title'] || h['class']
         func = 'test_cache_' + h['name']
         GC.start
         job.report(title) do
@@ -303,13 +341,13 @@ begin
   end
 
   ## function
-  if !testmode || testmode == 'func'
+  if testmode == 'func'
     $stderr.puts "## evaluate function"
     Benchmark.bm(width) do |job|
       testdefs.each do |h|
         next unless h['compile']
         #title = 'func_' + h['name']
-        title = h['class']
+        title = h['title'] || h['class']
         func = 'test_func_' + h['name']
         GC.start
         job.report(title) do
@@ -363,8 +401,9 @@ __END__
 
 ## testdefs
 
-- name:   ERuby
+- name:   eruby
   class:  ERuby
+  title:  eruby
   code: |
     ERuby.import(erubyfile)
   compile: |
@@ -393,6 +432,15 @@ __END__
     Erubis::Eruby2.new(File.read(erubyfile)).result(binding())
   return: null
   skip:   yes
+
+- name:   ErubisEruby_cached
+  class:  Erubis::Eruby
+  title:  Erubis::Eruby(cached)
+  code: |
+    Erubis::Eruby.load_file(erubyfile).result(binding())
+  compile: |
+    Erubis::Eruby.load_file(erubyfile)
+  return: str
 
 - name:   ErubisExprStripped
   desc:   strip expr code

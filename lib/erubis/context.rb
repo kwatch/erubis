@@ -57,6 +57,21 @@ module Erubis
       end
     end
 
+    def update(context_or_hash)
+      arg = context_or_hash
+      if arg.is_a?(Hash)
+        arg.each do |key, val|
+          self[key] = val
+        end
+      else
+        arg.instance_variables.each do |varname|
+          key = varname[1..-1]
+          val = arg.instance_variable_get(varname)
+          self[key] = val
+        end
+      end
+    end
+
   end
 
 
