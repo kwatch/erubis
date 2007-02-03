@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.58 (2007-02-03)
+	.- [update] webiste/index.txt
+
+: Rev.57 (2007-02-03)
+	.- [update] website/images updated
+
 : Rev.56 (2007-02-03)
 	.- [update] users-guide updated
 	.- [enhance] add Erubis::Eruby_cached test

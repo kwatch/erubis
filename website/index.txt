@@ -6,6 +6,7 @@
 
 .$ News
 
+.* [2007-02-03] {{<erubis_2.2.0|download.cgi>}} released.
 .* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.
 .* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
 .* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
@@ -26,7 +27,7 @@
  </tr>
  <tr>
   <td class="fig-body">
-   <img src="img/erubis01.png" alt="figure of Erubis" />
+   <img src="img/erubis01.png" width="345" height="267" alt="figure of Erubis" />
   </td>
  </tr>
 </table>
@@ -34,7 +35,7 @@
 
 Erubis is a fast, secure, and very extensible implementation of eRuby.
 It has the following features.
-.* Very fast, almost three times faster than ERB and even faster than eruby (implemented in C).
+.* Very fast, almost three times faster than ERB and about ten percent faster than eruby (implemented in C).
 .* Auto escaping (sanitizing) support, it means that '<%= %>' can be escaped in default.
    It is desirable for web application.
 .* Spaces around '<% %>' are trimmed automatically only when '<%' is at the beginning of line and '%>' is at the end of line.
@@ -112,11 +113,11 @@ You can use Erubis in Java with Rhino.
 .$ Documents
 	.#.* {{<README|README.en.html>}}
 	.* Erubis (implemented in Ruby)
-	    .- {{<Users' guide|users-guide.html>}}
+	    .- {{<User's guide|users-guide.html>}}
 	    .- {{<CHANGES|CHANGES>}}
-	    .- {{<ReleaseNote|ReleaseNote.txt>}}
+	    .#.- {{<ReleaseNote|ReleaseNote.txt>}}
 	.* Erubis-J (implemented in Java)
-	    .- {{<Users' guide|erubisj-users-guide.html>}}
+	    .- {{<User's guide|erubisj-users-guide.html>}}
 	    .#.- {{<Changelog|erubisj-ChangeLog>}}
 	    .#.- {{<ReleaseNote|erubisj-ReleaseNote.txt>}}
 

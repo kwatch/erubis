@@ -24,6 +24,8 @@
 <a name="News"></a>
 <h2 class="section">News</h2>
 <ul class="ul1">
+<li>[2007-02-03] <a href="download.cgi">erubis_2.2.0</a> released.
+</li>
 <li>[2006-09-28] <a href="download.cgi">erubis-j_1.0.0</a> (porting to Java) released.
 </li>
 <li>[2006-09-24] <a href="download.cgi">erubis_2.1.0</a> released.
@@ -47,7 +49,7 @@
  </tr>
  <tr>
   <td class="fig-body">
-   <img src="img/erubis01.png" alt="figure of Erubis" />
+   <img src="img/erubis01.png" width="345" height="267" alt="figure of Erubis" />
   </td>
  </tr>
 </table>
@@ -55,7 +57,7 @@
 It has the following features.
 </p>
 <ul class="ul1">
-<li>Very fast, almost three times faster than ERB and even faster than eruby (implemented in C).
+<li>Very fast, almost three times faster than ERB and about ten percent faster than eruby (implemented in C).
 </li>
 <li>Auto escaping (sanitizing) support, it means that '&lt;%= %&gt;' can be escaped in default.
    It is desirable for web application.
@@ -104,11 +106,11 @@ The following is an example of eRuby. '&lt;% ... %&gt;' means Ruby statement and
 <p>This will be compiled into Ruby program code.
 </p>
 <pre class="terminal">$ erubis -x example.eruby
-_buf = []; _buf &lt;&lt; 'Hello '; _buf &lt;&lt; ( @user ).to_s; _buf &lt;&lt; '!
+_buf = ''; _buf &lt;&lt; 'Hello '; _buf &lt;&lt; ( @user ).to_s; _buf &lt;&lt; '!
 '; for item in @list 
  _buf &lt;&lt; ' * '; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '
 '; end 
-_buf.join
+_buf.to_s
 </pre>
 <p>Or you can execute eRuby script directry.
 </p>
@@ -158,17 +160,15 @@ You can use Erubis in Java with Rhino.
 	<ul class="ul1">
 	<li>Erubis (implemented in Ruby)
 	    <ul class="ul2">
-	    <li><a href="users-guide.html">Users' guide</a>
+	    <li><a href="users-guide.html">User's guide</a>
 	    </li>
 	    <li><a href="CHANGES">CHANGES</a>
-	    </li>
-	    <li><a href="ReleaseNote.txt">ReleaseNote</a>
 	    </li>
 	    </ul>
 	</li>
 	<li>Erubis-J (implemented in Java)
 	    <ul class="ul2">
-	    <li><a href="erubisj-users-guide.html">Users' guide</a>
+	    <li><a href="erubisj-users-guide.html">User's guide</a>
 	    </li>
 	    </ul>
 	</li>
