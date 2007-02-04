@@ -25,7 +25,7 @@ class StringWriter < String
 end
 
 
-class BinTest < Test::Unit::TestCase
+class MainTest < Test::Unit::TestCase
 
   INPUT = <<'END'
 list:
@@ -187,6 +187,74 @@ END
   end
 
 
+  def test_syntax1    # -X (syntax ok)
+    @input    = INPUT
+    @expected = "Syntax OK\n"
+    @options  = '-X'
+    _test()
+  end
+
+
+  def test_syntax2    # -X (syntax error)
+    inputs = []
+    inputs << <<'END'
+<ul>
+<% for item in list %>
+  <li><%= item[:name]] %></li>
+<% end %>
+</ul>
+END
+    inputs << <<'END'
+<ul>
+<% for item in list %>
+  <li><%= item[:name] %></li>
+<% edn %>
+</ul>
+END
+    basename = 'tmp.test_syntax2_%d.rhtml'
+    filenames = [ basename % 0, basename % 1 ]
+    errmsgs = []
+    errmsgs << <<'END'
+3: parse error, unexpected ']', expecting ')'
+ _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
+                                         ^
+-:4: parse error, unexpected kEND, expecting ')'
+'; end 
+      ^
+-:7: parse error, unexpected $, expecting ')'
+END
+    errmsgs << <<'END'
+7: parse error, unexpected $, expecting kEND
+END
+    #
+    max = inputs.length
+    (0...max).each do |i|
+      @input    = inputs[i]
+      @expected = "tmp.test_syntax2:#{errmsgs[i]}"
+      @options  = '-X'
+      _test()
+    end
+    #
+    begin
+      (0...max).each do |i|
+        File.open(filenames[i], 'w') { |f| f.write(inputs[i]) }
+      end
+      @input = '<ok/>'
+      @expected = ''
+      @options = '-X'
+      (0...max).each do |i|
+        @expected << "#{filenames[i]}:#{errmsgs[i]}"
+        @options << " #{filenames[i]}"
+      end
+      _test()
+    ensure
+      (0...max).each do |i|
+        File.unlink(filenames[i]) if test(?f, filenames[i])
+      end
+    end
+  end
+
+
   def test_pattern1   # -p
     @input    = INPUT.gsub(/<%/, '<!--%').gsub(/%>/, '%-->')
     @expected = OUTPUT
@@ -258,21 +326,40 @@ END
   #++
 
 
-  def test_yaml1      # -f
-    yamlfile = "test.context1.yaml"
+  def test_datafile1      # -f data.yaml
+    datafile = "test.context1.yaml"
     @input    = INPUT2
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
-    @options  = "-f #{yamlfile}"
+    @options  = "-f #{datafile}"
     #
-    yaml = <<-END
+    str = <<-END
     user:  Hello
     password:  world
     END
-    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    File.open(datafile, 'w') { |f| f.write(str) }
     begin
       _test()
     ensure
-      File.unlink(yamlfile) if test(?f, yamlfile)
+      File.unlink(datafile) if test(?f, datafile)
+    end
+  end
+
+
+  def test_datafile2      # -f data.rb
+    datafile = "test.context1.rb"
+    @input    = INPUT2
+    @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
+    @options  = "-f #{datafile}"
+    #
+    str = <<-END
+    @user = 'Hello'
+    @password = 'world'
+    END
+    File.open(datafile, 'w') { |f| f.write(str) }
+    begin
+      _test()
+    ensure
+      File.unlink(datafile) if test(?f, datafile)
     end
   end
 

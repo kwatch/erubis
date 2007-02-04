@@ -6,7 +6,7 @@
 #
 - release:   2.2.0
   date:
-  enhances:
+  enhancements:
     - |
       Performance tuned up. Release 2.2.0 works about 8 percent faster
       than 2.1.0.
@@ -26,7 +26,7 @@
     - |
       Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
       instead of Erubis::ArrayBufferEnhancer.
-      (StringBufferEnhancer is a litte faster than ArrayBufferEnhancer.)
+      (String buffer is a litte faster than array buffer.)
 
       ex.
       ====================
@@ -77,41 +77,42 @@
       ====================
 
     - |
-      New option '-c context' support. It takes context string in
-      YAML inline style or Ruby code style.
-      
+      New command-line option '-c context' support. It takes context string
+      in YAML inline style or Ruby code style.
+
+      ex. YAML inline style
+      ====================
+      $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
+      ====================
+
+      ex. YAML inline style
+      ====================
+      $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
+      ====================
+
+    - |
+      New command-line option '-X' (syntax checking) support. It is similar
+      to 'erubis -x file.rhtml | ruby -wc', but It can take several filenames.
+
       ex.
       ====================
-      $ cat example.rhtml
-      <h1><%= @title %></h1>
-      <ul>
-      <% for item in @list %>
-        <li><%= item %></li>
-      <% end %>
-      </ul>
-      ## YAML inline style
-      $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
-      <h1>Example</h1>
-      <ul>
-        <li>AAA</li>
-        <li>BBB</li>
-        <li>CCC</li>
-      </ul>
-      ## Ruby code styel
-      $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
-      <h1>Example</h1>
-      <ul>
-        <li>AAA</li>
-        <li>BBB</li>
-        <li>CCC</li>
-      </ul>
+      $ erubis -X app/views/*/*.rhtml
+      Syntax OK
       ====================
-	
+
+    - |
+      New constant Erubis::VERSION added.
+
+
+  bugfixes:
+    - |
+      
+
 
 #
 - release:   2.1.0
   date:      2006-09-23
-  enhances:
+  enhancements:
     - |
       Ruby on Rails support. Add the following code to
       your 'app/controllers/application.rb' and restart web server.
@@ -258,7 +259,7 @@
     - module 'FastEnhancer' and class 'FastEruby' is obsolete because they are integrated into Eruby class
     - Eruby#evaluate() calls instance_eval() instead of eval()
     - XmlEruby.escape_xml() is moved to XmlHelper.escape_xml()
-  enhances:
+  enhancements:
     - multi programming language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
     - class Eruby runs very fast because FastEnhancer module is integrated into Eruby by default
     - TinyEruby class (tiny.rb) is added
@@ -287,7 +288,7 @@
 #
 - release:   1.1.0
   date:      2006-03-05
-  enhances:
+  enhancements:
     - '<%# ... %>' is supported
     - PrintEnhancer, PrintEruby, and PrintXmlEruby added
 

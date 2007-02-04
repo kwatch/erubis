@@ -49,12 +49,13 @@ module Erubis
     end
 
     def initialize
-      @single_options = "hvxTtSbeB"
+      @single_options = "hvxXTtSbeB"
       @arg_options    = "pcrfKIlaEC"
       @option_names   = {
         ?h => :help,
         ?v => :version,
         ?x => :source,
+        ?X => :syntax,
         ?T => :notrim,
         ?t => :untabify,
         ?S => :intern,
@@ -113,6 +114,7 @@ module Erubis
 
       ## action
       action = opts.action
+      action ||= 'syntax'  if opts.syntax
       action ||= 'convert' if opts.source
 
       ## lang
@@ -153,32 +155,39 @@ module Erubis
 
       ## convert and execute
       val = nil
+      msg = "Syntax OK\n"
       if filenames && !filenames.empty?
         filenames.each do |filename|
           test(?f, filename)  or raise CommandOptionError.new("#{filename}: file not found.")
           engine.filename = filename
           engine.convert!(File.read(filename))
-          print val if val = do_action(action, engine, context, opts)
+          val = do_action(action, engine, context, filename, opts)
+          msg = nil if val
         end
       else
         engine.filename = '(stdin)'
         engine.convert!($stdin.read())
-        print val if val = do_action(action, engine, context, opts)
+        val = do_action(action, engine, context, filename, opts)
+        msg = nil if val
       end
+      print msg if action == 'syntax' && msg
 
     end
 
     private
 
-    def do_action(action, engine, context, opts)
+    def do_action(action, engine, context, filename, opts)
       case action
       when 'convert'
         s = engine.src
       when nil, 'exec', 'execute'
-        s = opts.binding ? engine.result(context) : engine.evaluate(context)
+        s = opts.binding ? engine.result(context.to_hash) : engine.evaluate(context)
+      when 'syntax'
+        s = check_syntax(filename, engine.src)
       else
         raise "*** internal error"
       end
+      print s if s
       return s
     end
 
@@ -189,7 +198,8 @@ erubis - embedded program converter for multi-language
 Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
-  -x            : converted code
+  -x            : show converted code
+  -X            : syntax checking
   -T            : don't trim spaces around '<% %>'
   -b            : body only (no preamble nor postamble)
   -e            : escape (equal to '--E Escape')
@@ -261,8 +271,7 @@ END
     end
 
     def version
-      release = ('$Release: 0.0.0 $' =~ /([.\d]+)/) && $1
-      return release
+      return Erubis::VERSION
     end
 
     def parse_argv(argv, arg_none='', arg_required='', arg_optional='')
@@ -377,8 +386,7 @@ END
         test(?f, filename) or raise CommandOptionError.new("#{filename}: file not found.")
         if filename =~ /\.ya?ml$/
           if opts.untabify
-            str = YAML.load(untabify(File.read(filename)))
-            ydoc = YAML.load(str)
+            ydoc = YAML.load(untabify(File.read(filename)))
           else
             ydoc = YAML.load_file(filename)
           end
@@ -434,6 +442,21 @@ END
           intern_hash_keys(val, done) if val.is_a?(Hash) || val.is_a?(Array)
         end
       end
+    end
+
+    def check_syntax(filename, src)
+      require 'open3'
+      stdin, stdout, stderr = Open3.popen3('ruby -wc')
+      stdin.write(src)
+      stdin.close
+      result = stdout.read()
+      stdout.close()
+      errmsg = stderr.read()
+      stderr.close()
+      return nil unless errmsg && !errmsg.empty?
+      errmsg =~ /\A-:(\d+): /
+      linenum, message = $1, $'
+      return "#{filename}:#{linenum}: #{message}"
     end
 
   end

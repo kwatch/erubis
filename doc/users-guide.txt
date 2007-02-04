@@ -1540,6 +1540,17 @@ $ erubis -l js example.ejs
 .$ Other Topics	| topics
 
 
+.$$ Syntax Checking		| topics-syntax
+
+Command-line option '-X' checks syntax. It is similar to 'erubis -x file.rhtml | ruby -wc', but it can take several file names.
+
+.? example of command-line option '-X'
+.====================
+$ erubis {{*-X*}} app/views/*/*.rhtml
+Syntax OK
+.====================
+
+
 .$$ File Caching		| topics-caching
 
 Erubis::Eruby.convert_file(filename) convert file into Ruby script and return Eruby object.
@@ -1567,6 +1578,7 @@ See {{benchmark|#topics-benchmark}} for details.
 Erubis::TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
 If you don't need any enhancements of Erubis and only require simple eRuby implementation,
 try Erubis::TinyEruby class.
+
 
 
 .$$ Ruby on Rails Support	| topics-rails
@@ -2000,7 +2012,7 @@ This shows that...
 .* Erubis::Eruby works more than 10 percent faster than eruby.
 .* Erubis::Eruby works about 3 times faster than ERB.
 .* Caching (by Erubis::Eruby.load_file()) makes Erubis about 40-50 percent faster.
-.* Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
+.* Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (StringBufferEnhancer which Erubis::Eruby includes)
 .* $stdout and print() make Erubis a little slower.
 .* Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
 
@@ -2078,6 +2090,7 @@ erubis [..options..] [{{/file/}} ...]
   .[ -h, --help    ]	Help.
   .[ -v            ]	Release version.
   .[ -x            ]	Show compiled source.
+  .[ -X            ]	Syntax checking.
   .[ -T            ]	No trimming spaces around '<% %>'.
 			This is equivarent to '--trim=false'.
   .[ -b            ]	Body only (no preamble nor postamble).
@@ -2095,7 +2108,7 @@ erubis [..options..] [{{/file/}} ...]
 			It is able to specify several paths separating with ','
 			(ex. -f path1,path2,path3).
   .[ -K kanji      ]	Kanji code (euc, sjis, utf8, or none) (default none).
-  .[ -f file.yaml  ]	Context data file in YAML format ('*.yaml', '*.yml') or
+  .[ -f datafile   ]	Context data file in YAML format ('*.yaml', '*.yml') or
                         Ruby script ('*.rb').
 			It is able to specify several filenames separating with ','
 			(ex. -f file1,file2,file3).

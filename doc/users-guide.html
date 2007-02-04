@@ -129,6 +129,10 @@ It has the following features.
   </li>
   <li><a href="#topics">Other Topics</a>
   <ul>
+    <li><a href="#topics-syntax">Syntax Checking</a>
+    </li>
+    <li><a href="#topics-caching">File Caching</a>
+    </li>
     <li><a href="#topics-tinyeruby">Erubis::TinyEruby class</a>
     </li>
     <li><a href="#topics-rails">Ruby on Rails Support</a>
@@ -1940,6 +1944,40 @@ document.write(_buf.join(""));
 
 <a name="topics"></a>
 <h2 class="section1">Other Topics</h2>
+<a name="topics-syntax"></a>
+<h3 class="section2">Syntax Checking</h3>
+<p>Command-line option '-X' checks syntax. It is similar to 'erubis -x file.rhtml | ruby -wc', but it can take several file names.
+</p>
+<div class="terminal_caption">
+example of command-line option '-X'</div>
+<pre class="terminal">$ erubis <strong>-X</strong> app/views/*/*.rhtml
+Syntax OK
+</pre>
+<br>
+
+
+<a name="topics-caching"></a>
+<h3 class="section2">File Caching</h3>
+<p>Erubis::Eruby.convert_file(filename) convert file into Ruby script and return Eruby object.
+In addition, it caches converted Ruby script into cache file (filename + '.cache') if cache file is old or not exist.
+If cache file exists and is newer than eruby file, Erubis::Eruby.convert_file() loads cache file.
+</p>
+<div class="program_caption">
+example of Erubis::Eruby.convert_file()</div>
+<pre class="program">require 'erubis'
+filename = 'example.rhtml'
+eruby = <strong>Erubis::Eruby.convert_file(filename)</strong>
+cachename = filename + '.cache'
+if test(?f, cachename)
+  puts "*** cache file '#{cachename}' created."
+end
+</pre>
+<p>Caching makes Erubis about 40-50 percent faster than no-caching.
+See {{benchmark|#topics-benchmark}} for details.
+</p>
+<br>
+
+
 <a name="topics-tinyeruby"></a>
 <h3 class="section2">Erubis::TinyEruby class</h3>
 <p>Erubis::TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
@@ -2172,8 +2210,8 @@ Here is an example result of benchmark.
 <div class="terminal_caption">
 MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.5, eruby1.0.5, gcc4.0.1</div>
 <pre class="terminal">$ cd erubis-2.2.0/benchmark/
-$ ruby erubybench.rb -n 10000 -m basic
-## evaluate
+$ ruby erubybench.rb -n 10000 -m execute
+## execute
                                     user     system      total        real
 eruby                          24.460000   0.600000  25.060000 ( 29.248518)
 ERB                            65.190000   1.060000  66.250000 ( 77.053693)
@@ -2194,7 +2232,9 @@ Erubis::TinyEruby              18.370000   0.660000  19.030000 ( 21.475423)
 </li>
 <li>Caching (by Erubis::Eruby.load_file()) makes Erubis about 40-50 percent faster.
 </li>
-<li>Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (ArrayBufferEnhancer which Erubis::Eruby includes)
+<li>Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (StringBufferEnhancer which Erubis::Eruby includes)
+</li>
+<li>$stdout and print() make Erubis a little slower.
 </li>
 <li>Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
 </li>
@@ -2231,6 +2271,11 @@ Erubis::TinyEruby              18.370000   0.660000  19.030000 ( 21.475423)
 -x            </b></dt>
   <dd class="dd3">
   	Show compiled source.
+  </dd>
+  <dt class="dt3"><b>
+-X            </b></dt>
+  <dd class="dd3">
+  	Syntax checking.
   </dd>
   <dt class="dt3"><b>
 -T            </b></dt>
@@ -2281,7 +2326,7 @@ Erubis::TinyEruby              18.370000   0.660000  19.030000 ( 21.475423)
   	Kanji code (euc, sjis, utf8, or none) (default none).
   </dd>
   <dt class="dt3"><b>
--f file.yaml  </b></dt>
+-f datafile   </b></dt>
   <dd class="dd3">
   	Context data file in YAML format ('*.yaml', '*.yml') or
                         Ruby script ('*.rb').

@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.59 (2007-02-04)
+	.- [update] rdoc of erubis.rb
+	.- [enhance] add Erubis::VERSION
+	.- [enhance] command-line option '-X' (syntax checking) added
+	.- [update] users-guide updated
+
 : Rev.58 (2007-02-03)
 	.- [update] webiste/index.txt
 

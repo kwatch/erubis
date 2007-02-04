@@ -57,6 +57,12 @@ module Erubis
       end
     end
 
+    def to_hash
+      hash = {}
+      self.keys.each { |key| hash[key] = self[key] }
+      return hash
+    end
+
     def update(context_or_hash)
       arg = context_or_hash
       if arg.is_a?(Hash)
