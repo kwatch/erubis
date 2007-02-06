@@ -243,6 +243,31 @@ module Erubis
   end
 
 
+  #--
+  ###
+  ### set buffer variable name to '_erbout' as well as '_buf'
+  ###
+  ### this is only for Eruby.
+  ###
+  #module ErboutEnhancer
+  #
+  #  def self.desc   # :nodoc:
+  #    "set buffer name '_erbout' as well as '_buf'"
+  #  end
+  #
+  #  def add_preamble(src)
+  #    src << "_erbout = _buf = '';"
+  #  end
+  #
+  #  def add_postamble(src)
+  #    src << "\n" unless src[-1] == ?\n
+  #    src << "_buf.to_s\n"
+  #  end
+  #
+  #end
+  #++
+
+
   ##
   ## remove text and leave code, especially useful when debugging.
   ##

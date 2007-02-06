@@ -3,21 +3,6 @@
 ### $Release$
 ### $Copyright$
 ###
-### = How to use Erubis in Rails
-###
-### 1. add the folliwng code in your 'app/controllers/application.rb'.
-###      --------------------
-###      require 'erubis/helper/rails'
-###      suffix = 'erubis'
-###      ActionView::Base.register_template_handler(suffix, Erubis::Helper::RailsTemplate)
-###      #Erubis::Helper::RailsTemplate.engine_class = Erubis::EscapedEruby ## if you want
-###      #Erubis::Helper::RailsTemplate.default_class = { :escape=>true, :escapefunc='h' }
-###      --------------------
-### 2. restart web server.
-### 3. change view template filename from 'file.rhtml' to 'file.erubis'.
-###    (suffix '.rhtml' is not recommended because error page of Rails is
-###     assumed to use ERB.)
-###
 
 
 require 'erubis'
@@ -27,9 +12,31 @@ module Erubis
 
   module Helper
 
-    class RailsTemplate
+    ##
+    ## helper module for Ruby on Rails
+    ##
+    ## howto:
+    ##
+    ## 1. add the folliwng code in your 'config/environment.rb'
+    ##
+    ##      require 'erubis/helper/rails'
+    ##      #Erubis::Helper::Rails.engine_class = Erubis::Eruby
+    ##      #Erubis::Helper::Rails.init_properties = {}
+    ##      #Erubis::Helper::Rails.show_src = false
+    ##
+    ## 2. (optional) apply the patch for 'action_view/base.rb'
+    ##
+    ##      $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
+    ##      $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
+    ##
+    ## 3. restart web server.
+    ##
+    ## if Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
+    ## into log file ('log/development.log' or so). This may be useful for debug.
+    ##
+    module Rails
 
-
+      #cattr_accessor :init_properties
       @@engine_class = Erubis::Eruby
 
       def self.engine_class
@@ -38,122 +45,145 @@ module Erubis
 
       def self.engine_class=(klass)
         @@engine_class = klass
-        @@engine_instance = klass.new
       end
 
-      #cattr_accessor :engine_class
+      #cattr_accessor :init_properties
+      @@init_properties = {}
 
-
-      @@default_properties = { }
-
-      def self.default_properties
-        return @@default_properties
+      def self.init_properties
+        @@init_properties
       end
 
-      def self.default_properties=(properties)
-        @@default_properties = properties
+      def self.init_properties=(hash)
+        @@init_properties = hash
       end
 
-      #cattr_accessor :default_properties
+      #cattr_accessor :show_src
+      @@show_src = false
+
+      def self.show_src
+        @@show_src
+      end
+
+      def self.show_src=(flag)
+        @@show_src = flag
+      end
+
+    end
+
+  end
+
+end
 
 
-      def initialize(view)
-        @view = view
-        #@@engine_instance ||= @@engine_class.new(nil, @@default_properties)
+method_name = 'convert_template_into_ruby_code'
+unless ActionView::Base.private_instance_methods.include?(method_name) ||
+       ActionView::Base.instance_methods.include?(method_name)
+
+  require 'action_pack/version'
+
+  module ActionView  # :nodoc:
+
+    class Base  # :nodoc:
+
+      private
+
+      # convert template into ruby code
+      def convert_template_into_ruby_code(template)
+        ERB.new(template, nil, @@erb_trim_mode).src
       end
 
 
-      def convert(template)
-        #code = @@engine_instance.convert(template)
-        #return code
-        engine = @@engine_class.new(nil, @@default_properties)
-        code = engine.convert(template)
-        return code
-      end
+if ActionPack::VERSION::MINOR <= 12   ###  Rails 1.1
 
 
-      def render(template, assigns)
-        ## get ruby code
-        code = convert(template)
-
-        ## use @view as context object
-        @view.__send__(:evaluate_assigns)  #or @view.instance_eval("evaluate_assigns()")
-        context = @view
-
-        ## evaluate ruby code with context object
-        if assigns && !assigns.empty?
-          return _evaluate_string(code, context, assigns)
+      # Create source code for given template
+      def create_template_source(extension, template, render_symbol, locals)
+        if template_requires_setup?(extension)
+          body = case extension.to_sym
+            when :rxml
+              "xml = Builder::XmlMarkup.new(:indent => 2)\n" +
+              "@controller.headers['Content-Type'] ||= 'application/xml'\n" +
+              template
+            when :rjs
+              "@controller.headers['Content-Type'] ||= 'text/javascript'\n" +
+              "update_page do |page|\n#{template}\nend"
+          end
         else
-          return context.instance_eval(code)
-        end
-      end
-
-
-      protected
-
-
-      def _localvar_code(_localvars)
-        list = _localvars.collect { |_name| "#{_name} = _localvars[#{_name.inspect}]\n" }
-        code = list.join()
-        return code
-      end
-
-
-      def _evaluate_string(_code, _context, _localvars)
-        eval(_localvar_code(_localvars))
-        _context.instance_eval(_code)
-      end
-
-
-    end #class
-
-
-
-    class CachedRailsTemplate < RailsTemplate
-
-
-      @@cache_table = {}
-
-
-      def render(template, assigns)
-        ## template path without suffix
-        ## (how to get template path name with suffix? I can't find...)
-        c = @view.controller
-        template_basename = c.template_root + "/" + c.controller_name + "/" + c.action_name
-
-        ## cache template
-        proc_obj = @@cache_table[template_basename]
-        unless proc_obj
-          code = convert(template)
-          proc_obj = eval("proc do #{code} end")
-          @@cache_table[template_basename] = proc_obj
+          #body = ERB.new(template, nil, @@erb_trim_mode).src
+          body = convert_template_into_ruby_code(template)
         end
 
-        ## use @view as context object
-        @view.__send__(:evaluate_assigns)
-        #or @view.instance_eval("evaluate_assigns()")
-        context = @view
+        @@template_args[render_symbol] ||= {}
+        locals_keys = @@template_args[render_symbol].keys | locals
+        @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
 
-        ## evaluate ruby code with context object
-        if assigns && !assigns.empty?
-          return _evaluate_proc(proc_obj, context, assigns)
+        locals_code = ""
+        locals_keys.each do |key|
+          locals_code << "#{key} = local_assigns[:#{key}] if local_assigns.has_key?(:#{key})\n"
+        end
+
+        "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
+      end
+
+
+else    ###  Rails 1.2 or later
+
+
+      # Create source code for given template
+      def create_template_source(extension, template, render_symbol, locals)
+        if template_requires_setup?(extension)
+          body = case extension.to_sym
+            when :rxml
+              "controller.response.content_type ||= 'application/xml'\n" +
+              "xml = Builder::XmlMarkup.new(:indent => 2)\n" +
+              template
+            when :rjs
+              "controller.response.content_type ||= 'text/javascript'\n" +
+              "update_page do |page|\n#{template}\nend"
+          end
         else
-          return context.instance_eval(&proc_obj)
+          #body = ERB.new(template, nil, @@erb_trim_mode).src
+          body = convert_template_into_ruby_code(template)
         end
+
+        @@template_args[render_symbol] ||= {}
+        locals_keys = @@template_args[render_symbol].keys | locals
+        @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
+
+        locals_code = ""
+        locals_keys.each do |key|
+          locals_code << "#{key} = local_assigns[:#{key}]\n"
+        end
+
+        "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
       end
 
 
-      protected
+end   ###
 
 
-      def _evaluate_proc(_proc_obj, _context, _localvars)
-        eval(_localvar_code(_localvars))
-        _context.instance_eval(&_proc_obj)
-      end
+    end
+
+  end
+
+end
 
 
-    end #class
+class ActionView::Base  # :nodoc:
+  private
+  def convert_template_into_ruby_code(template)
+    #src = Erubis::Eruby.new(template).src
+    klass = Erubis::Helper::Rails.engine_class
+    properties = Erubis::Helper::Rails.init_properties
+    src = klass.new(template, properties).src
+    src.insert(0, '_erbout = ')
+    logger.debug "** Erubis: src=<<'END'\n#{src}END\n" if Erubis::Helper::Rails.show_src
+    src
+  end
+end
 
-  end #module
 
-end #module
+ac = ActionController::Base.new
+ac.logger.info "** Erubis #{Erubis::VERSION}"
+#$stdout.puts "** Erubis #{Erubis::VERSION}"

@@ -1,0 +1,23 @@
+--- action_view/base.rb	(original)
++++ action_view/base.rb	(working copy)
+@@ -445,6 +445,11 @@
+         end
+       end
+ 
++      # convert template into ruby code
++      def convert_template_into_ruby_code(template)
++        ERB.new(template, nil, @@erb_trim_mode).src
++      end
++
+       # Create source code for given template
+       def create_template_source(extension, template, render_symbol, locals)
+         if template_requires_setup?(extension)
+@@ -458,7 +463,7 @@
+               "update_page do |page|\n#{template}\nend"
+           end
+         else
+-          body = ERB.new(template, nil, @@erb_trim_mode).src
++          body = convert_template_into_ruby_code(template)
+         end
+ 
+         @@template_args[render_symbol] ||= {}

@@ -8,7 +8,7 @@ copyright::	$Copyright$
 == About Erubis
 
 Erubis is an implementation of eRuby. It has the following features.
-* Very fast, almost three times faster than ERB and even faster than eruby
+* Very fast, almost three times faster than ERB and even 10% faster than eruby
 * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
 * Auto escaping support
 * Auto trimming spaces around '<% %>'
@@ -53,6 +53,22 @@ See doc/users-guide.html for details.
 
 
 
+== Ruby on Rails Support
+
+Erubis supports Ruby on Rails.
+All you have to do is to add the following code into your 'config/environment.rb'
+and restart web server.
+
+     require 'erubis/helper/rails'
+     #Erubis::Helper::Rails.engine_class = Erubis::Eruby
+     #Erubis::Helper::Rails.init_properties = {}
+     #Erubis::Helper::Rails.show_src = false
+
+If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
+into log file ('log/development.log' or so).  It is useful for debugging.
+
+
+
 == Exploring Guide
 
 If you are exploring Eruby, see the following class at first.
@@ -76,9 +92,8 @@ Try 'ruby erubybenchmark.rb' in benchmark directory.
 
 == License
 
-LGPL version 2.1
+MIT License
 
-If you need looser license, please suggest me.
 
 
 == Author

@@ -113,7 +113,7 @@ module Erubis
       prefix, postfix = pattern.split()   # '<% %>' => '<%', '%>'
       #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-      return /#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+      return /#{prefix}(=+|-|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
     end
     module_function :pattern_regexp
 
@@ -134,21 +134,17 @@ module Erubis
         len  = match.begin(0) - pos
         text = input[pos, len]
         pos  = match.end(0)
-        is_expr = indicator && indicator[0] == ?=
-        lspace = is_expr ? nil : detect_spaces_at_bol(text, is_bol)
+        ch   = indicator ? indicator[0] : nil
+        lspace = ch == ?= ? nil : detect_spaces_at_bol(text, is_bol)
         is_bol = rspace ? true : false
         add_text(src, text) if text && !text.empty?
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
-        if !indicator               # <% %>
-          if @trim && lspace && rspace
-            add_stmt(src, "#{lspace}#{code}#{rspace}")
-          else
-            add_text(src, lspace) if lspace
-            add_stmt(src, code)
-            add_text(src, rspace) if rspace
-          end
-        elsif indicator[0] == ?\#   # <%# %>
+        if ch == ?=              # <%= %>
+          add_text(src, lspace) if lspace
+          add_expr(src, code, indicator)
+          add_text(src, rspace) if rspace
+        elsif ch == ?\#          # <%# %>
           n = code.count("\n") + (rspace ? 1 : 0)
           if @trim && lspace && rspace
             add_stmt(src, "\n" * n)
@@ -157,10 +153,14 @@ module Erubis
             add_stmt(src, "\n" * n)
             add_text(src, rspace) if rspace
           end
-        else                        # <%= %>
-          add_text(src, lspace) if lspace
-          add_expr(src, code, indicator)
-          add_text(src, rspace) if rspace
+        else                     # <% %>
+          if @trim && lspace && rspace
+            add_stmt(src, "#{lspace}#{code}#{rspace}")
+          else
+            add_text(src, lspace) if lspace
+            add_stmt(src, code)
+            add_text(src, rspace) if rspace
+          end
         end
       end
       rest = $' || input     # add input when no matched

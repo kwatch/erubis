@@ -12,6 +12,21 @@
       than 2.1.0.
 
     - |
+      Support of Ruby on Rails improved.
+      If you want to use Erubis with Ruby on Rails, add the following code
+      into your 'config/environment.rb' and restart web server.
+
+      --------------------
+      require 'erubis/helper/rails'
+      #Erubis::Helper::Rails.engine_class = Erubis::Eruby
+      #Erubis::Helper::Rails.init_properties = {}
+      #Erubis::Helper::Rails.show_src = true
+      --------------------
+
+      If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
+      into log file ('log/development.log' or so).
+
+    - |
       Erubis::Engine.load_file(filename) creates cache file (filename +
       '.cache') automatically if cache file is old or not exist.
       Caching makes Erubis about 40-50 percent faster.
@@ -92,7 +107,7 @@
 
     - |
       New command-line option '-X' (syntax checking) support. It is similar
-      to 'erubis -x file.rhtml | ruby -wc', but It can take several filenames.
+      to 'erubis -x file.rhtml | ruby -wc', but it can take several filenames.
 
       ex.
       ====================
@@ -104,9 +119,12 @@
       New constant Erubis::VERSION added.
 
 
-  bugfixes:
+  changes:
     - |
-      
+      License is changed to MIT License.
+
+    - |
+      Embedded pattern '<%- -%>' can be handled.
 
 
 #

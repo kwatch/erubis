@@ -164,7 +164,7 @@ __END__
         <li><%= item %></li>
        <% end %>
       </ul>
-  src: |
+  src: &basic1_src|
       _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
@@ -293,6 +293,19 @@ __END__
       ';
       _buf.to_s
   output: *quotation1_input
+
+##
+- name:  minus1
+  desc:  '<%- -%>'
+  class: Eruby
+  input: |
+      <ul>
+       <%- for item in list -%>
+        <li><%= item -%></li>
+       <% end -%>
+      </ul>
+  src: *basic1_src
+  output: *basic1_output
 
 ##
 - name:  pattern1

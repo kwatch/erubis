@@ -37,10 +37,11 @@ recipes:
 
   - product:	:test
     method*: |
-	sys "ruby test/test-erubis.rb"
-	sys "ruby test/test-engines.rb"
-	sys "ruby test/test-main.rb"
-	sys "ruby test/test-notext.rb"
+	#sys "ruby test/test-erubis.rb"
+	#sys "ruby test/test-engines.rb"
+	#sys "ruby test/test-main.rb"
+	#sys "ruby test/test-notext.rb"
+	sys "ruby test/test.rb 2>&1 | tee test.log"
 
   - product:	:clear
     method*: |

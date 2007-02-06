@@ -19,7 +19,7 @@ spec = Gem::Specification.new do |s|
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
 
-  * Very fast, almost three times faster than ERB and even as fast as eruby.
+  * Very fast, almost three times faster than ERB and about 10% faster than eruby.
   * Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
   * Auto escaping support
   * Auto trimming spaces around '<% %>'
@@ -38,7 +38,7 @@ spec = Gem::Specification.new do |s|
   files += Dir.glob('examples/**/*')
   files += Dir.glob('test/*.rb')
   files += %w[doc/users-guide.html doc/docstyle.css]
-  files += %w[README.txt ChangeLog LGPL setup.rb]
+  files += %w[README.txt CHANGES MIT-LICENSE setup.rb]
   files += Dir.glob('contrib/*')
   files += Dir.glob('benchmark/*')
   files += Dir.glob('doc-api/**/*')
