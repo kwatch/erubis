@@ -12,19 +12,20 @@
       than 2.1.0.
 
     - |
-      Support of Ruby on Rails improved.
+      Support of Ruby on Rails improved. Methods 'capture()' and 'content_for()'
+      of ActionView::Helpers::CaptureHelper are available.
       If you want to use Erubis with Ruby on Rails, add the following code
       into your 'config/environment.rb' and restart web server.
 
       --------------------
-      require 'erubis/helper/rails'
-      #Erubis::Helper::Rails.engine_class = Erubis::Eruby
-      #Erubis::Helper::Rails.init_properties = {}
-      #Erubis::Helper::Rails.show_src = true
+      require 'erubis/helpers/rails_helper'
+      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+      #Erubis::Helpers::RailsHelper.init_properties = {}
+      #Erubis::Helpers::RailsHelper.show_src = true
       --------------------
 
-      If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
-      into log file ('log/development.log' or so).
+      If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted
+      Ruby code into log file ('log/development.log' or so).
 
     - |
       Erubis::Engine.load_file(filename) creates cache file (filename +

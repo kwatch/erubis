@@ -3,6 +3,9 @@
 .?version:	$Rev$
 
 : Rev.60 (2007-02-06)
+	.- [change] 'lib/erubis/helper' is renamed to 'lib/erubis/helpers'
+
+: Rev.60 (2007-02-06)
 	.- [enhance] Ruby on Rails support improved
 	.- [enhance] add 'contrib/action_view_base_rb.patch'
 	.- [change] license changed to MIT License

@@ -59,13 +59,13 @@ Erubis supports Ruby on Rails.
 All you have to do is to add the following code into your 'config/environment.rb'
 and restart web server.
 
-     require 'erubis/helper/rails'
-     #Erubis::Helper::Rails.engine_class = Erubis::Eruby
-     #Erubis::Helper::Rails.init_properties = {}
-     #Erubis::Helper::Rails.show_src = false
+     require 'erubis/helpers/rails_helper'
+     #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+     #Erubis::Helpers::RailsHelper.init_properties = {}
+     #Erubis::Helpers::RailsHelper.show_src = false
 
-If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
-into log file ('log/development.log' or so).  It is useful for debugging.
+If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted Ruby code
+into log file ('log/development.log' or so).  It is useful for debug.
 
 
 
