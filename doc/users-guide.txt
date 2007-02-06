@@ -1589,10 +1589,10 @@ Erubis supports Ruby on Rails.
     
     .? config/environment.rb
     .--------------------
-    require 'erubis/helper/rails'
-    #Erubis::Helper::Rails.engine_class = Erubis::Eruby
-    #Erubis::Helper::Rails.init_properties = {}
-    #Erubis::Helper::Rails.show_src = false
+    require 'erubis/helpers/rails_helper'
+    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+    #Erubis::Helpers::RailsHelper.init_properties = {}
+    #Erubis::Helpers::RailsHelper.show_src = false
     .--------------------
     
 .2) (Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
@@ -1632,6 +1632,8 @@ Erubis supports Ruby on Rails.
     $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
     $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
     .====================
+
+    Notice that this patch is optinal if you are using Ruby on Rails ver 1.1 or 1.2.
     
 .3) Restart web server.
     .====================

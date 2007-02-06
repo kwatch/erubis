@@ -10,7 +10,7 @@ require 'erubis'
 
 module Erubis
 
-  module Helper
+  module Helpers
 
     ##
     ## helper module for Ruby on Rails
@@ -19,10 +19,10 @@ module Erubis
     ##
     ## 1. add the folliwng code in your 'config/environment.rb'
     ##
-    ##      require 'erubis/helper/rails'
-    ##      #Erubis::Helper::Rails.engine_class = Erubis::Eruby
-    ##      #Erubis::Helper::Rails.init_properties = {}
-    ##      #Erubis::Helper::Rails.show_src = false
+    ##      require 'erubis/helpers/rails_helper'
+    ##      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+    ##      #Erubis::Helpers::RailsHelper.init_properties = {}
+    ##      #Erubis::Helpers::RailsHelper.show_src = false
     ##
     ## 2. (optional) apply the patch for 'action_view/base.rb'
     ##
@@ -34,7 +34,7 @@ module Erubis
     ## if Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code
     ## into log file ('log/development.log' or so). This may be useful for debug.
     ##
-    module Rails
+    module RailsHelper
 
       #cattr_accessor :init_properties
       @@engine_class = Erubis::Eruby
@@ -174,11 +174,12 @@ class ActionView::Base  # :nodoc:
   private
   def convert_template_into_ruby_code(template)
     #src = Erubis::Eruby.new(template).src
-    klass = Erubis::Helper::Rails.engine_class
-    properties = Erubis::Helper::Rails.init_properties
+    klass      = Erubis::Helpers::RailsHelper.engine_class
+    properties = Erubis::Helpers::RailsHelper.init_properties
+    show_src   = Erubis::Helpers::RailsHelper.show_src
     src = klass.new(template, properties).src
     src.insert(0, '_erbout = ')
-    logger.debug "** Erubis: src=<<'END'\n#{src}END\n" if Erubis::Helper::Rails.show_src
+    logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
     src
   end
 end

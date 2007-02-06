@@ -5,13 +5,13 @@
 ###
 
 properties:
-  - release    :  0.0.0
+  - release    :  2.2.0
 
 
 parameters:
   - project    :  erubis
   - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
-  - text_files :  [ChangeLog, README.txt, LGPL, setup.rb, erubis.gemspec]
+  - text_files :  [CHANGES, README.txt, MIT-LICENSE, setup.rb, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]
   - apidocdir  :  doc-api
@@ -52,7 +52,7 @@ recipes:
     ingreds:	[ $(apidocdir)/index.html ]
 
   - product:	$(apidocdir)/index.html
-    ingreds:	[ $(libfiles) ]
+    ingreds:	[ $(libfiles), README.txt ]
     method*: |
         rm_rf '$(apidocdir)'
 	opts = "-o ../$(apidocdir) -S -m ../README.txt"
@@ -73,21 +73,24 @@ recipes:
     ingreds:    [ $(project)_$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
-        tar_cjf @product, @ingred
+        #tar_cjf @product, @ingred
+	sys "tar cjf #{@product} #{@ingred}"
 
   - product:	$(project)_*.tar.gz
     desc:	create *.tar.gz
     ingreds:	[ $(project)_$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
-        tar_czf @product, @ingred
+        #tar_czf @product, @ingred
+	sys "tar czf #{@product} #{@ingred}"
 
   - product:	$(project)_*.zip
     desc:	create *.zip
     ingreds:	[ $(project)_$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
-        zip_r @product, @ingred
+        #zip_r @product, @ingred
+        sys "zip -r9 #{@product} #{@ingred}"
 
 
   - product:    $(project)-*.gem
@@ -133,7 +136,8 @@ recipes:
 	mkdir_p "#{dir}/doc"
 	cp_r doc_files, "#{dir}/doc"
 	#
-	mkdir_p "#{dir}/contrib"
+	store 'contrib/*', dir
+	#mkdir_p "#{dir}/contrib"
 	cp_r '$(inline_require_script)', "#{dir}/contrib"
 	#
 	edit "#{dir}/**/*" do |content|

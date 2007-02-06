@@ -1995,10 +1995,10 @@ try Erubis::TinyEruby class.
 <li>Add the following code to your 'config/environment.rb'.
 <div class="program_caption">
 config/environment.rb</div>
-<pre class="program">require 'erubis/helper/rails'
-#Erubis::Helper::Rails.engine_class = Erubis::Eruby
-#Erubis::Helper::Rails.init_properties = {}
-#Erubis::Helper::Rails.show_src = false
+<pre class="program">require 'erubis/helpers/rails_helper'
+#Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+#Erubis::Helpers::RailsHelper.init_properties = {}
+#Erubis::Helpers::RailsHelper.show_src = false
 </pre>
 </li>
 <li>(Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
@@ -2037,6 +2037,10 @@ how to apply patch:</div>
 $ sudo patch -p1 &lt; /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
 </pre>
 </li>
+</ol>
+<p>    Notice that this patch is optinal if you are using Ruby on Rails ver 1.1 or 1.2.
+</p>
+<ol type="1">
 <li>Restart web server.
 <pre class="terminal">$ ruby script/server
 </pre>
