@@ -49,13 +49,13 @@ module Erubis
     end
 
     def initialize
-      @single_options = "hvxXTtSbeB"
+      @single_options = "hvxzTtSbeB"
       @arg_options    = "pcrfKIlaEC"
       @option_names   = {
         ?h => :help,
         ?v => :version,
         ?x => :source,
-        ?X => :syntax,
+        ?z => :syntax,
         ?T => :notrim,
         ?t => :untabify,
         ?S => :intern,
@@ -199,7 +199,7 @@ Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
   -x            : show converted code
-  -X            : syntax checking
+  -z            : syntax checking
   -T            : don't trim spaces around '<% %>'
   -b            : body only (no preamble nor postamble)
   -e            : escape (equal to '--E Escape')

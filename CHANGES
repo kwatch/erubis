@@ -107,12 +107,12 @@
       ====================
 
     - |
-      New command-line option '-X' (syntax checking) support. It is similar
+      New command-line option '-z' (syntax checking) support. It is similar
       to 'erubis -x file.rhtml | ruby -wc', but it can take several filenames.
 
       ex.
       ====================
-      $ erubis -X app/views/*/*.rhtml
+      $ erubis -z app/views/*/*.rhtml
       Syntax OK
       ====================
 

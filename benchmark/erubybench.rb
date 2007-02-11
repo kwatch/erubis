@@ -7,6 +7,15 @@
 require 'eruby'
 require 'erb'
 require 'stringio'
+require 'cgi'
+include ERB::Util
+#module ERB::Util
+#  XmlEscapeTable = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;' }
+#  def h(value)
+#    value.to_s.gsub(/[&<>"]/) { |s| XmlEscapeTable[s] }
+#  end
+#  module_function :h
+#end
 
 require 'erubis'
 require 'erubis/engine/enhanced'
@@ -49,7 +58,7 @@ end
 require 'optparse'
 optparser = OptionParser.new
 options = {}
-['-h', '-n N', '-t erubyfile', '-f datafile', '-o outfile', '-A',
+['-h', '-n N', '-t erubyfile', '-f datafile', '-o outfile', '-A', '-e',
   '-x exclude', '-m testmode', '-X', '-p', '-D'].each do |opt|
   optparser.on(opt) { |val| options[opt[1].chr] = val }
 end
@@ -63,12 +72,13 @@ end
 
 flag_help = options['h']
 ntimes    = (options['n'] || defaults[:ntimes]).to_i
-erubyfile = options['t'] || defaults[:erubyfile]
+$erubyfile = options['t'] || defaults[:erubyfile]
 datafile  = options['f'] || defaults[:datafile]
 outfile   = options['o'] || defaults[:outfile]
 flag_all  = options['A']
 testmode  = options['m'] || defaults[:testmode]
 excludes  = options['x']
+$escape   = options['e']
 flag_expand = options['X'] ? true : false
 flag_output = options['p'] ? true : false
 $debug    = options['D']
@@ -90,6 +100,15 @@ require 'yaml'
 ydoc = YAML.load_file(datafile)
 context = ydoc
 list = context['list']
+if $escape
+  list.each do |item|
+    if item['name'] =~ / /
+      item['name'] = "<#{item['name'].gsub(/ /, '&amp;')}>"
+    else
+      item['name'] = "\"#{item['name']}\""
+    end
+  end
+end
 #list = []
 #ydoc['list'].each do |hash|
 #  list << hash.inject({}) { |h, t| h[t[0].intern] = t[1]; h }
@@ -126,8 +145,55 @@ end
 #require 'pp'; pp testdefs
 
 
+## generate template
+def erubyfilename(name)
+  case name
+  when /eruby/  ;  s = '_eruby.'
+  when /ERB/    ;  s = '_erb.'
+  when /PI/     ;  s = '_pierubis.'
+  when /Tiny/   ;  s = '_tiny.'
+  when /Erubis/ ;  s = '_erubis.'
+  else
+    raise "#{name}: unknown name."
+  end
+  return $erubyfile.sub(/\./, s)
+end
+#
+def File.write(filename, str)
+  File.open(filename, 'w') { |f| f.write(str) }
+end
+#
+if $erubyfile == defaults[:erubyfile]
+  header = File.read("templates/_header.html")
+  footer = File.read("templates/_footer.html")
+  body   = File.read("templates/#{$erubyfile}")
+  erubystr = header + body + footer
+  s = erubystr
+  erubystrs = {}
+  if $escape
+    erubystrs['eruby']  = s.gsub(/<%=(.*?)%>/, '<%= CGI.escapeHTML((\1).to_s) %>')
+    erubystrs['ERB']    = s.gsub(/<%=(.*?)%>/, '<%=h \1%>')
+    erubystrs['Erubis'] = s.gsub(/<%=(.*?)%>/, '<%==\1%>')
+    erubystrs['Tiny']   = s.gsub(/<%=(.*?)%>/, '<%=Erubis::XmlHelper.escape_xml((\1).to_s)%>')
+    erubystrs['PI']     = s.gsub(/<%=(.*?)%>/, '@{\1}@').gsub(/<%(.*?)%>/m, '<?rb\1?>')
+  else
+    erubystrs['eruby']  = s
+    erubystrs['ERB']    = s
+    erubystrs['Erubis'] = s
+    erubystrs['Tiny']  = s
+    erubystrs['PI']     = s.gsub(/<%=(.*?)%>/, '@!{\1}@').gsub(/<%(.*?)%>/m, '<?rb\1?>')
+  end
+else
+  erubystr = File.read($erubyfile)
+end
+%w[eruby ERB PI Tiny Erubis].each do |name|
+  File.write(erubyfilename(name), erubystrs[name])
+end
+
+
+
 ## define test functions for each classes
-str = File.read(erubyfile)
+str = erubystr
 testdefs.each do |h|
   s = ''
   s   << "def test_execute_#{h['name']}(erubyfile, context)\n"
@@ -148,9 +214,10 @@ end
 
 
 ## define view functions for each classes
-str = File.read(erubyfile)
+str = erubystr
 testdefs.each do |h|
   if h['compile']
+    erubyfile = erubyfilename(h['name'])
     code = eval h['compile']
     s = <<-END
       def view_#{h['name']}(context)
@@ -205,13 +272,14 @@ testdefs.each do |h|
   end
 end
 
-  
+
 ## define tests for caching
-str = File.read(erubyfile)
+str = erubystr
 Dir.mkdir('src') unless test(?d, 'src')
 testdefs.each do |h|
   if h['compile']
     # create file to read
+    erubyfile = erubyfilename(h['name'])
     code = eval h['compile']
     fname = "src/erubybench.#{h['name']}.rb"
     File.open(fname, 'w') { |f| f.write(code) }
@@ -254,6 +322,7 @@ end
 $stdout = StringIO.new
 testdefs.each do |h|
   ## execute test code
+  erubyfile = erubyfilename(h['name'])
   eval h['code']
   ## execute view function
   next unless h['compile']
@@ -299,7 +368,7 @@ begin
         func = 'test_execute_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, erubyfile, context)
+          __send__(func, erubyfilename(h['name']), context)
         end
       end
     end
@@ -316,7 +385,7 @@ begin
         func = 'test_convert_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, erubyfile)
+          __send__(func, erubyfilename(h['name']))
         end
       end
     end
@@ -333,7 +402,7 @@ begin
         func = 'test_cache_' + h['name']
         GC.start
         job.report(title) do
-          __send__(func, erubyfile, context)
+          __send__(func, erubyfilename(h['name']), context)
         end
       end
     end
@@ -516,6 +585,14 @@ __END__
   class:  Erubis::TinyPrintEruby
   return: null
   skip:   yes
+
+- name:   ErubisPIEruby
+  class:  Erubis::PI::Eruby
+  code: |
+    Erubis::PI::Eruby.new(File.read(erubyfile)).result(binding())
+  compile: |
+    Erubis::PI::Eruby.new(File.read(erubyfile)).src
+  return: str
 
 #- name:    load
 #  class:   load

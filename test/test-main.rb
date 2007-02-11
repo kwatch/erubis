@@ -187,15 +187,15 @@ END
   end
 
 
-  def test_syntax1    # -X (syntax ok)
+  def test_syntax1    # -z (syntax ok)
     @input    = INPUT
     @expected = "Syntax OK\n"
-    @options  = '-X'
+    @options  = '-z'
     _test()
   end
 
 
-  def test_syntax2    # -X (syntax error)
+  def test_syntax2    # -z (syntax error)
     inputs = []
     inputs << <<'END'
 <ul>
@@ -231,7 +231,7 @@ END
     (0...max).each do |i|
       @input    = inputs[i]
       @expected = "tmp.test_syntax2:#{errmsgs[i]}"
-      @options  = '-X'
+      @options  = '-z'
       _test()
     end
     #
@@ -241,7 +241,7 @@ END
       end
       @input = '<ok/>'
       @expected = ''
-      @options = '-X'
+      @options = '-z'
       (0...max).each do |i|
         @expected << "#{filenames[i]}:#{errmsgs[i]}"
         @options << " #{filenames[i]}"

@@ -20,7 +20,7 @@ It has the following features.
 .* Context object available and easy to combine eRuby template with YAML datafile
 .* Print statement available
 .* Easy to expand and customize in subclass
-.* Ruby on Rails support
+.* {{<Ruby on Rails support|#topics-rails>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -1542,11 +1542,11 @@ $ erubis -l js example.ejs
 
 .$$ Syntax Checking		| topics-syntax
 
-Command-line option '-X' checks syntax. It is similar to 'erubis -x file.rhtml | ruby -wc', but it can take several file names.
+Command-line option '-z' checks syntax. It is similar to 'erubis -x file.rhtml | ruby -wc', but it can take several file names.
 
-.? example of command-line option '-X'
+.? example of command-line option '-z'
 .====================
-$ erubis {{*-X*}} app/views/*/*.rhtml
+$ erubis {{*-z*}} app/views/*/*.rhtml
 Syntax OK
 .====================
 
@@ -1583,7 +1583,7 @@ try Erubis::TinyEruby class.
 
 .$$ Ruby on Rails Support	| topics-rails
 
-Erubis supports Ruby on Rails.
+Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
 
 .1) Add the following code to your 'config/environment.rb'.
     
@@ -1594,6 +1594,8 @@ Erubis supports Ruby on Rails.
     #Erubis::Helpers::RailsHelper.init_properties = {}
     #Erubis::Helpers::RailsHelper.show_src = false
     .--------------------
+
+    This will replace ERB in Rails by Erubis entirely.
     
 .2) (Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
     
@@ -1624,7 +1626,7 @@ Erubis supports Ruby on Rails.
              @@template_args[render_symbol] ||= {}
     .--------------------
     
-    This patch is included in erubis_X.X.X/contrib directory and the following is an
+    This patch is included in erubis_2.X.X/contrib directory and the following is an
     example to apply this patch.
     
     .? how to apply patch:
@@ -1633,7 +1635,7 @@ Erubis supports Ruby on Rails.
     $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
     .====================
 
-    Notice that this patch is optinal if you are using Ruby on Rails ver 1.1 or 1.2.
+    Notice that this patch is not necessary if you are using Ruby on Rails ver 1.1 or 1.2, but it is recommended.
     
 .3) Restart web server.
     .====================
@@ -2028,15 +2030,16 @@ $ cd erubis-2.2.0/benchmark/
 $ ruby erubybench.rb -n 10000 -m execute
 ## execute
                                     user     system      total        real
-eruby                          24.460000   0.600000  25.060000 ( 29.248518)
-ERB                            65.190000   1.060000  66.250000 ( 77.053693)
-Erubis::Eruby                  21.450000   0.700000  22.150000 ( 26.237943)
-Erubis::Eruby(cached)          14.440000   0.850000  15.290000 ( 18.152723)
-Erubis::ArrayBufferEruby       21.730000   0.710000  22.440000 ( 26.861644)
-Erubis::SimplifiedEruby        19.620000   0.660000  20.280000 ( 23.159973)
-Erubis::StdoutEruby            22.810000   0.690000  23.500000 ( 26.590015)
-Erubis::PrintOutEruby          22.590000   0.680000  23.270000 ( 26.336551)
-Erubis::TinyEruby              18.370000   0.660000  19.030000 ( 21.475423)
+eruby                          23.270000   0.540000  23.810000 ( 33.621505)
+ERB                            68.170000   0.930000  69.100000 ( 77.182647)
+Erubis::Eruby                  20.650000   0.640000  21.290000 ( 23.776704)
+Erubis::Eruby(cached)          13.780000   0.810000  14.590000 ( 16.420384)
+Erubis::ArrayBufferEruby       20.920000   0.650000  21.570000 ( 24.031593)
+Erubis::SimplifiedEruby        18.830000   0.620000  19.450000 ( 21.792011)
+Erubis::StdoutEruby            22.070000   0.650000  22.720000 ( 25.483154)
+Erubis::PrintOutEruby          21.930000   0.640000  22.570000 ( 25.272523)
+Erubis::TinyEruby              17.620000   0.620000  18.240000 ( 20.641452)
+Erubis::PI::Eruby              21.840000   0.650000  22.490000 ( 25.242539)
 .====================
 
 This shows that...
@@ -2046,6 +2049,29 @@ This shows that...
 .* Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (StringBufferEnhancer which Erubis::Eruby includes)
 .* $stdout and print() make Erubis a little slower.
 .* Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
+
+Escaping HTML characters (such as '< > & "') makes Erubis more faster than eruby and ERB,
+because Erubis::XmlHelper.escape_html() works faster than CGI.escapeHTML() and ERB::Util.h().
+The following shows that Erubis is more than 30 percent faster than eruby.
+
+.? When escaping HTML characters with option '-e'
+.====================
+$ ruby erubybench.rb -n 10000 -m execute -e
+## execute
+                                    user     system      total        real
+eruby                          41.800000   0.820000  42.620000 ( 45.547137)
+ERB                            86.030000   1.340000  87.370000 ( 92.739382)
+Erubis::Eruby                  30.960000   0.820000  31.780000 ( 33.783879)
+Erubis::Eruby(cached)          23.150000   0.970000  24.120000 ( 25.599809)
+Erubis::ArrayBufferEruby       31.180000   0.830000  32.010000 ( 33.815682)
+Erubis::SimplifiedEruby        29.120000   0.810000  29.930000 ( 31.788697)
+Erubis::StdoutEruby            32.670000   0.840000  33.510000 ( 35.592838)
+Erubis::PrintOutEruby          32.560000   0.850000  33.410000 ( 35.365003)
+Erubis::TinyEruby              30.220000   0.810000  31.030000 ( 32.996905)
+Erubis::PI::Eruby              31.880000   0.850000  32.730000 ( 35.329514)
+.====================
+
+
 
 .#.? Env: Linux FedoraCore4, Celeron 667MHz, Mem512MB, Ruby1.8.4, eruby1.0.5
 .#.____________________
@@ -2121,7 +2147,7 @@ erubis [..options..] [{{/file/}} ...]
   .[ -h, --help    ]	Help.
   .[ -v            ]	Release version.
   .[ -x            ]	Show compiled source.
-  .[ -X            ]	Syntax checking.
+  .[ -z            ]	Syntax checking.
   .[ -T            ]	No trimming spaces around '<% %>'.
 			This is equivarent to '--trim=false'.
   .[ -b            ]	Body only (no preamble nor postamble).

@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.63 (2007-02-11)
+	.- [change] option '-X' is changed to '-z'
+	.- [enhance] erubybench.rb supports '-e' (escape) option
+	.- [enhance] erubybench.rb supports PI::Eruby
+	.- [update] users-guide
 
 : Rev.62 (2007-02-06)
 	.- [change] 'helpers/rails.rb' is renamed to 'helpers/rails_helper.rb'
