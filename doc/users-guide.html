@@ -17,6 +17,8 @@
       last update: $Date$<br>
     </div>
 
+<p>release: 2.2.0
+</p>
 <a name="preface"></a>
 <h2 class="section1">Preface</h2>
 <p>Erubis is an implementation of eRuby.
@@ -295,11 +297,11 @@ _buf = ''; _buf &lt;&lt; '&lt;ul&gt;
 ';
 _buf.to_s
 </pre>
-<p>If you want leave spaces around '&lt;% %&gt;', add command-line option '-T'.
+<p>If you want leave spaces around '&lt;% %&gt;', add command-line property '--trim=false'.
 </p>
 <div class="terminal_caption">
-compiled source code with command-line option '-T'</div>
-<pre class="terminal">$ erubis -x <strong>-T</strong> example2.eruby
+compiled source code with command-line property '--trim=false'</div>
+<pre class="terminal">$ erubis -x <strong>--trim=false</strong> example2.eruby
 _buf = ''; _buf &lt;&lt; '&lt;ul&gt;
 '; _buf &lt;&lt; '  '; for item in list ; _buf &lt;&lt; '
 '; _buf &lt;&lt; '  &lt;li&gt;
@@ -1224,21 +1226,21 @@ notext-example.eruby</div>
 </pre>
 <div class="terminal_caption">
 output example of NoTextEnhancer</div>
-<pre class="terminal">$ erubis -TxE NoText notext-example.eruby
+<pre class="terminal">$ erubis -xE NoText notext-example.eruby
 _buf = '';
- if !@list || @list.empty? ;
+ if !@list || @list.empty? 
 
- else ;
+ else 
 
 
-     @list.each_with_index do |item, i| ;
+     @list.each_with_index do |item, i| 
                   _buf &lt;&lt; ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
            _buf &lt;&lt; ( item ).to_s;
 
-     end ;
+     end 
 
 
- end ;
+ end 
 _buf.to_s
 </pre>
 <p>NoTextEnhancer is language-independent. It is useful even if you are PHP user, see <a href="#topics-php">this section</a>.
@@ -1270,19 +1272,19 @@ nocode-example.eruby</div>
 &lt;% end %&gt;
 </pre>
 <div class="terminal_caption">
-output example of NoTextEnhancer</div>
-<pre class="terminal">$ erubis -TxE NoCode notext-example.eruby
+output example of NoCodeEnhancer</div>
+<pre class="terminal">$ erubis -xE NoCode notext-example.eruby
 &lt;h3&gt;List&lt;/h3&gt;
 
 &lt;p&gt;not found.&lt;/p&gt;
 
 &lt;table&gt;
   &lt;tbody&gt;
-    
+
     &lt;tr bgcolor=""&gt;
       &lt;td&gt;&lt;/td&gt;
     &lt;/tr&gt;
-    
+
   &lt;/tbody&gt;
 &lt;/table&gt;
 
@@ -1510,7 +1512,7 @@ example.ephp</div>
      &lt;td&gt;<strong>&lt;%= $i %&gt;</strong>&lt;/td&gt;
      &lt;td&gt;<strong>&lt;%== $item %&gt;</strong>&lt;/td&gt;
     &lt;/tr&gt;
-    &lt;% } %&gt;
+    <strong>&lt;% } %&gt;</strong>
    &lt;/tbody&gt;
   &lt;/table&gt;
  &lt;/body&gt;
@@ -1973,7 +1975,7 @@ if test(?f, cachename)
 end
 </pre>
 <p>Caching makes Erubis about 40-50 percent faster than no-caching.
-See {{benchmark|#topics-benchmark}} for details.
+See <a href="#topics-benchmark">benchmark</a> for details.
 </p>
 <br>
 
@@ -1989,7 +1991,7 @@ try Erubis::TinyEruby class.
 
 <a name="topics-rails"></a>
 <h3 class="section2">Ruby on Rails Support</h3>
-<p>Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
+<p>Erubis supports Ruby on Rails. 
 </p>
 <ol type="1">
 <li>Add the following code to your 'config/environment.rb'.
@@ -2000,11 +2002,9 @@ config/environment.rb</div>
 #Erubis::Helpers::RailsHelper.init_properties = {}
 #Erubis::Helpers::RailsHelper.show_src = false
 </pre>
-</li>
-</ol>
 <p>    This will replace ERB in Rails by Erubis entirely.
 </p>
-<ol type="1">
+</li>
 <li>(Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
 <div class="program_caption">
 action_view_base_rb.patch</div>
@@ -2040,16 +2040,16 @@ how to apply patch:</div>
 <pre class="terminal">$ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
 $ sudo patch -p1 &lt; /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
 </pre>
-</li>
-</ol>
 <p>    Notice that this patch is not necessary if you are using Ruby on Rails ver 1.1 or 1.2, but it is recommended.
 </p>
-<ol type="1">
+</li>
 <li>Restart web server.
 <pre class="terminal">$ ruby script/server
 </pre>
 </li>
 </ol>
+<p>ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
+</p>
 <p>If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code into log file (ex. 'log/development.log').
 It is useful for debugging.
 </p>
@@ -2092,7 +2092,7 @@ NoTextEnhancer can separate PHP code from HTML document.
 </p>
 <div class="terminal_caption">
 example of using NoTextEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -T -l php -E NoText -p '&lt;\?php \?&gt;' notext-example.php | cat -n
+<pre class="terminal">$ erubis -l php -E NoText -p '&lt;\?php \?&gt;' --trim=false notext-example.php | cat -n
      1	
      2	
      3	
@@ -2117,24 +2117,24 @@ example of using NoTextEnhancer with PHP file</div>
 </p>
 <div class="terminal_caption">
 example of using NoCodeEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -T -l php -E NoCode -p '&lt;\?php \?&gt;' notext-example.php | cat -n
+<pre class="terminal">$ erubis -l php -E NoCode -p '&lt;\?php \?&gt;' notext-example.php | cat -n
      1	&lt;html&gt;
      2	  &lt;body&gt;
      3	    &lt;h3&gt;List&lt;/h3&gt;
-     4	    
+     4	
      5	    &lt;p&gt;not found.&lt;/p&gt;
-     6	    
+     6	
      7	    &lt;table&gt;
      8	      &lt;tbody&gt;
-     9	        
-    10	        
+     9	
+    10	
     11	        &lt;tr bgcolor=""&gt;
     12	          &lt;td&gt;&lt;/td&gt;
     13	        &lt;/tr&gt;
-    14	        
+    14	
     15	      &lt;/tbody&gt;
     16	    &lt;/table&gt;
-    17	    
+    17	
     18	  &lt;/body&gt;
     19	&lt;/html&gt;
 </pre>
@@ -2278,8 +2278,8 @@ Erubis::PI::Eruby              21.840000   0.650000  22.490000 ( 25.242539)
 </li>
 </ul>
 <p>Escaping HTML characters (such as '&lt; &gt; &amp; "') makes Erubis more faster than eruby and ERB,
-because Erubis::XmlHelper.escape_html() works faster than CGI.escapeHTML() and ERB::Util.h().
-The following shows that Erubis is more than 30 percent faster than eruby.
+because Erubis::XmlHelper#escape_xml() works faster than CGI.escapeHTML() and ERB::Util#h().
+The following shows that Erubis is more than 30 percent faster than eruby if HTML characters are escaped.
 </p>
 <div class="terminal_caption">
 When escaping HTML characters with option '-e'</div>
@@ -2336,12 +2336,6 @@ Erubis::PI::Eruby              31.880000   0.850000  32.730000 ( 35.329514)
   	Syntax checking.
   </dd>
   <dt class="dt3"><b>
--T            </b></dt>
-  <dd class="dd3">
-  	No trimming spaces around '&lt;% %&gt;'.
-			This is equivarent to '--trim=false'.
-  </dd>
-  <dt class="dt3"><b>
 -b            </b></dt>
   <dd class="dd3">
   	Body only (no preamble nor postamble).
@@ -2392,8 +2386,9 @@ Erubis::PI::Eruby              31.880000   0.850000  32.730000 ( 35.329514)
 			(ex. -f file1,file2,file3).
   </dd>
   <dt class="dt3"><b>
--c context    ]    Context data string in YAML inline style or Ruby code.</b></dt>
+-c context    </b></dt>
   <dd class="dd3">
+  	Context data string in YAML inline style or Ruby code.
   </dd>
   <dt class="dt3"><b>
 -t            </b></dt>
@@ -2414,6 +2409,11 @@ Erubis::PI::Eruby              31.880000   0.850000  32.730000 ( 35.329514)
 --pi[=name]   </b></dt>
   <dd class="dd3">
   	parse '&lt;?name ... ?&gt;' instead of '&lt;% ... %&gt;'
+  </dd>
+  <dt class="dt3"><b>
+--trim=false  </b></dt>
+  <dd class="dd3">
+  	No trimming spaces around '&lt;% %&gt;'.
   </dd>
   </dl>
 <br>

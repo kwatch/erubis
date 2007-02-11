@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.65 (2007-02-11)
+	.- [change] option '-T' is removed
+	.- [update] user's guide
+
 : Rev.64 (2007-02-11)
 	.- [release] release preparation
 

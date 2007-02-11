@@ -5,12 +5,12 @@
 
 #
 - release:   2.2.0
-  date:
+  date:      2007-02-11
   enhancements:
     - |
       Performance tuned up. Release 2.2.0 works about 8 percent faster
       than 2.1.0.
-      As a result, Erubis works about 10 percent faster than eruby.
+      As a result, Erubis works more than 10 percent faster than eruby.
       (eruby is the extension module of eRuby written in C.)
 
     - |
@@ -125,6 +125,9 @@
       Erubis::StringBufferEnhancer#add_postamble() prints "_buf.to_s"
       instead of "_buf".
       This is useful for 'erubis -x file.rhtml | ruby -wc'.
+
+    - |
+      Command-line option '-T' is removed. Use '--trim=false' instead.
 
     - |
       License is changed to MIT License.

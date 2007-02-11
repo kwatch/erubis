@@ -49,14 +49,14 @@ module Erubis
     end
 
     def initialize
-      @single_options = "hvxzTtSbeB"
+      @single_options = "hvxztSbeB"
       @arg_options    = "pcrfKIlaEC"
       @option_names   = {
         ?h => :help,
         ?v => :version,
         ?x => :source,
         ?z => :syntax,
-        ?T => :notrim,
+        #?T => :notrim,
         ?t => :untabify,
         ?S => :intern,
         ?b => :bodyonly,
@@ -140,7 +140,7 @@ module Erubis
       ## properties for engine
       properties[:escape]   = true         if opts.escape && !properties.key?(:escape)
       properties[:pattern]  = opts.pattern if opts.pattern
-      properties[:trim]     = false        if opts.notrim
+      #properties[:trim]     = false        if opts.notrim
       properties[:preamble] = properties[:postamble] = false if opts.bodyonly
       properties[:pi]       = nil          if properties[:pi] == true
 
@@ -200,7 +200,6 @@ Usage: #{command} [..options..] [file ...]
   -v            : version
   -x            : show converted code
   -z            : syntax checking
-  -T            : don't trim spaces around '<% %>'
   -b            : body only (no preamble nor postamble)
   -e            : escape (equal to '--E Escape')
   -p pattern    : embedded pattern (default '<% %>')
@@ -217,6 +216,7 @@ Usage: #{command} [..options..] [file ...]
 
 END
       #'
+      #  -T            : don't trim spaces around '<% %>'
       #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
       #  -a            : action (convert/execute)

@@ -6,7 +6,7 @@
 
 .$ News
 
-.* [2007-02-03] {{<erubis_2.2.0|download.cgi>}} released.
+.* [2007-02-12] {{<erubis_2.2.0|download.cgi>}} released.
 .* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.
 .* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
 .* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
@@ -122,6 +122,5 @@ You can use Erubis in Java with Rhino.
 	    .#.- {{<ReleaseNote|erubisj-ReleaseNote.txt>}}
 
 .$ License
-	.* {{<LGPL ver.2|http://www.gnu.org/copyleft/lgpl.html>}}
-	   
-	   If you need other license, please suggest me.
+	.* Erubis is released under MIT License.
+	.* Erubis-J is released under LGPL License.

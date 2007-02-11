@@ -272,7 +272,7 @@ END
   end
 
 
-  def test_notrim1    # -T
+  def test_notrim1    # --trim=false
     @input   = INPUT
     @expected = <<'END'
 list:
@@ -285,12 +285,12 @@ list:
 
 user: (none)
 END
-    @options = "-T"
+    @options = "--trim=false"  # -T
     _test()
   end
 
 
-  def test_notrim2    # -T
+  def test_notrim2    # --trim=false
     @input    = INPUT
 #    @expected = <<'END'
 #_buf = ''; _buf << "list:\n"
@@ -311,7 +311,7 @@ _buf = ''; _buf << 'list:
 ';
 _buf.to_s
 END
-    @options = "-xT"
+    @options = "-x --trim=false"   # -xT
     _test()
   end
 

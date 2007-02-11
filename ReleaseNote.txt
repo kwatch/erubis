@@ -1,5 +1,161 @@
 $ [ANN] Erubis 2.1.0 release - a fast eRuby implementation
 
+Hi all,
+
+I have just released Erubis 2.2.0.
+http://www.kuwata-lab.com/erubis
+http://www.kuwata-lab.com/erubis/CHANGES
+
+Erubis is another implementation of eRuby.
+
+Features:
+  * Very fast, almost three times faster than ERB and
+    even ten percent faster than eruby (implemented in C)
+  * Support multi-language
+    (Ruby,PHP,C,Java,Scheme,Perl,Javascript)
+  * Auto escaping support
+  * Auto trimming spaces around '<% %>'
+  * Embedded pattern changeable (default '<% %>')
+  * Context object available and easy to combine eRuby
+    template with YAML datafile or Ruby script
+  * Easy to extend in subclass
+  * Ruby on Rails support
+
+See users' guide (erubis_2.2.0/doc/users-guide.html)
+for details.
+
+
+$$ Enhancements
+
+  * Performance tuned up. Release 2.2.0 works about 8 percent faster
+    than 2.1.0.
+    As a result, Erubis works more than 10 percent faster than eruby.
+    (eruby is the extension module of eRuby written in C.)
+  
+  * Support of Ruby on Rails improved.
+    If you want to use Erubis with Ruby on Rails, add the following code
+    into your 'config/environment.rb' and restart web server.
+    This will set Erubis as eRuby compiler in Ruby on Rails instead of ERB.
+  
+    --------------------
+    require 'erubis/helpers/rails_helper'
+    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+    #Erubis::Helpers::RailsHelper.init_properties = {}
+    #Erubis::Helpers::RailsHelper.show_src = true
+    --------------------
+  
+    Methods 'capture()' and 'content_for()' of ActionView::Helpers::CaptureHelper
+    are available. Methd ActionView::Helpers::TextHelper#concat() is also available.
+  
+    If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted
+    Ruby code into log file (such as 'log/development.log').
+  
+  * Erubis::Engine.load_file(filename) creates cache file (filename +
+    '.cache') automatically if cache file is old or not exist.
+    Caching makes Erubis about 40-50 percent faster.
+  
+    ex.
+    --------------------
+    require 'erubis'
+    eruby = Erubis::Eruby.load_file('example.rhtml')
+       ## cache file 'example.rhtml.cache' is created automatically
+    --------------------
+  
+  * Command-line option '-f datafile' can take Ruby script ('*.rb')
+    as well as YAML file ('*.yaml' or '*.yml').
+  
+    ex.
+    ====================
+    $ cat context.rb
+    @title = 'Example'
+    @list  = %w[AAA BBB CCC]
+    $ cat example.rhtml
+    <h1><%= @title %></h1>
+    <ul>
+    <% for item in @list %>
+      <li><%= item %></li>
+    <% end %>
+    </ul>
+    $ erubis -f context.rb example.rhtml
+    <h1>Example</h1>
+    <ul>
+      <li>AAA</li>
+      <li>BBB</li>
+      <li>CCC</li>
+    </ul>
+    ====================
+  
+  * New command-line option '-c context' support. It takes context string
+    in YAML inline style or Ruby code style.
+  
+    ex. YAML inline style
+    ====================
+    $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
+    ====================
+  
+    ex. YAML inline style
+    ====================
+    $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
+    ====================
+  
+  * New command-line option '-z' (syntax checking) support. It is similar
+    to 'erubis -x file.rhtml | ruby -wc', but it can take several filenames.
+  
+    ex.
+    ====================
+    $ erubis -z app/views/*/*.rhtml
+    Syntax OK
+    ====================
+  
+  * New constant Erubis::VERSION added.
+
+
+$$ Changes
+
+  * Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
+    instead of Erubis::ArrayBufferEnhancer.
+    This is for Ruby on Rails support.
+  
+    ex.
+    ====================
+    $ cat example.rhtml
+    <ul>
+    <% for item in @list %>
+      <li><%= item %></li>
+    <% end %>
+    </ul>
+    $ erubis -x example.rhtml
+    _buf = ''; _buf << '<ul>
+    '; for item in @list 
+     _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+    '; end 
+     _buf << '</ul>
+    ';
+    _buf.to_s
+    ====================
+  
+  * Erubis::StringBufferEnhancer#add_postamble() prints "_buf.to_s"
+    instead of "_buf".
+    This is useful for 'erubis -x file.rhtml | ruby -wc'.
+
+  * Command-line option '-T' is removed. Use '--trim=false' instead.
+  
+  * License is changed to MIT License.
+  
+  * Embedded pattern '<%- -%>' can be handled.
+
+
+
+--
+regards,
+kwatch
+
+
+--------------------------------------------------------------------------------
+
+
+$ [ANN] Erubis 2.1.0 release - a fast eRuby implementation
+
 I have released Erubis 2.1.0.
 http://www.kuwata-lab.com/erubis/
 

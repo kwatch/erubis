@@ -4,6 +4,8 @@
 .?lastupdate:	$Date$
 .?stylesheet:	docstyle.css
 
+release: 2.2.0
+
 
 
 .$ Preface		| preface*
@@ -154,12 +156,12 @@ $ erubis -x example2.eruby
 .<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -x guide.d/example2.eruby)
 .====================
 
-If you want leave spaces around '<% %>', add command-line option '-T'.
+If you want leave spaces around '<% %>', add command-line property '--trim=false'.
 
-.? compiled source code with command-line option '-T'
+.? compiled source code with command-line property '--trim=false'
 .====================
-$ erubis -x {{*-T*}} example2.eruby
-.<<<:! erubis -x -T guide.d/example2.eruby
+$ erubis -x {{*--trim=false*}} example2.eruby
+.<<<:! erubis -x --trim=false guide.d/example2.eruby
 .====================
 
 Or add option {{,:trim=>false,}} to Erubis::Eruby.new().
@@ -1003,8 +1005,8 @@ This is useful especially when debugging a complex eRuby script.
 
 .? output example of NoTextEnhancer
 .====================
-$ erubis -TxE NoText notext-example.eruby
-.<<<:! (cd guide.d; erubis -TxE NoText notext-example.eruby)
+$ erubis -xE NoText notext-example.eruby
+.<<<:! (cd guide.d; erubis -xE NoText notext-example.eruby)
 .====================
 
 NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -1034,10 +1036,10 @@ This is useful especially when validating HTML tags.
 <% end %>
 .--------------------
 
-.? output example of NoTextEnhancer
+.? output example of NoCodeEnhancer
 .====================
-$ erubis -TxE NoCode notext-example.eruby
-.<<<:! (cd guide.d; erubis -TxE NoCode nocode-example.eruby)
+$ erubis -xE NoCode notext-example.eruby
+.<<<:! (cd guide.d; erubis -xE NoCode nocode-example.eruby)
 .====================
 
 NoCodeEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -1298,7 +1300,7 @@ Erubis supports the following language currently:
      <td>{{*<%= $i %>*}}</td>
      <td>{{*<%== $item %>*}}</td>
     </tr>
-    <% } %>
+    {{*<% } %>*}}
    </tbody>
   </table>
  </body>
@@ -1569,7 +1571,7 @@ end
 .--------------------
 
 Caching makes Erubis about 40-50 percent faster than no-caching.
-See {{benchmark|#topics-benchmark}} for details.
+See {{<benchmark|#topics-benchmark>}} for details.
 
 
 
@@ -1583,7 +1585,7 @@ try Erubis::TinyEruby class.
 
 .$$ Ruby on Rails Support	| topics-rails
 
-Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
+Erubis supports Ruby on Rails. 
 
 .1) Add the following code to your 'config/environment.rb'.
     
@@ -1594,7 +1596,7 @@ Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and 
     #Erubis::Helpers::RailsHelper.init_properties = {}
     #Erubis::Helpers::RailsHelper.show_src = false
     .--------------------
-
+    
     This will replace ERB in Rails by Erubis entirely.
     
 .2) (Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
@@ -1634,7 +1636,7 @@ Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and 
     $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
     $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
     .====================
-
+    
     Notice that this patch is not necessary if you are using Ruby on Rails ver 1.1 or 1.2, but it is recommended.
     
 .3) Restart web server.
@@ -1642,6 +1644,7 @@ Erubis supports Ruby on Rails. ActionView::Helpers::CaptureHelper#capture() and 
     $ ruby script/server
     .====================
 
+ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
 
 If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code into log file (ex. 'log/development.log').
 It is useful for debugging.
@@ -1684,16 +1687,16 @@ NoTextEnhancer can separate PHP code from HTML document.
 
 .? example of using NoTextEnhancer with PHP file
 .====================
-$ erubis -T -l php -E NoText -p '<\?php \?>' notext-example.php | cat -n
-.<<<:! erubis -T -l php -E NoText -p '<\?php \?>' guide.d/notext-example.php | cat -n
+$ erubis -l php -E NoText -p '<\?php \?>' --trim=false notext-example.php | cat -n
+.<<<:! erubis -l php -E NoText -p '<\?php \?>' --trim=false guide.d/notext-example.php | cat -n
 .====================
 
 In the same way, NoCodeEnhancer can extract HTML tags.
 
 .? example of using NoCodeEnhancer with PHP file
 .====================
-$ erubis -T -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
-.<<<:! erubis -T -l php -E NoCode -p '<\?php \?>' guide.d/notext-example.php | cat -n
+$ erubis -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
+.<<<:! erubis -l php -E NoCode -p '<\?php \?>' guide.d/notext-example.php | cat -n
 .====================
 
 
@@ -2051,8 +2054,8 @@ This shows that...
 .* Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
 
 Escaping HTML characters (such as '< > & "') makes Erubis more faster than eruby and ERB,
-because Erubis::XmlHelper.escape_html() works faster than CGI.escapeHTML() and ERB::Util.h().
-The following shows that Erubis is more than 30 percent faster than eruby.
+because Erubis::XmlHelper#escape_xml() works faster than CGI.escapeHTML() and ERB::Util#h().
+The following shows that Erubis is more than 30 percent faster than eruby if HTML characters are escaped.
 
 .? When escaping HTML characters with option '-e'
 .====================
@@ -2148,8 +2151,8 @@ erubis [..options..] [{{/file/}} ...]
   .[ -v            ]	Release version.
   .[ -x            ]	Show compiled source.
   .[ -z            ]	Syntax checking.
-  .[ -T            ]	No trimming spaces around '<% %>'.
-			This is equivarent to '--trim=false'.
+.#  .[ -T            ]	No trimming spaces around '<% %>'.
+.#			This is equivarent to '--trim=false'.
   .[ -b            ]	Body only (no preamble nor postamble).
 			This is equivarent to '--preamble=false --postamble=false'.
   .[ -e            ]	Escape. This is equivarent to '-E Escape'.
@@ -2169,11 +2172,12 @@ erubis [..options..] [{{/file/}} ...]
                         Ruby script ('*.rb').
 			It is able to specify several filenames separating with ','
 			(ex. -f file1,file2,file3).
-  .[ -c context    ]    Context data string in YAML inline style or Ruby code.
+  .[ -c context    ]	Context data string in YAML inline style or Ruby code.
   .[ -t            ]	Expand tab characters in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
   .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()
   .[ --pi[=name]   ]	parse '<?name ... ?>' instead of '<% ... %>'
+  .[ --trim=false  ]	No trimming spaces around '<% %>'.
 
 
 
