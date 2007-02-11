@@ -11,7 +11,7 @@ require 'rubygems'
 spec = Gem::Specification.new do |s|
   ## package information
   s.name        = "erubis"
-  s.author      = "kwatch"
+  s.author      = "makoto kuwata"
   s.version     = ("$Release$" =~ /[\.\d]+/) && $&
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "http://rubyforge.org/projects/erubis"

@@ -10,9 +10,9 @@ require 'stringio'
 require 'cgi'
 include ERB::Util
 #module ERB::Util
-#  XmlEscapeTable = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;' }
+#  ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
 #  def h(value)
-#    value.to_s.gsub(/[&<>"]/) { |s| XmlEscapeTable[s] }
+#    value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }
 #  end
 #  module_function :h
 #end
@@ -164,10 +164,7 @@ def File.write(filename, str)
 end
 #
 if $erubyfile == defaults[:erubyfile]
-  header = File.read("templates/_header.html")
-  footer = File.read("templates/_footer.html")
-  body   = File.read("templates/#{$erubyfile}")
-  erubystr = header + body + footer
+  erubystr = File.read($erubyfile)
   s = erubystr
   erubystrs = {}
   if $escape
@@ -180,7 +177,7 @@ if $erubyfile == defaults[:erubyfile]
     erubystrs['eruby']  = s
     erubystrs['ERB']    = s
     erubystrs['Erubis'] = s
-    erubystrs['Tiny']  = s
+    erubystrs['Tiny']   = s
     erubystrs['PI']     = s.gsub(/<%=(.*?)%>/, '@!{\1}@').gsub(/<%(.*?)%>/m, '<?rb\1?>')
   end
 else

@@ -122,6 +122,7 @@ recipes:
 	  base = File.basename(f)
 	  !exclude_libs.include?(base)
 	end
+	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#
 	store 'benchmark/erubybench.{rb,rhtml,yaml}', 'benchmark/erubybench-lib.rb', dir
 	#
@@ -157,6 +158,7 @@ recipes:
 	#
 	chmod 0644, "#{dir}/**/*", :filetype=>'file'
 	chmod 0755, "#{dir}/{bin,contrib}/*", :filetype=>'file'
+	chmod 0644, "#{dir}/contrib/*.patch"
 
   - product:	:duplicate
     method*: |

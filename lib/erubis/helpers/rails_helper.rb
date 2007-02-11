@@ -170,6 +170,7 @@ end   ###
 end
 
 
+## set Erubis as eRuby compiler in Ruby on Rails instead of ERB
 class ActionView::Base  # :nodoc:
   private
   def convert_template_into_ruby_code(template)
@@ -185,6 +186,17 @@ class ActionView::Base  # :nodoc:
 end
 
 
+## make h() method faster
+module ERB::Util  # :nodoc:
+  ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
+  def h(value)
+    value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }
+  end
+  module_function :h
+end
+
+
+## finish
 ac = ActionController::Base.new
 ac.logger.info "** Erubis #{Erubis::VERSION}"
 #$stdout.puts "** Erubis #{Erubis::VERSION}"

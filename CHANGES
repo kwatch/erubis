@@ -10,12 +10,14 @@
     - |
       Performance tuned up. Release 2.2.0 works about 8 percent faster
       than 2.1.0.
+      As a result, Erubis works about 10 percent faster than eruby.
+      (eruby is the extension module of eRuby written in C.)
 
     - |
-      Support of Ruby on Rails improved. Methods 'capture()' and 'content_for()'
-      of ActionView::Helpers::CaptureHelper are available.
+      Support of Ruby on Rails improved.
       If you want to use Erubis with Ruby on Rails, add the following code
       into your 'config/environment.rb' and restart web server.
+      This will set Erubis as eRuby compiler in Ruby on Rails instead of ERB.
 
       --------------------
       require 'erubis/helpers/rails_helper'
@@ -24,8 +26,11 @@
       #Erubis::Helpers::RailsHelper.show_src = true
       --------------------
 
+      Methods 'capture()' and 'content_for()' of ActionView::Helpers::CaptureHelper
+      are available. Methd ActionView::Helpers::TextHelper#concat() is also available.
+
       If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted
-      Ruby code into log file ('log/development.log' or so).
+      Ruby code into log file (such as 'log/development.log').
 
     - |
       Erubis::Engine.load_file(filename) creates cache file (filename +
@@ -38,34 +43,6 @@
       eruby = Erubis::Eruby.load_file('example.rhtml')
          ## cache file 'example.rhtml.cache' is created automatically
       --------------------
-
-    - |
-      Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
-      instead of Erubis::ArrayBufferEnhancer.
-      (String buffer is a litte faster than array buffer.)
-
-      ex.
-      ====================
-      $ cat example.rhtml
-      <ul>
-      <% for item in @list %>
-        <li><%= item %></li>
-      <% end %>
-      </ul>
-      $ erubis -x example.rhtml
-      _buf = ''; _buf << '<ul>
-      '; for item in @list 
-       _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
-      '; end 
-       _buf << '</ul>
-      ';
-      _buf.to_s
-      ====================
-
-    - |
-      Erubis::StringBufferEnhancer#add_postamble() prints "_buf.to_s"
-      instead of "_buf".
-      This is useful for 'erubis -x file.rhtml | ruby -wc'.
 
     - |
       Command-line option '-f datafile' can take Ruby script ('*.rb')
@@ -121,6 +98,34 @@
 
 
   changes:
+    - |
+      Class Erubis::Eruby changed to include Erubis::StringBufferEnhancer
+      instead of Erubis::ArrayBufferEnhancer.
+      This is for Ruby on Rails support.
+
+      ex.
+      ====================
+      $ cat example.rhtml
+      <ul>
+      <% for item in @list %>
+        <li><%= item %></li>
+      <% end %>
+      </ul>
+      $ erubis -x example.rhtml
+      _buf = ''; _buf << '<ul>
+      '; for item in @list 
+       _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+      '; end 
+       _buf << '</ul>
+      ';
+      _buf.to_s
+      ====================
+
+    - |
+      Erubis::StringBufferEnhancer#add_postamble() prints "_buf.to_s"
+      instead of "_buf".
+      This is useful for 'erubis -x file.rhtml | ruby -wc'.
+
     - |
       License is changed to MIT License.
 
