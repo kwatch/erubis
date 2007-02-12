@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.67 (2007-02-12)
+	.- [update] benchmark data on user's guide is updated
+
 : Rev.66 (2007-02-12)
 	.- [update] website/image/erubis01.{bmp,png} updated
 

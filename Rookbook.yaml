@@ -10,7 +10,7 @@ properties:
 
 parameters:
   - project    :  erubis
-  - copyright  :  copyright(c) 2006 kuwata-lab all rights reserved.
+  - copyright  :  copyright(c) 2006-2007 kuwata-lab all rights reserved.
   - text_files :  [CHANGES, README.txt, MIT-LICENSE, setup.rb, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]
@@ -23,7 +23,7 @@ parameters:
   - base       :  $(project)_$(release)
   - base2      :  $(project)-$(release)
   #
-  - exclude_libs : [ ]   # [cache.rb]
+  - exclude_libs :    # [cache.rb]
 
 
 recipes:
@@ -55,11 +55,15 @@ recipes:
     ingreds:	[ $(libfiles), README.txt ]
     method*: |
         rm_rf '$(apidocdir)'
-	opts = "-o ../$(apidocdir) -S -m ../README.txt"
-	opts << exclude_libs.collect { |f| " -x erubis/#{f}" }.join(" ")
+	opts = "-o ../$(apidocdir) -S -m README.txt"
+	if exclude_libs
+	  opts << exclude_libs.collect { |f| " -x erubis/#{f}" }.join(" ")
+	end
+	cp 'README.txt', 'lib'
 	chdir 'lib' do
-          sys "rdoc #{opts} ../README.txt *"
+          sys "rdoc #{opts} *"
         end
+	rm_f 'lib/README.txt'
 
   - product:	:chmod
     desc:	chmod files
@@ -90,7 +94,7 @@ recipes:
     method*: |
         rm_f @product if test(?f, @product)
         #zip_r @product, @ingred
-        sys "zip -r9 #{@product} #{@ingred}"
+        sys "zip -qr9 #{@product} #{@ingred}"
 
 
   - product:    $(project)-*.gem
@@ -120,7 +124,7 @@ recipes:
 	#store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir
 	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)
-	  !exclude_libs.include?(base)
+	  ! (exclude_libs && exclude_libs.include?(base))
 	end
 	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#

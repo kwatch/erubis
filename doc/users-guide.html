@@ -2250,23 +2250,23 @@ MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.5, eruby1.0.5, gcc4.0.1</div>
 $ ruby erubybench.rb -n 10000 -m execute
 ## execute
                                     user     system      total        real
-eruby                          23.270000   0.540000  23.810000 ( 33.621505)
-ERB                            68.170000   0.930000  69.100000 ( 77.182647)
-Erubis::Eruby                  20.650000   0.640000  21.290000 ( 23.776704)
-Erubis::Eruby(cached)          13.780000   0.810000  14.590000 ( 16.420384)
-Erubis::ArrayBufferEruby       20.920000   0.650000  21.570000 ( 24.031593)
-Erubis::SimplifiedEruby        18.830000   0.620000  19.450000 ( 21.792011)
-Erubis::StdoutEruby            22.070000   0.650000  22.720000 ( 25.483154)
-Erubis::PrintOutEruby          21.930000   0.640000  22.570000 ( 25.272523)
-Erubis::TinyEruby              17.620000   0.620000  18.240000 ( 20.641452)
-Erubis::PI::Eruby              21.840000   0.650000  22.490000 ( 25.242539)
+eruby                          12.870000   0.290000  <strong>13.160000</strong> ( 14.020219)
+ERB                            37.090000   0.460000  <strong>37.550000</strong> ( 39.639027)
+Erubis::Eruby                  11.420000   0.330000  <strong>11.750000</strong> ( 12.385562)
+Erubis::Eruby(cached)           7.580000   0.440000   <strong>8.020000</strong> (  8.536019)
+Erubis::ArrayBufferEruby       11.550000   0.340000  11.890000 ( 12.597665)
+Erubis::SimplifiedEruby        10.410000   0.320000  10.730000 ( 11.406730)
+Erubis::StdoutEruby            12.170000   0.340000  12.510000 ( 13.252177)
+Erubis::PrintOutEruby          12.070000   0.330000  12.400000 ( 13.142734)
+Erubis::TinyEruby               9.710000   0.320000  10.030000 ( 10.771446)
+Erubis::PI::Eruby              12.010000   0.340000  12.350000 ( 13.104801)
 </pre>
 <p>This shows that...
 </p>
 <ul type="disc">
-<li>Erubis::Eruby works more than 10 percent faster than eruby.
+<li>Erubis::Eruby runs more than 10 percent faster than eruby.
 </li>
-<li>Erubis::Eruby works about 3 times faster than ERB.
+<li>Erubis::Eruby runs about 3 times faster than ERB.
 </li>
 <li>Caching (by Erubis::Eruby.load_file()) makes Erubis about 40-50 percent faster.
 </li>
@@ -2279,23 +2279,23 @@ Erubis::PI::Eruby              21.840000   0.650000  22.490000 ( 25.242539)
 </ul>
 <p>Escaping HTML characters (such as '&lt; &gt; &amp; "') makes Erubis more faster than eruby and ERB,
 because Erubis::XmlHelper#escape_xml() works faster than CGI.escapeHTML() and ERB::Util#h().
-The following shows that Erubis is more than 30 percent faster than eruby if HTML characters are escaped.
+The following shows that Erubis runs more than 30 percent faster than eruby if HTML characters are escaped.
 </p>
 <div class="terminal_caption">
 When escaping HTML characters with option '-e'</div>
 <pre class="terminal">$ ruby erubybench.rb -n 10000 -m execute -e
 ## execute
                                     user     system      total        real
-eruby                          41.800000   0.820000  42.620000 ( 45.547137)
-ERB                            86.030000   1.340000  87.370000 ( 92.739382)
-Erubis::Eruby                  30.960000   0.820000  31.780000 ( 33.783879)
-Erubis::Eruby(cached)          23.150000   0.970000  24.120000 ( 25.599809)
-Erubis::ArrayBufferEruby       31.180000   0.830000  32.010000 ( 33.815682)
-Erubis::SimplifiedEruby        29.120000   0.810000  29.930000 ( 31.788697)
-Erubis::StdoutEruby            32.670000   0.840000  33.510000 ( 35.592838)
-Erubis::PrintOutEruby          32.560000   0.850000  33.410000 ( 35.365003)
-Erubis::TinyEruby              30.220000   0.810000  31.030000 ( 32.996905)
-Erubis::PI::Eruby              31.880000   0.850000  32.730000 ( 35.329514)
+eruby                          22.730000   0.350000  <strong>23.080000</strong> ( 24.815081)
+ERB                            46.590000   0.520000  <strong>47.110000</strong> ( 50.360891)
+Erubis::Eruby                  16.750000   0.360000  <strong>17.110000</strong> ( 18.253436)
+Erubis::Eruby(cached)          12.540000   0.450000  <strong>12.990000</strong> ( 13.935044)
+Erubis::ArrayBufferEruby       16.860000   0.370000  17.230000 ( 18.373771)
+Erubis::SimplifiedEruby        15.750000   0.350000  16.100000 ( 17.344105)
+Erubis::StdoutEruby            17.650000   0.360000  18.010000 ( 19.194326)
+Erubis::PrintOutEruby          17.560000   0.360000  17.920000 ( 19.293728)
+Erubis::TinyEruby              16.300000   0.350000  16.650000 ( 17.887278)
+Erubis::PI::Eruby              17.210000   0.360000  17.570000 ( 18.836510)
 </pre>
 <br>
 
