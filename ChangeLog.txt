@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.66 (2007-02-12)
+	.- [update] website/image/erubis01.{bmp,png} updated
+
 : Rev.65 (2007-02-11)
 	.- [change] option '-T' is removed
 	.- [update] user's guide

@@ -27,7 +27,7 @@
  </tr>
  <tr>
   <td class="fig-body">
-   <img src="img/erubis01.png" width="345" height="267" alt="figure of Erubis" />
+   <img src="img/erubis01.png" width="351" height="262" alt="figure of Erubis" />
   </td>
  </tr>
 </table>
