@@ -735,9 +735,11 @@ The following is the list of enhancers.
 .: {{<ArrayEnhancer|#array-enhancer>}} (only for Eruby)
 	Return array of string instead of returning string.
 .: {{<ArrayBufferEnhancer|#arraybuffer-enhancer>}} (only for Eruby)
-	Use array buffer. This is included in Erubis::Eruby by default.
+	Use array buffer. It is a little slower than StringBufferEnhancer.
 .: {{<StringBufferEnhancer|#stringbuffer-enhancer>}} (only for Eruby)
-	Use string buffer. It is a little slower than ArrayBufferEnhancer.
+	Use string buffer. This is included in Erubis::Eruby by default.
+.: {{<ErboutEnhancer|#erbout-enhancer>}} (only for Eruby)
+	Set '_erbout = _buf = "";' to be compatible with ERB.
 .: {{<NoTextEnhancer|#notext-enhancer>}} (language-independent)
 	Print embedded code only and ignore normal text.
 .: {{<NoCodeEnhancer|#nocode-enhancer>}} (language-independent)
@@ -750,6 +752,8 @@ The following is the list of enhancers.
 	Regard lines starting with '%' as Ruby code. This is for compatibility with eruby and ERB.
 .: {{<HeaderFooterEnhancer|#headerfooter-enhancer>}} (language-independent)
 	[experimental] Enable you to add header and footer in eRuby script.
+.: {{<ExpressionInterpolationEnhancer|#expressioninterpolation-enhancer>}} (only for Eruby)
+	[experimental] convert '<p><%= text %></p>' into '_buf << %Q`<p>#{text}</p>`'.
 
 
 If you required 'erubis/engine/enhanced', Eruby subclasses which include each enhancers are defined.
@@ -926,6 +930,7 @@ ArrayEnhancer makes Eruby to return an array of strings.
 
 .? compiled source code
 .====================
+$ erubis -xE Array example.eruby
 .<<<:! erubis -xE Array guide.d/example.eruby | ruby -pe 'sub! /^_buf( = \[\];)?/, "{{*\\&*}}"'
 .====================
 
@@ -942,7 +947,7 @@ ArrayBufferEnhancer is only for Eruby.
 
 .====================
 $ erubis -xE ArrayBuffer example.eruby
-.<<<:! erubis -xE ArrayBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;|\.to_s)?/,"{{*\\&*}}")'
+.<<<:! erubis -xE ArrayBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = .*?;|\.join)?/,"{{*\\&*}}")'
 .====================
 
 
@@ -972,11 +977,42 @@ Erubis::Eruby includes this enhancer by default.
 
 .#.====================
 .#$ erubis -xE StringBuffer example.eruby
-.#.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = ..;)?/,"{{*\\&*}}")'
+.#.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = .*?;)?/,"{{*\\&*}}")'
 .#.====================
 
 
 StringBufferEnhancer is only for Eruby.
+
+
+
+.$$ ErboutEnhancer | erbout-enhancer
+
+ErboutEnhancer makes Eruby to be compatible with ERB.
+This is useful especially for Ruby on Rails.
+
+.#.? erbout-example.rb
+.#.-------------------- erbout-example.rb
+.#require 'erubis'
+.#class ErboutEruby < Erubis::Eruby
+.#  include Erubis::ErboutEnhancer
+.#end
+.#eruby = ErboutEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby erbout-example.rb
+.#.<<<:! (cd guide.d; ruby erbout-example.rb)
+.#.====================
+
+.====================
+$ erubis -xE Erbout example.eruby
+.<<<:! erubis -xE Erbout guide.d/example.eruby | ruby -pe 'sub! /^_erbout = _buf = .*?;/,"{{*\\&*}}"'
+.====================
+
+
+ErboutEnhancer is only for Eruby.
 
 
 
@@ -1266,6 +1302,53 @@ $ erubis -xE HeaderFooter headerfooter-example2.rhtml
 .====================
 
 HeaderFooterEnhancer is experimental and is language-independent.
+
+
+
+.$$ ExpressionInterpolationEnhancer | expressioninterpolation-enhancer
+
+[experimental]
+
+ExpressionInterpolationEnhancer converts "<h1><%= title %></h1>" into
+"_buf << %Q`<h1>#{ title }</h1>`".
+This makes Eruby a litter faster because method call of String#<< are eliminated
+by expression interpolations.
+
+.? ExpressionInterpolationEnhancer elmininates method call of String#<<.
+.--------------------
+## Assume that input is '<a href="<%=url%>"><%=name%></a>'.
+## Eruby convert input into the following code.  String#<< is called 5 times.
+_buf << '<a href="'; _buf << (url).to_s; _buf << '">'; _buf << (name).to_s; _buf << '</a>';
+
+## If ExpressionInterpolationEnhancer is used, String#<< is called only once.
+_buf << %Q`<a href="#{url}">#{name}</a>`;
+.--------------------
+
+.#.? expressioninterpolation-example.rb
+.#.-------------------- expressioninterpolation-example.rb
+.#require 'erubis'
+.#class ExpressionInterpolationEruby < Erubis::Eruby
+.#  include Erubis::ExpressionInterpolationEnhancer
+.#end
+.#eruby = ExpressionInterpolationEruby.new(File.read('example.eruby'))
+.### or
+.##eruby = Erubis::FastEruby.new(File.read('example.eruby'))
+.#print eruby.src
+.#.--------------------
+.#
+.#.? compiled source code
+.#.====================
+.#$ ruby expressioninterpolation-example.rb
+.#.<<<:! (cd guide.d; ruby expressioninterpolation-example.rb)
+.#.====================
+
+.? compiled source code
+.====================
+$ erubis -xE ExpressionInterpolation example.eruby
+.<<<:! erubis -xE ExpressionInterpolation guide.d/example.eruby | ruby -pe 'gsub! /(%Q`|`|\#\{.*?\})/, "{{*\\&*}}"'
+.====================
+
+ExpressionInterpolationEnhancer is only for Eruby.
 
 
 

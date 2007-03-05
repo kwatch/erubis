@@ -62,6 +62,11 @@ module Erubis
   end
 
 
+  class ErboutEruby < Eruby
+    include ErboutEnhancer
+  end
+
+
   class NoTextEruby < Eruby
     include NoTextEnhancer
   end
@@ -101,6 +106,11 @@ module Erubis
 
   class HeaderFooterEruby < Eruby
     include HeaderFooterEnhancer
+  end
+
+
+  class ExpressionInterpolationEruby < Eruby
+    include ExpressionInterpolationEnhancer
   end
 
 

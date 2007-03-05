@@ -85,6 +85,14 @@ module Erubis
 
 
   ##
+  ## fast engine for Ruby
+  ##
+  class FastEruby < Eruby
+    include ExpressionInterpolationEnhancer
+  end
+
+
+  ##
   ## swtich '<%= %>' to escaped and '<%== %>' to not escaped
   ##
   class EscapedEruby < Eruby

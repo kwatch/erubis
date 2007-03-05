@@ -490,6 +490,10 @@ __END__
   class:  Erubis::Eruby
   return: str
 
+- name:   ErubisFastEruby
+  class:  Erubis::FastEruby
+  return: str
+
 - name:   ErubisEruby2
   desc:   print _buf    #, no binding()
   class:  Erubis::Eruby2

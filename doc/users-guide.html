@@ -99,6 +99,8 @@ It has the following features.
     </li>
     <li><a href="#stringbuffer-enhancer">StringBufferEnhancer</a>
     </li>
+    <li><a href="#erbout-enhancer">ErboutEnhancer</a>
+    </li>
     <li><a href="#notext-enhancer">NoTextEnhancer</a>
     </li>
     <li><a href="#nocode-enhancer">NoCodeEnhancer</a>
@@ -110,6 +112,8 @@ It has the following features.
     <li><a href="#percentline-enhancer">PercentLineEnhancer</a>
     </li>
     <li><a href="#headerfooter-enhancer">HeaderFooterEnhancer</a>
+    </li>
+    <li><a href="#expressioninterpolation-enhancer">ExpressionInterpolationEnhancer</a>
     </li>
   </ul>
   </li>
@@ -998,12 +1002,17 @@ The following is an example to use some enhancers in command-line.
 <dt class="dt1">
 <a href="#arraybuffer-enhancer">ArrayBufferEnhancer</a> (only for Eruby)</dt>
 <dd class="dd1">
-	Use array buffer. This is included in Erubis::Eruby by default.
+	Use array buffer. It is a little slower than StringBufferEnhancer.
 </dd>
 <dt class="dt1">
 <a href="#stringbuffer-enhancer">StringBufferEnhancer</a> (only for Eruby)</dt>
 <dd class="dd1">
-	Use string buffer. It is a little slower than ArrayBufferEnhancer.
+	Use string buffer. This is included in Erubis::Eruby by default.
+</dd>
+<dt class="dt1">
+<a href="#erbout-enhancer">ErboutEnhancer</a> (only for Eruby)</dt>
+<dd class="dd1">
+	Set '_erbout = _buf = "";' to be compatible with ERB.
 </dd>
 <dt class="dt1">
 <a href="#notext-enhancer">NoTextEnhancer</a> (language-independent)</dt>
@@ -1034,6 +1043,11 @@ The following is an example to use some enhancers in command-line.
 <a href="#headerfooter-enhancer">HeaderFooterEnhancer</a> (language-independent)</dt>
 <dd class="dd1">
 	[experimental] Enable you to add header and footer in eRuby script.
+</dd>
+<dt class="dt1">
+<a href="#expressioninterpolation-enhancer">ExpressionInterpolationEnhancer</a> (only for Eruby)</dt>
+<dd class="dd1">
+	[experimental] convert '&lt;p&gt;&lt;%= text %&gt;&lt;/p&gt;' into '_buf &lt;&lt; %Q`&lt;p&gt;#{text}&lt;/p&gt;`'.
 </dd>
 </dl>
 <p>If you required 'erubis/engine/enhanced', Eruby subclasses which include each enhancers are defined.
@@ -1156,7 +1170,8 @@ because print() method in '&lt;% ... %&gt;' invokes not Kernel#print() but Print
 </p>
 <div class="terminal_caption">
 compiled source code</div>
-<pre class="terminal"><strong>_buf = [];</strong> _buf &lt;&lt; '&lt;div&gt;
+<pre class="terminal">$ erubis -xE Array example.eruby
+<strong>_buf = [];</strong> _buf &lt;&lt; '&lt;div&gt;
 '; for item in list 
  _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
   &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
@@ -1185,7 +1200,7 @@ Array buffer is a litte slower than String buffer.
 '; end 
  _buf &lt;&lt; '&lt;/div&gt;
 ';
-<strong>_buf</strong>.join
+<strong>_buf.join</strong>
 </pre>
 <br>
 
@@ -1197,6 +1212,26 @@ String buffer is a little faster than array buffer.
 Erubis::Eruby includes this enhancer by default.
 </p>
 <p>StringBufferEnhancer is only for Eruby.
+</p>
+<br>
+
+
+<a name="erbout-enhancer"></a>
+<h3 class="section2">ErboutEnhancer</h3>
+<p>ErboutEnhancer makes Eruby to be compatible with ERB.
+This is useful especially for Ruby on Rails.
+</p>
+<pre class="terminal">$ erubis -xE Erbout example.eruby
+<strong>_erbout = _buf = '';</strong> _buf &lt;&lt; '&lt;div&gt;
+'; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item ); _buf &lt;&lt; '&lt;/p&gt;
+'; end 
+ _buf &lt;&lt; '&lt;/div&gt;
+';
+_buf.to_s
+</pre>
+<p>ErboutEnhancer is only for Eruby.
 </p>
 <br>
 
@@ -1467,6 +1502,40 @@ _buf.to_s
 
 </pre>
 <p>HeaderFooterEnhancer is experimental and is language-independent.
+</p>
+<br>
+
+
+<a name="expressioninterpolation-enhancer"></a>
+<h3 class="section2">ExpressionInterpolationEnhancer</h3>
+<p>[experimental]
+</p>
+<p>ExpressionInterpolationEnhancer converts "&lt;h1&gt;&lt;%= title %&gt;&lt;/h1&gt;" into
+"_buf &lt;&lt; %Q`&lt;h1&gt;#{ title }&lt;/h1&gt;`".
+This makes Eruby a litter faster because method call of String#&lt;&lt; are eliminated
+by expression interpolations.
+</p>
+<div class="program_caption">
+ExpressionInterpolationEnhancer elmininates method call of String#&lt;&lt;.</div>
+<pre class="program">## Assume that input is '&lt;a href="&lt;%=url%&gt;"&gt;&lt;%=name%&gt;&lt;/a&gt;'.
+## Eruby convert input into the following code.  String#&lt;&lt; is called 5 times.
+_buf &lt;&lt; '&lt;a href="'; _buf &lt;&lt; (url).to_s; _buf &lt;&lt; '"&gt;'; _buf &lt;&lt; (name).to_s; _buf &lt;&lt; '&lt;/a&gt;';
+
+## If ExpressionInterpolationEnhancer is used, String#&lt;&lt; is called only once.
+_buf &lt;&lt; %Q`&lt;a href="#{url}"&gt;#{name}&lt;/a&gt;`;
+</pre>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -xE ExpressionInterpolation example.eruby
+_buf = ''; _buf &lt;&lt; <strong>%Q`</strong>&lt;div&gt;\n<strong>`</strong>
+ for item in list 
+ _buf &lt;&lt; <strong>%Q`</strong>  &lt;p&gt;<strong>#{ item }</strong>&lt;/p&gt;
+  &lt;p&gt;<strong>#{Erubis::XmlHelper.escape_xml( item )}</strong>&lt;/p&gt;\n<strong>`</strong>
+ end 
+ _buf &lt;&lt; <strong>%Q`</strong>&lt;/div&gt;\n<strong>`</strong>
+_buf.to_s
+</pre>
+<p>ExpressionInterpolationEnhancer is only for Eruby.
 </p>
 <br>
 

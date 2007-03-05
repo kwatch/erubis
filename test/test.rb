@@ -24,6 +24,7 @@ require 'erubis'
 if $0 == __FILE__
   require "#{TESTDIR}/test-erubis.rb"
   require "#{TESTDIR}/test-engines.rb"
+  require "#{TESTDIR}/test-enhancers.rb"
   require "#{TESTDIR}/test-main.rb"
   require "#{TESTDIR}/test-notext.rb"
 end

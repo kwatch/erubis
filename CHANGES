@@ -4,6 +4,36 @@
 
 
 #
+- release:   2.3.0
+  date:
+  enhancements:
+    - |
+      New enhancer 'ErboutEnhancer' is added.
+      ErboutEnhancer set '_erbout' as well as '_buf' to be compatible with ERB.
+
+      ex.
+      --------------------
+      _erbout = _buf = '';  _buf << '<p>'; _buf << text; _buf << '</p>
+      '; 
+      --------------------
+
+    - |
+      New enhancer 'ExpressionInterpolationEnhancer' is added.
+      This enhancer uses expression interpolation to eliminate method call
+      of String#<<. In the result, this enhancer makes Eruby a little faster.
+
+      --------------------
+      ## Assume that input is '<a href="<%=url%>"><%=name%></a>'.
+      ## Eruby convert input into the following code.  String#<< is called 5 times.
+      _buf << '<a href="'; _buf << (url).to_s; _buf << '">'; _buf << (name).to_s; _buf << '</a>';
+      
+      ## If ExpressionInterpolationEnhancer is used, String#<< is called only once.
+      _buf << %Q`<a href="#{url}">#{name}</a>`;
+      --------------------
+
+      
+
+#
 - release:   2.2.0
   date:      2007-02-11
   enhancements:
@@ -78,7 +108,7 @@
       $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
       ====================
 
-      ex. YAML inline style
+      ex. Ruby style
       ====================
       $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
       ====================

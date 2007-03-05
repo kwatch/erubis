@@ -2,6 +2,13 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.69 (2007-03-05)
+	.- [enhance] add ErboutEnhancer
+	.- [enhance] add ExpressionInterpolationEnhancer
+
+: Rev.68 (2007-02-12)
+	.- [release] 2.2.0
+
 : Rev.67 (2007-02-12)
 	.- [update] benchmark data on user's guide is updated
 

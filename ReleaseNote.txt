@@ -1,4 +1,4 @@
-$ [ANN] Erubis 2.1.0 release - a fast eRuby implementation
+$ [ANN] Erubis 2.2.0 release - a fast eRuby implementation
 
 Hi all,
 
@@ -48,7 +48,7 @@ $$ Enhancements
     are available. Methd ActionView::Helpers::TextHelper#concat() is also available.
   
     If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted
-    Ruby code into log file (such as 'log/development.log').
+    Ruby code into log file (such as 'log/development.log'). This is for debug.
   
   * Erubis::Engine.load_file(filename) creates cache file (filename +
     '.cache') automatically if cache file is old or not exist.
@@ -93,7 +93,7 @@ $$ Enhancements
     $ erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example.rhtml
     ====================
   
-    ex. YAML inline style
+    ex. Ruby style
     ====================
     $ erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example.rhtml
     ====================
@@ -143,7 +143,6 @@ $$ Changes
   * License is changed to MIT License.
   
   * Embedded pattern '<%- -%>' can be handled.
-
 
 
 --

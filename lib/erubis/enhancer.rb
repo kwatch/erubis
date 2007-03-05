@@ -243,29 +243,27 @@ module Erubis
   end
 
 
-  #--
-  ###
-  ### set buffer variable name to '_erbout' as well as '_buf'
-  ###
-  ### this is only for Eruby.
-  ###
-  #module ErboutEnhancer
-  #
-  #  def self.desc   # :nodoc:
-  #    "set buffer name '_erbout' as well as '_buf'"
-  #  end
-  #
-  #  def add_preamble(src)
-  #    src << "_erbout = _buf = '';"
-  #  end
-  #
-  #  def add_postamble(src)
-  #    src << "\n" unless src[-1] == ?\n
-  #    src << "_buf.to_s\n"
-  #  end
-  #
-  #end
-  #++
+  ##
+  ## set buffer variable name to '_erbout' as well as '_buf'
+  ##
+  ## this is only for Eruby.
+  ##
+  module ErboutEnhancer
+
+    def self.desc   # :nodoc:
+      "set '_erbout = _buf = \"\";' to be compatible with ERB."
+    end
+
+    def add_preamble(src)
+      src << "_erbout = _buf = '';"
+    end
+
+    def add_postamble(src)
+      src << "\n" unless src[-1] == ?\n
+      src << "_buf.to_s\n"
+    end
+
+  end
 
 
   ##
@@ -539,6 +537,98 @@ module Erubis
     def convert(input)
       source = super
       return @src = "#{@header}#{source}#{@footer}"
+    end
+
+  end
+
+
+  ##
+  ## convert "<h1><%= title %></h1>" into "_buf << %Q`<h1>#{ title }</h1>`"
+  ##
+  ## this is only for Eruby.
+  ##
+  module ExpressionInterpolationEnhancer
+
+    def self.desc   # :nodoc:
+      "convert '<p><%= text %></p>' into '_buf << %Q`<p>#{text}</p>`'"
+    end
+
+    def convert_input(src, input)
+      pat = @pattern
+      regexp = pat.nil? || pat == '<% %>' ? Basic::Converter::DEFAULT_REGEXP : pattern_regexp(pat)
+      pos = 0
+      is_bol = true     # is beginning of line
+      str = ''
+      input.scan(regexp) do |indicator, code, rspace|
+        match = Regexp.last_match()
+        len  = match.begin(0) - pos
+        text = input[pos, len]
+        pos  = match.end(0)
+        ch   = indicator ? indicator[0] : nil
+        lspace = ch == ?= ? nil : detect_spaces_at_bol(text, is_bol)
+        is_bol = rspace ? true : false
+        _add_text_to_str(str, text)
+        ## * when '<%= %>', do nothing
+        ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
+        if ch == ?=              # <%= %>
+          str << lspace if lspace
+          add_expr(str, code, indicator)
+          str << rspace if rspace
+        elsif ch == ?\#          # <%# %>
+          n = code.count("\n") + (rspace ? 1 : 0)
+          if @trim && lspace && rspace
+            add_text(src, str)
+            str = ''
+            add_stmt(src, "\n" * n)
+          else
+            str << lspace if lspace
+            add_text(src, str)
+            str = ''
+            add_stmt(src, "\n" * n)
+            str << rspace if rspace
+          end
+        else                     # <% %>
+          if @trim && lspace && rspace
+            add_text(src, str)
+            str = ''
+            add_stmt(src, "#{lspace}#{code}#{rspace}")
+          else
+            str << lspace if lspace
+            add_text(src, str)
+            str = ''
+            add_stmt(src, code)
+            str << rspace if rspace
+          end
+        end
+      end
+      rest = $' || input     # add input when no matched
+      _add_text_to_str(str, rest)
+      add_text(src, str)
+    end
+
+    def add_text(src, text)
+      return if !text || text.empty?
+      #src << " _buf << %Q`" << text << "`;"
+      if text[-1] == ?\n
+        text[-1] = "\\n"
+        src << " _buf << %Q`" << text << "`\n"
+      else
+        src << " _buf << %Q`" << text << "`;"
+      end
+    end
+
+    def _add_text_to_str(str, text)
+      return if !text || text.empty?
+      text.gsub!(/['\#\\]/, '\\\\\&')
+      str << text
+    end
+
+    def add_expr_escaped(str, code)
+      str << "\#{#{escaped_expr(code)}}"
+    end
+
+    def add_expr_literal(str, code)
+      str << "\#{#{code}}"
     end
 
   end
