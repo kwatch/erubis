@@ -109,6 +109,11 @@ module Erubis
   end
 
 
+  class DeleteIndentEruby < Eruby
+    include DeleteIndentEnhancer
+  end
+
+
   class ExpressionInterpolationEruby < Eruby
     include ExpressionInterpolationEnhancer
   end

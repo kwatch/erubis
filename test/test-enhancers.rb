@@ -531,6 +531,27 @@ __END__
       </ol>
 
 ##
+- name:  deleteindent1
+  class: DeleteIndentEruby
+  options:
+  testopt:
+  input: *basic1_input
+  src: |
+      _buf = ''; _buf << '<ul>
+      '; for item in list 
+       _buf << '<li>'; _buf << ( item ).to_s; _buf << '</li>
+      '; end 
+       _buf << '</ul>
+      ';
+      _buf.to_s
+  output: |
+      <ul>
+      <li><aaa></li>
+      <li>b&b</li>
+      <li>"ccc"</li>
+      </ul>
+
+##
 - name:  expressioninterpolation1
   class: ExpressionInterpolationEruby
   options:

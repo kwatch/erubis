@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.70 (2007-03-05)
+	.- [enhance] add DeleteIndentEnhancer
+
 : Rev.69 (2007-03-05)
 	.- [enhance] add ErboutEnhancer
 	.- [enhance] add ExpressionInterpolationEnhancer

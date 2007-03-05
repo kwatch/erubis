@@ -543,6 +543,25 @@ module Erubis
 
 
   ##
+  ## delete indentation of HTML.
+  ##
+  ## this is language-independent.
+  ##
+  module DeleteIndentEnhancer
+
+    def self.desc   # :nodoc:
+      "delete indentation of HTML."
+    end
+
+    def convert_input(src, input)
+      input = input.gsub(/^[ \t]+</, '<')
+      super(src, input)
+    end
+
+  end
+
+
+  ##
   ## convert "<h1><%= title %></h1>" into "_buf << %Q`<h1>#{ title }</h1>`"
   ##
   ## this is only for Eruby.

@@ -12,10 +12,18 @@
       ErboutEnhancer set '_erbout' as well as '_buf' to be compatible with ERB.
 
       ex.
-      --------------------
-      _erbout = _buf = '';  _buf << '<p>'; _buf << text; _buf << '</p>
-      '; 
-      --------------------
+      ====================
+      $ cat ex.rhtml
+      <p>Hello</p>
+      $ erubis -x ex.rhtml
+      _buf = ''; _buf << '<p>Hello</p>
+      ';
+      _buf.to_s
+      $ erubis -xE Erbout ex.rhtml
+      _erbout = _buf = ''; _buf << '<p>Hello</p>
+      ';
+      _buf.to_s
+      ====================
 
     - |
       New enhancer 'ExpressionInterpolationEnhancer' is added.
@@ -31,6 +39,37 @@
       _buf << %Q`<a href="#{url}">#{name}</a>`;
       --------------------
 
+    - |
+      New enhancer 'DeleteIndentEnhancer' is added.
+      This enhancer deletes indentation of HTML file.
+
+      ex.
+      ====================
+      $ cat ex.rhtml
+      <div>
+        <ul>
+        <% for item in ['AAA', 'BBB', 'CCC'] %>
+          <li><%= item %></li>
+        <% end %>
+        </ul>
+      </div>
+      $ erubis ex.rhtml
+      <div>
+        <ul>
+          <li>AAA</li>
+          <li>BBB</li>
+          <li>CCC</li>
+        </ul>
+      </div>
+      $ erubis -E DeleteIndent ex.rhtml
+      <div>
+      <ul>
+      <li>AAA</li>
+      <li>BBB</li>
+      <li>CCC</li>
+      </ul>
+      </div>
+      ====================
       
 
 #
