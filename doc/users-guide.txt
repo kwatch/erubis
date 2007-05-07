@@ -1638,15 +1638,15 @@ Syntax OK
 
 .$$ File Caching		| topics-caching
 
-Erubis::Eruby.convert_file(filename) convert file into Ruby script and return Eruby object.
+Erubis::Eruby.load_file(filename) convert file into Ruby script and return Eruby object.
 In addition, it caches converted Ruby script into cache file (filename + '.cache') if cache file is old or not exist.
-If cache file exists and is newer than eruby file, Erubis::Eruby.convert_file() loads cache file.
+If cache file exists and is newer than eruby file, Erubis::Eruby.load_file() loads cache file.
 
-.? example of Erubis::Eruby.convert_file()
+.? example of Erubis::Eruby.load_file()
 .--------------------
 require 'erubis'
 filename = 'example.rhtml'
-eruby = {{*Erubis::Eruby.convert_file(filename)*}}
+eruby = {{*Erubis::Eruby.load_file(filename)*}}
 cachename = filename + '.cache'
 if test(?f, cachename)
   puts "*** cache file '#{cachename}' created."

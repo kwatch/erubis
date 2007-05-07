@@ -27,6 +27,9 @@ recipes:
   - product:	:default
     ingreds:	[ :all ]
 
+  - product:	:doc
+    ingreds:	[ users-guide.html ]
+
   - product:    :clear
     method*: |
 	rm_rf 'guide.d', '*.html'

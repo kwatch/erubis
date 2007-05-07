@@ -2029,15 +2029,15 @@ Syntax OK
 
 <a name="topics-caching"></a>
 <h3 class="section2">File Caching</h3>
-<p>Erubis::Eruby.convert_file(filename) convert file into Ruby script and return Eruby object.
+<p>Erubis::Eruby.load_file(filename) convert file into Ruby script and return Eruby object.
 In addition, it caches converted Ruby script into cache file (filename + '.cache') if cache file is old or not exist.
-If cache file exists and is newer than eruby file, Erubis::Eruby.convert_file() loads cache file.
+If cache file exists and is newer than eruby file, Erubis::Eruby.load_file() loads cache file.
 </p>
 <div class="program_caption">
-example of Erubis::Eruby.convert_file()</div>
+example of Erubis::Eruby.load_file()</div>
 <pre class="program">require 'erubis'
 filename = 'example.rhtml'
-eruby = <strong>Erubis::Eruby.convert_file(filename)</strong>
+eruby = <strong>Erubis::Eruby.load_file(filename)</strong>
 cachename = filename + '.cache'
 if test(?f, cachename)
   puts "*** cache file '#{cachename}' created."
