@@ -114,8 +114,8 @@ module Erubis
   end
 
 
-  class ExpressionInterpolationEruby < Eruby
-    include ExpressionInterpolationEnhancer
+  class InterpolationEruby < Eruby
+    include InterpolationEnhancer
   end
 
 

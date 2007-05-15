@@ -513,6 +513,15 @@ __END__
     Erubis::Eruby.load_file(erubyfile)
   return: str
 
+- name:   ErubisFastEruby_cached
+  class:  Erubis::FastEruby
+  title:  Erubis::FastEruby(cached)
+  code: |
+    Erubis::FastEruby.load_file(erubyfile).result(binding())
+  compile: |
+    Erubis::FastEruby.load_file(erubyfile)
+  return: str
+
 - name:   ErubisExprStripped
   desc:   strip expr code
   class:  Erubis::ExprStrippedEruby

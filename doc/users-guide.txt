@@ -4,7 +4,7 @@
 .?lastupdate:	$Date$
 .?stylesheet:	docstyle.css
 
-release: 2.2.0
+release: $Release$
 
 
 
@@ -12,7 +12,7 @@ release: 2.2.0
 
 Erubis is an implementation of eRuby.
 It has the following features.
-.* Very fast, almost 3 times faster than ERB and about 10 percent faster than eruby (implemented in C)
+.* {{<Very fast|topics-benchmark>}}, almost 3 times faster than ERB and about 10 percent faster than eruby (implemented in C)
 .* File caching of converted Ruby script support
 .* Auto escaping support
 .* Auto trimming spaces around '<% %>'
@@ -120,17 +120,40 @@ puts {{*eruby.result(binding())*}}        # get result
 .--------------------
 
 .? output
-.====================
+.==================== example1.result
 $ ruby example1.rb
-.<<<:! (cd guide.d; ruby example1.rb)
+.#.<<<:! (cd guide.d; ruby example1.rb)
+---------- script source ---
+_buf = ''; _buf << '<ul>
+';   for item in list 
+ _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+';   end 
+
+ _buf << '</ul>
+';
+_buf.to_s
+---------- result ----------
+<ul>
+  <li>aaa</li>
+  <li>bbb</li>
+  <li>ccc</li>
+</ul>
 .====================
 
 Erubis has command 'erubis'.  Command-line option '-x' shows the compiled source code of eRuby script.
 
 .? example of command-line option '-x'
-.====================
+.==================== example1_x.result
 $ erubis {{*-x*}} example1.eruby
-.<<<:! (cd guide.d; erubis -x example1.eruby)
+.#.<<<:! (cd guide.d; erubis -x example1.eruby)
+_buf = ''; _buf << '<ul>
+';   for item in list 
+ _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+';   end 
+
+ _buf << '</ul>
+';
+_buf.to_s
 .====================
 
 
@@ -140,7 +163,7 @@ $ erubis {{*-x*}} example1.eruby
 Erubis deletes spaces around '<% %>' automatically, while it leaves spaces around '<%= %>'.
 
 .? example2.eruby
-.-------------------- example2.eruby
+.-------------------- example2.eruby.comment_filter
 <ul>
   <% for item in list %>      # trimmed
   <li>
@@ -151,17 +174,35 @@ Erubis deletes spaces around '<% %>' automatically, while it leaves spaces aroun
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example2_x.result
 $ erubis -x example2.eruby
-.<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -x guide.d/example2.eruby)
+.#.<<<:! (ruby -pi.bak -e 'sub! /\s*\#.*$/, ""' guide.d/example2.eruby; erubis -x guide.d/example2.eruby)
+_buf = ''; _buf << '<ul>
+';   for item in list 
+ _buf << '  <li>
+    '; _buf << ( item ).to_s; _buf << '
+'; _buf << '  </li>
+';   end 
+ _buf << '</ul>
+';
+_buf.to_s
 .====================
 
 If you want leave spaces around '<% %>', add command-line property '--trim=false'.
 
 .? compiled source code with command-line property '--trim=false'
-.====================
+.==================== example2_trim.result
 $ erubis -x {{*--trim=false*}} example2.eruby
-.<<<:! erubis -x --trim=false guide.d/example2.eruby
+.#.<<<:! erubis -x --trim=false guide.d/example2.eruby
+_buf = ''; _buf << '<ul>
+'; _buf << '  '; for item in list ; _buf << '
+'; _buf << '  <li>
+    '; _buf << ( item ).to_s; _buf << '
+'; _buf << '  </li>
+'; _buf << '  '; end ; _buf << '
+'; _buf << '</ul>
+';
+_buf.to_s
 .====================
 
 Or add option {{,:trim=>false,}} to Erubis::Eruby.new().
@@ -172,43 +213,44 @@ require 'erubis'
 input = File.read('example2.eruby')
 eruby = Erubis::Eruby.new(input{{*, :trim=>false*}})
 
-puts "---------- script source ---"
+puts "----- script source ---"
 puts eruby.src                            # print script source
 
-puts "---------- result ----------"
+puts "----- result ----------"
 list = ['aaa', 'bbb', 'ccc']
 puts eruby.result(binding())              # get result
 .--------------------
 
 .? output
-.====================
+.==================== example2.result
 $ ruby example2.rb
-.<<<:! (cd guide.d; ruby example2.rb)
-.#--- script source ---
-.#_buf = ''; _buf << "<ul>\n"
-.#{{*_buf << "  ";*}}  for item in list {{*; _buf << "\n"*}}
-.#_buf << "  <li>\n"
-.#_buf << "    "; _buf << ( item ).to_s; _buf << "\n"
-.#_buf << "  </li>\n"
-.#{{*_buf << "  ";*}}  end {{*; _buf << "\n"*}}
-.#_buf << "</ul>\n"
-.#_buf
-.#--- result ---
-.#<ul>
-.#  
-.#  <li>
-.#    aaa
-.#  </li>
-.#  
-.#  <li>
-.#    bbb
-.#  </li>
-.#  
-.#  <li>
-.#    ccc
-.#  </li>
-.#  
-.#</ul>
+.#.<<<:! (cd guide.d; ruby example2.rb)
+----- script source ---
+_buf = ''; _buf << '<ul>
+'; {{*_buf << '  ';*}} for item in list ; _buf << '
+'; _buf << '  <li>
+    '; _buf << ( item ).to_s; _buf << '
+'; _buf << '  </li>
+'; {{*_buf << '  ';*}} end ; _buf << '
+'; _buf << '</ul>
+';
+_buf.to_s
+----- result ----------
+<ul>
+  
+  <li>
+    aaa
+  </li>
+  
+  <li>
+    bbb
+  </li>
+  
+  <li>
+    ccc
+  </li>
+  
+</ul>
 .====================
 
 
@@ -242,57 +284,60 @@ require 'erubis'
 input = File.read('example3.eruby')
 eruby = Erubis::{{*EscapedEruby*}}.new(input)    # or Erubis::XmlEruby
 
-puts "---------- script source ---"
+puts "----- script source ---"
 puts eruby.src                             # print script source
 
-puts "---------- result ----------"
+puts "----- result ----------"
 {{*list = ['<aaa>', 'b&b', '"ccc"']*}}
 puts eruby.result(binding())               # get result
 .--------------------
 
 .? output
-.====================
+.==================== example3.result.split_filter
 $ ruby example3.rb 2> stderr.log
-.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)  | ruby -pe 'sub! /_buf << [E(].*?;|\$stderr.*?;/, "{{*\\&*}}"'
-.#--- script source ---
-.#_buf = ''; _buf << "<ul>\n"
-.#   for item in list 
-.#_buf << "  <li>"; {{*_buf << Erubis::XmlEruby.escape( item )*}}; _buf << "</li>\n"
-.#_buf << "  <li>"; _buf << ( item ).to_s; _buf << "</li>\n"
-.#_buf << "  <li>"; {{*$stderr.puts("** erubis: item = #{(item).inspect}")*}}; _buf << "</li>\n"
-.#_buf << "\n"
-.#   end 
-.#_buf << "</ul>\n"
-.#_buf
-.#--- result ---
-.#<ul>
-.#  <li>{{*&lt;aaa&gt;*}}</li>
-.#  <li><aaa></li>
-.#  <li></li>
-.#
-.#  <li>{{*b&amp;b*}}</li>
-.#  <li>b&b</li>
-.#  <li></li>
-.#
-.#  <li>{{*&quot;ccc&quot;*}}</li>
-.#  <li>"ccc"</li>
-.#  <li></li>
-.#
-.#</ul>
+.#.<<<:! (cd guide.d; ruby example3.rb  2> stderr.log)  | ruby -pe 'sub! /_buf << [E(].*?;|\$stderr.*?;/, "{{*\\&*}}"'
+----- script source ---
+_buf = ''; for item in list 
+ _buf << '  <p>'; {{*_buf << Erubis::XmlHelper.escape_xml( item )*}}; _buf << '</p>
+  <p>'; {{*_buf << ( item ).to_s*}}; _buf << '</p>
+  <p>'; {{*$stderr.puts("*** debug: item=#{(item).inspect}")*}}; _buf << '</p>
+
+'; end 
+_buf.to_s
+----- result ----------
+  <p>{{*&lt;aaa&gt;*}}</p>
+  <p><aaa></p>
+  <p></p>
+
+  <p>{{*b&amp;b*}}</p>
+  <p>b&b</p>
+  <p></p>
+
+  <p>{{*&quot;ccc&quot;*}}</p>
+  <p>"ccc"</p>
+  <p></p>
+
 $ cat stderr.log
-.<<<: guide.d/stderr.log
-.#** erubis: item = "<aaa>"
-.#** erubis: item = "b&b"
-.#** erubis: item = "\"ccc\""
+.#.<<<: guide.d/stderr.log
+*** debug: item="<aaa>"
+*** debug: item="b&b"
+*** debug: item="\"ccc\""
 .====================
 
 The command-line option '-e' will do the same action as Erubis::EscapedEruby.
 This option is available for any language.
 .#{{(Command-line option '-e' is equivarent to '-E Escape'.)}}
 
-.====================
+.==================== example3_e.result
 $ erubis -l ruby {{*-e*}} example3.eruby
-.<<<:! (cd guide.d; erubis -e -l ruby example3.eruby)
+.#.<<<:! (cd guide.d; erubis -e -l ruby example3.eruby)
+_buf = ''; for item in list 
+ _buf << '  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; $stderr.puts("*** debug: item=#{(item).inspect}"); _buf << '</p>
+
+'; end 
+_buf.to_s
 .====================
 
 Escaping function (default 'Erubis::XmlHelper.escape_xml()') can be changed by command-line property '--escapefunc=xxx' or by overriding Erubis::Eruby#escaped_expr() in subclass.
@@ -327,9 +372,13 @@ You can change embedded pattern '{{,<% %>,}}' to another by command-line option 
 .--------------------
 
 .? compiled source code with command-line option '-p'
-.====================
+.==================== example4_x.result
 $ erubis -x {{*-p '<!--% %-->'*}} example4.eruby
-.<<<:! erubis -x -p '<!--% %-->' guide.d/example4.eruby
+.#.<<<:! erubis -x -p '<!--% %-->' guide.d/example4.eruby
+_buf = ''; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+'; end 
+_buf.to_s
 .====================
 
 .? example4.rb
@@ -348,9 +397,18 @@ puts eruby.result(binding())              # get result
 .--------------------
 
 .? output
-.====================
+.==================== example4.result
 $ ruby example4.rb
-.<<<:! (cd guide.d; ruby example4.rb)
+.#.<<<:! (cd guide.d; ruby example4.rb)
+---------- script source ---
+_buf = ''; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+'; end 
+_buf.to_s
+---------- result ----------
+  <p>aaa</p>
+  <p>bbb</p>
+  <p>ccc</p>
 .====================
 
 It is able to specify regular expression with :pattern option.
@@ -398,9 +456,15 @@ puts {{*eruby.evaluate(context)*}}         # get result
 .--------------------
 
 .? output
-.====================
+.==================== example5.result
 $ ruby example5.rb
-.<<<:! (cd guide.d; ruby example5.rb)
+.#.<<<:! (cd guide.d; ruby example5.rb)
+<span>Erubis Example</span>
+<ul>
+  <li>aaa</li>
+  <li>bbb</li>
+  <li>ccc</li>
+</ul>
 .====================
 
 The difference between Erubis#result(binding) and Erubis#evaluate(context) is that the former invokes 'eval @src, binding' and the latter invokes 'context.instance_eval @src'.
@@ -450,9 +514,15 @@ puts eruby.evaluate({{*mydata*}})
 .--------------------
 
 .? output
-.====================
+.==================== example6.result
 $ ruby example6.rb
-.<<<:! (cd guide.d; ruby example6.rb)
+.#.<<<:! (cd guide.d; ruby example6.rb)
+<span>Erubis Example</span>
+<ul>
+  <li>aaa</li>
+  <li>bbb</li>
+  <li>ccc</li>
+</ul>
 .====================
 
 
@@ -522,11 +592,35 @@ Context data file can be YAML file ('*.yaml' or '*.yml') or Ruby script ('*.rb')
 .#You don't have to write ruby script such as 'example7.rb'.
 
 .? example of command-line option '-f'
-.====================
+.==================== example7.result.split_filter
 $ erubis {{*-f context.yaml*}} example7.eruby
-.<<<:! (cd guide.d; erubis -f context.yaml example7.eruby)
+.#.<<<:! (cd guide.d; erubis -f context.yaml example7.eruby)
+<h1>Users List</h1>
+<ul>
+  <li>
+    <a href="mailto:foo@mail.com">foo</a>
+  </li>
+  <li>
+    <a href="mailto:bar@mail.net">bar</a>
+  </li>
+  <li>
+    <a href="mailto:baz@mail.org">baz</a>
+  </li>
+</ul>
 $ erubis {{*-f context.rb*}} example7.eruby
-.<<<:! (cd guide.d; erubis -f context.rb example7.eruby)
+.#.<<<:! (cd guide.d; erubis -f context.rb example7.eruby)
+<h1>Users List</h1>
+<ul>
+  <li>
+    <a href="mailto:foo@mail.com">foo</a>
+  </li>
+  <li>
+    <a href="mailto:bar@mail.net">bar</a>
+  </li>
+  <li>
+    <a href="mailto:baz@mail.org">baz</a>
+  </li>
+</ul>
 .====================
 
 Command-line option '-S' converts keys of mapping in YAML data file from string into symbol.
@@ -537,7 +631,7 @@ Command-line option '-B' invokes 'Erubis::Eruby#result(binding())' instead of 'E
 .$$ Context Data String		| tut-datastr
 
 Command-line option '-c {{/str/}}' enables you to specify context data in command-line.
-{{/str/}} can be YAML inline style or Ruby code.
+{{/str/}} can be YAML flow-style or Ruby code.
 
 .? example8.eruby
 .-------------------- example8.eruby
@@ -549,14 +643,28 @@ Command-line option '-c {{/str/}}' enables you to specify context data in comman
 </ul>
 .--------------------
 
-.? example of command-line option '-c'
-.====================
-### YAML inline style
+.? example of YAML flow style
+.==================== example8_yaml.result
 $ erubis {{*-c '{title: Example, list: [AAA, BBB, CCC]}'*}} example8.eruby
-.<<<:! (cd guide.d; erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example8.eruby)
-### Ruby code
+.#.<<<:! (cd guide.d; erubis -c '{title: Example, list: [AAA, BBB, CCC]}' example8.eruby)
+<h1>Example</h1>
+<ul>
+ <li>AAA</li>
+ <li>BBB</li>
+ <li>CCC</li>
+</ul>
+.====================
+
+.? example of Ruby code
+.==================== example8_ruby.result
 $ erubis {{*-c '@title="Example"; @list=%w[AAA BBB CCC]'*}} example8.eruby
-.<<<:! (cd guide.d; erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example8.eruby)
+.#.<<<:! (cd guide.d; erubis -c '@title="Example"; @list=%w[AAA BBB CCC]' example8.eruby)
+<h1>Example</h1>
+<ul>
+ <li>AAA</li>
+ <li>BBB</li>
+ <li>CCC</li>
+</ul>
 .====================
 
 
@@ -575,14 +683,18 @@ Command-line option '-b' skips the output of preamble and postamble.
 .--------------------
 
 .? compiled source code with and without command-line option '-b'
-.====================
-## without '-b'
+.==================== example9.result.split_filter
 $ erubis -x example9.eruby
-.<<<:! erubis -x guide.d/example9.eruby | ruby -pe 'sub! /^_buf.*?(;|$)/, "{{*\\&*}}"'
-
-## with '-b'
+.#.<<<:! erubis -x guide.d/example9.eruby | ruby -pe 'sub! /^_buf.*?(;|$)/, "{{*\\&*}}"'
+{{*_buf = '';*}} for item in @list 
+ _buf << ' <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; end 
+{{*_buf.to_s*}}
 $ erubis -x {{*-b*}} example9.eruby
-.<<<:! erubis -x -b guide.d/example9.eruby
+.#.<<<:! erubis -x -b guide.d/example9.eruby
+ for item in @list 
+ _buf << ' <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; end 
 .====================
 
 Erubis::Eruby.new option '{{,:preamble=>false,}}' and '{{,:postamble=>false,}}' also suppress output of preamble or postamle.
@@ -600,9 +712,17 @@ puts eruby2.src   # don't print preamble and postamble
 .--------------------
 
 .? output
-.====================
+.==================== example9.result
 $ ruby example9.rb
-.<<<:! (cd guide.d; ruby example9.rb)
+.#.<<<:! (cd guide.d; ruby example9.rb)
+_buf = ''; for item in @list 
+ _buf << ' <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; end 
+_buf.to_s
+--------------
+ for item in @list 
+ _buf << ' <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; end 
 .====================
 
 .#The command-line option '-b' specify both :preamble and :postamble to false.
@@ -656,9 +776,25 @@ If {{/name/}} is omitted then the following name is used according to '-l {{/lan
 .+--------------------
 
 .? output
-.====================
+.==================== example10_x.result
 $ erubis -x {{*--pi*}} example10.xhtml
-.<<<:! (cd guide.d; erubis -x --pi example10.xhtml)
+.#.<<<:! (cd guide.d; erubis -x --pi example10.xhtml)
+_buf = ''; _buf << '<?xml version="1.0" ?>
+';
+  lang = 'en'
+  list = ['<aaa>', 'b&b', '"ccc"']
+
+ _buf << '<html lang="'; _buf << (lang).to_s; _buf << '">
+ <body>
+  <ul>
+';   for item in list 
+ _buf << '   <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '</li>
+';   end 
+ _buf << '  </ul>
+ </body>
+</html>
+';
+_buf.to_s
 .====================
 
 Expression character can be changeable by command-line property '--embchar={{/char/}}. Default is '{{,@,}}'.
@@ -674,9 +810,25 @@ print eruby.src
 .--------------------
 
 .? output
-.====================
+.==================== example10.result
 $ ruby example10.rb
-.<<<:! (cd guide.d; ruby example10.rb)
+.#.<<<:! (cd guide.d; ruby example10.rb)
+_buf = ''; _buf << '<?xml version="1.0" ?>
+';
+  lang = 'en'
+  list = ['<aaa>', 'b&b', '"ccc"']
+
+ _buf << '<html lang="'; _buf << (lang).to_s; _buf << '">
+ <body>
+  <ul>
+';   for item in list 
+ _buf << '   <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << '</li>
+';   end 
+ _buf << '  </ul>
+ </body>
+</html>
+';
+_buf.to_s
 .====================
 
 
@@ -708,6 +860,7 @@ Enhancer may be language-independent or only for Erubis::Eruby class.
 
 To use enhancers, define subclass and include them.
 The folloing is an example to use {{<EscapeEnhancer|#escape-enhancer>}}, {{<PercentLineEnhancer|#percentline-enhancer>}}, and {{<BiPatternEnhancer|#bipattern-enhancer>}}.
+
 .--------------------
 class MyEruby < Erubis::Eruby
   include EscapeEnhancer
@@ -752,7 +905,7 @@ The following is the list of enhancers.
 	Regard lines starting with '%' as Ruby code. This is for compatibility with eruby and ERB.
 .: {{<HeaderFooterEnhancer|#headerfooter-enhancer>}} (language-independent)
 	[experimental] Enable you to add header and footer in eRuby script.
-.: {{<ExpressionInterpolationEnhancer|#expressioninterpolation-enhancer>}} (only for Eruby)
+.: {{<InterpolationEnhancer|#interpolation-enhancer>}} (only for Eruby)
 	[experimental] convert '<p><%= text %></p>' into '_buf << %Q`<p>#{text}</p>`'.
 
 
@@ -802,9 +955,17 @@ EscapeEnhancer switches '<%= ... %>' to escaped and '<%== ... %>' to unescaped.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== escape_example.result
 $ erubis -xE Escape example.eruby
-.<<<:! erubis -xE Escape guide.d/example.eruby | ruby -pe 'sub! /_buf << [E(].*?;/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE Escape guide.d/example.eruby | ruby -pe 'sub! /_buf << [E(].*?;/, "{{*\\&*}}"'
+_buf = ''; _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; {{*_buf << Erubis::XmlHelper.escape_xml( item );*}} _buf << '</p>
+  <p>'; {{*_buf << ( item ).to_s;*}} _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+_buf.to_s
 .====================
 
 EscapeEnhancer is language-independent.
@@ -833,9 +994,17 @@ Therefore, you can use 'print' statement in embedded ruby code.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== stdout_exmple.result
 $ erubis -xE Stdout example.eruby
-.<<<:! erubis -xE Stdout guide.d/example.eruby | ruby -pe 'sub! /^_buf = .*;/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE Stdout guide.d/example.eruby | ruby -pe 'sub! /^_buf = .*;/, "{{*\\&*}}"'
+{{*_buf = $stdout;*}} _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+{{*''*}}
 .====================
 
 StdoutEnhancer is only for Eruby.
@@ -863,9 +1032,16 @@ PrintOutEnhancer makes compiled source code to use 'print(...)' instead of '_buf
 .#.====================
 
 .? compiled source code
-.====================
+.==================== printstatement_example.result
 $ erubis -xE PrintOut example.eruby
-.<<<:! erubis -xE PrintOut guide.d/example.eruby | ruby -pe 'gsub! /print/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE PrintOut guide.d/example.eruby | ruby -pe 'gsub! /print/, "{{*\\&*}}"'
+ {{*print*}} '<div>
+'; for item in list 
+ {{*print*}} '  <p>'; {{*print*}}(( item ).to_s); {{*print*}} '</p>
+  <p>'; {{*print*}} Erubis::XmlHelper.escape_xml( item ); {{*print*}} '</p>
+'; end 
+ {{*print*}} '</div>
+';
 .====================
 
 PrintOutEnhancer is only for Eruby.
@@ -896,9 +1072,12 @@ print eruby.evaluate(:list=>list)
 .--------------------
 
 .? output result
-.====================
+.==================== printenable_example.result
 $ ruby printenabled-example.rb
-.<<<:! (cd guide.d; ruby printenabled-example.rb)
+.#.<<<:! (cd guide.d; ruby printenabled-example.rb)
+  <b>aaa</b>
+  <b>bbb</b>
+  <b>ccc</b>
 .====================
 
 Notice to use Eruby#evaluate() and not to use Eruby#result(),
@@ -929,9 +1108,17 @@ ArrayEnhancer makes Eruby to return an array of strings.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== array_example.result
 $ erubis -xE Array example.eruby
-.<<<:! erubis -xE Array guide.d/example.eruby | ruby -pe 'sub! /^_buf( = \[\];)?/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE Array guide.d/example.eruby | ruby -pe 'sub! /^_buf( = \[\];)?/, "{{*\\&*}}"'
+{{*_buf = [];*}} _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+{{*_buf*}}
 .====================
 
 ArrayEnhancer is only for Eruby.
@@ -945,9 +1132,18 @@ Array buffer is a litte slower than String buffer.
 
 ArrayBufferEnhancer is only for Eruby.
 
-.====================
+.? compiled source code
+.==================== arraybuffer_example.result
 $ erubis -xE ArrayBuffer example.eruby
-.<<<:! erubis -xE ArrayBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = .*?;|\.join)?/,"{{*\\&*}}")'
+.#.<<<:! erubis -xE ArrayBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = .*?;|\.join)?/,"{{*\\&*}}")'
+{{*_buf = [];*}} _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+{{*_buf.join*}}
 .====================
 
 
@@ -975,10 +1171,19 @@ Erubis::Eruby includes this enhancer by default.
 .#.<<<:! (cd guide.d; ruby stringbuffer-example.rb)
 .#.====================
 
-.#.====================
-.#$ erubis -xE StringBuffer example.eruby
+.? compiled source code
+.==================== stringbuffer_example.result
+$ erubis -xE StringBuffer example.eruby
 .#.<<<:! erubis -xE StringBuffer guide.d/example.eruby | ruby -pe 'sub!(/^_buf( = .*?;)?/,"{{*\\&*}}")'
-.#.====================
+{{*_buf = '';*}} _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+{{*_buf.to_s*}}
+.====================
 
 
 StringBufferEnhancer is only for Eruby.
@@ -1006,9 +1211,18 @@ This is useful especially for Ruby on Rails.
 .#.<<<:! (cd guide.d; ruby erbout-example.rb)
 .#.====================
 
+.? compiled source code
 .====================
 $ erubis -xE Erbout example.eruby
-.<<<:! erubis -xE Erbout guide.d/example.eruby | ruby -pe 'sub! /^_erbout = _buf = .*?;/,"{{*\\&*}}"'
+.#.<<<:! erubis -xE Erbout guide.d/example.eruby | ruby -pe 'sub! /^_erbout = _buf = .*?;/,"{{*\\&*}}"'
+{{*_erbout = _buf = '';*}} _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+_buf.to_s
 .====================
 
 
@@ -1040,9 +1254,24 @@ This is useful especially when debugging a complex eRuby script.
 .--------------------
 
 .? output example of NoTextEnhancer
-.====================
+.==================== notext_example.result
 $ erubis -xE NoText notext-example.eruby
-.<<<:! (cd guide.d; erubis -xE NoText notext-example.eruby)
+.#.<<<:! (cd guide.d; erubis -xE NoText notext-example.eruby)
+_buf = '';
+ if !@list || @list.empty? 
+
+ else 
+
+
+     @list.each_with_index do |item, i| 
+                  _buf << ( i%2 == 0 ? '#FFCCCC' : '#CCCCFF' ).to_s;
+           _buf << ( item ).to_s;
+
+     end 
+
+
+ end 
+_buf.to_s
 .====================
 
 NoTextEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -1073,9 +1302,23 @@ This is useful especially when validating HTML tags.
 .--------------------
 
 .? output example of NoCodeEnhancer
-.====================
+.==================== nocode_example.result
 $ erubis -xE NoCode notext-example.eruby
-.<<<:! (cd guide.d; erubis -xE NoCode nocode-example.eruby)
+.#.<<<:! (cd guide.d; erubis -xE NoCode nocode-example.eruby)
+<h3>List</h3>
+
+<p>not found.</p>
+
+<table>
+  <tbody>
+
+    <tr bgcolor="">
+      <td></td>
+    </tr>
+
+  </tbody>
+</table>
+
 .====================
 
 NoCodeEnhancer is language-independent. It is useful even if you are PHP user, see {{<this section|#topics-php>}}.
@@ -1103,9 +1346,17 @@ SimplifyEnhancer makes compiling a little faster but don't trim spaces around '<
 .#.====================
 
 .? compiled source code
-.====================
-$ erubis -xE Simplify example.euby
-.<<<:! erubis -xE Simplify guide.d/example.eruby
+.==================== simplify_example.result
+$ erubis -xE Simplify example.eruby
+.#.<<<:! erubis -xE Simplify guide.d/example.eruby
+_buf = ''; _buf << '<div>
+'; for item in list ; _buf << '
+  <p>'; _buf << ( item ).to_s; _buf << '</p>
+  <p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end ; _buf << '
+</div>
+';
+_buf.to_s
 .====================
 
 SimplifyEnhancer is language-independent.
@@ -1145,9 +1396,14 @@ You can specify pattern by :bipattern property.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== bipattern_example.result
 $ erubis -xE BiPattern bipattern-example.rhtml
-.<<<:! erubis -xE BiPattern guide.d/bipattern-example.rhtml | ruby -pe 'sub! /_buf << [E(].*;/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE BiPattern guide.d/bipattern-example.rhtml | ruby -pe 'sub! /_buf << [E(].*;/, "{{*\\&*}}"'
+_buf = ''; for item in list 
+ _buf << '  <b>'; {{*_buf << ( item ).to_s;*}} _buf << '</b>
+  <b>'; {{*_buf << Erubis::XmlHelper.escape_xml( item );*}} _buf << '</b>
+'; end 
+_buf.to_s
 .====================
 
 BiPatternEnhancer is language-independent.
@@ -1186,9 +1442,15 @@ This is for compatibility with eruby and ERB.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== percentline_example.result
 $ erubis -xE PercentLine percentline-example.rhtml
-.<<<:! erubis -xE PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
+_buf = ''; {{*for item in list*}}
+ _buf << '  <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; {{*end*}}
+ _buf << '% lines with \'%%\'
+';
+_buf.to_s
 .====================
 
 PercentLineEnhancer is language-independent.
@@ -1233,9 +1495,19 @@ HeaderFooterEnhancer enables you to add header and footer in eRuby script.
 .#.====================
 
 .? compiled source code
-.====================
+.==================== headerfooter_example.result
 $ erubis -xE HeaderFooter headerfooter-example.eruby
-.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+
+{{*def list_items(items)*}}
+
+_buf = ''; for item in items 
+ _buf << '  <b>'; _buf << ( item ).to_s; _buf << '</b>
+'; end 
+_buf.to_s
+
+{{*end*}}
+
 .====================
 
 Compare to the following:
@@ -1254,9 +1526,19 @@ Compare to the following:
 .--------------------
 
 .? compiled source code
-.====================
+.==================== normal_eruby_test.result
 $ erubis -x normal-eruby-test.eruby
-.<<<:! erubis -x guide.d/normal-eruby-test.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+.#.<<<:! erubis -x guide.d/normal-eruby-test.eruby | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+_buf = '';
+{{*def list_items(items)*}}
+
+ for item in items 
+ _buf << '<li>'; _buf << ( item ).to_s; _buf << '</li>
+'; end 
+
+{{*end*}}
+
+_buf.to_s
 .====================
 
 Header and footer can be in any position in eRuby script,
@@ -1296,41 +1578,53 @@ print eruby.src
 .#.====================
 
 .? compiled source code
-.====================
+.==================== headerfooter_example2.result
 $ erubis -xE HeaderFooter headerfooter-example2.rhtml
-.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example2.rhtml | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+.#.<<<:! erubis -xE HeaderFooter guide.d/headerfooter-example2.rhtml | ruby -pe 'sub! /^(def|end).*$/, "{{*\\&*}}"'
+
+{{*def page(list)*}}
+
+_buf = ''; _buf << '<?xml version="1.0"?>
+<html>
+'; _buf << ' :
+'; _buf << '</html>
+';
+_buf.to_s
+
+{{*end*}}
+
 .====================
 
 HeaderFooterEnhancer is experimental and is language-independent.
 
 
 
-.$$ ExpressionInterpolationEnhancer | expressioninterpolation-enhancer
+.$$ InterpolationEnhancer | interpolation-enhancer
 
 [experimental]
 
-ExpressionInterpolationEnhancer converts "<h1><%= title %></h1>" into
+InterpolationEnhancer converts "<h1><%= title %></h1>" into
 "_buf << %Q`<h1>#{ title }</h1>`".
 This makes Eruby a litter faster because method call of String#<< are eliminated
 by expression interpolations.
 
-.? ExpressionInterpolationEnhancer elmininates method call of String#<<.
+.? InterpolationEnhancer elmininates method call of String#<<.
 .--------------------
 ## Assume that input is '<a href="<%=url%>"><%=name%></a>'.
 ## Eruby convert input into the following code.  String#<< is called 5 times.
 _buf << '<a href="'; _buf << (url).to_s; _buf << '">'; _buf << (name).to_s; _buf << '</a>';
 
-## If ExpressionInterpolationEnhancer is used, String#<< is called only once.
+## If InterpolationEnhancer is used, String#<< is called only once.
 _buf << %Q`<a href="#{url}">#{name}</a>`;
 .--------------------
 
-.#.? expressioninterpolation-example.rb
-.#.-------------------- expressioninterpolation-example.rb
+.#.? interpolation-example.rb
+.#.-------------------- interpolation-example.rb
 .#require 'erubis'
-.#class ExpressionInterpolationEruby < Erubis::Eruby
-.#  include Erubis::ExpressionInterpolationEnhancer
+.#class InterpolationEruby < Erubis::Eruby
+.#  include Erubis::InterpolationEnhancer
 .#end
-.#eruby = ExpressionInterpolationEruby.new(File.read('example.eruby'))
+.#eruby = InterpolationEruby.new(File.read('example.eruby'))
 .### or
 .##eruby = Erubis::FastEruby.new(File.read('example.eruby'))
 .#print eruby.src
@@ -1338,17 +1632,27 @@ _buf << %Q`<a href="#{url}">#{name}</a>`;
 .#
 .#.? compiled source code
 .#.====================
-.#$ ruby expressioninterpolation-example.rb
-.#.<<<:! (cd guide.d; ruby expressioninterpolation-example.rb)
+.#$ ruby interpolation-example.rb
+.#.<<<:! (cd guide.d; ruby interpolation-example.rb)
 .#.====================
 
 .? compiled source code
-.====================
-$ erubis -xE ExpressionInterpolation example.eruby
-.<<<:! erubis -xE ExpressionInterpolation guide.d/example.eruby | ruby -pe 'gsub! /(%Q`|`|\#\{.*?\})/, "{{*\\&*}}"'
+.==================== interpolation_example.result
+$ erubis -xE Interpolation example.eruby
+.#.<<<:! erubis -xE Interpolation guide.d/example.eruby | ruby -pe 'gsub! /(%Q`|`|\#\{.*?\})/, "{{*\\&*}}"'
+_buf = ''; _buf << {{*%Q`*}}<div>\n{{*`*}}
+ for item in list 
+ _buf << {{*%Q`*}}  <p>{{*#{ item }*}}</p>
+  <p>{{*#{Erubis::XmlHelper.escape_xml( item )}*}}</p>\n{{*`*}}
+ end 
+ _buf << {{*%Q`*}}</div>\n{{*`*}}
+_buf.to_s
 .====================
 
-ExpressionInterpolationEnhancer is only for Eruby.
+Erubis provides Erubis::FastEruby class which includes InterpolationEnhancer.
+You can use Erubis::FastEruby class instead of Erubis::Eruby class.
+
+InterpolationEnhancer is only for Eruby.
 
 
 
@@ -1391,9 +1695,27 @@ Erubis supports the following language currently:
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_php.result
 $ erubis -l php example.ephp
-.<<<:! (cd guide.d; erubis -l php example.ephp)
+.#.<<<:! (cd guide.d; erubis -l php example.ephp)
+<<?php ?>?xml version="1.0"?>
+<html>
+ <body>
+  <p>Hello <?php echo $user; ?>!</p>
+  <table>
+   <tbody>
+<?php     $i = 0; ?>
+<?php     foreach ($list as $item) { ?>
+<?php       $i++; ?>
+    <tr bgcolor="<?php echo $i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'; ?>">
+     <td><?php echo $i; ?></td>
+     <td><?php echo htmlspecialchars($item); ?></td>
+    </tr>
+<?php     } ?>
+   </tbody>
+  </table>
+ </body>
+</html>
 .====================
 
 
@@ -1432,9 +1754,37 @@ int main(int argc, char *argv[])
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_c.result
 $ erubis -l c example.ec
-.<<<:! (cd guide.d; erubis -l c example.ec)
+.#.<<<:! (cd guide.d; erubis -l c example.ec)
+#line 1 "example.ec"
+
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    int i;
+
+
+fputs("<html>\n"
+      " <body>\n"
+      "  <p>Hello ", stdout); fprintf(stdout, "%s", argv[0]); fputs("!</p>\n"
+      "  <table>\n"
+      "   <tbody>\n", stdout);
+     for (i = 1; i < argc; i++) { 
+fputs("    <tr bgcolor=\"", stdout); fprintf(stdout, i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); fputs("\">\n"
+      "      <td>", stdout); fprintf(stdout, "%d", i); fputs("</td>\n"
+      "      <td>", stdout); fprintf(stdout, "%s", argv[i]); fputs("</td>\n"
+      "    </tr>\n", stdout);
+     } 
+fputs("   </tbody>\n"
+      "  </table>\n"
+      " </body>\n"
+      "</html>\n", stdout);
+
+    return 0; 
+}
+
 .====================
 
 
@@ -1501,9 +1851,64 @@ public class Example {
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_java.result
 $ erubis -b -l java example.ejava
-.<<<:! (cd guide.d; erubis -l java example.ejava)
+.#.<<<:! (cd guide.d; erubis -l java example.ejava)
+
+import java.util.*;
+
+public class Example {
+  private String user;
+  private String[] list;
+  public example(String user, String[] list) {
+    this.user = user;
+    this.list = list;
+  }
+
+  public String view() {
+    StringBuffer _buf = new StringBuffer();
+
+_buf.append("<html>\n"
+          + " <body>\n"
+          + "  <p>Hello "); _buf.append(user); _buf.append("!</p>\n"
+          + "  <table>\n"
+          + "   <tbody>\n");
+     for (int i = 0; i < list.length; i++) { 
+_buf.append("    <tr bgcolor=\""); _buf.append(i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _buf.append("\">\n"
+          + "     <td>"); _buf.append(i + 1); _buf.append("</td>\n"
+          + "     <td>"); _buf.append(escape(list[i])); _buf.append("</td>\n"
+          + "    </tr>\n");
+     } 
+_buf.append("   </tbody>\n"
+          + "  </table>\n"
+          + " <body>\n"
+          + "</html>\n");
+
+    return _buf.toString();
+  }
+
+  public static void main(String[] args) {
+    String[] list = { "<aaa>", "b&b", "\"ccc\"" };
+    Example ex = Example.new("Erubis", list);
+    System.out.print(ex.view());
+  }
+
+  public static String escape(String s) {
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < s.length(); i++) {
+      char ch = s.charAt(i);
+      switch (ch) {
+      case '<':   sb.append("&lt;"); break;
+      case '>':   sb.append("&gt;"); break;
+      case '&':   sb.append("&amp;"); break;
+      case '"':   sb.append("&quot;"); break;
+      default:    sb.append(ch);
+      }
+    }
+    return sb.toString();
+  }
+}
+
 .====================
 
 
@@ -1543,15 +1948,72 @@ $ erubis -b -l java example.ejava
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_scheme.result
 $ erubis -l scheme example.escheme
-.<<<:! (cd guide.d; erubis -l scheme example.escheme)
+.#.<<<:! (cd guide.d; erubis -l scheme example.escheme)
+(let ((_buf '())) (define (_add x) (set! _buf (cons x _buf))) (_add "<html>
+ <body>\n")
+
+(let ((user "Erubis")
+      (items '("<aaa>" "b&b" "\"ccc\""))
+      (i 0))
+ 
+(_add "  <p>Hello ")(_add user)(_add "!</p>
+  <table>\n")
+
+  (for-each
+   (lambda (item)
+     (set! i (+ i 1))
+ 
+(_add "   <tr bgcolor=\"")(_add (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF"))(_add "\">
+    <td>")(_add i)(_add "</td>
+    <td>")(_add item)(_add "</td>
+   </tr>\n")
+
+   ) ; lambda end
+   items) ; for-each end
+ 
+(_add "  </table>\n")
+
+) ; let end
+
+(_add " </body>
+</html>\n")
+  (reverse _buf))
 .====================
 
 .? compiled source code (with --func=display property)
-.====================
+.==================== example_scheme_display.result
 $ erubis -l scheme --func=display example.escheme
-.<<<:! (cd guide.d; erubis -l scheme --func=display example.escheme)
+.#.<<<:! (cd guide.d; erubis -l scheme --func=display example.escheme)
+(display "<html>
+ <body>\n")
+
+(let ((user "Erubis")
+      (items '("<aaa>" "b&b" "\"ccc\""))
+      (i 0))
+ 
+(display "  <p>Hello ")(display user)(display "!</p>
+  <table>\n")
+
+  (for-each
+   (lambda (item)
+     (set! i (+ i 1))
+ 
+(display "   <tr bgcolor=\"")(display (if (= (modulo i 2) 0) "#FFCCCC" "#CCCCFF"))(display "\">
+    <td>")(display i)(display "</td>
+    <td>")(display item)(display "</td>
+   </tr>\n")
+
+   ) ; lambda end
+   items) ; for-each end
+ 
+(display "  </table>\n")
+
+) ; let end
+
+(display " </body>
+</html>\n")
 .====================
 
 
@@ -1581,9 +2043,28 @@ $ erubis -l scheme --func=display example.escheme
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_perl.result
 $ erubis -l perl example.eperl
-.<<<:! (cd guide.d; erubis -l perl example.eperl)
+.#.<<<:! (cd guide.d; erubis -l perl example.eperl)
+use HTML::Entities; 
+   my $user = 'Erubis';
+   my @list = ('<aaa>', 'b&b', '"ccc"');
+
+print('<html>
+ <body>
+  <p>Hello '); print($user); print('!</p>
+  <table>
+');     $i = 0; 
+    for $item (@list) { 
+print('   <tr bgcolor='); print(++$i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); print('">
+    <td>'); print($i); print('</td>
+    <td>'); print($item); print('</td>
+   </tr>
+');     } 
+print('  </table>
+ </body>
+</html>
+'); 
 .====================
 
 
@@ -1615,14 +2096,119 @@ $ erubis -l perl example.eperl
 .--------------------
 
 .? compiled source code
-.====================
+.==================== example_js.result
 $ erubis -l js example.ejs
-.<<<:! (cd guide.d; erubis -l js example.ejs)
+.#.<<<:! (cd guide.d; erubis -l js example.ejs)
+var _buf = [];
+   var user = 'Erubis';
+   var list = ['<aaa>', 'b&b', '"ccc"'];
+ 
+_buf.push("<html>\n\
+ <body>\n\
+  <p>Hello "); _buf.push(user); _buf.push("!</p>\n\
+  <table>\n\
+   <tbody>\n");
+     var i; 
+     for (i = 0; i < list.length; i++) { 
+_buf.push("    <tr bgcolor=\""); _buf.push(i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _buf.push("\">\n\
+     <td>"); _buf.push(i + 1); _buf.push("</td>\n\
+     <td>"); _buf.push(list[i]); _buf.push("</td>\n\
+    </tr>\n");
+     } 
+_buf.push("   </tbody>\n\
+  </table>\n\
+ </body>\n\
+</html>\n");
+document.write(_buf.join(""));
 .====================
+
 
 
 
 .$ Other Topics	| topics
+
+
+.$$ Class Erubis::FastEruby	| topics-fasteruby
+
+Erubis provides Erubis::FastEruby class which includes {{<InterpolationEnhancer|#interpolation-enhancer>}} and works faster than Erubis::Eruby class.
+If you desire more speed, try Erubis::FastEruby class.
+
+.? File 'fasteruby.rhtml':
+.-------------------- fasteruby.rhtml
+<html>
+  <body>
+    <h1><%== @title %></h1>
+    <table>
+<% i = 0 %>
+<% for item in @list %>
+<%   i += 1 %>
+      <tr>
+        <td><%= i %></td>
+        <td><%== item %></td>
+      </tr>
+<% end %>
+    </table>
+  </body>
+</html>
+.--------------------
+
+
+.? File 'fasteruby.rb':
+.-------------------- fasteruby.rb
+require 'erubis'
+input = File.read('fasteruby.rhtml')
+eruby = {{*Erubis::FastEruby.new(input)*}}    # create Eruby object
+
+puts "---------- script source ---"
+puts eruby.src
+
+puts "---------- result ----------"
+context = { :title=>'Example', :list=>['aaa', 'bbb', 'ccc'] }
+output = eruby.evaluate(context)
+print output
+.--------------------
+
+.? output
+.==================== fasteruby.result
+$ ruby fasteruby.rb
+---------- script source ---
+_buf = ''; _buf << {{*%Q`*}}<html>
+  <body>
+    <h1>{{*#{Erubis::XmlHelper.escape_xml( @title )}*}}</h1>
+    <table>\n{{*`*}}
+ i = 0 
+ for item in @list 
+   i += 1 
+ _buf << {{*%Q`*}}      <tr>
+        <td>{{*#{ i }*}}</td>
+        <td>{{*#{Erubis::XmlHelper.escape_xml( item )}*}}</td>
+      </tr>\n{{*`*}}
+ end 
+ _buf << {{*%Q`*}}    </table>
+  </body>
+</html>\n{{*`*}}
+_buf.to_s
+---------- result ----------
+<html>
+  <body>
+    <h1>Example</h1>
+    <table>
+      <tr>
+        <td>1</td>
+        <td>aaa</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>bbb</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>ccc</td>
+      </tr>
+    </table>
+  </body>
+</html>
+.====================
 
 
 .$$ Syntax Checking		| topics-syntax

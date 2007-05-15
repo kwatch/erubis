@@ -566,7 +566,7 @@ module Erubis
   ##
   ## this is only for Eruby.
   ##
-  module ExpressionInterpolationEnhancer
+  module InterpolationEnhancer
 
     def self.desc   # :nodoc:
       "convert '<p><%= text %></p>' into '_buf << %Q`<p>\#{text}</p>`'"

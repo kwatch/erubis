@@ -48,6 +48,28 @@ recipes:
 	rm_rf "guide.d"
 	mkdir_p "guide.d"
 	sys "retrieve -d guide.d #{@ingred}"
+	for filename in Dir.glob("guide.d/*.*_filter")
+	  content = File.read(filename)
+	  name = (filename =~ /\.(\w+)_filter$/) && $1
+	  case name
+	  when 'comment'
+	    content.gsub!(/\s*\#.*$/, '')
+	    fname = filename.sub(/\.comment_filter$/, '')
+	    File.open(fname, 'w') {|f| f.write(content) }
+	  when 'split'
+	    contents = content.split(/^\$ /).select{|s| !s.empty?}.collect{|s| '$ '+s}
+	    i = 0
+	    for cont in contents
+	      i += 1
+	      fname = filename.sub(/\.(\w+).(\w+)_filter$/, "#{i}.\\1")
+	      File.open(fname, 'w') { |f| f.write(cont) }
+	    end
+	  end
+	  File.unlink(filename)
+	end
+	mkdir_p "../test/data/$(u)/"
+	rm_f "../test/data/$(u)/*"
+	cp_p "guide.d/*", "../test/data/$(u)/"
 	sys "kwaser -t $(tagfile) -T #{@ingred} > #{@byprod}"
 	sys "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
 	rm "#{@byprod}"

@@ -88,7 +88,7 @@ module Erubis
   ## fast engine for Ruby
   ##
   class FastEruby < Eruby
-    include ExpressionInterpolationEnhancer
+    include InterpolationEnhancer
   end
 
 

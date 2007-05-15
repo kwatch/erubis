@@ -36,8 +36,15 @@ module Erubis
     ##
     module RailsHelper
 
+      class RailsHelperEruby < Erubis::Eruby
+        include Erubis::ErboutEnhancer
+        #include Erubis::InterpolationEnhancer
+        #include Erubis::DeleteIndentEnhancer
+      end
+
       #cattr_accessor :init_properties
-      @@engine_class = Erubis::Eruby
+      @@engine_class = Erubis::RailsHelper::RailsHelperEruby
+      #@@engine_class = Erubis::Eruby
 
       def self.engine_class
         @@engine_class
@@ -179,7 +186,7 @@ class ActionView::Base  # :nodoc:
     properties = Erubis::Helpers::RailsHelper.init_properties
     show_src   = Erubis::Helpers::RailsHelper.show_src
     src = klass.new(template, properties).src
-    src.insert(0, '_erbout = ')
+    #src.insert(0, '_erbout = ')
     logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
     src
   end

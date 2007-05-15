@@ -27,4 +27,5 @@ if $0 == __FILE__
   require "#{TESTDIR}/test-enhancers.rb"
   require "#{TESTDIR}/test-main.rb"
   require "#{TESTDIR}/test-notext.rb"
+  require "#{TESTDIR}/test-users-guide.rb"
 end

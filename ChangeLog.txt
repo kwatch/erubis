@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.73 (2007-05-15)
+	.- [change] rename ExpressionInterporationEnhancer to InterpolationEnhancer
+	.- [enhance] add test/test-users-guide.rb
+
 : Rev.72 (2007-05-15)
 	.- [bugfix] ExpressionInterporationEnhancer.desc() had error
 	.- [bugfix] test/test-main.rb fixed around error messages

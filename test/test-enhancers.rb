@@ -552,8 +552,8 @@ __END__
       </ul>
 
 ##
-- name:  expressioninterpolation1
-  class: ExpressionInterpolationEruby
+- name:  interpolation1
+  class: InterpolationEruby
   options:
   testopt:
   input: *basic1_input
