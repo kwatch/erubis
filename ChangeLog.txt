@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.72 (2007-05-15)
+	.- [bugfix] ExpressionInterporationEnhancer.desc() had error
+	.- [bugfix] test/test-main.rb fixed around error messages
+
 : Rev.71 (2007-05-07)
 	.- [bugfix] 'convert_file()' was fixed to 'load_file()' in users-guide
 

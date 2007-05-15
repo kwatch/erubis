@@ -569,7 +569,7 @@ module Erubis
   module ExpressionInterpolationEnhancer
 
     def self.desc   # :nodoc:
-      "convert '<p><%= text %></p>' into '_buf << %Q`<p>#{text}</p>`'"
+      "convert '<p><%= text %></p>' into '_buf << %Q`<p>\#{text}</p>`'"
     end
 
     def convert_input(src, input)

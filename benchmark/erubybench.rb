@@ -49,6 +49,7 @@ Usage: ruby #{script} [..options..] [..testnames..] > /dev/null 2> bench.log
   -m testmode    :  execute/convert/func (default '#{defaults[:testmode]}')
   -X             :  expand loop
   -p             :  print output
+  -e             :  escape expressions
 END
   return s
 end

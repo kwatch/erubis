@@ -215,16 +215,16 @@ END
     filenames = [ basename % 0, basename % 1 ]
     errmsgs = []
     errmsgs << <<'END'
-3: parse error, unexpected ']', expecting ')'
+3: syntax error, unexpected ']', expecting ')'
  _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
                                          ^
--:4: parse error, unexpected kEND, expecting ')'
+-:4: syntax error, unexpected kEND, expecting ')'
 '; end 
       ^
--:7: parse error, unexpected $, expecting ')'
+-:7: syntax error, unexpected $end, expecting ')'
 END
     errmsgs << <<'END'
-7: parse error, unexpected $, expecting kEND
+7: syntax error, unexpected $end, expecting kEND
 END
     #
     max = inputs.length
