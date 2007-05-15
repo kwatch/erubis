@@ -234,7 +234,7 @@ class MainApplication
     ntimes = 1000
     targets = BenchmarkApplication::TARGETS.dup
     testmode = 'execute'
-    contextfile = 'erubybench.yaml'
+    contextfile = 'bench_context.yaml'
     #
     options, args = parse_argv(ARGV)
     ntimes      = options['n'].to_i if options['n']
