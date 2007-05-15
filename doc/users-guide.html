@@ -81,6 +81,8 @@ It has the following features.
     </li>
     <li><a href="#tut-pi">Processing Instruction (PI) Converter</a>
     </li>
+    <li><a href="#tut-notext">Retrieve Ruby Code</a>
+    </li>
   </ul>
   </li>
   <li><a href="#enhancer">Enhancer</a>
@@ -144,10 +146,6 @@ It has the following features.
     <li><a href="#topics-tinyeruby">Erubis::TinyEruby class</a>
     </li>
     <li><a href="#topics-rails">Ruby on Rails Support</a>
-    </li>
-    <li><a href="#topics-php">NoTextEnhancer and NoCodeEnhancer in PHP</a>
-    </li>
-    <li><a href="#topics-notext">Command <code>notext</code></a>
     </li>
     <li><a href="#topics-benchmark">Benchmark</a>
     </li>
@@ -963,6 +961,178 @@ example of Rails view template</div>
 &lt;?rb end ?&gt;
   &lt;/tr&gt;
 &lt;/table&gt;
+</pre>
+<br>
+
+
+<a name="tut-notext"></a>
+<h3 class="section2">Retrieve Ruby Code</h3>
+<p>Similar to '-x', ommand-line option '-X' shows converted Ruby source code.
+The difference between '-x' and 'X' is that the former converts text part but the latter ignores it.
+It means that you can retrieve Ruby code from eRuby script by '-X' option.
+</p>
+<p>For example, see the following eRuby script.
+This is some complex, so it is difficult to grasp the program code.
+</p>
+<a name="example11.rhtml"></a>
+<div class="program_caption">
+example11.rhtml</div>
+<pre class="program">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"&gt;
+  &lt;body&gt;
+    &lt;h3&gt;List&lt;/h3&gt;
+    &lt;% if @list.nil? || @list.empty? %&gt;
+    &lt;p&gt;not found.&lt;/p&gt;
+    &lt;% else %&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;% @list.each_with_index do |item, i| %&gt;
+        &lt;tr bgcolor="&lt;%= i % 2 == 0 ? '#FCC' : '#CCF' %&gt;"&gt;
+          &lt;td&gt;&lt;%= item %&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;% end %&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+    &lt;% end %&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>Command-line option '-X' extracts only the ruby code from eRuby script.
+</p>
+<a name="example11.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ erubis <strong>-X</strong> example11.rhtml
+_buf = '';
+
+
+
+
+
+     if @list.nil? || @list.empty? 
+
+     else 
+
+
+         @list.each_with_index do |item, i| 
+                      _buf &lt;&lt; ( i % 2 == 0 ? '#FCC' : '#CCF' ).to_s;
+               _buf &lt;&lt; ( item ).to_s;
+
+         end 
+
+
+     end 
+
+
+_buf.to_s
+</pre>
+<p>Command-line option '-C' (<strong>c</strong>mpact) deletes empty lines.
+</p>
+<a name="example11_C.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ erubis <strong>-XC</strong> example11.rhtml
+_buf = '';
+     if @list.nil? || @list.empty? 
+     else 
+         @list.each_with_index do |item, i| 
+                      _buf &lt;&lt; ( i % 2 == 0 ? '#FCC' : '#CCF' ).to_s;
+               _buf &lt;&lt; ( item ).to_s;
+         end 
+     end 
+_buf.to_s
+</pre>
+<p>Option '-U' (<strong>u</strong>nique) converts empty lines into a line.
+</p>
+<a name="example11_U.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ erubis <strong>-XU</strong> example11.rhtml
+_buf = '';
+
+     if @list.nil? || @list.empty? 
+
+     else 
+
+         @list.each_with_index do |item, i| 
+                      _buf &lt;&lt; ( i % 2 == 0 ? '#FCC' : '#CCF' ).to_s;
+               _buf &lt;&lt; ( item ).to_s;
+
+         end 
+
+     end 
+
+_buf.to_s
+</pre>
+<p>Option '-N' (<strong>n</strong>umber) adds line number.
+It is available with '-C' or '-U'.
+</p>
+<a name="example11_N.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ erubis <strong>-XNU</strong> example11.rhtml
+    1:  _buf = '';
+
+    7:       if @list.nil? || @list.empty? 
+
+    9:       else 
+
+   12:           @list.each_with_index do |item, i| 
+   13:                        _buf &lt;&lt; ( i % 2 == 0 ? '#FCC' : '#CCF' ).to_s;
+   14:                 _buf &lt;&lt; ( item ).to_s;
+
+   16:           end 
+
+   19:       end 
+
+   22:  _buf.to_s
+</pre>
+<p>Command-line option '-X' is available with PHP script.
+</p>
+<a name="example11.php"></a>
+<div class="program_caption">
+example11.php</div>
+<pre class="program">&lt;?xml version="1.0"?&gt;
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;h3&gt;List&lt;/h3&gt;
+    &lt;?php if (!$list) { ?&gt;
+    &lt;p&gt;not found.&lt;/p&gt;
+    &lt;?php } else { ?&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;?php $i = 0; ?&gt;
+        &lt;?php foreach ($list as $item) { ?&gt;
+        &lt;tr bgcolor="&lt;?php echo ++$i % 2 == 1 ? '#FCC' : '#CCF'; ?&gt;"&gt;
+          &lt;td&gt;&lt;?php echo $item; ?&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;?php } ?&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+    &lt;?php } ?&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<a name="example11_php.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ erubis -XNU <strong>-l php</strong> <strong>--pi=php</strong> --trim=false example11.php
+
+    5:      &lt;?php if (!$list) { ?&gt;
+
+    7:      &lt;?php } else { ?&gt;
+
+   10:          &lt;?php $i = 0; ?&gt;
+   11:          &lt;?php foreach ($list as $item) { ?&gt;
+   12:                       &lt;?php echo ++$i % 2 == 1 ? '#FCC' : '#CCF'; ?&gt;
+   13:                &lt;?php echo $item; ?&gt;
+
+   15:          &lt;?php } ?&gt;
+
+   18:      &lt;?php } ?&gt;
+
 </pre>
 <br>
 
@@ -2076,7 +2246,9 @@ document.write(_buf.join(""));
 <h2 class="section1">Other Topics</h2>
 <a name="topics-fasteruby"></a>
 <h3 class="section2">Class Erubis::FastEruby</h3>
-<p>Erubis provides Erubis::FastEruby class which includes <a href="#interpolation-enhancer">InterpolationEnhancer</a> and works faster than Erubis::Eruby class.
+<p>[experimental]
+</p>
+<p>Erubis provides Erubis::FastEruby class which includes <a href="#interpolation-enhancer">InterpolationEnhancer</a> and <a href="#topics-benchmark">works faster than Erubis::Eruby class</a>.
 If you desire more speed, try Erubis::FastEruby class.
 </p>
 <a name="fasteruby.rhtml"></a>
@@ -2117,6 +2289,43 @@ print output
 <div class="terminal_caption">
 output</div>
 <pre class="terminal">$ ruby fasteruby.rb
+---------- script source ---
+_buf = ''; _buf &lt;&lt; <strong>%Q`</strong>&lt;html&gt;
+  &lt;body&gt;
+    &lt;h1&gt;<strong>#{Erubis::XmlHelper.escape_xml( @title )}</strong>&lt;/h1&gt;
+    &lt;table&gt;\n<strong>`</strong>
+ i = 0 
+ for item in @list 
+   i += 1 
+ _buf &lt;&lt; <strong>%Q`</strong>      &lt;tr&gt;
+        &lt;td&gt;<strong>#{ i }</strong>&lt;/td&gt;
+        &lt;td&gt;<strong>#{Erubis::XmlHelper.escape_xml( item )}</strong>&lt;/td&gt;
+      &lt;/tr&gt;\n<strong>`</strong>
+ end 
+ _buf &lt;&lt; <strong>%Q`</strong>    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;\n<strong>`</strong>
+_buf.to_s
+---------- result ----------
+&lt;html&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Example&lt;/h1&gt;
+    &lt;table&gt;
+      &lt;tr&gt;
+        &lt;td&gt;1&lt;/td&gt;
+        &lt;td&gt;aaa&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;2&lt;/td&gt;
+        &lt;td&gt;bbb&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;3&lt;/td&gt;
+        &lt;td&gt;ccc&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
 </pre>
 <br>
 
@@ -2231,189 +2440,6 @@ It is useful for debugging.
 <br>
 
 
-<a name="topics-php"></a>
-<h3 class="section2">NoTextEnhancer and NoCodeEnhancer in PHP</h3>
-<p>NoTextEnhancer and NoCodEnahncer are quite useful not only for eRuby but also for PHP.
-The former "drops" HTML text and show up embedded Ruby/PHP code
-and the latter drops embedded Ruby/PHP code and leave HTML text.
-</p>
-<p>For example, see the following PHP script.
-</p>
-<a name="notext-example.php"></a>
-<div class="program_caption">
-notext-example.php</div>
-<pre class="program">&lt;html&gt;
-  &lt;body&gt;
-    &lt;h3&gt;List&lt;/h3&gt;
-    &lt;?php if (!$list || count($list) == 0) { ?&gt;
-    &lt;p&gt;not found.&lt;/p&gt;
-    &lt;?php } else { ?&gt;
-    &lt;table&gt;
-      &lt;tbody&gt;
-        &lt;?php $i = 0; ?&gt;
-        &lt;?php foreach ($list as $item) { ?&gt;
-        &lt;tr bgcolor="&lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;"&gt;
-          &lt;td&gt;&lt;?php echo $item; ?&gt;&lt;/td&gt;
-        &lt;/tr&gt;
-        &lt;?php } ?&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-    &lt;?php } ?&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</pre>
-<p>This is complex because PHP code and HTML document are mixed.
-NoTextEnhancer can separate PHP code from HTML document.
-</p>
-<div class="terminal_caption">
-example of using NoTextEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -l php -E NoText -p '&lt;\?php \?&gt;' --trim=false notext-example.php | cat -n
-     1	
-     2	
-     3	
-     4	    &lt;?php if (!$list || count($list) == 0) { ?&gt;
-     5	
-     6	    &lt;?php } else { ?&gt;
-     7	
-     8	
-     9	        &lt;?php $i = 0; ?&gt;
-    10	        &lt;?php foreach ($list as $item) { ?&gt;
-    11	                     &lt;?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?&gt;
-    12	              &lt;?php echo $item; ?&gt;
-    13	
-    14	        &lt;?php } ?&gt;
-    15	
-    16	
-    17	    &lt;?php } ?&gt;
-    18	
-    19	
-</pre>
-<p>In the same way, NoCodeEnhancer can extract HTML tags.
-</p>
-<div class="terminal_caption">
-example of using NoCodeEnhancer with PHP file</div>
-<pre class="terminal">$ erubis -l php -E NoCode -p '&lt;\?php \?&gt;' notext-example.php | cat -n
-     1	&lt;html&gt;
-     2	  &lt;body&gt;
-     3	    &lt;h3&gt;List&lt;/h3&gt;
-     4	
-     5	    &lt;p&gt;not found.&lt;/p&gt;
-     6	
-     7	    &lt;table&gt;
-     8	      &lt;tbody&gt;
-     9	
-    10	
-    11	        &lt;tr bgcolor=""&gt;
-    12	          &lt;td&gt;&lt;/td&gt;
-    13	        &lt;/tr&gt;
-    14	
-    15	      &lt;/tbody&gt;
-    16	    &lt;/table&gt;
-    17	
-    18	  &lt;/body&gt;
-    19	&lt;/html&gt;
-</pre>
-<br>
-
-
-<a name="topics-notext"></a>
-<h3 class="section2">Command <code>notext</code></h3>
-<p>Command 'notext' removes text part from eRuby script and leaves only embedded Ruby code.
-This is very useful when debugging eRuby script.
-</p>
-<div class="program_caption">
-notext-ex.rhtml</div>
-<pre class="program">&lt;html&gt;
- &lt;head&gt;
-  &lt;title&gt;notext example&lt;/title&gt;
- &lt;/head&gt;
- &lt;body&gt;
-  &lt;table&gt;
-&lt;% @list.each_with_index do |item, i| %&gt;
-&lt;%   klass = i % 2 == 0 ? 'odd' : 'even' %&gt;
-   &lt;tr class="&lt;%= klass %&gt;"&gt;
-    &lt;td&gt;&lt;%== item %&gt;&lt;/td&gt;
-   &lt;/tr&gt;
-&lt;% end %&gt;
-  &lt;/table&gt;
- &lt;/body&gt;
-&lt;/html&gt;
-</pre>
-<div class="terminal_caption">
-command line example</div>
-<pre class="terminal">$ notext notext-ex.rhtml
-_buf = '';
-
-
-
-
-
- @list.each_with_index do |item, i| ;
-   klass = i % 2 == 0 ? 'odd' : 'even' ;
-               _buf &lt;&lt; ( klass ).to_s;
-         _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-
- end ;
-
-
-_buf.to_s
-</pre>
-<p>Command-line option '-u' deletes continuous empty lines to one empty line.
-</p>
-<div class="terminal_caption">
-command-line example</div>
-<pre class="terminal">$ notext <strong>-u</strong> notext-ex.rhtml
-_buf = '';
-
- @list.each_with_index do |item, i| ;
-   klass = i % 2 == 0 ? 'odd' : 'even' ;
-               _buf &lt;&lt; ( klass ).to_s;
-         _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-
- end ;
-
-_buf.to_s
-</pre>
-<p>Command-line option '-c' deletes all empty lines.
-</p>
-<div class="terminal_caption">
-command-line example</div>
-<pre class="terminal">$ notext <strong>-c</strong> notext-ex.rhtml
-_buf = '';
- @list.each_with_index do |item, i| ;
-   klass = i % 2 == 0 ? 'odd' : 'even' ;
-               _buf &lt;&lt; ( klass ).to_s;
-         _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
- end ;
-_buf.to_s
-</pre>
-<p>Command-line option '-n' shows line numbers. It can work with '-c' or '-u'.
-</p>
-<pre class="terminal">$ notext <strong>-nu</strong> example2.rhtml
-  1: _buf = '';
-
-  7:  @list.each_with_index do |item, i| ;
-  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  9:                _buf &lt;&lt; ( klass ).to_s;
- 10:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
-
- 12:  end ;
-
- 16: _buf.to_s
-$ notext <strong>-nc</strong> example2.rhtml
-  1: _buf = '';
-  7:  @list.each_with_index do |item, i| ;
-  8:    klass = i % 2 == 0 ? 'odd' : 'even' ;
-  9:                _buf &lt;&lt; ( klass ).to_s;
- 10:          _buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );
- 12:  end ;
- 16: _buf.to_s
-</pre>
-<p>Command 'notext' supports '-l <em>lang</em>' options. For example, command-line option '-l php' retrieves embedded PHP code from PHP file.
-</p>
-<br>
-
-
 <a name="topics-benchmark"></a>
 <h3 class="section2">Benchmark</h3>
 <p>A benchmark script is included in Erubis package at 'erubis-X.X.X/benchark/' directory.
@@ -2421,20 +2447,21 @@ Here is an example result of benchmark.
 </p>
 <div class="terminal_caption">
 MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.5, eruby1.0.5, gcc4.0.1</div>
-<pre class="terminal">$ cd erubis-2.2.0/benchmark/
-$ ruby erubybench.rb -n 10000 -m execute
-## execute
+<pre class="terminal">$ cd erubis-$Release$/benchmark/
+$ ruby bench.rb -n 10000 -m execute
+*** ntimes=10000, testmode=execute
                                     user     system      total        real
-eruby                          12.870000   0.290000  <strong>13.160000</strong> ( 14.020219)
-ERB                            37.090000   0.460000  <strong>37.550000</strong> ( 39.639027)
-Erubis::Eruby                  11.420000   0.330000  <strong>11.750000</strong> ( 12.385562)
-Erubis::Eruby(cached)           7.580000   0.440000   <strong>8.020000</strong> (  8.536019)
-Erubis::ArrayBufferEruby       11.550000   0.340000  11.890000 ( 12.597665)
-Erubis::SimplifiedEruby        10.410000   0.320000  10.730000 ( 11.406730)
-Erubis::StdoutEruby            12.170000   0.340000  12.510000 ( 13.252177)
-Erubis::PrintOutEruby          12.070000   0.330000  12.400000 ( 13.142734)
-Erubis::TinyEruby               9.710000   0.320000  10.030000 ( 10.771446)
-Erubis::PI::Eruby              12.010000   0.340000  12.350000 ( 13.104801)
+ERuby                          14.220000   0.270000  <strong>14.490000</strong> ( 14.498195)
+ERB                            39.960000   0.420000  <strong>40.380000</strong> ( 40.445606)
+ERB(cached)                    13.600000   0.470000  <strong>14.070000</strong> ( 14.087191)
+Erubis::Eruby                  11.970000   0.320000  <strong>12.290000</strong> ( 12.305445)
+Erubis::Eruby(cached)           8.090000   0.430000   <strong>8.520000</strong> (  8.541349)
+Erubis::FastEruby              11.430000   0.320000  <strong>11.750000</strong> ( 11.754823)
+Erubis::FastEruby(cached)       7.390000   0.430000   <strong>7.820000</strong> (  7.828517)
+Erubis::TinyEruby              10.340000   0.310000  10.650000 ( 10.659101)
+Erubis::ArrayBufferEruby       12.150000   0.320000  12.470000 ( 12.497017)
+Erubis::PrintOutEruby          12.750000   0.320000  13.070000 ( 13.099295)
+Erubis::StdoutEruby            12.710000   0.320000  13.030000 ( 13.042235)
 </pre>
 <p>This shows that...
 </p>
@@ -2444,6 +2471,8 @@ Erubis::PI::Eruby              12.010000   0.340000  12.350000 ( 13.104801)
 <li>Erubis::Eruby runs about 3 times faster than ERB.
 </li>
 <li>Caching (by Erubis::Eruby.load_file()) makes Erubis about 40-50 percent faster.
+</li>
+<li>Erubis::FastEruby is a litte faster than Erubis::Eruby.
 </li>
 <li>Array buffer (ArrayBufferEnhancer) is a little slower than string buffer (StringBufferEnhancer which Erubis::Eruby includes)
 </li>
@@ -2458,19 +2487,19 @@ The following shows that Erubis runs more than 30 percent faster than eruby if H
 </p>
 <div class="terminal_caption">
 When escaping HTML characters with option '-e'</div>
-<pre class="terminal">$ ruby erubybench.rb -n 10000 -m execute -e
-## execute
+<pre class="terminal">$ ruby bench.rb -n 10000 -m execute -ep
+*** ntimes=10000, testmode=execute
                                     user     system      total        real
-eruby                          22.730000   0.350000  <strong>23.080000</strong> ( 24.815081)
-ERB                            46.590000   0.520000  <strong>47.110000</strong> ( 50.360891)
-Erubis::Eruby                  16.750000   0.360000  <strong>17.110000</strong> ( 18.253436)
-Erubis::Eruby(cached)          12.540000   0.450000  <strong>12.990000</strong> ( 13.935044)
-Erubis::ArrayBufferEruby       16.860000   0.370000  17.230000 ( 18.373771)
-Erubis::SimplifiedEruby        15.750000   0.350000  16.100000 ( 17.344105)
-Erubis::StdoutEruby            17.650000   0.360000  18.010000 ( 19.194326)
-Erubis::PrintOutEruby          17.560000   0.360000  17.920000 ( 19.293728)
-Erubis::TinyEruby              16.300000   0.350000  16.650000 ( 17.887278)
-Erubis::PI::Eruby              17.210000   0.360000  17.570000 ( 18.836510)
+eruby                          21.500000   0.320000  <strong>21.820000</strong> ( 21.930308)
+ERB                            45.280000   0.500000  <strong>45.780000</strong> ( 46.101839)
+ERB(cached)                    20.230000   0.520000  <strong>20.750000</strong> ( 20.913674)
+Erubis::Eruby                  15.070000   0.340000  <strong>15.410000</strong> ( 15.541843)
+Erubis::Eruby(cached)          11.260000   0.450000  <strong>11.710000</strong> ( 11.774822)
+Erubis::FastEruby              15.100000   0.340000  15.440000 ( 15.532790)
+Erubis::FastEruby(cached)      11.160000   0.460000  11.620000 ( 11.704288)
+Erubis::ArrayBufferEruby       15.260000   0.350000  15.610000 ( 15.785612)
+Erubis::PrintOutEruby          15.960000   0.330000  16.290000 ( 16.392182)
+Erubis::StdoutEruby            16.030000   0.340000  16.370000 ( 16.461998)
 </pre>
 <br>
 
@@ -2506,15 +2535,36 @@ Erubis::PI::Eruby              17.210000   0.360000  17.570000 ( 18.836510)
   	Show compiled source.
   </dd>
   <dt class="dt3"><b>
--z            </b></dt>
+-X            </b></dt>
   <dd class="dd3">
-  	Syntax checking.
+  	Show compiled source but only Ruby code.
+			This is equivarent to '-E NoText'.
+  </dd>
+  <dt class="dt3"><b>
+-N            </b></dt>
+  <dd class="dd3">
+  	Numbering: add line numbers. (for '-x/-X')
+  </dd>
+  <dt class="dt3"><b>
+-U            </b></dt>
+  <dd class="dd3">
+  	Unique mode: zip empty lines into a line. (for '-x/-X')
+  </dd>
+  <dt class="dt3"><b>
+-C            </b></dt>
+  <dd class="dd3">
+  	Compact: remove empty lines. (for '-x/-X')
   </dd>
   <dt class="dt3"><b>
 -b            </b></dt>
   <dd class="dd3">
-  	Body only (no preamble nor postamble).
+  	Body only: no preamble nor postamble. (for '-x/-X')
 			This is equivarent to '--preamble=false --postamble=false'.
+  </dd>
+  <dt class="dt3"><b>
+-z            </b></dt>
+  <dd class="dd3">
+  	Syntax checking.
   </dd>
   <dt class="dt3"><b>
 -e            </b></dt>

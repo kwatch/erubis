@@ -562,14 +562,14 @@ module Erubis
 
 
   ##
-  ## convert "<h1><%= title %></h1>" into "_buf << %Q`<h1>#{ title }</h1>`"
+  ## convert "<h1><%=title%></h1>" into "_buf << %Q`<h1>#{title}</h1>`"
   ##
   ## this is only for Eruby.
   ##
   module InterpolationEnhancer
 
     def self.desc   # :nodoc:
-      "convert '<p><%= text %></p>' into '_buf << %Q`<p>\#{text}</p>`'"
+      "convert '<p><%=text%></p>' into '_buf << %Q`<p>\#{text}</p>`'"
     end
 
     def convert_input(src, input)

@@ -49,8 +49,8 @@ module Erubis
     end
 
     def initialize
-      @single_options = "hvxztSbeB"
-      @arg_options    = "pcrfKIlaEC"
+      @single_options = "hvxztSbeBXNUC"
+      @arg_options    = "pcrfKIlaE" #C
       @option_names   = {
         ?h => :help,
         ?v => :version,
@@ -63,7 +63,7 @@ module Erubis
         ?B => :binding,
         ?p => :pattern,
         ?c => :context,
-        ?C => :class,
+        #?C => :class,
         ?e => :escape,
         ?r => :requires,
         ?f => :datafiles,
@@ -72,6 +72,10 @@ module Erubis
         ?l => :lang,
         ?a => :action,
         ?E => :enhancers,
+        ?X => :notext,
+        ?N => :linenum,
+        ?U => :unique,
+        ?C => :compact,
       }
       assert unless @single_options.length + @arg_options.length == @option_names.length
       (@single_options + @arg_options).each_byte do |ch|
@@ -115,14 +119,15 @@ module Erubis
       ## action
       action = opts.action
       action ||= 'syntax'  if opts.syntax
-      action ||= 'convert' if opts.source
+      action ||= 'convert' if opts.source || opts.notext
 
       ## lang
       lang = opts.lang || 'ruby'
       action ||= 'convert' if opts.lang
 
       ## class name of Eruby
-      classname = opts.class
+      #classname = opts.class
+      classname = nil
       klass = get_classobj(classname, lang, properties[:pi])
 
       ## kanji code
@@ -153,6 +158,9 @@ module Erubis
         engine.bipattern = properties[:bipattern] if enhancer == Erubis::BiPatternEnhancer
       end
 
+      ## no-text
+      engine.extend(Erubis::NoTextEnhancer) if opts.notext
+
       ## convert and execute
       val = nil
       msg = "Syntax OK\n"
@@ -179,7 +187,7 @@ module Erubis
     def do_action(action, engine, context, filename, opts)
       case action
       when 'convert'
-        s = engine.src
+        s = manipulate_src(engine.src, opts)
       when nil, 'exec', 'execute'
         s = opts.binding ? engine.result(context.to_hash) : engine.evaluate(context)
       when 'syntax'
@@ -191,6 +199,22 @@ module Erubis
       return s
     end
 
+    def manipulate_src(source, opts)
+      flag_linenum   = opts.linenum
+      flag_unique    = opts.unique
+      flag_compact   = opts.compact
+      if flag_linenum
+        n = 0
+        source.gsub!(/^/) { n += 1; "%5d:  " % n }
+        source.gsub!(/^ *\d+:\s+?\n/, '')      if flag_compact
+        source.gsub!(/(^ *\d+:\s+?\n)+/, "\n") if flag_unique
+      else
+        source.gsub!(/^\s*?\n/, '')      if flag_compact
+        source.gsub!(/(^\s*?\n)+/, "\n") if flag_unique
+      end
+      return source
+    end
+
     def usage
       command = File.basename($0)
       s = <<END
@@ -199,8 +223,12 @@ Usage: #{command} [..options..] [file ...]
   -h, --help    : help
   -v            : version
   -x            : show converted code
+  -X            : show converted code, only ruby code and no text part
+  -N            : numbering: add line numbers          (for '-x/-X')
+  -U            : unique: zip empty lines to a line    (for '-x/-X')
+  -C            : compact: remove empty lines          (for '-x/-X')
+  -b            : body only: no preamble nor postamble (for '-x/-X')
   -z            : syntax checking
-  -b            : body only (no preamble nor postamble)
   -e            : escape (equal to '--E Escape')
   -p pattern    : embedded pattern (default '<% %>')
   -l lang       : convert but no execute (ruby/php/c/java/scheme/perl/js)
@@ -209,7 +237,7 @@ Usage: #{command} [..options..] [file ...]
   -K kanji      : kanji code (euc/sjis/utf8) (default none)
   -c context    : context data string (yaml inline style or ruby code)
   -f datafile   : context data file ('*.yaml', '*.yml', or '*.rb')
-  -t            : expand tab character in YAML file
+  -t            : expand tab characters in YAML file
   -S            : convert mapping key from string to symbol in YAML file
   -B            : invoke 'result(binding)' instead of 'evaluate(context)'
   --pi=name     : parse '<?name ... ?>' instead of '<% ... %>'

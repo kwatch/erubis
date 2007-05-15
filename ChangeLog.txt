@@ -2,6 +2,15 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.76 (2007-05-16)
+	.- [enhance] new command-line option '-X', '-N', '-C', and '-U' support
+	.- [change] command 'notext' has been removed
+	.- [change] remove test/test-notext.{rb,yaml}
+	.- [change] command-line option '-C' has been desupported
+
+: Rev.75 (2007-05-15)
+	.- [change] remove 'benchmark/erubybench*'
+
 : Rev.74 (2007-05-15)
 	.- [enhance] add 'benchmark/bench.rb' and 'benchmark/templates/*'
 

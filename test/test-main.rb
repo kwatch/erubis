@@ -264,12 +264,12 @@ END
   end
 
 
-  def test_class1     # -C
-    @input    = INPUT
-    @expected = OUTPUT.gsub(/<aaa>/, '&lt;aaa&gt;').gsub(/b&b/, 'b&amp;b').gsub(/"ccc"/, '&quot;ccc&quot;')
-    @options  = "-C XmlEruby"
-    _test()
-  end
+#  def test_class1     # -C
+#    @input    = INPUT
+#    @expected = OUTPUT.gsub(/<aaa>/, '&lt;aaa&gt;').gsub(/b&b/, 'b&amp;b').gsub(/"ccc"/, '&quot;ccc&quot;')
+#    @options  = "-C XmlEruby"
+#    _test()
+#  end
 
 
   def test_notrim1    # --trim=false

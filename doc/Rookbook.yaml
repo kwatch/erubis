@@ -74,6 +74,14 @@ recipes:
 	sys "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
 	rm "#{@byprod}"
 
+  - product:	:test
+    ingreds:	[ $(u).html ]
+    method*: |
+        currdir = Dir.pwd
+	chdir '../test' do
+	  sys 'ruby test-users-guide.rb'
+	end
+
   - product:	notext.txt
     ingreds:	[ ../test/test-notext.yaml, Rookbook.yaml ]
     desc:       create 'notext.txt' from 'test-notext.yaml'

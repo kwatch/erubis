@@ -128,7 +128,7 @@ recipes:
 	end
 	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#
-	store 'benchmark/erubybench.{rb,rhtml,yaml}', 'benchmark/erubybench-lib.rb', dir
+	store 'benchmark/{bench.rb,bench_context.yaml}', 'benchmark/Makefile', dir
 	#
 	Dir.glob('examples/*').each { |d| chdir d do sys 'make clean' end }
 	store 'examples/**/*', dir
