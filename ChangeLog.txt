@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.74 (2007-05-15)
+	.- [enhance] add 'benchmark/bench.rb' and 'benchmark/templates/*'
+
 : Rev.73 (2007-05-15)
 	.- [change] rename ExpressionInterporationEnhancer to InterpolationEnhancer
 	.- [enhance] add test/test-users-guide.rb
