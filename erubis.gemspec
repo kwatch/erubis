@@ -12,7 +12,7 @@ spec = Gem::Specification.new do |s|
   ## package information
   s.name        = "erubis"
   s.author      = "makoto kuwata"
-  s.version     = ("$Release$" =~ /[\.\d]+/) && $&
+  s.version     = "$Release$"
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "http://rubyforge.org/projects/erubis"
   s.summary     = "a fast and extensible eRuby implementation which supports multi-language"
@@ -37,13 +37,14 @@ spec = Gem::Specification.new do |s|
   files += Dir.glob('bin/*')
   files += Dir.glob('examples/**/*')
   files += Dir.glob('test/*.rb')
+  files += Dir.glob('test/data/**/*')
   files += %w[doc/users-guide.html doc/docstyle.css]
   files += %w[README.txt CHANGES MIT-LICENSE setup.rb]
   files += Dir.glob('contrib/*')
   files += Dir.glob('benchmark/*')
   files += Dir.glob('doc-api/**/*')
   s.files       = files
-  s.executables = ['erubis', 'notext']
+  s.executables = ['erubis']
   s.bindir      = 'bin'
   s.test_file   = 'test/test.rb'
   s.add_dependency('abstract', ['>= 1.0.0'])

@@ -1,6 +1,6 @@
 ##
 ## $Rev$
-## $Release$
+## $Release:$
 ## $Copyright$
 ##
 
@@ -80,7 +80,7 @@ module Erubis
 
 
     ##
-    ## helper method evaluate Proc object iwth contect object.
+    ## helper method evaluate Proc object with contect object.
     ## context may be Binding, Hash, or Object.
     ##
     def process_proc(proc_obj, context=nil, filename=nil)

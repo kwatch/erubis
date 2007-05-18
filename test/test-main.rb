@@ -1,6 +1,6 @@
 ##
 ## $Rev$
-## $Release$
+## $Release:$
 ## $Date$
 ##
 

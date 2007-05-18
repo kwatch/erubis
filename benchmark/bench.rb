@@ -2,7 +2,7 @@
 
 ###
 ### $Rev$
-### $Release: $
+### $Release:$
 ### $Copyright$
 ###
 

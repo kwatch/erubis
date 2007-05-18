@@ -2,7 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-: Rev.76 (2007-05-16)
+: Rev.77 (2007-05-18)
+	.- [refactor] remove RailsHelperEruby from helpers/rails.rb
+	.- [bugfix] change context key 'code' to 'symbol' in benchmark/bench_context.yaml
+
+: Rev.76 (2007-05-15)
 	.- [enhance] new command-line option '-X', '-N', '-C', and '-U' support
 	.- [change] command 'notext' has been removed
 	.- [change] remove test/test-notext.{rb,yaml}

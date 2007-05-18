@@ -1,6 +1,6 @@
 ###
 ### $Rev$
-### $Release$
+### $Release:$
 ### $Copyright$
 ###
 
@@ -9,6 +9,14 @@ require 'erubis'
 
 
 module Erubis
+
+  class Eruby
+    include ErboutEnhancer
+  end
+
+  class FastEruby
+    include ErboutEnhancer
+  end
 
   module Helpers
 
@@ -20,9 +28,9 @@ module Erubis
     ## 1. add the folliwng code in your 'config/environment.rb'
     ##
     ##      require 'erubis/helpers/rails_helper'
-    ##      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+    ##      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
     ##      #Erubis::Helpers::RailsHelper.init_properties = {}
-    ##      #Erubis::Helpers::RailsHelper.show_src = false
+    ##      #Erubis::Helpers::RailsHelper.show_src = false             # set true for debugging
     ##
     ## 2. (optional) apply the patch for 'action_view/base.rb'
     ##
@@ -36,15 +44,9 @@ module Erubis
     ##
     module RailsHelper
 
-      class RailsHelperEruby < Erubis::Eruby
-        include Erubis::ErboutEnhancer
-        #include Erubis::InterpolationEnhancer
-        #include Erubis::DeleteIndentEnhancer
-      end
-
       #cattr_accessor :init_properties
-      @@engine_class = Erubis::RailsHelper::RailsHelperEruby
-      #@@engine_class = Erubis::Eruby
+      @@engine_class = Erubis::Eruby
+      #@@engine_class = Erubis::FastEruby
 
       def self.engine_class
         @@engine_class

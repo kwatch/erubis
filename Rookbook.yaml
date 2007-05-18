@@ -121,6 +121,7 @@ recipes:
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#
+	rm_f 'test/data/**/*.cache'
 	#store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir
 	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)
@@ -146,7 +147,8 @@ recipes:
 	cp_r '$(inline_require_script)', "#{dir}/contrib"
 	#
 	edit "#{dir}/**/*" do |content|
-	  content.gsub!(/\$Release.*?\$/, "$Release: $(1) $")
+	  content.gsub!(/\$Release\$/, "$(1)")
+	  content.gsub!(/\$Release:.*?\$/, "$Release: $(1) $")
 	  content.gsub!(/\$Copyright.*?\$/, '$(copyright)')
 	  content
 	end

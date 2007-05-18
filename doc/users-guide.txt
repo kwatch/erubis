@@ -2486,7 +2486,7 @@ Erubis supports Ruby on Rails.
     .? config/environment.rb
     .--------------------
     require 'erubis/helpers/rails_helper'
-    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
+    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
     #Erubis::Helpers::RailsHelper.init_properties = {}
     #Erubis::Helpers::RailsHelper.show_src = false
     .--------------------

@@ -1,6 +1,6 @@
 ###
 ### $Rev$
-### $Release: 0.0.0 $
+### $Release:$
 ### $Copyright$
 ###
 
