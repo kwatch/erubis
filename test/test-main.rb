@@ -364,7 +364,7 @@ END
   end
 
 
-  def test_untabify1  # -t
+  def test_untabify1  # -t (obsolete)
     yamlfile = "test.context2.yaml"
     @input    = INPUT2
     @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
@@ -380,6 +380,30 @@ END
     ensure
       File.unlink(yamlfile) if test(?f, yamlfile)
     end
+  end
+
+
+  def test_untabify2  # -T
+    yamlfile = "test.context2.yaml"
+    @input    = INPUT2
+    @expected = OUTPUT.gsub(/\(none\)/, 'Hello')
+    @options  = "-Tf #{yamlfile}"
+    #
+    yaml = <<-END
+    user: Hello
+    items:
+	- aaa
+	- bbb
+	- ccc
+    END
+    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    assert_raise(ArgumentError) do
+      _test()
+    end
+    File.open(yamlfile, 'w') { |f| f.write(yaml.gsub(/\t/, ' '*8)) }
+    _test()
+  ensure
+      File.unlink(yamlfile) if test(?f, yamlfile)
   end
 
 

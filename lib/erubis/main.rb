@@ -49,15 +49,15 @@ module Erubis
     end
 
     def initialize
-      @single_options = "hvxztSbeBXNUC"
+      @single_options = "hvxztTSbeBXNUC"
       @arg_options    = "pcrfKIlaE" #C
       @option_names   = {
         ?h => :help,
         ?v => :version,
         ?x => :source,
         ?z => :syntax,
-        #?T => :notrim,
-        ?t => :untabify,
+        ?T => :unexpand,
+        ?t => :untabify,      # obsolete
         ?S => :intern,
         ?b => :bodyonly,
         ?B => :binding,
@@ -217,38 +217,37 @@ module Erubis
 
     def usage
       command = File.basename($0)
-      s = <<END
-erubis - embedded program converter for multi-language
-Usage: #{command} [..options..] [file ...]
-  -h, --help    : help
-  -v            : version
-  -x            : show converted code
-  -X            : show converted code, only ruby code and no text part
-  -N            : numbering: add line numbers          (for '-x/-X')
-  -U            : unique: zip empty lines to a line    (for '-x/-X')
-  -C            : compact: remove empty lines          (for '-x/-X')
-  -b            : body only: no preamble nor postamble (for '-x/-X')
-  -z            : syntax checking
-  -e            : escape (equal to '--E Escape')
-  -p pattern    : embedded pattern (default '<% %>')
-  -l lang       : convert but no execute (ruby/php/c/java/scheme/perl/js)
-  -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)
-  -I path       : library include path
-  -K kanji      : kanji code (euc/sjis/utf8) (default none)
-  -c context    : context data string (yaml inline style or ruby code)
-  -f datafile   : context data file ('*.yaml', '*.yml', or '*.rb')
-  -t            : expand tab characters in YAML file
-  -S            : convert mapping key from string to symbol in YAML file
-  -B            : invoke 'result(binding)' instead of 'evaluate(context)'
-  --pi=name     : parse '<?name ... ?>' instead of '<% ... %>'
-
-END
+      buf = []
+      buf << "erubis - embedded program converter for multi-language"
+      buf << "Usage: #{command} [..options..] [file ...]"
+      buf << "  -h, --help    : help"
+      buf << "  -v            : version"
+      buf << "  -x            : show converted code"
+      buf << "  -X            : show converted code, only ruby code and no text part"
+      buf << "  -N            : numbering: add line numbers            (for '-x/-X')"
+      buf << "  -U            : unique: compress empty lines to a line (for '-x/-X')"
+      buf << "  -C            : compact: remove empty lines            (for '-x/-X')"
+      buf << "  -b            : body only: no preamble nor postamble   (for '-x/-X')"
+      buf << "  -z            : syntax checking"
+      buf << "  -e            : escape (equal to '--E Escape')"
+      buf << "  -p pattern    : embedded pattern (default '<% %>')"
+      buf << "  -l lang       : convert but no execute (ruby/php/c/java/scheme/perl/js)"
+      buf << "  -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)"
+      buf << "  -I path       : library include path"
+      buf << "  -K kanji      : kanji code (euc/sjis/utf8) (default none)"
+      buf << "  -c context    : context data string (yaml inline style or ruby code)"
+      buf << "  -f datafile   : context data file ('*.yaml', '*.yml', or '*.rb')"
+      #buf << "  -t            : expand tab characters in YAML file"
+      buf << "  -T            : don't expand tab characters in YAML file"
+      buf << "  -S            : convert mapping key from string to symbol in YAML file"
+      buf << "  -B            : invoke 'result(binding)' instead of 'evaluate(context)'"
+      buf << "  --pi=name     : parse '<?name ... ?>' instead of '<% ... %>'"
       #'
       #  -T            : don't trim spaces around '<% %>'
       #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
       #  -a            : action (convert/execute)
-      return s
+      return join("\n")
     end
 
 
@@ -413,10 +412,10 @@ END
         filename.strip!
         test(?f, filename) or raise CommandOptionError.new("#{filename}: file not found.")
         if filename =~ /\.ya?ml$/
-          if opts.untabify
-            ydoc = YAML.load(untabify(File.read(filename)))
-          else
+          if opts.unexpand
             ydoc = YAML.load_file(filename)
+          else
+            ydoc = YAML.load(untabify(File.read(filename)))
           end
           ydoc.is_a?(Hash) or raise CommandOptionError.new("#{filename}: root object is not a mapping.")
           intern_hash_keys(ydoc) if opts.intern

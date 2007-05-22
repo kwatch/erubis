@@ -12,17 +12,18 @@ release: $Release$
 
 Erubis is an implementation of eRuby.
 It has the following features.
-.* {{<Very fast|topics-benchmark>}}, almost 3 times faster than ERB and about 10 percent faster than eruby (implemented in C)
-.* File caching of converted Ruby script support
-.* Auto escaping support
-.* Auto trimming spaces around '<% %>'
-.* Embedded pattern changeable (default '<% %>')
-.* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
-.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
-.* Context object available and easy to combine eRuby template with YAML datafile
-.* Print statement available
-.* Easy to expand and customize in subclass
+.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+.* {{<File caching of converted Ruby script support|#topics-caching>}}
+.* {{<Auto escaping support|#tut-escape>}}
+.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
+.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
+.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
+.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
+.* {{<Print statement available|#printenabled-enhancer>}}
+.* {{<Easy to expand and customize in subclass|#enhancer>}}
 .* {{<Ruby on Rails support|#topics-rails>}}
+.* {{<mod_ruby support|#topcs-modruby>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -1878,8 +1879,33 @@ You can use Erubis::FastEruby class instead of Erubis::Eruby class.
 InterpolationEnhancer is only for Eruby.
 
 
+.$$ DeleteIndentEnhancer | interpolation-enhancer
 
-.$ Multi-Language	| lang
+[experimental]
+DeleteIndentEnhancer deletes indentation of HTML file.
+
+.? compiled source code
+.==================== interpolation_example.result
+$ erubis -xE DeleteIndent example.eruby
+.#.<<<:! erubis -xE DeleteIndent guide.d/example.eruby
+_buf = ''; _buf << '<div>
+'; for item in list 
+ _buf << '<p>'; _buf << ( item ).to_s; _buf << '</p>
+<p>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+_buf.to_s
+.====================
+
+Notice that DeleteIndentEnhancer isn't intelligent.
+It deletes indentations even if they are in <PRE></PRE>.
+
+DeleteIndentEnhancer is language-independent.
+
+
+
+.$ Multi-Language Support	| lang
 
 Erubis supports the following language currently:
 
@@ -2595,28 +2621,82 @@ It is useful for debugging.
 
 
 
+.$$ Helper Class for mod_ruby		| topcs-modruby
+
+Thanks Andrew R Jackson, he developed 'erubis-run.rb' which enables you to use Erubis with mod_ruby.
+
+.1) Copy 'erubis-$Release$/contrib/erubis-run.rb' to the 'RUBYLIBDIR/apache' directory (for example '/usr/local/lib/ruby/1.8/apache') which contains 'ruby-run.rb', 'eruby-run.rb', and so on.
+     .====================
+     $ cd erubis-$Release$/
+     $ sudo copy contrib/erubis-run.rb /usr/local/lib/ruby/1.8/apache/
+     .====================
+.2) Add the following example to your 'httpd.conf' (for example '/usr/local/apache2/conf/httpd.conf')
+     .--------------------
+     LoadModule ruby_module modules/mod_ruby.so
+     <IfModule mod_ruby.c>
+       RubyRequire apache/ruby-run
+       RubyRequire apache/eruby-run
+       RubyRequire apache/erubis-run
+       <Location /erubis>
+         SetHandler ruby-object
+         RubyHandler Apache::ErubisRun.instance
+       </Location>
+       <Files *.rhtml>
+         SetHandler ruby-object
+         RubyHandler Apache::ErubisRun.instance
+       </Files>
+     </IfModule>
+     .--------------------
+.3) Restart Apache web server.
+     .====================
+     $ sudo /usr/local/apache2/bin/apachectl stop
+     $ sudo /usr/local/apache2/bin/apachectl start
+     .====================
+.4) Create *.rhtml file, for example:
+     .--------------------
+     <html>
+      <body>
+       Now is <%= Time.now %>
+       Erubis version is <%= Erubis::VERSION %>
+      </body>
+     </html>
+     .--------------------
+.5) Change mode of your directory to be writable by web server process.
+     .====================
+     $ cd /usr/local/apache2/htdocs/erubis
+     $ sudo chgrp daemon .
+     $ sudo chmod 775 .
+     .====================
+.6) Access the *.rhtml file and you'll get the web page.
+
+You must set your directories to be writable by web server process, because
+Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
+in the same directory as '*.rhtml' file.
+
+
+
 .$$ Benchmark		| topics-benchmark
 
-A benchmark script is included in Erubis package at 'erubis-X.X.X/benchark/' directory.
+A benchmark script is included in Erubis package at 'erubis-$Release$/benchark/' directory.
 Here is an example result of benchmark.
 
-.? MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.5, eruby1.0.5, gcc4.0.1
+.? MacOS X 10.4 Tiger, Intel CoreDuo 1.83GHz, Ruby1.8.6, eruby1.0.5, gcc4.0.1
 .====================
 $ cd erubis-$Release$/benchmark/
 $ ruby bench.rb -n 10000 -m execute
 *** ntimes=10000, testmode=execute
                                     user     system      total        real
-ERuby                          14.220000   0.270000  {{*14.490000*}} ( 14.498195)
-ERB                            39.960000   0.420000  {{*40.380000*}} ( 40.445606)
-ERB(cached)                    13.600000   0.470000  {{*14.070000*}} ( 14.087191)
-Erubis::Eruby                  11.970000   0.320000  {{*12.290000*}} ( 12.305445)
-Erubis::Eruby(cached)           8.090000   0.430000   {{*8.520000*}} (  8.541349)
-Erubis::FastEruby              11.430000   0.320000  {{*11.750000*}} ( 11.754823)
-Erubis::FastEruby(cached)       7.390000   0.430000   {{*7.820000*}} (  7.828517)
-Erubis::TinyEruby              10.340000   0.310000  10.650000 ( 10.659101)
-Erubis::ArrayBufferEruby       12.150000   0.320000  12.470000 ( 12.497017)
-Erubis::PrintOutEruby          12.750000   0.320000  13.070000 ( 13.099295)
-Erubis::StdoutEruby            12.710000   0.320000  13.030000 ( 13.042235)
+eruby                          12.720000   0.240000  {{*12.960000*}} ( 12.971888)
+ERB                            36.760000   0.350000  {{*37.110000*}} ( 37.112019)
+ERB(cached)                    11.990000   0.440000  {{*12.430000*}} ( 12.430375)
+Erubis::Eruby                  10.840000   0.300000  {{*11.140000*}} ( 11.144426)
+Erubis::Eruby(cached)           7.540000   0.410000   {{*7.950000*}} (  7.969305)
+Erubis::FastEruby              10.440000   0.300000  {{*10.740000*}} ( 10.737808)
+Erubis::FastEruby(cached)       6.940000   0.410000   {{*7.350000*}} (  7.353666)
+Erubis::TinyEruby               9.550000   0.290000   9.840000 (  9.851729)
+Erubis::ArrayBufferEruby       11.010000   0.300000  11.310000 ( 11.314339)
+Erubis::PrintOutEruby          11.640000   0.290000  11.930000 ( 11.942141)
+Erubis::StdoutEruby            11.590000   0.300000  11.890000 ( 11.886512)
 .#$ ruby erubybench.rb -n 10000 -m execute
 .### execute
 .#                                    user     system      total        real
@@ -2643,23 +2723,23 @@ This shows that...
 
 Escaping HTML characters (such as '< > & "') makes Erubis more faster than eruby and ERB,
 because Erubis::XmlHelper#escape_xml() works faster than CGI.escapeHTML() and ERB::Util#h().
-The following shows that Erubis runs more than 30 percent faster than eruby if HTML characters are escaped.
+The following shows that Erubis runs more than 40 percent (when no-cached) or 90 percent (when cached) faster than eruby if HTML characters are escaped.
 
 .? When escaping HTML characters with option '-e'
 .====================
 $ ruby bench.rb -n 10000 -m execute -ep
 *** ntimes=10000, testmode=execute
                                     user     system      total        real
-eruby                          21.500000   0.320000  {{*21.820000*}} ( 21.930308)
-ERB                            45.280000   0.500000  {{*45.780000*}} ( 46.101839)
-ERB(cached)                    20.230000   0.520000  {{*20.750000*}} ( 20.913674)
-Erubis::Eruby                  15.070000   0.340000  {{*15.410000*}} ( 15.541843)
-Erubis::Eruby(cached)          11.260000   0.450000  {{*11.710000*}} ( 11.774822)
-Erubis::FastEruby              15.100000   0.340000  15.440000 ( 15.532790)
-Erubis::FastEruby(cached)      11.160000   0.460000  11.620000 ( 11.704288)
-Erubis::ArrayBufferEruby       15.260000   0.350000  15.610000 ( 15.785612)
-Erubis::PrintOutEruby          15.960000   0.330000  16.290000 ( 16.392182)
-Erubis::StdoutEruby            16.030000   0.340000  16.370000 ( 16.461998)
+eruby                          21.700000   0.290000  {{*21.990000*}} ( 22.050687)
+ERB                            45.140000   0.390000  {{*45.530000*}} ( 45.536976)
+ERB(cached)                    20.340000   0.470000  {{*20.810000*}} ( 20.822653)
+Erubis::Eruby                  14.830000   0.310000  {{*15.140000*}} ( 15.147930)
+Erubis::Eruby(cached)          11.090000   0.420000  {{*11.510000*}} ( 11.514954)
+Erubis::FastEruby              14.850000   0.310000  {{*15.160000*}} ( 15.172499)
+Erubis::FastEruby(cached)      10.970000   0.430000  {{*11.400000*}} ( 11.399605)
+Erubis::ArrayBufferEruby       14.970000   0.300000  15.270000 ( 15.281061)
+Erubis::PrintOutEruby          15.780000   0.300000  16.080000 ( 16.088289)
+Erubis::StdoutEruby            15.840000   0.310000  16.150000 ( 16.235338)
 .#$ ruby erubybench.rb -n 10000 -m execute -e
 .### execute
 .#                                    user     system      total        real
@@ -2779,7 +2859,8 @@ erubis [..options..] [{{/file/}} ...]
 			It is able to specify several filenames separating with ','
 			(ex. -f file1,file2,file3).
   .[ -c context    ]	Context data string in YAML inline style or Ruby code.
-  .[ -t            ]	Expand tab characters in YAML file.
+.#  .[ -t            ]	Expand tab characters in YAML file.
+  .[ -T            ]	Don't expand tab characters in YAML file.
   .[ -S            ]	Convert mapping key from string to symbol in YAML file.
   .[ -B		   ]	invoke Eruby#result() instead of Eruby#evaluate()
   .[ --pi[=name]   ]	parse '<?name ... ?>' instead of '<% ... %>'

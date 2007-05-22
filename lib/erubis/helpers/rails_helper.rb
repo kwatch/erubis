@@ -11,11 +11,11 @@ require 'erubis'
 module Erubis
 
   class Eruby
-    include ErboutEnhancer
+    include ErboutEnhancer      # will generate '_erbout = _buf = ""; '
   end
 
   class FastEruby
-    include ErboutEnhancer
+    include ErboutEnhancer      # will generate '_erbout = _buf = ""; '
   end
 
   module Helpers
@@ -34,7 +34,7 @@ module Erubis
     ##
     ## 2. (optional) apply the patch for 'action_view/base.rb'
     ##
-    ##      $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
+    ##      $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.3/lib/action_view/
     ##      $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
     ##
     ## 3. restart web server.
@@ -113,80 +113,15 @@ if ActionPack::VERSION::MINOR <= 12   ###  Rails 1.1
             when :rxml
               "xml = Builder::XmlMarkup.new(:indent => 2)\n" +
               "@controller.headers['Content-Type'] ||= 'application/xml'\n" +
-              template
-            when :rjs
-              "@controller.headers['Content-Type'] ||= 'text/javascript'\n" +
-              "update_page do |page|\n#{template}\nend"
-          end
-        else
-          #body = ERB.new(template, nil, @@erb_trim_mode).src
-          body = convert_template_into_ruby_code(template)
-        end
-
-        @@template_args[render_symbol] ||= {}
-        locals_keys = @@template_args[render_symbol].keys | locals
-        @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
-
-        locals_code = ""
-        locals_keys.each do |key|
-          locals_code << "#{key} = local_assigns[:#{key}] if local_assigns.has_key?(:#{key})\n"
-        end
-
-        "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
-      end
-
-
-else    ###  Rails 1.2 or later
-
-
-      # Create source code for given template
-      def create_template_source(extension, template, render_symbol, locals)
-        if template_requires_setup?(extension)
-          body = case extension.to_sym
-            when :rxml
-              "controller.response.content_type ||= 'application/xml'\n" +
-              "xml = Builder::XmlMarkup.new(:indent => 2)\n" +
-              template
-            when :rjs
-              "controller.response.content_type ||= 'text/javascript'\n" +
-              "update_page do |page|\n#{template}\nend"
-          end
-        else
-          #body = ERB.new(template, nil, @@erb_trim_mode).src
-          body = convert_template_into_ruby_code(template)
-        end
-
-        @@template_args[render_symbol] ||= {}
-        locals_keys = @@template_args[render_symbol].keys | locals
-        @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
-
-        locals_code = ""
-        locals_keys.each do |key|
-          locals_code << "#{key} = local_assigns[:#{key}]\n"
-        end
-
-        "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
-      end
-
-
-end   ###
-
-
-    end
-
-  end
-
-end
-
-
 ## set Erubis as eRuby compiler in Ruby on Rails instead of ERB
 class ActionView::Base  # :nodoc:
   private
   def convert_template_into_ruby_code(template)
     #src = Erubis::Eruby.new(template).src
-    klass      = Erubis::Helpers::RailsHelper.engine_class
-    properties = Erubis::Helpers::RailsHelper.init_properties
-    show_src   = Erubis::Helpers::RailsHelper.show_src
+    rails_helper = Erubis::Helpers::RailsHelper
+    klass      = rails_helper.engine_class
+    properties = rails_helper.init_properties
+    show_src   = rails_helper.show_src
     src = klass.new(template, properties).src
     #src.insert(0, '_erbout = ')
     logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
