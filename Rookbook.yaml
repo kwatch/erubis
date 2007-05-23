@@ -129,7 +129,8 @@ recipes:
 	end
 	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#
-	store 'benchmark/{bench.rb,bench_context.yaml}', 'benchmark/Makefile', dir
+	store 'benchmark/{bench.rb,bench_context.yaml}',
+	      'benchmark/templates/*', 'benchmark/Makefile', dir
 	#
 	Dir.glob('examples/*').each { |d| chdir d do sys 'make clean' end }
 	store 'examples/**/*', dir
@@ -163,8 +164,8 @@ recipes:
 	end
 	#
 	chmod 0644, "#{dir}/**/*", :filetype=>'file'
-	chmod 0755, "#{dir}/{bin,contrib}/*", :filetype=>'file'
-	chmod 0644, "#{dir}/contrib/*.patch"
+	chmod 0755, "#{dir}/bin/*", :filetype=>'file'
+	chmod 0755, "#{dir}/contrib/{erubis,inline-require}", :filetype=>'file'
 
   - product:	:duplicate
     method*: |

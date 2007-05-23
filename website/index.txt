@@ -6,6 +6,7 @@
 
 .$ News
 
+.* [2007-05-23] {{<erubis_2.3.0|download.cgi>}} released.
 .* [2007-02-12] {{<erubis_2.2.0|download.cgi>}} released.
 .* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.
 .* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
@@ -36,6 +37,7 @@
 Erubis is a fast, secure, and very extensible implementation of eRuby.
 It has the following features.
 .* Very fast, almost three times faster than ERB and about ten percent faster than eruby (implemented in C).
+.* File caching of converted Ruby script support.
 .* Auto escaping (sanitizing) support, it means that '<%= %>' can be escaped in default.
    It is desirable for web application.
 .* Spaces around '<% %>' are trimmed automatically only when '<%' is at the beginning of line and '%>' is at the end of line.
@@ -53,6 +55,7 @@ It has the following features.
   .- Another embedded pattern support
   .- etc...
 .* Ruby on Rails support.
+.* Mod_ruby support.
 
 eRuby means "embedded Ruby" in documents.
 Embedded patterns are '{{,<% {{/statement/}} %>,}}' and '{{,<%= {{/expression/}} %>,}}'.
@@ -60,10 +63,12 @@ The following is an example of eRuby. '<% ... %>' means Ruby statement and '<%= 
 
 .? example.eruby
 .-------------------- example.eruby
-Hello <%= @user %>!
-<% for item in @list %>
- * <%= item %>
-<% end %>
+<h1>{{*<%= @title %>*}}</h1>
+<ul>
+  {{*<% for item in @items %>*}}
+  <li><%= item %></td>
+  {{*<% end %>*}}
+</ul>
 .--------------------
 
 This will be compiled into Ruby program code.
@@ -82,11 +87,11 @@ $ erubis -f data.yaml example.eruby
 
 .#+++
 .-------------------- data.yaml
-user: Erubis
-list:
-  - aaa
-  - bbb
-  - ccc
+title: Erubis Example
+items:
+  - AAA
+  - BBB
+  - CCC
 .--------------------
 .#---
 
@@ -102,25 +107,25 @@ You can use Erubis in Java with Rhino.
 
 
 .$ Download
-	.* Erubis (implemented in Ruby)
+	.* Erubis 2.3.0 (implemented in Ruby)
 	    .- if you have installed RubyGems, just type `{{,gem install -r erubis,}}' to install Erubis
 	    .- Or {{<download|download.cgi>}}.^
 	       (Erubis requires {{<abstract|http://rubyforge.org/projects/abstract>}} library.
 	        Download and install it at first.)
-	.* Erubis-J (implemented in Java) {{!(New!)!}}
+	.* Erubis-J 1.0.0 (implemented in Java) {{!(New!)!}}
 	    .- {{<download|download.cgi?project=erubisj>}}
 
 .$ Documents
 	.#.* {{<README|README.en.html>}}
-	.* Erubis (implemented in Ruby)
+	.* Erubis 2.3.0 (implemented in Ruby)
 	    .- {{<User's guide|users-guide.html>}}
 	    .- {{<CHANGES|CHANGES>}}
 	    .#.- {{<ReleaseNote|ReleaseNote.txt>}}
-	.* Erubis-J (implemented in Java)
+	.* Erubis-J 1.0.0 (implemented in Java)
 	    .- {{<User's guide|erubisj-users-guide.html>}}
 	    .#.- {{<Changelog|erubisj-ChangeLog>}}
 	    .#.- {{<ReleaseNote|erubisj-ReleaseNote.txt>}}
 
 .$ License
-	.* Erubis is released under MIT License.
-	.* Erubis-J is released under LGPL License.
+	.* Erubis is released under the MIT License.
+	.* Erubis-J is released under the LGPL License.

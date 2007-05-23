@@ -1,3 +1,145 @@
+$ [ANN] Erubis 2.3.0 release - a fast and extensible eRuby implementation
+
+Hi all,
+
+I have just released Erubis 2.3.0.
+http://www.kuwata-lab.com/erubis
+http://www.kuwata-lab.com/erubis/CHANGES
+
+Erubis is another implementation of eRuby and it gives more speed
+to Ruby on Rails application.
+
+Features:
+  * Very fast, almost three times faster than ERB and
+    even ten percent faster than eruby (implemented in C)
+  * File caching of converted Ruby script support, which
+    makes eRuby about 40-50 percent faster.
+  * Support multi-language
+    (Ruby,PHP,C,Java,Scheme,Perl,Javascript)
+  * Auto escaping support
+  * Auto trimming spaces around '<% %>'
+  * Embedded pattern changeable (default '<% %>')
+  * Context object available and easy to combine eRuby
+    template with YAML datafile or Ruby script
+  * Easy to extend in subclass
+  * Ruby on Rails support
+  * Mod_ruby support
+
+Installation is very easy.
+.* Just type 'gem install -r erubis' if you have installed RubyGems.
+.* Or download erubis_2.3.0.tar.bz2 and type 'ruby setup.rb'.
+
+See users' guide (erubis_2.3.0/doc/users-guide.html)
+for details.
+
+
+Enhancements:
+    
+  * New class 'Erubis::FastEruby' is added.
+    It is a subclass of Erubis::Eruby and includes InterpolationEnhancer.
+    Erubis::FastEruby is compatible with and faster than Erubis::Eruby.
+
+  * New enhancer 'InterpolationEnhancer' is added.
+    This enhancer uses expression interpolation to eliminate method call
+    of String#<<. In the result, this enhancer makes Eruby a little faster.
+      --------------------
+      ## Assume that input is '<a href="<%=url%>"><%=name%></a>'.
+      ## Eruby convert input into the following code.  String#<< is called 5 times.
+      _buf << '<a href="'; _buf << (url).to_s; _buf << '">'; _buf << (name).to_s; _buf << '</a>';
+      
+      ## When InterpolationEnhancer is used, String#<< is called only once.
+      _buf << %Q`<a href="#{url}">#{name}</a>`;
+      --------------------
+
+  * New enhancer 'ErboutEnhancer' is added.
+    ErboutEnhancer set '_erbout' as well as '_buf' to be compatible with ERB.
+      ====================
+      $ cat ex.rhtml
+      <p>Hello</p>
+      $ erubis -x ex.rhtml
+      _buf = ''; _buf << '<p>Hello</p>
+      ';
+      _buf.to_s
+      $ erubis -xE Erbout ex.rhtml
+      _erbout = _buf = ''; _buf << '<p>Hello</p>
+      ';
+      _buf.to_s
+      ====================
+
+  * [experimental]
+    New enhancer 'DeleteIndentEnhancer' is added.
+    This enhancer deletes indentation of HTML file.
+      ====================
+      $ cat ex.rhtml
+      <div>
+        <ul>
+        <% for item in ['AAA', 'BBB', 'CCC'] %>
+          <li><%= item %></li>
+        <% end %>
+        </ul>
+      </div>
+      $ erubis ex.rhtml
+      <div>
+        <ul>
+          <li>AAA</li>
+          <li>BBB</li>
+          <li>CCC</li>
+        </ul>
+      </div>
+      $ erubis -E DeleteIndent ex.rhtml
+      <div>
+      <ul>
+      <li>AAA</li>
+      <li>BBB</li>
+      <li>CCC</li>
+      </ul>
+      </div>
+      ====================
+
+  * Mod_ruby is supported (very thanks to Andrew R Jackson!).
+    See users-guide and 'contrib/erubis-run.rb' for details.
+      
+  * New command-line option '-X', '-N', '-U', and '-C' are added.
+    These are intended to be a replacement of 'notext' command.
+     = '-X' shows only ruby statements and expressions.
+     = '-N' adds line numbers.
+     = '-U' compress empty lines into a line.
+     = '-C' removes empty lines.
+
+
+Changes:
+
+  * 'helpers/rails_helper.rb' is changed to use ErboutEnhancer.
+    The following is an examle to use Erubis with Ruby on Rails.
+      File 'config/environment.rb':
+      ----------------------------------------
+      require 'erubis/helpers/rails_helper'
+      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
+      #Erubis::Helpers::RailsHelper.init_properties = {}
+      #Erubis::Helpers::RailsHelper.show_src = false             # set true for debugging
+      ----------------------------------------
+      
+  * Command 'notext' has been removed. Use '-X', '-N', '-U', and '-C'
+    instead.
+
+  * Tab characters in YAML file are expaneded automatically.
+    If you want not to expand tab characters, add command-line optio '-T'.
+
+  * Benchmark scripts (benchmark/bench.*) are rewrited.
+
+  * Users-guide (doc/users-guide.html) is updated.
+
+
+Have fun!
+
+--
+regards,
+kwatch
+
+
+
+.#--------------------------------------------------------------------------------
+
 $ [ANN] Erubis 2.2.0 release - a fast eRuby implementation
 
 Hi all,

@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.79 (2007-05-23)
+	.- [update] CHANGES, ReleaseNote.txt, website/index.txt
+
 : Rev.78 (2007-05-22)
 	.- [enhance] add '-T' (don't expand tab characters)
 	.- [enhance] add 'contrib/erubis-run.rb' (thanks to Andrew R Jackson)

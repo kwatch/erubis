@@ -10,20 +10,20 @@ release: $Release$
 
 .$ Preface		| preface*
 
-Erubis is an implementation of eRuby.
-It has the following features.
-.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
-.* {{<File caching of converted Ruby script support|#topics-caching>}}
-.* {{<Auto escaping support|#tut-escape>}}
-.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
-.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
-.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
-.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
-.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
-.* {{<Print statement available|#printenabled-enhancer>}}
-.* {{<Easy to expand and customize in subclass|#enhancer>}}
-.* {{<Ruby on Rails support|#topics-rails>}}
-.* {{<mod_ruby support|#topcs-modruby>}}
+.#Erubis is an implementation of eRuby.
+.#It has the following features.
+.#.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+.#.* {{<File caching of converted Ruby script support|#topics-caching>}}
+.#.* {{<Auto escaping support|#tut-escape>}}
+.#.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
+.#.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
+.#.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
+.#.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.#.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
+.#.* {{<Print statement available|#printenabled-enhancer>}}
+.#.* {{<Easy to expand and customize in subclass|#enhancer>}}
+.#.* {{<Ruby on Rails support|#topics-rails>}}
+.#.* {{<mod_ruby support|#topcs-modruby>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -1131,6 +1131,8 @@ The following is the list of enhancers.
 	[experimental] Enable you to add header and footer in eRuby script.
 .: {{<InterpolationEnhancer|#interpolation-enhancer>}} (only for Eruby)
 	[experimental] convert '<p><%= text %></p>' into '_buf << %Q`<p>#{text}</p>`'.
+.: {{<DeleteIndentEnhancer|#deleteindent-enhancer>}} (language-independent)
+	[experimental] delete indentation of HTML file and eliminate page size.
 
 
 If you required 'erubis/engine/enhanced', Eruby subclasses which include each enhancers are defined.
@@ -1879,7 +1881,7 @@ You can use Erubis::FastEruby class instead of Erubis::Eruby class.
 InterpolationEnhancer is only for Eruby.
 
 
-.$$ DeleteIndentEnhancer | interpolation-enhancer
+.$$ DeleteIndentEnhancer | deleteindent-enhancer
 
 [experimental]
 DeleteIndentEnhancer deletes indentation of HTML file.
@@ -2571,53 +2573,89 @@ It is useful for debugging.
 
 
 
-.#.$$ NoTextEnhancer and NoCodeEnhancer in PHP	| topics-php
-.#
-.#NoTextEnhancer and NoCodEnahncer are quite useful not only for eRuby but also for PHP.
-.#The former "drops" HTML text and show up embedded Ruby/PHP code
-.#and the latter drops embedded Ruby/PHP code and leave HTML text.
-.#
-.#For example, see the following PHP script.
-.#
-.#.? notext-example.php
-.#.-------------------- notext-example.php
-.#<html>
-.#  <body>
-.#    <h3>List</h3>
-.#    <?php if (!$list || count($list) == 0) { ?>
-.#    <p>not found.</p>
-.#    <?php } else { ?>
-.#    <table>
-.#      <tbody>
-.#        <?php $i = 0; ?>
-.#        <?php foreach ($list as $item) { ?>
-.#        <tr bgcolor="<?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>">
-.#          <td><?php echo $item; ?></td>
-.#        </tr>
-.#        <?php } ?>
-.#      </tbody>
-.#    </table>
-.#    <?php } ?>
-.#  </body>
-.#</html>
-.#.--------------------
-.#
-.#This is complex because PHP code and HTML document are mixed.
-.#NoTextEnhancer can separate PHP code from HTML document.
-.#
-.#.? example of using NoTextEnhancer with PHP file
-.#.====================
-.#$ erubis -l php -E NoText -p '<\?php \?>' --trim=false notext-example.php | cat -n
-.#.<<<:! erubis -l php -E NoText -p '<\?php \?>' --trim=false guide.d/notext-example.php | cat -n
-.#.====================
-.#
-.#In the same way, NoCodeEnhancer can extract HTML tags.
-.#
-.#.? example of using NoCodeEnhancer with PHP file
-.#.====================
-.#$ erubis -l php -E NoCode -p '<\?php \?>' notext-example.php | cat -n
-.#.<<<:! erubis -l php -E NoCode -p '<\?php \?>' guide.d/notext-example.php | cat -n
-.#.====================
+.$$ NoTextEnhancer and NoCodeEnhancer in PHP	| topics-php
+
+NoTextEnhancer and NoCodEnahncer are quite useful not only for eRuby but also for PHP.
+The former "drops" HTML text and show up embedded Ruby/PHP code
+and the latter drops embedded Ruby/PHP code and leave HTML text.
+
+For example, see the following PHP script.
+
+.? notext-example.php
+.-------------------- notext-example.php
+<html>
+  <body>
+    <h3>List</h3>
+    <?php if (!$list || count($list) == 0) { ?>
+    <p>not found.</p>
+    <?php } else { ?>
+    <table>
+      <tbody>
+        <?php $i = 0; ?>
+        <?php foreach ($list as $item) { ?>
+        <tr bgcolor="<?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>">
+          <td><?php echo $item; ?></td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+    <?php } ?>
+  </body>
+</html>
+.--------------------
+
+This is complex because PHP code and HTML document are mixed.
+NoTextEnhancer can separate PHP code from HTML document.
+
+.? example of using NoTextEnhancer with PHP file
+.==================== notext-php.result
+$ erubis -l php --pi=php -N -E NoText --trim=false notext-example.php
+    1:  
+    2:  
+    3:  
+    4:      <?php if (!$list || count($list) == 0) { ?>
+    5:  
+    6:      <?php } else { ?>
+    7:  
+    8:  
+    9:          <?php $i = 0; ?>
+   10:          <?php foreach ($list as $item) { ?>
+   11:                       <?php echo ++$i % 2 == 1 ? '#FFCCCC' : '#CCCCFF'; ?>
+   12:                <?php echo $item; ?>
+   13:  
+   14:          <?php } ?>
+   15:  
+   16:  
+   17:      <?php } ?>
+   18:  
+   19:  
+.====================
+
+In the same way, NoCodeEnhancer can extract HTML tags.
+
+.? example of using NoCodeEnhancer with PHP file
+.==================== nocode-php.result
+$ erubis -l php --pi=php -N -E NoCode --trim=false notext-example.php
+    1:  <html>
+    2:    <body>
+    3:      <h3>List</h3>
+    4:      
+    5:      <p>not found.</p>
+    6:      
+    7:      <table>
+    8:        <tbody>
+    9:          
+   10:          
+   11:          <tr bgcolor="">
+   12:            <td></td>
+   13:          </tr>
+   14:          
+   15:        </tbody>
+   16:      </table>
+   17:      
+   18:    </body>
+   19:  </html>
+.====================
 
 
 
