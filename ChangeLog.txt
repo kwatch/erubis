@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.80 (2007-05-23)
+	.- [bugfix] erubis.gemspec is updated
+
 : Rev.79 (2007-05-23)
 	.- [update] CHANGES, ReleaseNote.txt, website/index.txt
 
