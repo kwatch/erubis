@@ -78,6 +78,26 @@ module Erubis
         @@show_src = flag
       end
 
+      ##--- preprocessor ---
+      @@preprocessing = false
+      def self.preprocessing
+        @@preprocessing
+      end
+      def self.preprocessing=(flag)
+        @@preprocessing = flag
+      end
+      class PreprocessingEruby < Erubis::Eruby
+        def initialize(input, params={})
+          params[:pattern] = '\[% %\]'    # use '[%= %]' instead of '<%= %>'
+          params[:escape] = true          # transport '[%= %]' and '[%== %]'
+          super
+        end
+        def add_expr_escaped(src, code)
+          add_expr_literal(src, "_decode((#{code}))")
+        end
+      end
+      ##--------------------
+
     end
 
   end
@@ -187,11 +207,30 @@ class ActionView::Base  # :nodoc:
     klass      = Erubis::Helpers::RailsHelper.engine_class
     properties = Erubis::Helpers::RailsHelper.init_properties
     show_src   = Erubis::Helpers::RailsHelper.show_src
+    ## --- preprocessing ---
+    if Erubis::Helpers::RailsHelper.preprocessing
+      preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template)
+      template = self.instance_eval(preprocessor.src)
+      logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
+    end
+    ## ---------------------
     src = klass.new(template, properties).src
     #src.insert(0, '_erbout = ')
     logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
     src
   end
+
+  ## --- preprocessing ---
+  def _expr(arg)
+    return "<%=#{arg}%>"
+  end
+  alias _x _expr
+  alias _? _expr
+  def _decode(arg)
+    return arg.to_s.gsub(/&lt;%=(.*?)%&gt;/, '<%=\1%>').gsub(/%3C%25%3D(.*?)%25%3E/, '<%=\1%>')
+  end
+  ## ---------------------
+
 end
 
 

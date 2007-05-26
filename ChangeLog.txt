@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.85 (2007-05-26)
+	.- [enhance] preprocessor support in rails_helper.rb
+
+: Rev.84 (2007-05-26)
+	.- [release] 2.3.1
+
 : Rev.83 (2007-05-26)
 	.- [release] release preparation
 

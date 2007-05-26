@@ -10,6 +10,10 @@ Bugfix:
       You must be update if you are using Erubis with Ruby on Rails.
 
 
+--
+regards,
+kwatch
+
 
 
 
