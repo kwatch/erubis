@@ -6,6 +6,8 @@
 
 .$ News
 
+.* [2007-05-26] {{<erubis_2.3.1|download.cgi>}} released.
+   This is a bugfix release. You should update immediately.
 .* [2007-05-23] {{<erubis_2.3.0|download.cgi>}} released.
 .* [2007-02-12] {{<erubis_2.2.0|download.cgi>}} released.
 .* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.

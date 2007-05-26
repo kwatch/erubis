@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.83 (2007-05-26)
+	.- [release] release preparation
+
 : Rev.82 (2007-05-26)
 	.- [bugfix] rails_helper.rb is edited incorrectly
 

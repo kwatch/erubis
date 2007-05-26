@@ -1,3 +1,18 @@
+$ [ANN] Erubis 2.3.1 released - a serious bug is fixed in rails_helper.rb
+
+Erubis 2.3.1 released.
+This is a bug fix release.
+http://www.kuwata-lab.com/erubis/
+
+Bugfix:
+
+    * A serious bug in 'helpers/rails_helper.rb' is fixed.
+      You must be update if you are using Erubis with Ruby on Rails.
+
+
+
+
+
 $ [ANN] Erubis 2.3.0 released - a fast and extensible eRuby implementation
 
 Hi all,

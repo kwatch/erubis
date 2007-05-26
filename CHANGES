@@ -4,8 +4,16 @@
 
 
 #
+- release:   2.3.1
+  date: 2007-05-26
+  bugfix:
+    - A serious bug in 'helpers/rails_helper.rb' is fixed.
+      You must be update if you are using Erubis with Ruby on Rails.
+
+
+#
 - release:   2.3.0
-  date:
+  date: 2007-05-23
   enhancements:
     - |
       New class 'Erubis::FastEruby' is added.
