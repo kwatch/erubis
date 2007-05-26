@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.82 (2007-05-26)
+	.- [bugfix] rails_helper.rb is edited incorrectly
+
+: Rev.81 (2007-05-23)
+	.- [release] 2.3.0
+
 : Rev.80 (2007-05-23)
 	.- [bugfix] erubis.gemspec is updated
 

@@ -5,12 +5,12 @@
 ###
 
 properties:
-  - release    :  2.2.0
+  - release    :  2.3.0
+  - copyright  :  copyright(c) 2006-2007 kuwata-lab all rights reserved.
 
 
 parameters:
   - project    :  erubis
-  - copyright  :  copyright(c) 2006-2007 kuwata-lab all rights reserved.
   - text_files :  [CHANGES, README.txt, MIT-LICENSE, setup.rb, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]

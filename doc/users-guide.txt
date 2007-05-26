@@ -10,20 +10,20 @@ release: $Release$
 
 .$ Preface		| preface*
 
-.#Erubis is an implementation of eRuby.
-.#It has the following features.
-.#.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
-.#.* {{<File caching of converted Ruby script support|#topics-caching>}}
-.#.* {{<Auto escaping support|#tut-escape>}}
-.#.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
-.#.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
-.#.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
-.#.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
-.#.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
-.#.* {{<Print statement available|#printenabled-enhancer>}}
-.#.* {{<Easy to expand and customize in subclass|#enhancer>}}
-.#.* {{<Ruby on Rails support|#topics-rails>}}
-.#.* {{<mod_ruby support|#topcs-modruby>}}
+Erubis is an implementation of eRuby.
+It has the following features.
+.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+.* {{<File caching of converted Ruby script support|#topics-caching>}}
+.* {{<Auto escaping support|#tut-escape>}}
+.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
+.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
+.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
+.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
+.* {{<Print statement available|#printenabled-enhancer>}}
+.* {{<Easy to expand and customize in subclass|#enhancer>}}
+.* {{<Ruby on Rails support|#topics-rails>}}
+.* {{<mod_ruby support|#topcs-modruby>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 

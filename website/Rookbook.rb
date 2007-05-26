@@ -6,6 +6,12 @@ html_tagfile    = 'html-css_i'
 
 material 'index.txt'
 
+require 'yaml'
+parameters = YAML.load_file('../Rookbook.props')
+release = parameters['release']
+copyright = parameters['copyright']
+
+
 ##
 ##  recipes for kuwata-lab.com
 ##
@@ -41,6 +47,12 @@ recipe	"#{U}.01.xhtml"	, "#{U}.txt", :byprods=>["#{U}.toc.html"]  do
         files = Dir.glob("#{U}.??.html")
         files << "#{U}.html"
         #p files
+        edit files do |content|
+          content.gsub!(/\$Release\$/, "#{release}")
+          content.gsub!(/\$Release:.*?\$/, "$Release: #{release} $")
+          content.gsub!(/\$Copyright.*?\$/, copyright)
+          content
+        end
         files.each do |old|
           new = old.sub(/\.html$/, '.xhtml')
           File.rename(old, new) if old != new

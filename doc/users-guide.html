@@ -21,6 +21,35 @@
 </p>
 <a name="preface"></a>
 <h2 class="section1">Preface</h2>
+<p>Erubis is an implementation of eRuby.
+It has the following features.
+</p>
+<ul type="disc">
+<li><a href="#topics-benchmark">Very fast</a>, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+</li>
+<li><a href="#topics-caching">File caching of converted Ruby script support</a>
+</li>
+<li><a href="#tut-escape">Auto escaping support</a>
+</li>
+<li><a href="#tut-trim">Auto trimming spaces around '&lt;% %&gt;'</a>
+</li>
+<li><a href="#tut-pattern">Embedded pattern changeable</a> (default '&lt;% %&gt;')
+</li>
+<li><a href="#tut-pi">Enable to handle Processing Instructions (PI) as embedded pattern</a> (ex. '&lt;?rb ... ?&gt;')
+</li>
+<li><a href="#lang">Multi-language support</a> (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+</li>
+<li><a href="#tut-context">Context object available</a> and <a href="#tut-datafile">easy to combine eRuby template with YAML datafile</a>
+</li>
+<li><a href="#printenabled-enhancer">Print statement available</a>
+</li>
+<li><a href="#enhancer">Easy to expand and customize in subclass</a>
+</li>
+<li><a href="#topics-rails">Ruby on Rails support</a>
+</li>
+<li><a href="#topcs-modruby">mod_ruby support</a>
+</li>
+</ul>
 <p>Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 </p>
 <a name="toc"></a>
@@ -90,7 +119,7 @@
     </li>
     <li><a href="#interpolation-enhancer">InterpolationEnhancer</a>
     </li>
-    <li><a href="#interpolation-enhancer">DeleteIndentEnhancer</a>
+    <li><a href="#deleteindent-enhancer">DeleteIndentEnhancer</a>
     </li>
   </ul>
   </li>
@@ -1747,7 +1776,7 @@ You can use Erubis::FastEruby class instead of Erubis::Eruby class.
 <br>
 
 
-<a name="interpolation-enhancer"></a>
+<a name="deleteindent-enhancer"></a>
 <h3 class="section2">DeleteIndentEnhancer</h3>
 <p>[experimental]
 DeleteIndentEnhancer deletes indentation of HTML file.
