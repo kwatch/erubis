@@ -6,6 +6,7 @@
 
 
 require 'erubis'
+require 'cgi'
 
 
 module Erubis
@@ -227,7 +228,10 @@ class ActionView::Base  # :nodoc:
   alias _x _expr
   alias _? _expr
   def _decode(arg)
-    return arg.to_s.gsub(/&lt;%=(.*?)%&gt;/, '<%=\1%>').gsub(/%3C%25%3D(.*?)%25%3E/, '<%=\1%>')
+    arg = arg.to_s
+    arg.gsub!(/%3C%25%3D(.*?)%25%3E/) { "<%=#{CGI.unescape($1)}%>" }
+    arg.gsub!(/&lt;%=(.*?)%&gt;/) { "<%=#{CGI.unescapeHTML($1)}%>" }
+    return arg
   end
   ## ---------------------
 

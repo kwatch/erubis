@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.86 (2007-05-26)
+	.- [bugfix] preprocessor bug is rails_helper.rb
+
 : Rev.85 (2007-05-26)
 	.- [enhance] preprocessor support in rails_helper.rb
 
