@@ -406,7 +406,7 @@ module Erubis
 
     def load_datafiles(filenames, opts)
       context = Erubis::Context.new
-      return hash unless filenames
+      return context unless filenames
       filenames.split(/,/).each do |filename|
         filename.strip!
         test(?f, filename) or raise CommandOptionError.new("#{filename}: file not found.")

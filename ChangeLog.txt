@@ -2,9 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+
+: Rev.88 (2007-07-12)
+	.- [bugfix] main.rb: Object#hash() was returned instead of context in load_datafile()
+
 : Rev.87 (2007-07-12)
 	.- [bugfix] main.rb: help message was not displayed
-	.- [bugfix] main.rb: Object#hash() was returned instead of context in load_datafile()
 
 : Rev.86 (2007-05-26)
 	.- [bugfix] preprocessor bug is found in rails_helper.rb
