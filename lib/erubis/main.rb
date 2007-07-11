@@ -215,8 +215,8 @@ module Erubis
       return source
     end
 
-    def usage
-      command = File.basename($0)
+    def usage(command=nil)
+      command ||= File.basename($0)
       buf = []
       buf << "erubis - embedded program converter for multi-language"
       buf << "Usage: #{command} [..options..] [file ...]"
@@ -247,9 +247,8 @@ module Erubis
       #  -c class      : class name (XmlEruby/PercentLineEruby/...) (default Eruby)
       #  -r library    : require library
       #  -a            : action (convert/execute)
-      return join("\n")
+      return buf.join("\n")
     end
-
 
     def collect_supported_properties(erubis_klass)
       list = []

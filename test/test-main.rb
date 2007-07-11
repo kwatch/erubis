@@ -24,6 +24,12 @@ class StringWriter < String
   end
 end
 
+class Erubis::Main
+  public :usage
+  public :show_properties
+  public :show_enhancers
+end
+
 
 class MainTest < Test::Unit::TestCase
 
@@ -162,6 +168,13 @@ END
     assert_text_equal(@expected, output)
   end
 
+  def test_help      # -h
+    @options = '-h'
+    m = Erubis::Main.new
+    @expected = m.usage() + "\n" + m.show_properties() + m.show_enhancers()
+    @filename = false
+    _test()
+  end
 
   def test_version    # -v
     @options = '-v'
