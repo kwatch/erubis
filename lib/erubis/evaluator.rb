@@ -53,7 +53,8 @@ module Erubis
       _arg = _binding_or_hash
       if _arg.is_a?(Hash)
         ## load _context data as local variables by eval
-        eval _arg.keys.inject("") { |s, k| s << "#{k.to_s} = _arg[#{k.inspect}];" }
+        #eval _arg.keys.inject("") { |s, k| s << "#{k.to_s} = _arg[#{k.inspect}];" }
+        eval _arg.collect{|k,v| "#{k} = _arg[#{k.inspect}]; "}.join
         _arg = binding()
       end
       return eval(@src, _arg, (@filename || '(erubis)'))
@@ -62,8 +63,16 @@ module Erubis
     ## invoke context.instance_eval(@src)
     def evaluate(context=Context.new)
       context = Context.new(context) if context.is_a?(Hash)
-      return context.instance_eval(@src, (@filename || '(erubis)'))
+      #return context.instance_eval(@src, @filename || '(erubis)')
+      @_proc ||= eval("proc { #{@src} }", TOPLEVEL_BINDING, @filename || '(erubis)')
+      return context.instance_eval(&@_proc)
     end
+
+    ## define method to module_object. this is equivarent to ERB#def_method.
+    def def_method(module_object, method_name, filename=nil)
+      module_object.module_eval("def #{method_name}; #{@src}; end", filename || @filename)
+    end
+
 
   end
 

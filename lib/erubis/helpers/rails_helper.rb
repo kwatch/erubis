@@ -79,7 +79,7 @@ module Erubis
         @@show_src = flag
       end
 
-      ##--- preprocessor ---
+      ##--- preprocessor: experimental ---
       @@preprocessing = false
       def self.preprocessing
         @@preprocessing
@@ -89,6 +89,7 @@ module Erubis
       end
       class PreprocessingEruby < Erubis::Eruby
         def initialize(input, params={})
+          params = params.dup
           params[:pattern] = '\[% %\]'    # use '[%= %]' instead of '<%= %>'
           params[:escape] = true          # transport '[%= %]' and '[%== %]'
           super
@@ -208,7 +209,7 @@ class ActionView::Base  # :nodoc:
     klass      = Erubis::Helpers::RailsHelper.engine_class
     properties = Erubis::Helpers::RailsHelper.init_properties
     show_src   = Erubis::Helpers::RailsHelper.show_src
-    ## --- preprocessing ---
+    ## --- preprocessing: experimental ---
     if Erubis::Helpers::RailsHelper.preprocessing
       preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template)
       template = self.instance_eval(preprocessor.src)
@@ -221,7 +222,7 @@ class ActionView::Base  # :nodoc:
     src
   end
 
-  ## --- preprocessing ---
+  ## --- preprocessing: experimental ---
   def _expr(arg)
     return "<%=#{arg}%>"
   end
