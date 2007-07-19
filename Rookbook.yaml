@@ -35,6 +35,10 @@ recipes:
     desc:       create packages
     ingreds:	[ $(base).tar.gz, $(base).tar.bz2, $(base).zip, $(base2).gem ]
 
+  - product:	:doc
+    method*: |
+	chdir 'doc' do sys "#{rook_command()} :doc" end
+
   - product:	:test
     method*: |
 	#sys "ruby test/test-erubis.rb"
@@ -157,7 +161,9 @@ recipes:
 	begin
 	  cp abstract_rb, "#{dir}/lib"
 	  chdir dir do
-	    sys "RUBYLIB= ruby $(inline_require_script) -I lib bin/erubis > contrib/erubis"
+	    rubybin = '/opt/local/bin/ruby'
+	    rubybin = 'ruby' unless test(?f, rubybin)
+	    sys "RUBYLIB= #{rubybin} $(inline_require_script) -I lib bin/erubis > contrib/erubis"
 	  end
 	ensure
 	  rm "#{dir}/lib/abstract.rb"

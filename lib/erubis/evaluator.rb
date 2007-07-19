@@ -68,9 +68,11 @@ module Erubis
       return context.instance_eval(&@_proc)
     end
 
-    ## define method to module_object. this is equivarent to ERB#def_method.
-    def def_method(module_object, method_name, filename=nil)
-      module_object.module_eval("def #{method_name}; #{@src}; end", filename || @filename)
+    ## if object is an Class or Module then define instance method to it,
+    ## else define singleton method to it.
+    def def_method(object, method_name, filename=nil)
+      m = object.is_a?(Module) ? :module_eval : :instance_eval
+      object.__send__(m, "def #{method_name}; #{@src}; end", filename || @filename || '(erubis)')
     end
 
 

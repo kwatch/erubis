@@ -2,8 +2,8 @@ $ [ANN] Erubis 2.4.0 released - a fast eRuby implementation
 
 Erubis 2.4.0 released.
 http://www.kuwata-lab.com/erubis/
-In this release, Erubis provides important feature for Ruby on Rails
-application.
+In this release, Erubis provides an important feature for
+Ruby on Rails application.
 
 Enhancements:
 
@@ -13,7 +13,7 @@ Enhancements:
 
       For example,
 
-         [%= link_to 'Show', :action=>'show', :id=_?('@user.id') %]
+         [%= link_to 'Show', :action=>'show', :id=>_?('@user.id') %]
 
       is evaluate by preprocessor and expanded into the following
       when template file is loaded.
@@ -40,11 +40,22 @@ Enhancements:
       
     - |
       Erubis::Eruby#def_method() is supported.
-      This method defines ruby code as module's instance method.
+      This method defines ruby code as instance method or singleton metod.
 
-        def def_method(module_object, method_name, filename=nil)
-          module_object.module_eval("def #{method_name}; #{@src}; end", filename || @filename)
-        end
+        require 'erubis'
+        s = "hello <%= name %>"
+        eruby = Erubis::Eruby.new(s)
+	filename = 'hello.rhtml'
+        
+        ## define instance method to Dummy class (or module)
+        class Dummy; end
+        eruby.def_method(Dummy, 'render(name)', filename)  # filename is optional
+        p Dummy.new.render('world')    #=> "hello world"
+        
+        ## define singleton method to an object
+        obj = Object.new
+        eruby.def_method(obj, 'render(name)', filename)    # filename is optional
+        p obj.render('world')      #=> "hello world"
 
       This is equivarent to ERB#def_method().
 
@@ -61,7 +72,9 @@ Bugfix:
     - 'def method()' was not availabe in template file. Fixed.
 
 
-
+--
+regards,
+kwatch
 
 --------------------------------------------------------------------------------
 

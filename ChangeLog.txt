@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.91 (2007-07-19)
+	.- [enhance] RubyEvaluator#def_method() can take instance object as well was module object
+
 : Rev.90 (2007-07-19)
 	.- [update] document updated
 

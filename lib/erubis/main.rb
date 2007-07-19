@@ -173,7 +173,7 @@ module Erubis
           msg = nil if val
         end
       else
-        engine.filename = '(stdin)'
+        engine.filename = filename = '(stdin)'
         engine.convert!($stdin.read())
         val = do_action(action, engine, context, filename, opts)
         msg = nil if val

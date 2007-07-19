@@ -2498,7 +2498,7 @@ It means that link_to() method is not called when template is rendered.
 If link_to() method have variable arguments, use {{,_?(),}} helper method.
 
 .--------------------
-<% for use in @users %>
+<% for user in @users %>
 [%= link_to {{*_?('user.name')*}}, :action=>'show', :id=>{{*_?('user.id')*}} %]
 <% end %>
 .--------------------
@@ -2557,6 +2557,32 @@ Helper methods of Ruby on Rails are divided into two groups.
 .* If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code into log file (ex. 'log/development.log').
 If it is nil (default), Erubis prints converted Ruby code into log file only when development mode.
    It is useful for debugging.
+
+.* ERB::Util.h() is redefined if you require 'erubis/helpers/rails_helper.rb'.
+   Original definition of ERB::Util.h() is the following and it is slow
+   because it scans string four times.
+   
+   .--------------------
+    def html_escape(s)
+      s.to_s.gsub(/&/, "&amp;").gsub(/\"/, "&quot;").gsub(/>/, "&gt;").gsub(/</, "&lt;")
+    end
+    alias h html_escape
+   .--------------------
+
+   New definition in 'erubis/helpers/rails_helper.rb' is faster than the above
+   because it scans string only once.
+
+   .--------------------
+    ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
+    def h(value)
+      value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }
+    end
+   .--------------------
+
+   Notice that the new definition may be slow if string contains
+   many '< > & "' characters because block is call many time.
+   You should use ERB::Util.html_hscape() if string contains a lot of '< > & "'
+   characters.
 
 
 
@@ -2827,6 +2853,36 @@ You must set your directories to be writable by web server process, because
 Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
 in the same directory in which '*.rhtml' file exists.
 
+
+
+.$$ Define method	| topics-defmethod
+
+Erubis::Eruby#def_method() defines instance method or singleton method.
+
+.-------------------- def_method.rb
+require 'erubis'
+s = "hello <%= name %>"
+eruby = Erubis::Eruby.new(s)
+filename = 'hello.rhtml'
+
+## define instance method to Dummy class (or module)
+class Dummy; end
+{{*eruby.def_method(Dummy, 'render(name)', filename)*}}  # filename is optional
+p Dummy.new.render('world')    #=> "hello world"
+
+## define singleton method to dummy object
+obj = Object.new
+{{*eruby.def_method(obj, 'render(name)', filename)*}}    # filename is optional
+p obj.render('world')          #=> "hello world"
+.--------------------
+
+.#+++
+.==================== def_method.result
+$ ruby def_method.rb
+"hello world"
+"hello world"
+.====================
+.#---
 
 
 .$$ Benchmark		| topics-benchmark

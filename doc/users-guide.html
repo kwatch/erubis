@@ -163,6 +163,8 @@ It has the following features.
     </li>
     <li><a href="#topcs-modruby">Helper Class for mod_ruby</a>
     </li>
+    <li><a href="#topics-defmethod">Define method</a>
+    </li>
     <li><a href="#topics-benchmark">Benchmark</a>
     </li>
   </ul>
@@ -2387,7 +2389,7 @@ It means that link_to() method is not called when template is rendered.
 </p>
 <p>If link_to() method have variable arguments, use <code>_?()</code> helper method.
 </p>
-<pre class="program">&lt;% for use in @users %&gt;
+<pre class="program">&lt;% for user in @users %&gt;
 [%= link_to <strong>_?('user.name')</strong>, :action=&gt;'show', :id=&gt;<strong>_?('user.id')</strong> %]
 &lt;% end %&gt;
 </pre>
@@ -2452,6 +2454,30 @@ because tag helpers generate different html code when form parameter has errors 
 </ul>
 <p>If it is nil (default), Erubis prints converted Ruby code into log file only when development mode.
    It is useful for debugging.
+</p>
+<ul type="disc">
+<li>ERB::Util.h() is redefined if you require 'erubis/helpers/rails_helper.rb'.
+   Original definition of ERB::Util.h() is the following and it is slow
+   because it scans string four times.
+<pre class="program"> def html_escape(s)
+   s.to_s.gsub(/&amp;/, "&amp;amp;").gsub(/\"/, "&amp;quot;").gsub(/&gt;/, "&amp;gt;").gsub(/&lt;/, "&amp;lt;")
+ end
+ alias h html_escape
+</pre>
+</li>
+</ul>
+<p>   New definition in 'erubis/helpers/rails_helper.rb' is faster than the above
+   because it scans string only once.
+</p>
+<pre class="program"> ESCAPE_TABLE = { '&amp;'=&gt;'&amp;amp;', '&lt;'=&gt;'&amp;lt;', '&gt;'=&gt;'&amp;gt;', '"'=&gt;'&amp;quot;', "'"=&gt;'&amp;#039;', }
+ def h(value)
+   value.to_s.gsub(/[&amp;&lt;&gt;"]/) { |s| ESCAPE_TABLE[s] }
+ end
+</pre>
+<p>   Notice that the new definition may be slow if string contains
+   many '&lt; &gt; &amp; "' characters because block is call many time.
+   You should use ERB::Util.html_hscape() if string contains a lot of '&lt; &gt; &amp; "'
+   characters.
 </p>
 <br>
 
@@ -2731,6 +2757,29 @@ $ sudo chmod 775 .
 Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
 in the same directory in which '*.rhtml' file exists.
 </p>
+<br>
+
+
+<a name="topics-defmethod"></a>
+<h3 class="section2">Define method</h3>
+<p>Erubis::Eruby#def_method() defines instance method or singleton method.
+</p>
+<a name="def_method.rb"></a>
+<pre class="program">require 'erubis'
+s = "hello &lt;%= name %&gt;"
+eruby = Erubis::Eruby.new(s)
+filename = 'hello.rhtml'
+
+## define instance method to Dummy class (or module)
+class Dummy; end
+<strong>eruby.def_method(Dummy, 'render(name)', filename)</strong>  # filename is optional
+p Dummy.new.render('world')    #=&gt; "hello world"
+
+## define singleton method to dummy object
+obj = Object.new
+<strong>eruby.def_method(obj, 'render(name)', filename)</strong>    # filename is optional
+p obj.render('world')          #=&gt; "hello world"
+</pre>
 <br>
 
 

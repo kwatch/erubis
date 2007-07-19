@@ -154,6 +154,44 @@ END
   end
 
 
+  class Dummy
+  end
+
+  def test_def_method1
+    s = "<%for i in list%>i=<%=i%>\n<%end%>"
+    eruby = Erubis::Eruby.new(s)
+    assert(! Dummy.instance_methods.include?('render'))
+    eruby.def_method(Dummy, 'render(list)', 'foo.rhtml')
+    assert(Dummy.instance_methods.include?('render'))
+    actual = Dummy.new().render(%w[1 2 3])
+    assert_equal("i=1\ni=2\ni=3\n", actual)
+  end
+
+  def test_def_method2
+    s = "<%for i in list%>i=<%=i%>\n<%end%>"
+    eruby = Erubis::Eruby.new(s)
+    assert(! (eruby.respond_to? :render))
+    eruby.def_method(eruby, 'render(list)', 'foo.rhtml')
+    assert eruby.respond_to?(:render)
+    actual = eruby.render([1, 2, 3])
+    assert_equal("i=1\ni=2\ni=3\n", actual)
+    assert !(eruby.class.instance_methods.include? :render)
+  end
+
+  def test_evaluate_creates_proc
+    s = "hello <%= @name %>"
+    eruby = Erubis::Eruby.new(s)
+    assert_nil(eruby.instance_variable_get('@_proc'))
+    actual1 = eruby.evaluate(:name=>'world')
+    assert_not_nil(eruby.instance_variable_get('@_proc'))
+    assert_instance_of(Proc, eruby.instance_variable_get('@_proc'))
+    actual2 = eruby.evaluate(:name=>'world')
+    assert_equal(actual1, actual2)
+    # convert() must clear @_proc
+    eruby.convert(s)
+    assert_nil(eruby.instance_variable_get('@_proc'))
+  end
+
 end
 
 __END__
