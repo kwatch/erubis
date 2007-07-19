@@ -12,18 +12,30 @@ release: $Release$
 
 Erubis is an implementation of eRuby.
 It has the following features.
-.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
-.* {{<File caching of converted Ruby script support|#topics-caching>}}
-.* {{<Auto escaping support|#tut-escape>}}
-.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
-.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
-.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
-.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
-.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
-.* {{<Print statement available|#printenabled-enhancer>}}
-.* {{<Easy to expand and customize in subclass|#enhancer>}}
-.* {{<Ruby on Rails support|#topics-rails>}}
-.* {{<mod_ruby support|#topcs-modruby>}}
+.* Very fast, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+.* File caching of converted Ruby script support
+.* Auto escaping support
+.* Auto trimming spaces around '<% %>'
+.* Embedded pattern changeable (default '<% %>')
+.* Enable to handle Processing Instructions (PI) as embedded pattern (ex. '<?rb ... ?>')
+.* Multi-language support (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.* Context object available and easy to combine eRuby template with YAML datafile
+.* Print statement available
+.* Easy to expand and customize in subclass
+.* {{<Ruby on Rails support|#rails>}}
+.* mod_ruby support|#topcs-modruby
+.#.* {{<Very fast|#topics-benchmark>}}, almost three times faster than ERB and about ten percent faster than eruby (implemented in C)
+.#.* {{<File caching of converted Ruby script support|#topics-caching>}}
+.#.* {{<Auto escaping support|#tut-escape>}}
+.#.* {{<Auto trimming spaces around '<% %>'|#tut-trim>}}
+.#.* {{<Embedded pattern changeable|#tut-pattern>}} (default '<% %>')
+.#.* {{<Enable to handle Processing Instructions (PI) as embedded pattern|#tut-pi>}} (ex. '<?rb ... ?>')
+.#.* {{<Multi-language support|#lang>}} (Ruby/PHP/C/Java/Scheme/Perl/Javascript)
+.#.* {{<Context object available|#tut-context>}} and {{<easy to combine eRuby template with YAML datafile|#tut-datafile>}}
+.#.* {{<Print statement available|#printenabled-enhancer>}}
+.#.* {{<Easy to expand and customize in subclass|#enhancer>}}
+.#.* {{<Ruby on Rails support|#topics-rails>}}
+.#.* {{<mod_ruby support|#topcs-modruby>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
 
@@ -2376,6 +2388,178 @@ document.write(_buf.join(""));
 
 
 
+.$ Ruby on Rails Support	| rails
+
+Erubis supports Ruby on Rails. 
+This section describes how to use Erubis with Ruby on Rails.
+
+
+.$$ Settings		| rails-settings
+
+
+.1) Add the following code to your 'config/environment.rb'.
+    
+    .? config/environment.rb
+    .--------------------
+    require 'erubis/helpers/rails_helper'
+    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
+    #Erubis::Helpers::RailsHelper.init_properties = {}
+    #Erubis::Helpers::RailsHelper.show_src = false
+    #Erubis::Helpers::RailsHelper.preprocessing = true
+    .--------------------
+    
+    This will replace ERB in Rails by Erubis entirely.
+    
+.2) (Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
+    
+    .? action_view_base_rb.patch
+    .--------------------
+    --- lib/action_view/base.rb	(original)
+    +++ lib/action_view/base.rb	(working copy)
+    @@ -445,6 +445,11 @@
+             end
+           end
+     
+    +      # convert template into ruby code
+    +      def convert_template_into_ruby_code(template)
+    +        ERB.new(template, nil, @@erb_trim_mode).src
+    +      end
+    +
+           # Create source code for given template
+           def create_template_source(extension, template, render_symbol, locals)
+             if template_requires_setup?(extension)
+    @@ -458,7 +463,7 @@
+                   "update_page do |page|\n#{template}\nend"
+               end
+             else
+    -          body = ERB.new(template, nil, @@erb_trim_mode).src
+    +          body = convert_template_into_ruby_code(template)
+             end
+     
+             @@template_args[render_symbol] ||= {}
+    .--------------------
+    
+    This patch is included in erubis_2.X.X/contrib directory and the following is an
+    example to apply this patch.
+    
+    .? how to apply patch:
+    .====================
+    $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
+    $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
+    .====================
+    
+    Notice that this patch is not necessary if you are using Ruby on Rails ver 1.1 or 1.2, but it is recommended.
+    
+.3) Restart web server.
+    .====================
+    $ ruby script/server
+    .====================
+
+The setting is above all.
+
+
+
+.$$ Preprosessing		| rails-preprocessing
+
+{{*(Experimental)*}}
+Erubis supports preprocessing of template files.
+Preprocessing make your Ruby on Rails application about 20-40 percent faster.
+To enable preprocessing, set Erubis::Helpers::RailsHelper.preprocessing to true in your 'environment.rb' file.
+
+For example, assume the following template.
+This is slow because link_to() method is called every time when template is rendered.
+
+.--------------------
+<%= link_to 'Create', :action=>'create' %>
+.--------------------
+
+The following is faster than the above, but not flexible because url is fixed.
+
+.--------------------
+<a href="/users/create">Create</a>
+.--------------------
+
+Preprocessing solves this problem.
+If you use '[%= %]' instead of '<%= %>', preprocessor evaluate it only once when template is loaded.
+
+.--------------------
+{{*[%= link_to 'Create', :action=>'create'%]*}}
+.--------------------
+
+The above is evaluated by preprocessor and replaced to the following code automatically.
+
+.--------------------
+<a href="/users/create">Create</a>
+.--------------------
+
+Notice that this is done only once when template file is loaded.
+It means that link_to() method is not called when template is rendered.
+
+If link_to() method have variable arguments, use {{,_?(),}} helper method.
+
+.--------------------
+<% for use in @users %>
+[%= link_to {{*_?('user.name')*}}, :action=>'show', :id=>{{*_?('user.id')*}} %]
+<% end %>
+.--------------------
+
+The above is evaluated by preprocessor when template is loaded and expanded into the following code.
+This will be much faster because link_to() method is not called when rendering.
+
+.--------------------
+<% for user in @users %>
+<a href="/users/show/{{*<%=user.id%>*}}">{{*<%=user.name%>*}}</a>
+<% end %>
+.--------------------
+
+Preprocessing statement ({{,[% %],}}) is also available as well as preprocessing expression ({{,[%= %],}}).
+.--------------------
+<select name="state">
+  <option value="">-</option>
+{{*[% for code in states.keys.sort %]*}}
+  <option value="{{*[%= code %]*}}">{{*[%= states[code] %]*}}</option>
+{{*[% end %]*}}
+</select>
+.--------------------
+
+The above will be evaluated by preprocessor and expanded into the following when template is loaded.
+In the result, rendering speed will be much faster because for-loop is not executed when rendering.
+.--------------------
+<select name="state">
+  <option value="">-</option>
+  <option value="AK">Alaska</option>
+  <option value="AL">Alabama</option>
+  <option value="AR">Arkansas</option>
+  <option value="AS">American Samoa</option>
+  <option value="AZ">Arizona</option>
+  <option value="CA">California</option>
+  <option value="CO">Colorado</option>
+   ....
+</select>
+.--------------------
+
+Notice that it is not recommended to use preprocessing with tag helpers,
+because tag helpers generate different html code when form parameter has errors or not.
+
+Helper methods of Ruby on Rails are divided into two groups.
+.* link_to() or _() (method of gettext package) are not need to call for every time
+   as template is rendered because it returns same value when same arguments are passed.
+   These methods can be got faster by preprocessing.
+.* Tag helper methods should be called for every time as template is rendered
+   because it may return differrent value even if the same arguments are passed.
+   Preprocessing is not available with these methods.
+
+
+.$$ Others			| rails-others
+
+.* ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
+
+.* If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code into log file (ex. 'log/development.log').
+If it is nil (default), Erubis prints converted Ruby code into log file only when development mode.
+   It is useful for debugging.
+
+
+
 .$ Other Topics	| topics
 
 
@@ -2502,74 +2686,6 @@ See {{<benchmark|#topics-benchmark>}} for details.
 Erubis::TinyEruby class in 'erubis/tiny.rb' is the smallest implementation of eRuby.
 If you don't need any enhancements of Erubis and only require simple eRuby implementation,
 try Erubis::TinyEruby class.
-
-
-
-.$$ Ruby on Rails Support	| topics-rails
-
-Erubis supports Ruby on Rails. 
-
-.1) Add the following code to your 'config/environment.rb'.
-    
-    .? config/environment.rb
-    .--------------------
-    require 'erubis/helpers/rails_helper'
-    #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
-    #Erubis::Helpers::RailsHelper.init_properties = {}
-    #Erubis::Helpers::RailsHelper.show_src = false
-    .--------------------
-    
-    This will replace ERB in Rails by Erubis entirely.
-    
-.2) (Optional) apply the following patch to 'action_pack/lib/action_view/base.rb'.
-    
-    .? action_view_base_rb.patch
-    .--------------------
-    --- lib/action_view/base.rb	(original)
-    +++ lib/action_view/base.rb	(working copy)
-    @@ -445,6 +445,11 @@
-             end
-           end
-     
-    +      # convert template into ruby code
-    +      def convert_template_into_ruby_code(template)
-    +        ERB.new(template, nil, @@erb_trim_mode).src
-    +      end
-    +
-           # Create source code for given template
-           def create_template_source(extension, template, render_symbol, locals)
-             if template_requires_setup?(extension)
-    @@ -458,7 +463,7 @@
-                   "update_page do |page|\n#{template}\nend"
-               end
-             else
-    -          body = ERB.new(template, nil, @@erb_trim_mode).src
-    +          body = convert_template_into_ruby_code(template)
-             end
-     
-             @@template_args[render_symbol] ||= {}
-    .--------------------
-    
-    This patch is included in erubis_2.X.X/contrib directory and the following is an
-    example to apply this patch.
-    
-    .? how to apply patch:
-    .====================
-    $ cd /usr/local/lib/ruby/gems/1.8/gems/actionpack-1.13.1/lib/action_view/
-    $ sudo patch -p1 < /tmp/erubis_2.X.X/contrib/action_view_base_rb.patch
-    .====================
-    
-    Notice that this patch is not necessary if you are using Ruby on Rails ver 1.1 or 1.2, but it is recommended.
-    
-.3) Restart web server.
-    .====================
-    $ ruby script/server
-    .====================
-
-ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
-
-If Erubis::Helper::Rails.show_src is ture, Erubis prints converted Ruby code into log file (ex. 'log/development.log').
-It is useful for debugging.
 
 
 
@@ -2709,7 +2825,7 @@ Thanks Andrew R Jackson, he developed 'erubis-run.rb' which enables you to use E
 
 You must set your directories to be writable by web server process, because
 Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
-in the same directory as '*.rhtml' file.
+in the same directory in which '*.rhtml' file exists.
 
 
 

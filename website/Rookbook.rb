@@ -16,7 +16,7 @@ copyright = parameters['copyright']
 ##  recipes for kuwata-lab.com
 ##
 #all = %W[index.xhtml README.xhtml #{U}.01.xhtml ChangeLog.txt]
-all = %W[index.xhtml #{U}.01.xhtml CHANGES ReleaseNote.txt]
+all = %W[index.xhtml #{U}.01.xhtml CHANGES.txt ReleaseNote.txt]
 
 recipe  :default		, :all
 
@@ -25,7 +25,7 @@ recipe  :all			, all
 recipe  :clean								do
 	files = []
 	files.concat Dir.glob("README.*")
-	files.concat Dir.glob("CHANGES")
+	files.concat Dir.glob("CHANGES*")
 	files.concat Dir.glob("#{U}.*")
 	files.concat(%w[m18n.rb guide.d index.xhtml])
 	rm_rf [files]
@@ -78,9 +78,9 @@ recipe	"index.xhtml"		, "index.txt",
 #	sys "kwaser -t #{tagfile} -b #{@ingred} > #{@product}"
 #	end
 
-recipe	"CHANGES"			, "../CHANGES"		do
+recipe	"CHANGES.txt"			, "../CHANGES"		do
 	#copy r.ingreds[0], r.product
-	cp @ingred, "."
+	cp @ingred, @product
 	end
 
 recipe  "ReleaseNote.txt"		, "../ReleaseNote.txt"		do

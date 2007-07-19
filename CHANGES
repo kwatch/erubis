@@ -4,6 +4,62 @@
 
 
 #
+- release:   2.4.0
+  date: 2007-07-19
+  enhancements:
+
+    - |
+      Preprocessing is supported by Ruby on Rails helper.
+      Preprocessing makes Ruby on Rails application about 20-40 percent faster.
+
+      For example,
+
+         [%= link_to 'Show', :action=>'show', :id=_?('@user.id') %]
+
+      is evaluate by preprocessor and expanded into the following
+      when template file is loaded.
+
+         <a href="/users/show/<%=@user.id%>">Show</a>
+
+      It means that link_to() is not called when template is rendered
+      and rendering speed will be much faster in the result.
+
+      See User's Guide for details.
+
+    - |
+      Erubis::Eruby#evaluate() (or Erubis::RubyEvaluator#evaluate())
+      creates Proc object from @src and eval it.
+
+        def evaluate(context=Context.new)
+          context = Context.new(context) if context.is_a?(Hash)
+          @_proc ||= eval("proc { #{@src} }", TOPLEVEL_BINDING, @filename || '(erubis)')
+          return context.instance_eval(&@_proc)
+        end
+
+      This makes evaluate() much faster when eruby object is reused.
+      
+    - |
+      Erubis::Eruby#def_method() is supported.
+      This method defines ruby code as module's instance method.
+
+        def def_method(module_object, method_name, filename=nil)
+          module_object.module_eval("def #{method_name}; #{@src}; end", filename || @filename)
+        end
+
+      This is equivarent to ERB#def_method().
+
+    - |
+      Erubis::XmlHelper.url_escape() and u() which is alias of url_escape()
+      are added.
+      This is equivarent to ERB#Util.url_escape().
+
+
+  bugfix:
+    - Help message was not shown when '-h' is specified. Fixed.
+    - 'def method()' was not availabe in template file. Fixed.
+
+
+#
 - release:   2.3.1
   date: 2007-05-26
   bugfix:

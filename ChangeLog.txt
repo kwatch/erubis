@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.90 (2007-07-19)
+	.- [update] document updated
+
 : Rev.89 (2007-07-19)
 	.- [enhance] add Erubis::XmlHelper::url_encode() (and u() which is alias of url_encode())
 	.- [enhance] Erubis::RubyEvaluator#evaluate() now convert @src into @_proc object and do instance_eval(&@_proc)

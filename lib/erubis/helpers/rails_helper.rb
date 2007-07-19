@@ -31,7 +31,8 @@ module Erubis
     ##      require 'erubis/helpers/rails_helper'
     ##      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby # or Erubis::FastEruby
     ##      #Erubis::Helpers::RailsHelper.init_properties = {}
-    ##      #Erubis::Helpers::RailsHelper.show_src = false             # set true for debugging
+    ##      #Erubis::Helpers::RailsHelper.show_src = false       # set true for debugging
+    ##      #Erubis::Helpers::RailsHelper.preprocessing = true   # set true to enable preprocessing
     ##
     ## 2. (optional) apply the patch for 'action_view/base.rb'
     ##
@@ -79,7 +80,7 @@ module Erubis
         @@show_src = flag
       end
 
-      ##--- preprocessor: experimental ---
+      ##----- preprocessor: experimental -----
       @@preprocessing = false
       def self.preprocessing
         @@preprocessing
@@ -98,7 +99,7 @@ module Erubis
           add_expr_literal(src, "_decode((#{code}))")
         end
       end
-      ##--------------------
+      ##----------------------------------------
 
     end
 
@@ -209,20 +210,20 @@ class ActionView::Base  # :nodoc:
     klass      = Erubis::Helpers::RailsHelper.engine_class
     properties = Erubis::Helpers::RailsHelper.init_properties
     show_src   = Erubis::Helpers::RailsHelper.show_src
-    ## --- preprocessing: experimental ---
+    ##----- preprocessing: experimental -----
     if Erubis::Helpers::RailsHelper.preprocessing
       preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template)
       template = self.instance_eval(preprocessor.src)
       logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
     end
-    ## ---------------------
+    ##----------------------------------------
     src = klass.new(template, properties).src
     #src.insert(0, '_erbout = ')
     logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
     src
   end
 
-  ## --- preprocessing: experimental ---
+  ##----- preprocessing: experimental -----
   def _expr(arg)
     return "<%=#{arg}%>"
   end
@@ -234,7 +235,7 @@ class ActionView::Base  # :nodoc:
     arg.gsub!(/&lt;%=(.*?)%&gt;/) { "<%=#{CGI.unescapeHTML($1)}%>" }
     return arg
   end
-  ## ---------------------
+  ##----------------------------------------
 
 end
 

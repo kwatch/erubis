@@ -6,14 +6,15 @@
 
 .$ News
 
+.* [2007-07-19] {{<erubis_2.4.0|download.cgi>}} released.
 .* [2007-05-26] {{<erubis_2.3.1|download.cgi>}} released.
    This is a bugfix release. You should update immediately.
 .* [2007-05-23] {{<erubis_2.3.0|download.cgi>}} released.
 .* [2007-02-12] {{<erubis_2.2.0|download.cgi>}} released.
 .* [2006-09-28] {{<erubis-j_1.0.0|download.cgi>}} (porting to Java) released.
 .* [2006-09-24] {{<erubis_2.1.0|download.cgi>}} released.
-.* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
-.* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
+.#.* [2006-05-20] {{<erubis_2.0.0|download.cgi>}} released.
+.#.* [2006-03-05] {{<erubis_1.1.0|download.cgi>}} released.
 .#.* [2006-05-20] {{<erubis_2.0.0|http://rubyforge.org/projects/erubis/>}} released.
 .#.* [2006-03-05] {{<erubis_1.1.0|http://rubyforge.org/projects/erubis/>}} released.
 
@@ -109,7 +110,7 @@ You can use Erubis in Java with Rhino.
 
 
 .$ Download
-	.* Erubis 2.3.0 (implemented in Ruby)
+	.* Erubis 2.4.0 (implemented in Ruby)
 	    .- if you have installed RubyGems, just type `{{,gem install -r erubis,}}' to install Erubis
 	    .- Or {{<download|download.cgi>}}.^
 	       (Erubis requires {{<abstract|http://rubyforge.org/projects/abstract>}} library.
@@ -119,9 +120,9 @@ You can use Erubis in Java with Rhino.
 
 .$ Documents
 	.#.* {{<README|README.en.html>}}
-	.* Erubis 2.3.0 (implemented in Ruby)
+	.* Erubis 2.4.0 (implemented in Ruby)
 	    .- {{<User's guide|users-guide.html>}}
-	    .- {{<CHANGES|CHANGES>}}
+	    .- {{<CHANGES|CHANGES.txt>}}
 	    .#.- {{<ReleaseNote|ReleaseNote.txt>}}
 	.* Erubis-J 1.0.0 (implemented in Java)
 	    .- {{<User's guide|erubisj-users-guide.html>}}
