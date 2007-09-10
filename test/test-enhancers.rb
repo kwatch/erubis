@@ -471,8 +471,8 @@ __END__
       '; end
        _buf << '</table>
       <pre>
-      '; _buf << '% double percent
-      '; _buf << ' % spaced percent
+      % double percent
+       % spaced percent
       </pre>
       ';
       _buf.to_s

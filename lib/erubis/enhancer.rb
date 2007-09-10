@@ -443,18 +443,33 @@ module Erubis
       "regard lines starting with '%' as program code"
     end
 
-    PERCENT_LINE_PATTERN = /(.*?)^\%(.*?\r?\n)/m
-
     def add_text(src, text)
-      text.scan(PERCENT_LINE_PATTERN) do |txt, line|
-        super(src, txt)
-        if line[0] == ?%
-          super(src, line)
+      pos = 0
+      text2 = ''
+      text.scan(/^\%(.*?\r?\n)/) do
+        line  = $1
+        match = Regexp.last_match
+        len   = match.begin(0) - pos
+        str   = text[pos, len]
+        pos   = match.end(0)
+        if text2.empty?
+          text2 = str
         else
+          text2 << str
+        end
+        if line[0] == ?%
+          text2 << line
+        else
+          super(src, text2)
+          text2 = ''
           add_stmt(src, line)
         end
       end
-      rest = $' || text
+      rest = pos == 0 ? text : $'  # or $' || text
+      unless text2.empty?
+        text2 << rest if rest
+        rest = text2
+      end
       super(src, rest)
     end
 
