@@ -539,6 +539,10 @@ $ ruby example6.rb
 .====================
 
 
+It is recommended to use 'Erubis::Eruby#evaluate(context)' rather than 'Erubis::Eruby#result(binding())' because the latter has some problems.
+See {{<evaluate(context) v.s. result(binding)|#topics-context-vs-binding>}} section for details.
+
+
 
 .$$ Context Data File	| tut-datafile
 
@@ -2587,6 +2591,92 @@ If it is nil (default), Erubis prints converted Ruby code into log file only whe
 
 
 .$ Other Topics	| topics
+
+
+.$$ evaluate(context) v.s. result(binding)	| topics-context-vs-binding
+
+It is recommended to use 'Erubis::Eruby#evaluate(context)' instead of 'Erubis::Eruby#result(binding)' because Ruby's Binding object has some problems.
+
+.* It is not able to specify variables to use.
+   Using binding() method, all of local variables are passed to templates.
+.* Changing local variables in templates may affect to varialbes in main program.
+   If you assign '10' to local variable 'x' in templates, it may change variable 'x' in main program unintendedly.
+
+The following example shows that assignment of some values into variable 'x' in templates affect to local variable 'x' in main program unintendedly.
+
+.? template1.rhtml (intended to be passed 'items' from main program)
+.-------------------- template1.rhtml
+<% for {{*x*}} in {{*items*}} %>
+item = <%= x %>
+<% end %>
+** debug: local variables=<%= local_variables().inspect() %>
+.--------------------
+
+.? main_program1.rb (intended to pass 'items' to template)
+.-------------------- main_program1.rb
+require 'erubis'
+eruby = Erubis::Eruby.new(File.read('template1.rhtml'))
+items = ['foo', 'bar', 'baz']
+x = 1
+## local variable 'x' and 'eruby' are passed to template as well as 'items'!
+print {{*eruby.result(binding())*}}    
+## local variable 'x' is changed unintendedly because it is changed in template!
+puts "** debug: x=#{x.inspect}"  #=> "baz"
+.--------------------
+
+.? Result:
+.==================== main_program1.result
+$ ruby main_program1.rb
+item = foo
+item = bar
+item = baz
+** debug: local variables=["eruby", "items", "x", "_buf"]
+** debug: x="baz"
+.====================
+
+This problem is caused because Ruby's Binding class is poor to use in template engine.
+Binding class should support the following features.
+
+.--------------------
+b = Binding.new     # create empty Binding object
+b['x'] = 1          # set local variables using binding object
+.--------------------
+
+But the above features are not implemented in Ruby.
+
+A pragmatic solution is to use 'Erubis::Eruby#evaluate(context)' instead of 'Erubis::Eruby#result(binding)'.
+'evaluate(context)' uses Erubis::Context object and instance variables instead of Binding object and local variables.
+
+.? template2.rhtml (intended to be passed '@items' from main program)
+.-------------------- template2.rhtml
+<% for {{*x*}} in {{*@items*}} %>
+item = <%= x %>
+<% end %>
+** debug: local variables=<%= local_variables().inspect() %>
+.--------------------
+
+.? main_program2.rb (intended to pass '@items' to template)
+.-------------------- main_program2.rb
+require 'erubis'
+eruby = Erubis::Eruby.new(File.read('template2.rhtml'))
+items = ['foo', 'bar', 'baz']
+x = 1
+## only 'items' are passed to template
+print {{*eruby.evaluate(:items=>items)*}}    
+## local variable 'x' is not changed!
+puts "** debug: x=#{x.inspect}"  #=> 1
+.--------------------
+
+.? Result:
+.==================== main_program2.result
+$ ruby main_program2.rb
+item = foo
+item = bar
+item = baz
+** debug: local variables=["x", "_buf"]
+** debug: x=1
+.====================
+
 
 
 .$$ Class Erubis::FastEruby	| topics-fasteruby

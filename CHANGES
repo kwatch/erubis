@@ -2,6 +2,50 @@
 # $Release:$
 # $Copyright$
 
+#
+- release:   2.4.1
+  date:
+  enhancements:
+
+    - |
+      Add new section 'evaluate(context) v.s. result(binding)' to user's guide.
+      This section describes why Erubis::Eruby#evaluate(context) is recommended
+      rather than Erubis::Eruby#result(binding).
+      User's Guide : Other Topics : evaluate(context) v.s. result(binding)
+      http://www.kuwata-lab.com/erubis/users-guide.06.html#topics-context-vs-binding
+
+  bugfix:
+
+    - |
+      When using Erubis::Eruby#evaluate(), changing local variables in
+      templates have affected to variables accessible with TOPLEVEL_BINDING.
+      It means that if you change variables in templates, it is possible to
+      change variables in main program.
+      This was a bug and is now fixed not to affect to variables in main
+      program.
+
+      ex. template.rhtml
+      --------------------
+      <% for x in @items %>
+      item = <%= x %>
+      <% end %>
+      --------------------
+
+      ex. main-program.rb
+      --------------------
+      require 'erubis'
+      x = 10
+      items = ['foo', 'bar', 'baz']
+      eruby = Erubis::Eruby.new(File.read('template.rhtml'))
+      s = eruby.evaluate(:items=>items)
+      print s
+      $stderr.puts "*** debug: x=#{x.inspect}"  #=> x="baz" (2.4.0)
+                                                #=> x=10    (2.4.1)
+      --------------------
+
+    - |
+      PercentLineEnhancer was very slow. Now performance problem is solved.
+
 
 #
 - release:   2.4.0

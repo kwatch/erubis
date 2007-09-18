@@ -45,10 +45,11 @@ recipes:
     ingreds:	[ $(u).txt ]
     byprods:	[ $(u).toc.html ]
     method*: |
-	rm_rf "guide.d"
-	mkdir_p "guide.d"
-	sys "retrieve -d guide.d #{@ingred}"
-	for filename in Dir.glob("guide.d/*.*_filter")
+	dir = "../test/data/$(u)"
+	mkdir_p dir
+	rm_rf "#{dir}/*"
+	sys "retrieve -d #{dir} #{@ingred}"
+	for filename in Dir.glob("#{dir}/*.*_filter")
 	  content = File.read(filename)
 	  name = (filename =~ /\.(\w+)_filter$/) && $1
 	  case name
@@ -67,9 +68,6 @@ recipes:
 	  end
 	  File.unlink(filename)
 	end
-	mkdir_p "../test/data/$(u)/"
-	rm_f "../test/data/$(u)/*"
-	cp_p "guide.d/*", "../test/data/$(u)/"
 	sys "kwaser -t $(tagfile) -T #{@ingred} > #{@byprod}"
 	sys "kwaser -t $(tagfile)    #{@ingred} > #{@product}"
 	rm "#{@byprod}"

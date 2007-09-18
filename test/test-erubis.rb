@@ -192,7 +192,22 @@ END
     assert_nil(eruby.instance_variable_get('@_proc'))
   end
 
+  #def test_toplevel_binding
+  #  s = "locals = <%= local_variables().inspect %>\n<% x = 50 %>\n"
+  #  eruby = Erubis::Eruby.new(s)
+  #  _x = eval 'x', TOPLEVEL_BINDING
+  #  _y = eval 'y', TOPLEVEL_BINDING
+  #  actual = eruby.evaluate(:x=>_x, :y=>_y)
+  #  _x = eval 'x', TOPLEVEL_BINDING
+  #  _y = eval 'y', TOPLEVEL_BINDING
+  #  puts "*** actual=#{actual.inspect}, x=#{_x.inspect}, y=#{_y.inspect}"
+  #end
+
 end
+
+x = 10
+y = 20
+
 
 __END__
 - name:  basic1

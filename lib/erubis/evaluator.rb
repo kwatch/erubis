@@ -10,6 +10,8 @@ require 'erubis/context'
 
 module Erubis
 
+  EMPTY_BINDING = binding()
+
 
   ##
   ## evaluate code
@@ -64,7 +66,7 @@ module Erubis
     def evaluate(context=Context.new)
       context = Context.new(context) if context.is_a?(Hash)
       #return context.instance_eval(@src, @filename || '(erubis)')
-      @_proc ||= eval("proc { #{@src} }", TOPLEVEL_BINDING, @filename || '(erubis)')
+      @_proc ||= eval("proc { #{@src} }", Erubis::EMPTY_BINDING, @filename || '(erubis)')
       return context.instance_eval(&@_proc)
     end
 
