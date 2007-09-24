@@ -18,6 +18,7 @@ module Erubis
       list = []
       #list << [:indent,   '',       "indent spaces (ex. '  ')"]
       #list << [:buf,      '_buf',   "output buffer name"]
+      list << [:docwrite, true,     "use 'document.write()' when true"]
       return list
     end
 
@@ -26,6 +27,7 @@ module Erubis
       @escapefunc ||= 'escape'
       @indent = properties[:indent] || ''
       @buf = properties[:out] || '_buf'
+      @docwrite = properties[:docwrite] != false  # '!= false' will be removed in the next release
     end
 
     def add_preamble(src)
@@ -76,7 +78,11 @@ module Erubis
 
     def add_postamble(src)
       src << "\n" if src[-1] == ?;
-      src << @indent << 'document.write(' << @buf << ".join(\"\"));\n"
+      if @docwrite
+        src << @indent << 'document.write(' << @buf << ".join(\"\"));\n"
+      else
+        src << @indent << @buf << ".join(\"\");\n"
+      end
     end
 
   end

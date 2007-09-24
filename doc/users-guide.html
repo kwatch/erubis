@@ -1822,24 +1822,30 @@ It deletes indentations even if they are in &lt;PRE&gt;&lt;/PRE&gt;.
 
 <a name="lang"></a>
 <h2 class="section1">Multi-Language Support</h2>
-<p>Erubis supports the following language currently:
+<p>Erubis supports the following languages<sup>(<a href="#fnref:2" name="fnlink:2">*2</a>)</sup>:
 </p>
 <ul type="disc">
 <li>Ruby
 </li>
-<li>PHP
+<li><a href="#lang-php">PHP</a>
 </li>
-<li>C
+<li><a href="#lang-c">C</a>
 </li>
-<li>Java
+<li><a href="#lang-java">Java</a>
 </li>
-<li>Scheme
+<li><a href="#lang-scheme">Scheme</a>
 </li>
-<li>Perl
+<li><a href="#lang-perl">Perl</a>
 </li>
-<li>JavaScript
+<li><a href="#lang-javascript">JavaScript</a>
 </li>
 </ul>
+<div class="footnote">
+ <dl compact>
+  <dt>(<a name="fnref:2" href="#fnlink:2">*2</a>)</dt>
+  <dd>If you need template engine in pure PHP/Perl/JavaScript, try <a href="http://www.kuwata-lab.com/tenjin/">Tenjin</a> (<a href="http://www.kuwata-lab.com/tenjin/">http://www.kuwata-lab.com/tenjin/</a>). Tenjin is a very fast and full-featured template engine implemented in pure PHP/Perl/JavaScript.</dd>
+ </dl>
+</div>
 <a name="lang-php"></a>
 <h3 class="section2">PHP</h3>
 <a name="example.ephp"></a>
@@ -2153,7 +2159,7 @@ compiled source code</div>
 </pre>
 <a name="example_scheme_display.result"></a>
 <div class="terminal_caption">
-compiled source code (with --func=display property)</div>
+compiled source code (with <code>--func=display</code> property)</div>
 <pre class="terminal">$ erubis -l scheme --func=display example.escheme
 (display "&lt;html&gt;
  &lt;body&gt;\n")
@@ -2290,6 +2296,19 @@ _buf.push("   &lt;/tbody&gt;\n\
 &lt;/html&gt;\n");
 document.write(_buf.join(""));
 </pre>
+<p>If command-line option '<code>--docwrite=false</code>' is specified,
+'<code>_buf.join("");</code>' is used instead of '<code>document.write(_buf.join(""));</code>'.
+This is useful when passing converted source code to eval() function in JavaScript.
+</p>
+<p>You can pass <code>:docwrite=&gt;false</code> to Erubis::Ejavascript.new() in your Ruby script.
+</p>
+<pre class="program">s = File.read('example.jshtml')
+engine = Erubis::Ejavascript.new(s, <code>:docwrite=&gt;false</code>)
+</pre>
+<p>If you want to specify any JavaScript code, use '--postamble=...'.
+</p>
+<p>Notice that default value of 'docwrite' property will be false in the future release.
+</p>
 <br>
 
 

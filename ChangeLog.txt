@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.95 (2007-09-24)
+	.- [enhance] add '--docwrite={true|false}' property to Ejavascript class.
+	.- [update] user's guide
+
 : Rev.94 (2007-09-18)
 	.- [change] add Erubis::EMPTY_BINDING
 	.- [bugfix] use Erubis::EMPTY_BINDING instead of TOPLEVEL_BINDING in Evaluator#evaluate()

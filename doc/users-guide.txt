@@ -1925,15 +1925,15 @@ DeleteIndentEnhancer is language-independent.
 
 .$ Multi-Language Support	| lang
 
-Erubis supports the following language currently:
+Erubis supports the following languages{{(If you need template engine in pure PHP/Perl/JavaScript, try {{<Tenjin|http://www.kuwata-lab.com/tenjin/>}} ({{<http://www.kuwata-lab.com/tenjin/>}}). Tenjin is a very fast and full-featured template engine implemented in pure PHP/Perl/JavaScript.)}}:
 
 .* Ruby
-.* PHP
-.* C
-.* Java
-.* Scheme
-.* Perl
-.* JavaScript
+.* {{<PHP|#lang-php>}}
+.* {{<C|#lang-c>}}
+.* {{<Java|#lang-java>}}
+.* {{<Scheme|#lang-scheme>}}
+.* {{<Perl|#lang-perl>}}
+.* {{<JavaScript|#lang-javascript>}}
 
 
 
@@ -1985,6 +1985,8 @@ $ erubis -l php example.ephp
 </html>
 .====================
 
+.# If you need template engine in pure PHP, try {{<phpTenjin|http://www.kuwata-lab.com/tenjin/>}} ({{<http://www.kuwata-lab.com/tenjin/>}}).
+.# phpTenjin is a very fast and full-featured template engine implemented in pure PHP.
 
 
 .$$ C		| lang-c
@@ -2249,7 +2251,7 @@ $ erubis -l scheme example.escheme
   (reverse _buf))
 .====================
 
-.? compiled source code (with --func=display property)
+.? compiled source code (with {{,--func=display,}} property)
 .==================== example_scheme_display.result
 $ erubis -l scheme --func=display example.escheme
 .#.<<<:! (cd guide.d; erubis -l scheme --func=display example.escheme)
@@ -2334,6 +2336,9 @@ print('  </table>
 '); 
 .====================
 
+.# If you need template engine in pure Perl, try {{<plTenjin|http://www.kuwata-lab.com/tenjin/>}} ({{<http://www.kuwata-lab.com/tenjin/>}}).
+.# plTenjin is a very fast and full-featured template engine implemented in pure Perl.
+
 
 
 .$$ JavaScript	| lang-javascript
@@ -2389,6 +2394,23 @@ _buf.push("   </tbody>\n\
 document.write(_buf.join(""));
 .====================
 
+If command-line option '{{,--docwrite=false,}}' is specified,
+'{{,_buf.join("");,}}' is used instead of '{{,document.write(_buf.join(""));,}}'.
+This is useful when passing converted source code to eval() function in JavaScript.
+
+You can pass {{,:docwrite=>false,}} to Erubis::Ejavascript.new() in your Ruby script.
+
+.--------------------
+s = File.read('example.jshtml')
+engine = Erubis::Ejavascript.new(s, {{,:docwrite=>false,}})
+.--------------------
+
+If you want to specify any JavaScript code, use '--postamble=...'.
+
+Notice that default value of 'docwrite' property will be false in the future release.
+
+.# If you need template engine in pure JavaScript, try {{<jsTenjin|http://www.kuwata-lab.com/tenjin/>}} ({{<http://www.kuwata-lab.com/tenjin/>}}).
+.# jsTenjin is a very fast and full-featured template engine implemented in pure JavaScript and available with not only web browser but also Spidermonkey and Rhino.
 
 
 

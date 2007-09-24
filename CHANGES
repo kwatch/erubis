@@ -11,8 +11,17 @@
       Add new section 'evaluate(context) v.s. result(binding)' to user's guide.
       This section describes why Erubis::Eruby#evaluate(context) is recommended
       rather than Erubis::Eruby#result(binding).
-      User's Guide : Other Topics : evaluate(context) v.s. result(binding)
+      User's Guide > Other Topics > evaluate(context) v.s. result(binding)
       http://www.kuwata-lab.com/erubis/users-guide.06.html#topics-context-vs-binding
+
+    - |
+      Add new command-line property '--docwrite={true|false}' to
+      Erubis::Ejavascript.
+      If this property is true then 'document.write(_buf.join(""));' is used
+      as postamble and if it is false then '_buf.join("")' is used.
+      Default is true for compatibility reason but it will be false in the
+      future release.
+      (This feature was proposed by D.Dribin. Thank you.)
 
   bugfix:
 

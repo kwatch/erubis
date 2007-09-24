@@ -298,11 +298,11 @@ __END__
       '); print('*** debug: $i=', $i, "\n");print('
       '); 
 ##
-- name:  javascript
+- name:  javascript1
   lang:  javascript
   class: Ejavascript
   options:
-  input: |
+  input: &javascript_input |
       <%
          var user = 'Erubis';
          var list = ['<aaa>', 'b&b', '"ccc"'];
@@ -339,4 +339,29 @@ __END__
       </table>\n");
       alert("*** debug: i="+(i)); _buf.push("\n");
       document.write(_buf.join(""));
+ ##
+- name:  javascript2
+  lang:  javascript
+  class: Ejavascript
+  options: { :docwrite: false }
+  input: *javascript_input
+  expected: |4
+      var _buf = [];
+         var user = 'Erubis';
+         var list = ['<aaa>', 'b&b', '"ccc"'];
+      
+      _buf.push("<p>Hello "); _buf.push(user); _buf.push("!</p>\n\
+      <table>\n\
+        <tbody>\n");
+           var i; 
+           for (i = 0; i < list.length; i++) { 
+      _buf.push("    <tr bgcolor="); _buf.push(++i % 2 == 0 ? '#FFCCCC' : '#CCCCFF'); _buf.push("\">\n\
+            <td>"); _buf.push(i); _buf.push("</td>\n\
+            <td>"); _buf.push(list[i]); _buf.push("</td>\n\
+          </tr>\n");
+           } 
+      _buf.push("  </tbody>\n\
+      </table>\n");
+      alert("*** debug: i="+(i)); _buf.push("\n");
+      _buf.join("");
  ##
