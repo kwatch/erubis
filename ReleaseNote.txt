@@ -1,3 +1,67 @@
+$ [ANN] Erubis 2.4.1 released - two bugs are fixed
+
+I have released Erubis 2.4.1.
+http://www.kuwata-lab.com/erubis/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+
+This is a bugfix release.
+
+  enhancements:
+
+    - |
+      Add new section 'evaluate(context) v.s. result(binding)' to user's guide.
+      This section describes why Erubis::Eruby#evaluate(context) is recommended
+      rather than Erubis::Eruby#result(binding).
+      User's Guide > Other Topics > evaluate(context) v.s. result(binding)
+      http://www.kuwata-lab.com/erubis/users-guide.06.html#topics-context-vs-binding
+
+    - |
+      Add new command-line property '--docwrite={true|false}' to
+      Erubis::Ejavascript.
+      If this property is true then 'document.write(_buf.join(""));' is used
+      as postamble and if it is false then '_buf.join("")' is used.
+      Default is true for compatibility reason but it will be false in the
+      future release.
+      (This feature was proposed by D.Dribin. Thank you.)
+
+  bugfix:
+
+    - |
+      When using Erubis::Eruby#evaluate(), changing local variables in
+      templates have affected to variables accessible with TOPLEVEL_BINDING.
+      It means that if you change variables in templates, it is possible to
+      change variables in main program.
+      This was a bug and is now fixed not to affect to variables in main
+      program.
+
+      ex. template.rhtml
+      --------------------
+      <% for x in @items %>
+      item = <%= x %>
+      <% end %>
+      --------------------
+
+      ex. main-program.rb
+      --------------------
+      require 'erubis'
+      x = 10
+      items = ['foo', 'bar', 'baz']
+      eruby = Erubis::Eruby.new(File.read('template.rhtml'))
+      s = eruby.evaluate(:items=>items)
+      print s
+      $stderr.puts "*** debug: x=#{x.inspect}"  #=> x="baz" (2.4.0)
+                                                #=> x=10    (2.4.1)
+      --------------------
+
+    - |
+      PercentLineEnhancer was very slow. Now performance problem is solved.
+
+--
+regards,
+kwatch
+
+
 $ [ANN] Erubis 2.4.0 released - a fast eRuby implementation
 
 Erubis 2.4.0 released.

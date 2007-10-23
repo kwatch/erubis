@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.97 (2007-10-23)
+	.- [change] remove 'website/'
+
+: Rev.96 (2007-09-25)
+	.- [release] 2.4.1
+
 : Rev.95 (2007-09-24)
 	.- [enhance] add '--docwrite={true|false}' property to Ejavascript class.
 	.- [update] user's guide
