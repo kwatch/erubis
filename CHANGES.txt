@@ -2,6 +2,56 @@
 # $Release:$
 # $Copyright$
 
+
+- release:   2.5.0
+  date:	     2008-02-01
+  enhancements:
+
+    - |
+      Ruby on Rails 2.0 supported.
+
+    - |
+      Rails form helper methods for preprocessing are added.
+      These helper methos are available with preprocessing.
+
+      ex. _form.rhtml
+      --------------------
+       <p>
+        Name: <%= text_field :user, :name %>
+       </p>
+       <p>
+        Name: [%= pp_text_field :user, :name %]
+       </p>
+      --------------------
+
+      preprocessed:
+      --------------------
+       <p>
+        Name: <%= text_field :user, :name %>
+       </p>
+       <p>
+        Name: {{*<input id="stock_name" name="stock[name]" size="30" type="text" value="<%=h @stock.name%>" />*}}
+       </p>
+      --------------------
+
+      Ruby code:
+      --------------------
+       _buf << ' <p>
+        Name: '; _buf << ( text_field :stock, :name ).to_s; _buf << '
+      '; _buf << ' </p>
+       <p>
+        Name: <input id="stock_name" name="stock[name]" size="30" type="text" value="'; _buf << (h @stock.name).to_s; _buf << '" />
+       </p>
+      ';
+      --------------------
+
+      This shows that text_filed() is called every time when rendering,
+      but pp_text_filed() is called only once when loading template,
+      so pp_text_field() with prepocessing is much faster than text_field().
+
+      See User's guide for details.
+      http://www.kuwata-lab.local:8080/erubis/users-guide.05.html#rails-formhelpers
+
 #
 - release:   2.4.1
   date:      2007-09-25

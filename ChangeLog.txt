@@ -2,6 +2,14 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.98 (2008-01-29)
+	.- [enhance] add 'helpers/rails_form_helper.rb'
+	.- [change] helpers/rails_helper.rb: rename _expr() to _p()
+	.- [enhance] helpers/rails_helper.rb: add _P()
+	.- [enhance] helpers/rails_helper.rb: support Rails 2.0
+	.- [update] users-guide.txt
+	.- [change] rename 'CHANGES' to 'CHANGES.txt'
+
 : Rev.97 (2007-10-23)
 	.- [change] remove 'website/'
 
