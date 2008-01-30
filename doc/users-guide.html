@@ -2449,13 +2449,28 @@ because tag helpers generate different html code when form parameter has errors 
    Preprocessing is not available with these methods.
 </li>
 </ul>
-<p><span style="color:#FF0000">CAUTHON:</span> link_to() in Ruby on Rails 2.0 doesn't work correctly with preprocessing.
+<p>In Ruby on Rails 2.0, <code>_?('user_id')</code> is OK but <code>_?('user.id')</code> is NG
+because the latter contains period ('.') character.
 </p>
+<pre class="program">&lt;!-- NG in Rails 2.0, because _?('') contains period --&gt;
+[%= link_to 'Edit', edit_user_path(<strong>_?('@user.id')</strong>) %]
+[%= link_to 'Show', <strong>@user</strong> %]
+[%= link_to 'Delete', <strong>@user</strong>, :confirm=&gt;'OK?', :method=&gt;:delete %]
+
+&lt;!-- OK in Rails 2.0 --&gt;
+<strong>&lt;%= user_id = @user.id %&gt;</strong>
+[%= link_to 'Edit', edit_user_path(<strong>_?('user_id')</strong>) %]
+[%= link_to 'Show', <strong>:action=&gt;'show', :id=&gt;_?('user_id')</strong> %]
+[%= link_to 'Delete', <strong>{:action=&gt;'destroy', :id=&gt;_?('user_id')}</strong>,
+                      {:confirm=&gt;'OK?', :method=&gt;:delete} %]
+</pre>
 <br>
 
 
 <a name="rails-formhelpers"></a>
 <h3 class="section2">Form Helpers for Preprocessing</h3>
+<p><strong>(Experimental)</strong>
+</p>
 <p>Erubis provides form helper methods for preprocessing.
 These are defined in 'erubis/helpers/rails_form_helper.rb'.
 If you want to use it, require it and include Erubis::Helpers::RailsFormHelper in 'app/helpers/applition_helper.rb'
@@ -2544,7 +2559,7 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
 </ul>
 <p>Notice that pp_form_for() is not provided.
 </p>
-<p><span style="color:#FF0000">CAUTION:</span> These are not tested in Ruby on Rails 2.0.
+<p><span style="color:#FF0000">CAUTION:</span> These are experimental and may not work in Ruby on Rails 2.0.
 </p>
 <br>
 
@@ -2553,10 +2568,6 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
 <h3 class="section2">Others</h3>
 <ul type="disc">
 <li>ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
-</li>
-</ul>
-<ul type="disc">
-<li>link_to() method in Ruby on Rails 2.0 doesn't work correctly with preprocessing.
 </li>
 </ul>
 <ul type="disc">
@@ -2572,8 +2583,6 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
  end
  alias h html_escape
 </pre>
-</li>
-</ul>
 <p>   New definition in 'erubis/helpers/rails_helper.rb' is faster than the above
    because it scans string only once.
 </p>
@@ -2587,6 +2596,8 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
    You should use ERB::Util.html_hscape() if string contains a lot of '&lt; &gt; &amp; "'
    characters.
 </p>
+</li>
+</ul>
 <br>
 
 

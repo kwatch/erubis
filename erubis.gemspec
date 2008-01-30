@@ -2,7 +2,7 @@
 
 ###
 ### $Rev$
-### $Release$
+### $Release: $
 ### $Copyright$
 ###
 
@@ -12,10 +12,12 @@ spec = Gem::Specification.new do |s|
   ## package information
   s.name        = "erubis"
   s.author      = "makoto kuwata"
+  s.email       = "kwa(at)kuwata-lab.com"
   s.version     = "$Release$"
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "http://www.kuwata-lab.com/erubis/"
   s.summary     = "a fast and extensible eRuby implementation which supports multi-language"
+  s.rubyforge_project = 'erubis'
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
 

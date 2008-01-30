@@ -20,7 +20,7 @@ parameters:
   - abstract_rb : $(home)/src/abstract/trunk/lib/abstract.rb
   - benchmark_files* : Dir.glob('benchmark/erubybench{-lib.rb,.rb,.rhtml,.yaml}')
   - libfiles*  :  Dir.glob("lib/**/*")
-  - base       :  $(project)_$(release)
+  - base       :  $(project)-$(release)
   - base2      :  $(project)-$(release)
   #
   - exclude_libs :    # [cache.rb]
@@ -76,25 +76,25 @@ recipes:
 	chmod 0755, 'bin/*'
 
 
-  - product:    $(project)_*.tar.bz2
+  - product:    $(project)-*.tar.bz2
     desc:	create *.tar.bz2
-    ingreds:    [ $(project)_$(1) ]
+    ingreds:    [ $(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #tar_cjf @product, @ingred
 	sys "tar cjf #{@product} #{@ingred}"
 
-  - product:	$(project)_*.tar.gz
+  - product:	$(project)-*.tar.gz
     desc:	create *.tar.gz
-    ingreds:	[ $(project)_$(1) ]
+    ingreds:	[ $(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #tar_czf @product, @ingred
 	sys "tar czf #{@product} #{@ingred}"
 
-  - product:	$(project)_*.zip
+  - product:	$(project)-*.zip
     desc:	create *.zip
-    ingreds:	[ $(project)_$(1) ]
+    ingreds:	[ $(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #zip_r @product, @ingred
@@ -103,11 +103,12 @@ recipes:
 
   - product:    $(project)-*.gem
     desc:	create *.gem
-    ingreds:	[ $(project)_$(1) ]
+    ingreds:	[ $(project)-$(1) ]
     method*: |
         dir = @ingred
 	cd dir do
           Gem.manage_gems
+	  require 'rubygems/gem_runner'
           Gem::GemRunner.new.run ['build', '$(project).gemspec']
 	end
 	mv "#{dir}/#{@product}", "."
@@ -116,12 +117,12 @@ recipes:
     method*: |
 	chdir "doc" do sys "rook :all" end
 
-  - product:    $(project)_*
+  - product:    $(project)-*
     ingreds:	[ $(text_files), $(doc_files), :apidoc ]
     method*: |
         comment 'delete and create directory'
 	release = '$(1)'      # @matches[1]
-	dir = "$(project)_#{release}"
+	dir = "$(project)-#{release}"
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#

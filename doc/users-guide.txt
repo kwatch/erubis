@@ -2589,11 +2589,27 @@ Helper methods of Ruby on Rails are divided into two groups.
    because it may return differrent value even if the same arguments are passed.
    Preprocessing is not available with these methods.
 
+In Ruby on Rails 2.0, {{,_?('user_id'),}} is OK but {{,_?('user.id'),}} is NG
+because the latter contains period ('.') character.
 
-{{!CAUTHON:!}} link_to() in Ruby on Rails 2.0 doesn't work correctly with preprocessing.
+.--------------------
+<!-- NG in Rails 2.0, because _?('') contains period -->
+[%= link_to 'Edit', edit_user_path({{*_?('@user.id')*}}) %]
+[%= link_to 'Show', {{*@user*}} %]
+[%= link_to 'Delete', {{*@user*}}, :confirm=>'OK?', :method=>:delete %]
+
+<!-- OK in Rails 2.0 -->
+{{*<%= user_id = @user.id %>*}}
+[%= link_to 'Edit', edit_user_path({{*_?('user_id')*}}) %]
+[%= link_to 'Show', {{*:action=>'show', :id=>_?('user_id')*}} %]
+[%= link_to 'Delete', {{*{:action=>'destroy', :id=>_?('user_id')}*}},
+                      {:confirm=>'OK?', :method=>:delete} %]
+.--------------------
 
 
 .$$ Form Helpers for Preprocessing  | rails-formhelpers
+
+{{*(Experimental)*}}
 
 Erubis provides form helper methods for preprocessing.
 These are defined in 'erubis/helpers/rails_form_helper.rb'.
@@ -2671,14 +2687,12 @@ Module Erubis::Helpers::RailsFormHelper defines the following form helper method
 
 Notice that pp_form_for() is not provided.
 
-{{!CAUTION:!}} These are not tested in Ruby on Rails 2.0.
+{{!CAUTION:!}} These are experimental and may not work in Ruby on Rails 2.0.
 
 
 .$$ Others			| rails-others
 
 .* ActionView::Helpers::CaptureHelper#capture() and ActionView::Helpers::Texthelper#concat() are available.
-
-.* link_to() method in Ruby on Rails 2.0 doesn't work correctly with preprocessing.
 
 .* Form helper methods are not tested in Ruby on Rails 2.0.
 
@@ -2692,17 +2706,17 @@ Notice that pp_form_for() is not provided.
     end
     alias h html_escape
    .--------------------
-
+   
    New definition in 'erubis/helpers/rails_helper.rb' is faster than the above
    because it scans string only once.
-
+   
    .--------------------
     ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
     def h(value)
       value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }
     end
    .--------------------
-
+   
    Notice that the new definition may be slow if string contains
    many '< > & "' characters because block is call many time.
    You should use ERB::Util.html_hscape() if string contains a lot of '< > & "'

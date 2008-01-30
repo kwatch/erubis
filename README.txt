@@ -27,9 +27,9 @@ See doc/users-guide.html for details.
 
 == Installation
 
-* If you have installed RubyGems, just type <tt>gem install --remote erubis</tt>.
+* If you have installed RubyGems, just type <tt>gem install erubis</tt>.
 
-    $ sudo gem install --remote erubis
+    $ sudo gem install erubis
 
 * Else install abstract[http://rubyforge.org/projects/abstract/] at first,
   and download erubis_X.X.X.tar.bz2 and install it by setup.rb.
@@ -62,7 +62,7 @@ and restart web server.
      require 'erubis/helpers/rails_helper'
      #Erubis::Helpers::RailsHelper.engine_class = Erubis::Eruby
      #Erubis::Helpers::RailsHelper.init_properties = {}
-     #Erubis::Helpers::RailsHelper.show_src = false
+     #Erubis::Helpers::RailsHelper.show_src = nil
 
 If Erubis::Helpers::RailsHelper.show_src is ture, Erubis prints converted Ruby code
 into log file ('log/development.log' or so).  It is useful for debug.

@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.99 (2008-01-29)
+	.- [update] users-guide.txt: add tips about preprocessing in Rails 2.0 
+	.- [debug] rails_helper.rb: _decode(): change /%3C%25%3D(.*?)%25%3E/ to /%3C%25(?:=|%3D)(.*?)%25%3E/
+	.- [release] release preparation for 2.5.0
+
 : Rev.98 (2008-01-29)
 	.- [enhance] add 'helpers/rails_form_helper.rb'
 	.- [change] helpers/rails_helper.rb: rename _expr() to _p()
