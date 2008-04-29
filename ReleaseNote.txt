@@ -5,6 +5,7 @@ http://www.kuwata-lab.com/erubis/
 Erubis is another eRuby implementation which is very fast and
 extensible than ERB and eruby.
 
+
 Enhancements from 2.4.1:
 
  * Ruby on Rails 2.0 support
@@ -26,7 +27,7 @@ Enhancements from 2.4.1:
    --------------------
 
  * (experimental)
-   Rails form helper methods for preprocessing are added.
+   Rails form helper methods for preprocessing are provided.
    These helper methos are available with preprocessing.
 
    ex. _form.rhtml

@@ -93,7 +93,8 @@ class BenchmarkApplication
 
   def execute_eruby(filename, context)
     return unless ERuby
-    eval context2code(context)
+    #eval context2code(context)
+    list = context['list']
     @ntimes.times do
       ERuby.import(filename)
     end
@@ -101,7 +102,8 @@ class BenchmarkApplication
   end
 
   def execute_erb(filename, context)
-    eval context2code(context)
+    #eval context2code(context)
+    list = context['list']
     output = nil
     @ntimes.times do
       eruby = ERB.new(File.read(filename))
@@ -112,7 +114,8 @@ class BenchmarkApplication
   end
 
   def execute_erb_cached(filename, context)
-    eval context2code(context)
+    #eval context2code(context)
+    list = context['list']
     output = nil
     cachefile = filename + '.cache'
     File.unlink(cachefile) if test(?f, cachefile)
@@ -135,7 +138,8 @@ class BenchmarkApplication
   for klass in %w[Eruby FastEruby TinyEruby ArrayBufferEruby PrintOutEruby StdoutEruby] do
     s = <<-END
     def execute_erubis_#{klass.downcase}(filename, context)
-      eval context2code(context)
+      #eval context2code(context)
+      list = context['list']
       output = nil
       @ntimes.times do
         eruby = Erubis::#{klass}.new(File.read(filename))
@@ -152,7 +156,8 @@ class BenchmarkApplication
   for klass in %w[Eruby FastEruby] do
     s = <<-END
     def execute_erubis_#{klass.downcase}_cached(filename, context)
-      eval context2code(context)
+      #eval context2code(context)
+      list = context['list']
       cachefile = filename + '.cache'
       File.unlink(cachefile) if test(?f, cachefile)
       output = nil
@@ -173,7 +178,8 @@ class BenchmarkApplication
 
   def convert_eruby(filename, context)
     return unless ERuby
-    eval context2code(context)
+    #eval context2code(context)
+    list = context['list']
     output = nil
     @ntimes.times do
       output = ERuby::Compiler.new.compile_string(File.read(filename))
@@ -182,7 +188,8 @@ class BenchmarkApplication
   end
 
   def convert_erb(filename, context)
-    eval context2code(context)
+    #eval context2code(context)
+    list = context['list']
     output = nil
     @ntimes.times do
       eruby = ERB.new(File.read(filename))
@@ -194,7 +201,8 @@ class BenchmarkApplication
   for klass in %w[Eruby FastEruby TinyEruby]
     s = <<-END
       def convert_erubis_#{klass.downcase}(filename, context)
-        eval context2code(context)
+        #eval context2code(context)
+        list = context['list']
         output = nil
         @ntimes.times do
           eruby = Erubis::#{klass}.new(File.read(filename))

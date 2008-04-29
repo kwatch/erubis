@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.101 (2008-04-29)
+	.- [change] bench/bench.rb: Ruby 1.9 support
+
+: Rev.100 (2008-01-30)
+	.- [release] 2.5.0
+
 : Rev.99 (2008-01-29)
 	.- [update] users-guide.txt: add tips about preprocessing in Rails 2.0 
 	.- [debug] rails_helper.rb: _decode(): change /%3C%25%3D(.*?)%25%3E/ to /%3C%25(?:=|%3D)(.*?)%25%3E/
