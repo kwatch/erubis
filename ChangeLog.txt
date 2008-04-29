@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.102 (2008-04-29)
+	.- [add] preprocessing.rb
+	.- [change] rails_helper.rb: move Preprocessing class and helper methods into preprocessing.rb
+
 : Rev.101 (2008-04-29)
 	.- [change] bench/bench.rb: Ruby 1.9 support
 

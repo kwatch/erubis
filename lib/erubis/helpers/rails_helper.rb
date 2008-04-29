@@ -6,7 +6,7 @@
 
 
 require 'erubis'
-require 'cgi'
+require 'erubis/preprocessing'
 
 
 module Erubis
@@ -76,7 +76,7 @@ module Erubis
         @@show_src = flag
       end
 
-      ##----- preprocessing --------------------
+      #cattr_accessor :preprocessing
       @@preprocessing = false
       def self.preprocessing
         @@preprocessing
@@ -84,18 +84,6 @@ module Erubis
       def self.preprocessing=(flag)
         @@preprocessing = flag
       end
-      class PreprocessingEruby < Erubis::Eruby
-        def initialize(input, params={})
-          params = params.dup
-          params[:pattern] = '\[% %\]'    # use '[%= %]' instead of '<%= %>'
-          params[:escape] = true          # transport '[%= %]' and '[%== %]'
-          super
-        end
-        def add_expr_escaped(src, code)
-          add_expr_literal(src, "_decode((#{code}))")
-        end
-      end
-      ##----------------------------------------
 
     end
 
@@ -235,6 +223,7 @@ end
 
 ## set Erubis as eRuby compiler in Ruby on Rails instead of ERB
 class ActionView::Base  # :nodoc:
+  include Erubis::PreprocessingHelper
   private
   def convert_template_into_ruby_code(template)
     #src = Erubis::Eruby.new(template).src
@@ -244,7 +233,7 @@ class ActionView::Base  # :nodoc:
     show_src = ENV['RAILS_ENV'] == 'development' if show_src.nil?
     ##----- preprocessing -------------------
     if Erubis::Helpers::RailsHelper.preprocessing
-      preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template)
+      preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template, :escape=>true)
       #template = self.instance_eval(preprocessor.src)
       template = preprocessor.evaluate(self)
       logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
@@ -255,23 +244,6 @@ class ActionView::Base  # :nodoc:
     logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
     src
   end
-
-  ##----- preprocessing -------------------
-  def _p(arg)
-    return "<%=#{arg}%>"
-  end
-  def _P(arg)
-    return "<%=h(#{arg})%>"
-  end
-  alias _? _p
-  def _decode(arg)
-    arg = arg.to_s
-    arg.gsub!(/%3C%25(?:=|%3D)(.*?)%25%3E/) { "<%=#{CGI.unescape($1)}%>" }
-    arg.gsub!(/&lt;%=(.*?)%&gt;/) { "<%=#{CGI.unescapeHTML($1)}%>" }
-    return arg
-  end
-  ##----------------------------------------
-
 end
 
 
