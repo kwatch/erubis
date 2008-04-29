@@ -517,6 +517,28 @@ __END__
       <>&"
 
 ##
+- name:  tailch1
+  options:
+  input: |
+        <p>
+          <% str = '<>&"' %>
+          <%= str %>
+          <%= str =%>
+          <%= str -%>
+        </p>
+  src: |
+        _buf = ''; _buf << '<p>
+        ';   str = '<>&"' 
+         _buf << '  '; _buf << ( str ).to_s; _buf << '
+        '; _buf << '  '; _buf << ( str ).to_s; _buf << '  '; _buf << ( str ).to_s; _buf << '</p>
+        ';
+        _buf.to_s
+  output: |
+        <p>
+          <>&"
+          <>&"  <>&"</p>
+
+##
 - name:  optimized1
   class: OptimizedEruby
   input: &optimized1_input|

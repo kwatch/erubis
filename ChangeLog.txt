@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.103 (2008-04-29)
+	.- [enhance] '<%= =%>' and '<%= -%>' removed tail spaces
+
 : Rev.102 (2008-04-29)
 	.- [add] preprocessing.rb
 	.- [change] rails_helper.rb: move Preprocessing class and helper methods into preprocessing.rb

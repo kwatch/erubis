@@ -114,7 +114,7 @@ module Erubis
       prefix, postfix = pattern.split()   # '<% %>' => '<%', '%>'
       #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
       #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-      return /#{prefix}(=+|-|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
+      return /#{prefix}(=+|-|\#)?(.*?)([-=])?#{postfix}([ \t]*\r?\n)?/m
     end
     module_function :pattern_regexp
 
@@ -130,7 +130,7 @@ module Erubis
       regexp = pat.nil? || pat == '<% %>' ? DEFAULT_REGEXP : pattern_regexp(pat)
       pos = 0
       is_bol = true     # is beginning of line
-      input.scan(regexp) do |indicator, code, rspace|
+      input.scan(regexp) do |indicator, code, tailch, rspace|
         match = Regexp.last_match()
         len  = match.begin(0) - pos
         text = input[pos, len]
@@ -142,6 +142,7 @@ module Erubis
         ## * when '<%= %>', do nothing
         ## * when '<% %>' or '<%# %>', delete spaces iff only spaces are around '<% %>'
         if ch == ?=              # <%= %>
+          rspace = nil if tailch && !tailch.empty?
           add_text(src, lspace) if lspace
           add_expr(src, code, indicator)
           add_text(src, rspace) if rspace
