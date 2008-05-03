@@ -539,6 +539,26 @@ __END__
           <>&"  <>&"</p>
 
 ##
+- name:  doublepercent1
+  options:
+  input: |
+        <% x1 = 10 %>
+        <%% x2 = 20 %>
+        <%= x1 %>
+        <%%= x2 %>
+  src: |
+        _buf = ''; x1 = 10 
+         _buf << '<% x2 = 20 %>
+        '; _buf << ( x1 ).to_s; _buf << '
+        '; _buf << '<%= x2 %>
+        ';
+        _buf.to_s
+  output: |
+        <% x2 = 20 %>
+        10
+        <%= x2 %>
+
+##
 - name:  optimized1
   class: OptimizedEruby
   input: &optimized1_input|

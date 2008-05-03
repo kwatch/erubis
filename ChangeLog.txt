@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.104 (2008-04-29)
+	.- [enhance] Conerter#convert_input(): convert '<%% %>' into '<% %>'
+	.- [enhance] test-erubis.rb: add 'doublepercent1' test
+	.- [enhance] Engine#load_file() can take :cachename property
+
 : Rev.103 (2008-04-29)
 	.- [enhance] '<%= =%>' and '<%= -%>' removed tail spaces
 

@@ -42,20 +42,23 @@ module Erubis
 
     ##
     ## load file, write cache file, and return engine object.
-    ## this method create cache file (filename + '.cache') automatically.
+    ## this method create code cache file automatically.
+    ## cachefile name can be specified with properties[:cachename],
+    ## or filname + 'cache' is used as default.
     ##
     def self.load_file(filename, properties={})
-      cachename = filename + '.cache'
+      cachename = properties[:cachename] || (filename + '.cache')
       properties[:filename] = filename
       if test(?f, cachename) && File.mtime(filename) <= File.mtime(cachename)
         engine = self.new(nil, properties)
         engine.src = File.read(cachename)
       else
-        input = File.open(filename, 'rb') { |f| f.read }
+        input = File.open(filename, 'rb') {|f| f.read }
         engine = self.new(input, properties)
-        File.open(cachename, 'w') do |f|
+        File.open(cachename, 'wb') do |f|
           f.flock(File::LOCK_EX)
           f.write(engine.src)
+          f.flush()
         end
       end
       engine.src.untaint   # ok?

@@ -5,7 +5,7 @@
 ###
 
 properties:
-  - release    :  2.5.0
+  - release    :  2.6.0
   - copyright  :  copyright(c) 2006-2008 kuwata-lab all rights reserved.
 
 
@@ -47,9 +47,9 @@ recipes:
 	#sys "ruby test/test-notext.rb"
 	sys "ruby test/test.rb 2>&1 | tee test.log"
 
-  - product:	:clear
+  - product:	:clean
     method*: |
-	rm_rf '$(project)_*.*', '$(project)-*.gem', apidocdir
+	rm_rf '$(project)_*.*', '$(project)-*.gem', 'lib/**/*.rbc', apidocdir
 
   - product:	:apidoc
     desc:	create api document by RDoc
@@ -126,7 +126,7 @@ recipes:
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#
-	rm_f 'test/data/**/*.cache'
+	rm_f 'test/data/**/*.cache', 'lib/**/*.rbc'
 	#store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir
 	store 'lib/**/*', 'bin/*', 'test/**/*', text_files, dir do |f|
 	  base = File.basename(f)

@@ -111,10 +111,10 @@ module Erubis
 
     ## return regexp of pattern to parse eRuby script
     def pattern_regexp(pattern)
-      prefix, postfix = pattern.split()   # '<% %>' => '<%', '%>'
-      #return /(.*?)(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-      #return /(^[ \t]*)?#{prefix}(=+|\#)?(.*?)-?#{postfix}([ \t]*\r?\n)?/m
-      return /#{prefix}(=+|-|\#)?(.*?)([-=])?#{postfix}([ \t]*\r?\n)?/m
+      @prefix, @postfix = pattern.split()   # '<% %>' => '<%', '%>'
+      #return /(.*?)(^[ \t]*)?#{@prefix}(=+|\#)?(.*?)-?#{@postfix}([ \t]*\r?\n)?/m
+      #return /(^[ \t]*)?#{@prefix}(=+|\#)?(.*?)-?#{@postfix}([ \t]*\r?\n)?/m
+      return /#{@prefix}(=+|-|\#|%)?(.*?)([-=])?#{@postfix}([ \t]*\r?\n)?/m
     end
     module_function :pattern_regexp
 
@@ -155,6 +155,9 @@ module Erubis
             add_stmt(src, "\n" * n)
             add_text(src, rspace) if rspace
           end
+        elsif ch == ?%           # <%% %>
+          s = "#{lspace}#{@prefix||='<%'}#{code}#{tailch}#{@postfix||='%>'}#{rspace}"
+          add_text(src, s)
         else                     # <% %>
           if @trim && lspace && rspace
             add_stmt(src, "#{lspace}#{code}#{rspace}")
