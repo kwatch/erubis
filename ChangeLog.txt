@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.105 (2008-05-03)
+	.- [enhance] rails_helper.rb: improved Rails 2.0.2 support
+
 : Rev.104 (2008-04-29)
 	.- [enhance] Conerter#convert_input(): convert '<%% %>' into '<% %>'
 	.- [enhance] test-erubis.rb: add 'doublepercent1' test

@@ -3,6 +3,65 @@
 # $Copyright$
 
 
+- release:   2.6.0
+  date:
+  enhancements:
+
+    - |
+	'<%% %>' and '<%%= %>' are converted into '<% %>' and '<%= %>' respectively.
+	This is for compatibility with ERB.
+
+	ex1.rhtml
+	    <ul>
+	    <%% for item in @list %>
+	      <li><%%= item %></li>
+	    <%% end %>
+	    </ul>
+
+	result:
+	    $ erubis ex1.rhtml
+	    <ul>
+	    <% for item in @list %>
+	      <li><%= item %></li>
+	    <% end %>
+	    </ul>
+
+    - |
+	'<%= -%>' removes tailing spaces and newlines.
+	This is for compatibiliy with ERB (and trim mode '-').
+	'<%= =%>' also removes tailing spaces and newlines, and this is
+	Erubis-original enhancement (it is cooler than '<%= -%>', isn't it?).
+
+	ex2.rhtml
+	   <div>
+	   <%= @var -%>          # or <%= @var =%>
+	   </div>
+
+	result (version 2.6.0):
+	    $ erubis -c '{var: "AAA\n"}' ex2.rhtml
+	    <div>
+	    AAA
+	    </div>
+
+	result (version 2.5.0):
+	    $ erubis -c '{var: "AAA\n"}' ex2.rhtml
+	    <div>
+	    AAA
+	    
+	    </div>
+
+    - |
+	Erubis::Eruby.load_file() now allows you to change cache filename.
+
+	eruby = Erubis::Eruby.load_file("ex3.rhtml",
+					:cachename=>'ex3.rhtml.cache')
+	
+
+    - |
+	Support of Ruby on Rails 2.0.2 improved.
+	
+
+
 - release:   2.5.0
   date:	     2008-01-30
   enhancements:

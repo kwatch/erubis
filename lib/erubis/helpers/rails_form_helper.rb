@@ -15,24 +15,29 @@ end
 
 module Erubis::Helpers::RailsFormHelper
 
+if ActionPack::VERSION::MAJOR == 1   ###  Rails 1.X
+  def pp_template_filename(basename)
+    return "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.html.erb"
+  end
+else                                 ###  Rails 2.X
   def pp_template_filename(basename)
     return "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.rhtml"
   end
+end
 
   def pp_render_partial(basename)
     basename = "_#{basename}" unless basename[0] == ?_
     filename = pp_template_filename(basename)
-    klass = Erubis::Helpers::RailsHelper::PreprocessingEruby
-    eruby = klass.new(File.read(filename))
-    return eruby.evaluate(self)
+    preprocessor = Erubis::::PreprocessingEruby.new(File.read(filename), :escape=>true)
+    return preprocessor.evaluate(self)
   end
 
-  def pp_error_on(object_name, method, &block)
+  def pp_error_on(object_name, method)
     s = ''
-    s << "<% _stag, _etag = _pp_error_tags(@#{object_name}.errors.on('#{method}'))%>"
-    s << "<%=_stag%>"
+    s << "<% _stag, _etag = _pp_error_tags(@#{object_name}.errors.on('#{method}')) %>"
+    s << "<%= _stag %>"
     s << yield(object_name, method)
-    s << "<%=_etag%>"
+    s << "<%= _etag %>"
     return s
   end
 
@@ -52,7 +57,7 @@ module Erubis::Helpers::RailsFormHelper
     unless options.key?(:value) || options.key?('value')
       options['value'] = _?("h @#{object_name}.#{method}")
     end
-    $stderr.puts "*** debug: pp_tag_helper(): options=#{options.inspect}"
+    #$stderr.puts "*** debug: pp_tag_helper(): options=#{options.inspect}"
     return pp_error_on(object_name, method) {
       s = __send__(helper, object_name, method, options)
       _pp_remove_error_div(s)

@@ -43,35 +43,29 @@ module Erubis
     module RailsHelper
 
       #cattr_accessor :init_properties
-      @@engine_class = Erubis::Eruby
-      #@@engine_class = Erubis::FastEruby
-
+      @@engine_class = ::Erubis::Eruby
+      #@@engine_class = ::Erubis::FastEruby
       def self.engine_class
         @@engine_class
       end
-
       def self.engine_class=(klass)
         @@engine_class = klass
       end
 
       #cattr_accessor :init_properties
       @@init_properties = {}
-
       def self.init_properties
         @@init_properties
       end
-
       def self.init_properties=(hash)
         @@init_properties = hash
       end
 
       #cattr_accessor :show_src
       @@show_src = nil
-
       def self.show_src
         @@show_src
       end
-
       def self.show_src=(flag)
         @@show_src = flag
       end
@@ -85,6 +79,27 @@ module Erubis
         @@preprocessing = flag
       end
 
+      ## covert eRuby string into ruby code
+      def self._convert_template(template)    # :nodoc:
+        #src = ::Erubis::Eruby.new(template).src
+        klass      = ::Erubis::Helpers::RailsHelper.engine_class
+        properties = ::Erubis::Helpers::RailsHelper.init_properties
+        show_src   = ::Erubis::Helpers::RailsHelper.show_src
+        show_src = ENV['RAILS_ENV'] == 'development' if show_src.nil?
+        ## preprocessing
+        if ::Erubis::Helpers::RailsHelper.preprocessing
+          preprocessor = ::Erubis::PreprocessingEruby.new(template, :escape=>true)
+          #template = self.instance_eval(preprocessor.src)
+          template = preprocessor.evaluate(self)
+          logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
+        end
+        ## convert into ruby code
+        src = klass.new(template, properties).src
+        #src.insert(0, '_erbout = ')
+        logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
+        src
+      end
+
     end
 
   end
@@ -92,27 +107,38 @@ module Erubis
 end
 
 
-method_name = 'convert_template_into_ruby_code'
-unless ActionView::Base.private_instance_methods.include?(method_name) ||
-       ActionView::Base.instance_methods.include?(method_name)
+class ActionView::Base   # :nodoc:
+  private
+  # convert template into ruby code
+  def convert_template_into_ruby_code(template)
+    #ERB.new(template, nil, @@erb_trim_mode).src
+    return ::Erubis::Helpers::RailsHelper._convert_template(template)
+  end
+end
 
-  require 'action_pack/version'
 
-  module ActionView  # :nodoc:
+require 'action_pack/version'
 
-    class Base  # :nodoc:
 
-      private
+if ActionPack::VERSION::MAJOR >= 2             ### Rails 2.X
 
-      # convert template into ruby code
-      def convert_template_into_ruby_code(template)
-        ERB.new(template, nil, @@erb_trim_mode).src
+
+  if ActionPack::VERSION::MINOR > 0 || ActionPack::VERSION::TINY >= 2   ### Rails 2.0.2 or higher
+
+    class ActionView::TemplateHandlers::Erubis
+      def compile(template)
+        return ::Erubis::Helpers::RailsHelper._convert_template(template)
       end
+    end
+    class ActionView::Base   # :nodoc:
+      register_default_template_handler :erb, TemplateHandlers::Erubis
+      register_template_handler :rhtml, TemplateHandlers::Erubis
+    end
 
+  else                                         ### Rails 2.0.0 or 2.0.1
 
-if ActionPack::VERSION::MAJOR >= 2   ###  Rails 2.X
-
-
+    class ActionView::Base   # :nodoc:
+      private
       # Method to create the source code for a given template.
       def create_template_source(extension, template, render_symbol, locals)
         if template_requires_setup?(extension)
@@ -131,23 +157,30 @@ if ActionPack::VERSION::MAJOR >= 2   ###  Rails 2.X
           #body = ERB.new(template, nil, @@erb_trim_mode).src
           body = convert_template_into_ruby_code(template)
         end
-
+        #
         @@template_args[render_symbol] ||= {}
         locals_keys = @@template_args[render_symbol].keys | locals
         @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
-
+        #
         locals_code = ""
         locals_keys.each do |key|
           locals_code << "#{key} = local_assigns[:#{key}]\n"
         end
-
+        #
         "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
       end
+    end
+
+  end #if
 
 
-elsif ActionPack::VERSION::MINOR > 12    ###  Rails 1.2
+else                                           ###  Rails 1.X
 
 
+  if ActionPack::VERSION::MINOR > 12           ###  Rails 1.2
+
+    class ActionView::Base   # :nodoc:
+      private
       # Create source code for given template
       def create_template_source(extension, template, render_symbol, locals)
         if template_requires_setup?(extension)
@@ -164,23 +197,24 @@ elsif ActionPack::VERSION::MINOR > 12    ###  Rails 1.2
           #body = ERB.new(template, nil, @@erb_trim_mode).src
           body = convert_template_into_ruby_code(template)
         end
-
+        #
         @@template_args[render_symbol] ||= {}
         locals_keys = @@template_args[render_symbol].keys | locals
         @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
-
+        #
         locals_code = ""
         locals_keys.each do |key|
           locals_code << "#{key} = local_assigns[:#{key}]\n"
         end
-
+        #
         "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
       end
+    end
 
+  else                                         ###  Rails 1.1
 
-elsif ActionPack::VERSION::MINOR <= 12   ###  Rails 1.1
-
-
+    class ActionView::Base   # :nodoc:
+      private
       # Create source code for given template
       def create_template_source(extension, template, render_symbol, locals)
         if template_requires_setup?(extension)
@@ -197,61 +231,30 @@ elsif ActionPack::VERSION::MINOR <= 12   ###  Rails 1.1
           #body = ERB.new(template, nil, @@erb_trim_mode).src
           body = convert_template_into_ruby_code(template)
         end
-
+        #
         @@template_args[render_symbol] ||= {}
         locals_keys = @@template_args[render_symbol].keys | locals
         @@template_args[render_symbol] = locals_keys.inject({}) { |h, k| h[k] = true; h }
-
+        #
         locals_code = ""
         locals_keys.each do |key|
           locals_code << "#{key} = local_assigns[:#{key}] if local_assigns.has_key?(:#{key})\n"
         end
-
+        #
         "def #{render_symbol}(local_assigns)\n#{locals_code}#{body}\nend"
       end
+    end
 
+  end #if
 
 end   ###
-
-
-    end
-
-  end
-
-end
-
-
-## set Erubis as eRuby compiler in Ruby on Rails instead of ERB
-class ActionView::Base  # :nodoc:
-  include Erubis::PreprocessingHelper
-  private
-  def convert_template_into_ruby_code(template)
-    #src = Erubis::Eruby.new(template).src
-    klass      = Erubis::Helpers::RailsHelper.engine_class
-    properties = Erubis::Helpers::RailsHelper.init_properties
-    show_src   = Erubis::Helpers::RailsHelper.show_src
-    show_src = ENV['RAILS_ENV'] == 'development' if show_src.nil?
-    ##----- preprocessing -------------------
-    if Erubis::Helpers::RailsHelper.preprocessing
-      preprocessor = Erubis::Helpers::RailsHelper::PreprocessingEruby.new(template, :escape=>true)
-      #template = self.instance_eval(preprocessor.src)
-      template = preprocessor.evaluate(self)
-      logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
-    end
-    ##----------------------------------------
-    src = klass.new(template, properties).src
-    #src.insert(0, '_erbout = ')
-    logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
-    src
-  end
-end
 
 
 ## make h() method faster
 module ERB::Util  # :nodoc:
   ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
   def h(value)
-    value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }
+    value.to_s.gsub(/[&<>"]/) {|s| ESCAPE_TABLE[s] }
   end
   module_function :h
 end
@@ -259,5 +262,5 @@ end
 
 ## finish
 ac = ActionController::Base.new
-ac.logger.info "** Erubis #{Erubis::VERSION}"
-#$stdout.puts "** Erubis #{Erubis::VERSION}"
+ac.logger.info "** Erubis #{::Erubis::VERSION}"
+#$stdout.puts "** Erubis #{::Erubis::VERSION}"
