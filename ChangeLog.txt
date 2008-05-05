@@ -2,12 +2,17 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-: Rev.108 (2008-05-05)
+: Rev.110 (2008-05-05)
+	.- [release] preparation for 2.6.0
+
+: Rev.109 (2008-05-05)
 	.- [bugfix] rails_form_helper.rb: change '::::' to '::'
 	.- [bugfix] rails_form_helper.rb: support Rails 2.0.2
 	.- [update] users-guide
 	.- [remove] contrib/action_view_base_rb.patch
-	.- [release] preparation for 2.6.0
+
+: Rev.108 (2008-05-05)
+	.- [update] users-guide
 
 : Rev.107 (2008-05-05)
 	.- [update] users-guide
