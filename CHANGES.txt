@@ -8,10 +8,15 @@
   enhancements:
 
     - |
+	Improved support of Ruby on Rails 2.0.2.
+	New class ActionView::TemplateHandlers::Erubis is defined and
+	registered as default handler of *.html.erb and *.rhtml.
+	
+    - |
 	'<%% %>' and '<%%= %>' are converted into '<% %>' and '<%= %>' respectively.
 	This is for compatibility with ERB.
 
-	ex1.rhtml
+	ex1.rhtml:
 	    <ul>
 	    <%% for item in @list %>
 	      <li><%%= item %></li>
@@ -27,12 +32,12 @@
 	    </ul>
 
     - |
-	'<%= -%>' removes tailing spaces and newlines.
-	This is for compatibiliy with ERB (and trim mode '-').
-	'<%= =%>' also removes tailing spaces and newlines, and this is
-	Erubis-original enhancement (it is cooler than '<%= -%>', isn't it?).
+	'<%= -%>' removes tail spaces and newlines.
+	This is for compatibiliy with ERB when trim mode is '-'.
+	'<%= =%>' also removes tail spaces and newlines, and this is
+	Erubis-original enhancement (cooler than '<%= -%>', isn't it?).
 
-	ex2.rhtml
+	ex2.rhtml:
 	   <div>
 	   <%= @var -%>          # or <%= @var =%>
 	   </div>
@@ -53,13 +58,9 @@
     - |
 	Erubis::Eruby.load_file() now allows you to change cache filename.
 
-	eruby = Erubis::Eruby.load_file("ex3.rhtml",
-					:cachename=>'ex3.rhtml.cache')
-	
-
-    - |
-	Support of Ruby on Rails 2.0.2 improved.
-	
+	ex.
+	    eruby = Erubis::Eruby.load_file("ex3.rhtml",
+		                            :cachename=>'ex3.rhtml.cache')
 
 
 - release:   2.5.0

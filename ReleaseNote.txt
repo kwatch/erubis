@@ -1,3 +1,77 @@
+$ [ANN] Erubis 2.6.0 released - a fast and extensible eRuby
+
+I have released Erubis 2.6.0.
+http://www.kuwata-lab.com/erubis/
+http://www.kuwata-lab.com/erubis/support/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+
+Enhancements from 2.5.0:
+
+
+  * Improved support of Ruby on Rails 2.0.2.
+    New class ActionView::TemplateHandlers::Erubis is defined and
+    registered as default handler of *.html.erb and *.rhtml.
+
+
+  * '<%% %>' and '<%%= %>' are converted into '<% %>' and '<%= %>' respectively.
+    This is for compatibility with ERB.
+
+    ex1.rhtml:
+        <ul>
+        <%% for item in @list %>
+          <li><%%= item %></li>
+        <%% end %>
+        </ul>
+
+    result:
+        $ erubis ex1.rhtml
+        <ul>
+        <% for item in @list %>
+          <li><%= item %></li>
+        <% end %>
+        </ul>
+
+
+  * '<%= -%>' removes tailing spaces and newlines.
+    This is for compatibiliy with ERB when trim mode is '-'.
+    '<%= =%>' also removes tailing spaces and newlines, and this is
+    Erubis-original enhancement (cooler than '<%= -%>', isn't it?).
+
+    ex2.rhtml:
+       <div>
+       <%= @var -%>          # or <%= @var =%>
+       </div>
+
+    result (version 2.6.0):
+        $ erubis -c '{var: "AAA\n"}' ex2.rhtml
+        <div>
+        AAA
+        </div>
+
+    result (version 2.5.0):
+        $ erubis -c '{var: "AAA\n"}' ex2.rhtml
+        <div>
+        AAA
+        
+        </div>
+
+
+  * Erubis::Eruby.load_file() now allows you to change cache filename.
+
+    ex.
+        eruby = Erubis::Eruby.load_file("ex3.rhtml",
+                                        :cachename=>'ex3.rhtml.cache')
+
+
+
+--
+regards,
+makoto kuwata
+
+
+.#--------------------------------------------------------------------------------
+
 $ [ANN] Erubis 2.5.0 released - a fast and extensible eRuby
 
 I have released Erubis 2.5.0.

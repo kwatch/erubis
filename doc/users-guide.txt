@@ -2727,6 +2727,64 @@ Notice that pp_form_for() is not provided.
 .$ Other Topics	| topics
 
 
+.$$ '<%= =%>' and '<%= -%>'
+
+Since 2.6.0, '<%= -%>' remove tail spaces and newline.
+This is for compatibiliy with ERB when trim mode is '-'.
+'<%= =%>' also removes tail spaces and newlines, and this is
+Erubis-original enhancement (cooler than '<%= -%>', isn't it?).
+
+.? tailnewline.rhtml
+.-------------------- tailnewline.rhtml.comment_filter
+<div>
+<%= @var -%>          # or <%= @var =%>
+</div>
+.--------------------
+
+.? result (version 2.5.0):
+.====================
+$ erubis -c '{var: "AAA\n"}' tailnewline.rhtml
+<div>
+AAA
+
+</div>
+.====================
+
+.? result (version 2.6.0):
+.==================== tail_260.result
+$ erubis -c '{var: "AAA\n"}' tailnewline.rhtml
+<div>
+AAA
+</div>
+.====================
+
+
+.$$ '<%% %>' and '<%%= %>'
+
+Since 2.6.0, '<%% %>' and '<%%= %>' are converted into '<% %>' and '<%= %>' respectively.
+This is for compatibility with ERB.
+
+.? doublepercent.rhtml:
+.--------------------
+<ul>
+<%% for item in @list %>
+  <li><%%= item %></li>
+<%% end %>
+</ul>
+.--------------------
+
+.? result:
+.====================
+$ erubis doublepercent.rhtml
+<ul>
+<% for item in @list %>
+  <li><%= item %></li>
+<% end %>
+</ul>
+.====================
+
+
+
 .$$ evaluate(context) v.s. result(binding)	| topics-context-vs-binding
 
 It is recommended to use 'Erubis::Eruby#evaluate(context)' instead of 'Erubis::Eruby#result(binding)' because Ruby's Binding object has some problems.
@@ -2898,6 +2956,7 @@ _buf.to_s
 .====================
 
 
+
 .$$ Syntax Checking		| topics-syntax
 
 Command-line option '-z' checks syntax. It is similar to 'erubis -x file.rhtml | ruby -wc', but it can take several file names.
@@ -2907,6 +2966,7 @@ Command-line option '-z' checks syntax. It is similar to 'erubis -x file.rhtml |
 $ erubis {{*-z*}} app/views/*/*.rhtml
 Syntax OK
 .====================
+
 
 
 .$$ File Caching		| topics-caching
@@ -2924,6 +2984,14 @@ cachename = filename + '.cache'
 if test(?f, cachename)
   puts "*** cache file '#{cachename}' created."
 end
+.--------------------
+
+Since 2.6.0, it is able to specify cache filename.
+
+.? specify cache filename.
+.--------------------
+filename = 'example.rhtml'
+eruby = Erubis::Eruby.load_file(filename, :cachename=>filename+'.cache')
 .--------------------
 
 Caching makes Erubis about 40-50 percent faster than no-caching.

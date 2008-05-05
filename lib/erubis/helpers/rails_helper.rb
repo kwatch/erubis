@@ -81,38 +81,13 @@ module Erubis
 
 
       ## define class for backward-compatibility
-      class PreprocessingEruby < Erubis::PreprocessingEruby
+      class PreprocessingEruby < Erubis::PreprocessingEruby   # :nodoc:
       end
 
 
       module TemplateConverter
         ## covert eRuby string into ruby code
         def _convert_template(template, view_obj=nil)    # :nodoc:
-          #$stderr.puts "*** debug: self.class.name=#{self.class.name}"
-          #                      #=> ActionView::TemplateHandlers::Erubis
-          #$stderr.puts "*** debug: self.instance_variables=#{self.instance_variables.sort.inspect}"
-          #                      #=> ["@view"]
-          #$stderr.puts "*** debug: @view.class.name=#{@view.class.name}"
-          #                      #=> ActionView::Base
-          #$stderr.puts "*** debug: @view.instance_variables=#{@view.instance_variables.sort.inspect}"
-          #                      #=> ["@assigns", "@assigns_added", "@controller", "@first_render", "@logger", "@template_format", "@view_paths"]
-          #                      #=> =["@_cookies", "@_flash", "@_headers", "@_params", "@_request", "@_response", "@_session", "@action_name", "@assigns", "@assigns_added", "@before_filter_chain_aborted", "@content_for_layout", "@controller", "@first_render", "@ignore_missing_templates", "@logger", "@request_origin", "@stocks", "@template", "@template_class", "@template_format", "@url", "@variables_added", "@view_paths"]
-          #$stderr.puts "*** debug: self.methods=#{(self.methods.sort - Object.new.methods).inspect}"
-          #                      #=> ["_convert_template", "compile", "render"]
-          ##$stderr.puts "*** debug: self.methods=#{(self.methods.sort).inspect}"
-          #$stderr.puts "*** debug: @views.methods=#{(@views.methods.sort - Object.new.methods).inspect}"
-          ##$stderr.puts "*** debug: @views.methods=#{(@views.methods.sort).inspect}"
-          #                      #=> ["&", "^", "to_f", "to_i", "|"]
-          #$stderr.puts "*** debug: @first_render.class.name=#{@first_render.class.name.inspect}"
-          #$stderr.puts "*** debug: @view.controller.instance_variables=#{@view.controller.instance_variables.inspect}"
-          #                      #=> ["@stocks", "@_headers", "@template", "@_params", "@performed_redirect", "@before_filter_chain_aborted", "@_flash", "@assigns", "@_session", "@request_origin", "@_request", "@variables_added", "@_response", "@performed_render", "@url", "@action_name", "@_cookies"]
-          #                      #=> ["@stocks", "@_headers", "@template", "@_params", "@performed_redirect", "@before_filter_chain_aborted", "@_flash", "@assigns", "@_session", "@request_origin", "@_request", "@variables_added", "@_response", "@performed_render", "@url", "@action_name", "@_cookies"]
-          #$stderr.puts "*** debug: @view.controller.methods=#{@view.controller.methods.sort.inspect}"
-          #$stderr.puts "*** debug: self.object_id=#{self.object_id}"
-          #$stderr.puts "*** debug: @view.controller.instance_variable_get('@template').object_id=#{@view.controller.instance_variable_get('@template').object_id}"
-          #$stderr.puts "*** debug: @view.controller.instance_variable_get('@template').class=#{@view.controller.instance_variable_get('@template').class}"
-
-
           #src = ::Erubis::Eruby.new(template).src
           klass      = ::Erubis::Helpers::RailsHelper.engine_class
           properties = ::Erubis::Helpers::RailsHelper.init_properties
@@ -125,12 +100,12 @@ module Erubis
             #template = self.instance_eval(preprocessor.src)
             self_ = view_obj ? view_obj.controller.instance_variable_get('@template') : self
             template = preprocessor.evaluate(self_)
-            logger.debug "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
+            logger.info "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
           end
           ## convert into ruby code
           src = klass.new(template, properties).src
           #src.insert(0, '_erbout = ')
-          logger.debug "** Erubis: src==<<'END'\n#{src}END\n" if show_src
+          logger.info "** Erubis: src==<<'END'\n#{src}END\n" if show_src
           return src
         end
       end

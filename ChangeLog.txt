@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.106 (2008-05-05)
+	.- [update] users-guide
+	.- [refactor] rails_helper.rb: remove debug messages
+	.- [change] rails_helper.rb: change 'logger.debug' to 'logger.info'
+
 : Rev.105 (2008-05-03)
 	.- [enhance] rails_helper.rb: improved Rails 2.0.2 support
 
