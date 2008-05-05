@@ -153,6 +153,10 @@ It has the following features.
   </li>
   <li><a href="#topics">Other Topics</a>
   <ul>
+    <li><a href="#'&lt;%= =%&gt;' and '&lt;%= -%&gt;'">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</a>
+    </li>
+    <li><a href="#'&lt;%% %&gt;' and '&lt;%%= %&gt;'">'&lt;%% %&gt;' and '&lt;%%= %&gt;'</a>
+    </li>
     <li><a href="#topics-context-vs-binding">evaluate(context) v.s. result(binding)</a>
     </li>
     <li><a href="#topics-fasteruby">Class Erubis::FastEruby</a>
@@ -2606,6 +2610,64 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
 
 <a name="topics"></a>
 <h2 class="section1">Other Topics</h2>
+<a name="'&lt;%= =%&gt;' and '&lt;%= -%&gt;'"></a>
+<h3 class="section2">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</h3>
+<p>Since 2.6.0, '&lt;%= -%&gt;' remove tail spaces and newline.
+This is for compatibiliy with ERB when trim mode is '-'.
+'&lt;%= =%&gt;' also removes tail spaces and newlines, and this is
+Erubis-original enhancement (cooler than '&lt;%= -%&gt;', isn't it?).
+</p>
+<a name="tailnewline.rhtml.comment_filter"></a>
+<div class="program_caption">
+tailnewline.rhtml</div>
+<pre class="program">&lt;div&gt;
+&lt;%= @var -%&gt;          # or &lt;%= @var =%&gt;
+&lt;/div&gt;
+</pre>
+<div class="terminal_caption">
+result (version 2.5.0):</div>
+<pre class="terminal">$ erubis -c '{var: "AAA\n"}' tailnewline.rhtml
+&lt;div&gt;
+AAA
+
+&lt;/div&gt;
+</pre>
+<a name="tail_260.result"></a>
+<div class="terminal_caption">
+result (version 2.6.0):</div>
+<pre class="terminal">$ erubis -c '{var: "AAA\n"}' tailnewline.rhtml
+&lt;div&gt;
+AAA
+&lt;/div&gt;
+</pre>
+<br>
+
+
+<a name="'&lt;%% %&gt;' and '&lt;%%= %&gt;'"></a>
+<h3 class="section2">'&lt;%% %&gt;' and '&lt;%%= %&gt;'</h3>
+<p>Since 2.6.0, '&lt;%% %&gt;' and '&lt;%%= %&gt;' are converted into '&lt;% %&gt;' and '&lt;%= %&gt;' respectively.
+This is for compatibility with ERB.
+</p>
+<div class="program_caption">
+doublepercent.rhtml:</div>
+<pre class="program">&lt;ul&gt;
+&lt;%% for item in @list %&gt;
+  &lt;li&gt;&lt;%%= item %&gt;&lt;/li&gt;
+&lt;%% end %&gt;
+&lt;/ul&gt;
+</pre>
+<div class="terminal_caption">
+result:</div>
+<pre class="terminal">$ erubis doublepercent.rhtml
+&lt;ul&gt;
+&lt;% for item in @list %&gt;
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+&lt;% end %&gt;
+&lt;/ul&gt;
+</pre>
+<br>
+
+
 <a name="topics-context-vs-binding"></a>
 <h3 class="section2">evaluate(context) v.s. result(binding)</h3>
 <p>It is recommended to use 'Erubis::Eruby#evaluate(context)' instead of 'Erubis::Eruby#result(binding)' because Ruby's Binding object has some problems.
@@ -2807,6 +2869,13 @@ cachename = filename + '.cache'
 if test(?f, cachename)
   puts "*** cache file '#{cachename}' created."
 end
+</pre>
+<p>Since 2.6.0, it is able to specify cache filename.
+</p>
+<div class="program_caption">
+specify cache filename.</div>
+<pre class="program">filename = 'example.rhtml'
+eruby = Erubis::Eruby.load_file(filename, :cachename=&gt;filename+'.cache')
 </pre>
 <p>Caching makes Erubis about 40-50 percent faster than no-caching.
 See <a href="#topics-benchmark">benchmark</a> for details.

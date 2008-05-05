@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.107 (2008-05-05)
+	.- [update] users-guide
+
 : Rev.106 (2008-05-05)
 	.- [update] users-guide
 	.- [refactor] rails_helper.rb: remove debug messages
