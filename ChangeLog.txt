@@ -2,13 +2,20 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-: Rev.107 (2008-05-05)
+: Rev.108 (2008-05-05)
+	.- [bugfix] rails_form_helper.rb: change '::::' to '::'
+	.- [bugfix] rails_form_helper.rb: support Rails 2.0.2
 	.- [update] users-guide
+	.- [remove] contrib/action_view_base_rb.patch
+	.- [release] preparation for 2.6.0
 
-: Rev.106 (2008-05-05)
+: Rev.107 (2008-05-05)
 	.- [update] users-guide
 	.- [refactor] rails_helper.rb: remove debug messages
 	.- [change] rails_helper.rb: change 'logger.debug' to 'logger.info'
+
+: Rev.106 (2008-05-04)
+	.- [enhance] rails_helper.rb: improved support of Rails 2.0.2.
 
 : Rev.105 (2008-05-03)
 	.- [enhance] rails_helper.rb: improved Rails 2.0.2 support

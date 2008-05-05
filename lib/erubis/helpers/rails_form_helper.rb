@@ -15,21 +15,24 @@ end
 
 module Erubis::Helpers::RailsFormHelper
 
+
 if ActionPack::VERSION::MAJOR == 1   ###  Rails 1.X
   def pp_template_filename(basename)
-    return "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.html.erb"
+    return "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.rhtml"
   end
 else                                 ###  Rails 2.X
   def pp_template_filename(basename)
-    return "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.rhtml"
+    fname = "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.html.erb"
+    return fname if test(?f, fname)
+    return  "#{RAILS_ROOT}/app/views/#{controller.controller_name}/#{basename}.rhtml"
   end
 end
 
   def pp_render_partial(basename)
     basename = "_#{basename}" unless basename[0] == ?_
     filename = pp_template_filename(basename)
-    preprocessor = Erubis::::PreprocessingEruby.new(File.read(filename), :escape=>true)
-    return preprocessor.evaluate(self)
+    preprocessor = _create_preprocessor(File.read(filename))
+    return preprocessor.evaluate(_preprocessing_context_object())
   end
 
   def pp_error_on(object_name, method)

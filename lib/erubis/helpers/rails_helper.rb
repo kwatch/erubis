@@ -87,19 +87,16 @@ module Erubis
 
       module TemplateConverter
         ## covert eRuby string into ruby code
-        def _convert_template(template, view_obj=nil)    # :nodoc:
+        def _convert_template(template)    # :nodoc:
           #src = ::Erubis::Eruby.new(template).src
           klass      = ::Erubis::Helpers::RailsHelper.engine_class
           properties = ::Erubis::Helpers::RailsHelper.init_properties
           show_src   = ::Erubis::Helpers::RailsHelper.show_src
           show_src = ENV['RAILS_ENV'] == 'development' if show_src.nil?
-          logger = view_obj ? view_obj.controller.logger : self.logger if show_src
           ## preprocessing
           if ::Erubis::Helpers::RailsHelper.preprocessing
-            preprocessor = PreprocessingEruby.new(template, :escape=>true)
-            #template = self.instance_eval(preprocessor.src)
-            self_ = view_obj ? view_obj.controller.instance_variable_get('@template') : self
-            template = preprocessor.evaluate(self_)
+            preprocessor = _create_preprocessor(template)
+            template = preprocessor.evaluate(_preprocessing_context_object())
             logger.info "** Erubis: preprocessed==<<'END'\n#{template}END\n" if show_src
           end
           ## convert into ruby code
@@ -107,6 +104,12 @@ module Erubis
           #src.insert(0, '_erbout = ')
           logger.info "** Erubis: src==<<'END'\n#{src}END\n" if show_src
           return src
+        end
+        def _create_preprocessor(template)
+          return PreprocessingEruby.new(template, :escape=>true)
+        end
+        def _preprocessing_context_object
+          return self
         end
       end
 
@@ -143,7 +146,13 @@ if ActionPack::VERSION::MAJOR >= 2             ### Rails 2.X
           include ::Erubis::Helpers::RailsHelper::TemplateConverter
           include ::Erubis::PreprocessingHelper
           def compile(template)
-            return _convert_template(template, @view)
+            return _convert_template(template)
+          end
+          def logger
+            return @view.controller.logger
+          end
+          def _preprocessing_context_object
+            return @view.controller.instance_variable_get('@template')
           end
         end
       end
