@@ -3,8 +3,17 @@
 # $Copyright$
 
 
+- release:   2.6.1
+  date: 2008-06-06
+  enhancements:
+
+    - |
+	Rails 2.1 support. (special thanks José Valim)
+
+
+
 - release:   2.6.0
-  date:
+  date: 2008-05-05
   enhancements:
 
     - |

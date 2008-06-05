@@ -1,3 +1,27 @@
+$ [ANN] Erubis 2.6.1 released - a fast and extensible eRuby
+
+I have released Erubis 2.6.1.
+http://www.kuwata-lab.com/erubis/
+http://www.kuwata-lab.com/support/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+
+Enhancements from 2.6.0:
+
+  * Rails 2.1 support. (special thanks Jos√© Valim)
+
+
+If you have got any errors or problems, please tell me.
+
+--
+regards,
+makoto kuwata
+
+
+.#--------------------------------------------------------------------------------
+
+
+
 $ [ANN] Erubis 2.6.0 released - a fast and extensible eRuby
 
 I have released Erubis 2.6.0.
@@ -873,14 +897,14 @@ See doc/users-guide.html in archive for details.
 
     $ eruby -x foo.eruby
     _out = '';  (1..3).each do |i| 
-    _out << " i = "; _out << ( i ).to_s; _out << "°¿n"
+    _out << " i = "; _out << ( i ).to_s; _out << "Ôººn"
      end
     $ eruby -x foo.eruby | ruby -wc
     Syntax OK
 
     $ eruby -s foo.eruby
     _out = '';  (1..3).each do |i| 
-    _out << " i = "; _out << ( i ).to_s; _out << "°¿n"
+    _out << " i = "; _out << ( i ).to_s; _out << "Ôººn"
      end
     _out
     $ erubis -s foo.rhtml | ruby -wc
