@@ -138,27 +138,60 @@ require 'action_pack/version'
 if ActionPack::VERSION::MAJOR >= 2             ### Rails 2.X
 
 
-  if ActionPack::VERSION::MINOR > 0 || ActionPack::VERSION::TINY >= 2   ### Rails 2.0.2 or higher
+  if ActionPack::VERSION::MINOR >=1            ### Rails 2.1 or higher
 
     module ActionView
       module TemplateHandlers # :nodoc:
-        class Erubis < TemplateHandler
-          include ::Erubis::Helpers::RailsHelper::TemplateConverter
-          include ::Erubis::PreprocessingHelper
+        class ErubisHandler < TemplateHandler
+          include Compilable
+          include Erubis::Helpers::RailsHelper::TemplateConverter
+          include Erubis::PreprocessingHelper
+          #
           def compile(template)
-            return _convert_template(template)
+            return _convert_template(template.source)   # template.is_a?(ActionView::Template)
           end
-          def logger
+          def logger  #:nodoc:
             return @view.controller.logger
           end
-          def _preprocessing_context_object
+          def _preprocessing_context_object  #:nodoc:
+            return @view.controller.instance_variable_get('@template')
+          end
+          #
+          def cache_fragment(block, name = {}, options = nil) #:nodoc:
+            @view.fragment_for(block, name, options) do
+              #eval(ActionView::Base.erb_variable, block.binding)
+              eval('_buf', block.binding)
+            end
+          end
+        end
+      end
+      handler_klass = TemplateHandlers::ErubisHandler
+      Template.register_default_template_handler :erb, handler_klass
+      Template.register_template_handler :rhtml, handler_klass
+    end
+
+  elsif ActionPack::VERSION::TINY >= 2         ### Rails 2.0.X (X >= 2)
+
+    module ActionView
+      module TemplateHandlers # :nodoc:
+        class ErubisHandler < TemplateHandler
+          include Erubis::Helpers::RailsHelper::TemplateConverter
+          include Erubis::PreprocessingHelper
+          def compile(template)
+            return _convert_template(template)     # template.is_a?(String)
+          end
+          def logger  #:nodoc:
+            return @view.controller.logger
+          end
+          def _preprocessing_context_object  #:nodoc:
             return @view.controller.instance_variable_get('@template')
           end
         end
       end
       Base.class_eval do
-        register_default_template_handler :erb, TemplateHandlers::Erubis
-        register_template_handler :rhtml, TemplateHandlers::Erubis
+        handler_klass = TemplateHandlers::ErubisHandler
+        register_default_template_handler :erb, handler_klass
+        register_template_handler :rhtml, handler_klass
       end
     end
 
@@ -274,17 +307,16 @@ else                                           ###  Rails 1.X
 
   end #if
 
-end   ###
-
-
-## make h() method faster
-module ERB::Util  # :nodoc:
-  ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
-  def h(value)
-    value.to_s.gsub(/[&<>"]/) {|s| ESCAPE_TABLE[s] }
+  ## make h() method faster (only for Rails 1.X)
+  module ERB::Util  # :nodoc:
+    ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
+    def h(value)
+      value.to_s.gsub(/[&<>"]/) {|s| ESCAPE_TABLE[s] }
+    end
+    module_function :h
   end
-  module_function :h
-end
+
+end   ###
 
 
 ## finish

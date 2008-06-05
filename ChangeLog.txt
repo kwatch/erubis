@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.112 (2008-06-06)
+	.- [enhance] helpers/rails_helper.rb: Rails 2.1 support
+
+: Rev.111 (2008-05-05)
+	.- [release] release 2.6.0
+
 : Rev.110 (2008-05-05)
 	.- [release] preparation for 2.6.0
 
