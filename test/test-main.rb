@@ -231,7 +231,21 @@ END
     basename = 'tmp.test_syntax2_%d.rhtml'
     filenames = [ basename % 0, basename % 1 ]
     errmsgs = []
-    errmsgs << <<'END'
+    if ruby19?
+      errmsgs << <<'END'
+3: syntax error, unexpected ']', expecting ')'
+ _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
+                                         ^
+-:4: syntax error, unexpected keyword_end, expecting ')'
+'; end 
+      ^
+-:7: syntax error, unexpected $end, expecting ')'
+END
+      errmsgs << <<'END'
+7: syntax error, unexpected $end, expecting keyword_end or keyword_endfor
+END
+    else
+      errmsgs << <<'END'
 3: syntax error, unexpected ']', expecting ')'
  _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
                                          ^
@@ -240,9 +254,10 @@ END
       ^
 -:7: syntax error, unexpected $end, expecting ')'
 END
-    errmsgs << <<'END'
+      errmsgs << <<'END'
 7: syntax error, unexpected $end, expecting kEND
 END
+    end
     #
     max = inputs.length
     (0...max).each do |i|

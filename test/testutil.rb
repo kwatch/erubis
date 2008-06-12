@@ -9,6 +9,21 @@ require 'yaml'
 require 'test/unit/testcase'
 
 
+
+def _ruby_ver_str  # :nodoc:
+  return /\d+\.\d+/.match(RUBY_VERSION)[0]
+end
+
+def ruby18?  # :nodoc:
+  _ruby_ver_str() == "1.8"
+end
+
+def ruby19?  # :nodoc:
+  _ruby_ver_str() > "1.8"
+end
+
+
+
 class Test::Unit::TestCase
 
 

@@ -472,7 +472,8 @@ module Erubis
 
     def check_syntax(filename, src)
       require 'open3'
-      stdin, stdout, stderr = Open3.popen3('ruby -wc')
+      command = (ENV['_'] || 'ruby') + ' -wc'   # ENV['_'] stores command name
+      stdin, stdout, stderr = Open3.popen3(command)
       stdin.write(src)
       stdin.close
       result = stdout.read()
