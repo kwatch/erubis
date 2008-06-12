@@ -52,34 +52,34 @@ module Erubis
       @single_options = "hvxztTSbeBXNUC"
       @arg_options    = "pcrfKIlaE" #C
       @option_names   = {
-        ?h => :help,
-        ?v => :version,
-        ?x => :source,
-        ?z => :syntax,
-        ?T => :unexpand,
-        ?t => :untabify,      # obsolete
-        ?S => :intern,
-        ?b => :bodyonly,
-        ?B => :binding,
-        ?p => :pattern,
-        ?c => :context,
-        #?C => :class,
-        ?e => :escape,
-        ?r => :requires,
-        ?f => :datafiles,
-        ?K => :kanji,
-        ?I => :includes,
-        ?l => :lang,
-        ?a => :action,
-        ?E => :enhancers,
-        ?X => :notext,
-        ?N => :linenum,
-        ?U => :unique,
-        ?C => :compact,
+        'h' => :help,
+        'v' => :version,
+        'x' => :source,
+        'z' => :syntax,
+        'T' => :unexpand,
+        't' => :untabify,      # obsolete
+        'S' => :intern,
+        'b' => :bodyonly,
+        'B' => :binding,
+        'p' => :pattern,
+        'c' => :context,
+        #'C' => :class,
+        'e' => :escape,
+        'r' => :requires,
+        'f' => :datafiles,
+        'K' => :kanji,
+        'I' => :includes,
+        'l' => :lang,
+        'a' => :action,
+        'E' => :enhancers,
+        'X' => :notext,
+        'N' => :linenum,
+        'U' => :unique,
+        'C' => :compact,
       }
       assert unless @single_options.length + @arg_options.length == @option_names.length
       (@single_options + @arg_options).each_byte do |ch|
-        assert unless @option_names.key?(ch)
+        assert unless @option_names.key?(ch.chr)
       end
     end
 
@@ -88,7 +88,7 @@ module Erubis
       ## parse command-line options
       options, properties = parse_argv(argv, @single_options, @arg_options)
       filenames = argv
-      options[?h] = true if properties[:help]
+      options['h'] = true if properties[:help]
       opts = Object.new
       arr = @option_names.collect { |ch, name| "def #{name}; @#{name}; end\n" }
       opts.instance_eval arr.join
@@ -287,7 +287,7 @@ module Erubis
       s = "enhancers:\n"
       list = []
       ObjectSpace.each_object(Module) do |m| list << m end
-      list.sort_by { |m| m.name }.each do |m|
+      list.sort_by { |m| m.name.to_s }.each do |m|
         next unless m.name =~ /\AErubis::(.*)Enhancer\z/
         name = $1
         desc = m.desc
@@ -319,7 +319,7 @@ module Erubis
           #
         else                  # options
           while optstr && !optstr.empty?
-            optchar = optstr[0]
+            optchar = optstr[0].chr
             optstr[0,1] = ""
             if arg_none.include?(optchar)
               options[optchar] = true

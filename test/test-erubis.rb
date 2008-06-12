@@ -157,12 +157,16 @@ END
   class Dummy
   end
 
+  def _class_has_instance_method(klass, method)
+    return klass.instance_methods.collect{|m| m.to_s}.include?(method.to_s)
+  end
+
   def test_def_method1
     s = "<%for i in list%>i=<%=i%>\n<%end%>"
     eruby = Erubis::Eruby.new(s)
-    assert(! Dummy.instance_methods.include?('render'))
+    assert(! _class_has_instance_method(Dummy, 'render'))
     eruby.def_method(Dummy, 'render(list)', 'foo.rhtml')
-    assert(Dummy.instance_methods.include?('render'))
+    assert(_class_has_instance_method(Dummy, 'render'))
     actual = Dummy.new().render(%w[1 2 3])
     assert_equal("i=1\ni=2\ni=3\n", actual)
   end
@@ -175,7 +179,7 @@ END
     assert eruby.respond_to?(:render)
     actual = eruby.render([1, 2, 3])
     assert_equal("i=1\ni=2\ni=3\n", actual)
-    assert !(eruby.class.instance_methods.include? :render)
+    assert(! _class_has_instance_method(eruby.class, 'render'))
   end
 
   def test_evaluate_creates_proc
@@ -202,6 +206,8 @@ END
   #  _y = eval 'y', TOPLEVEL_BINDING
   #  puts "*** actual=#{actual.inspect}, x=#{_x.inspect}, y=#{_y.inspect}"
   #end
+
+  self.post_definition()
 
 end
 

@@ -1,6 +1,15 @@
 .=document:	ChangeLog
+.# -*- coding: utf-8 -*-
 .?lastupdate:	$Date$
 .?version:	$Rev$
+
+: Rev.115 (2008-06-12)
+	.- [enhance] test/testutil.rb: add TestCase::post_definition
+	.- [enhance] Ruby 1.9 support
+	.- [change] Evaluator#evaluate() changed not to use Erubis::EMPTY_BINDING to support Ruby1.9
+
+: Rev.114 (2008-06-06)
+	.- [release] 2.6.1
 
 : Rev.113 (2008-06-06)
 	.- [release] preparation for 2.6.1

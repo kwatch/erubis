@@ -53,4 +53,6 @@ class KwarkUsersGuideTest < Test::Unit::TestCase
   end
 
 
+  self.post_definition()
+
 end

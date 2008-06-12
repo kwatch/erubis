@@ -29,6 +29,9 @@ class EnginesTest < Test::Unit::TestCase
     assert_text_equal(@expected, actual)
   end
 
+
+  self.post_definition()
+
 end
 
 __END__

@@ -43,7 +43,8 @@ module Erubis
           src << " _buf << (" << code << ").to_s;"
         end
       end
-      rest = $' || input
+      #rest = $' || input                        # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]   # ruby1.9
       #src << " _buf << '" << escape_text(rest) << "';"
       rest.gsub!(/['\\]/, '\\\\\&')
       src << " _buf << '" << rest << "';" unless rest.empty?
@@ -113,7 +114,8 @@ module Erubis
           end
         end
       end
-      rest = $' || input
+      #rest = $' || input                        # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]   # ruby1.9
       #src << " _buf << '" << escape_text(rest) << "';"
       rest.gsub!(/['\\]/, '\\\\\&')
       src << " _buf << '" << rest << "';" unless rest.empty?

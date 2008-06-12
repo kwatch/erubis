@@ -1,3 +1,6 @@
+.# -*- coding: utf-8 -*-
+
+
 $ [ANN] Erubis 2.6.1 released - a fast and extensible eRuby
 
 I have released Erubis 2.6.1.

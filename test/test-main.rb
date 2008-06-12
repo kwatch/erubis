@@ -22,6 +22,9 @@ class StringWriter < String
   def write(arg)
     self << arg
   end
+  def flush(*args)
+    # pass
+  end
 end
 
 class Erubis::Main
@@ -144,6 +147,7 @@ END
     end
     if @filename.nil?
       method = (caller[0] =~ /in `(.*)'/) && $1    #'
+      method =~ /block in (.*)/ and method = $1    # for Ruby 1.9
       @filename = "tmp.#{method}"
     end
     File.open(@filename, 'w') { |f| f.write(@input) } if @filename
@@ -649,5 +653,7 @@ END
     _test()
   end
 
+
+  self.post_definition()
 
 end

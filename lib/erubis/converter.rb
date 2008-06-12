@@ -168,7 +168,8 @@ module Erubis
           end
         end
       end
-      rest = $' || input     # add input when no matched
+      #rest = $' || input                        # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]   # ruby1.9
       add_text(src, rest)
     end
 
@@ -264,7 +265,8 @@ module Erubis
           add_pi_expr(codebuf, expr1 || expr2, indicator1 || indicator2)
         end
       end
-      rest = $' || input
+      #rest = $' || input                        # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]   # ruby1.9
       add_text(codebuf, rest)
     end
 

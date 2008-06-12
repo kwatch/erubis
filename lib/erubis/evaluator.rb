@@ -54,20 +54,25 @@ module Erubis
     def result(_binding_or_hash=TOPLEVEL_BINDING)
       _arg = _binding_or_hash
       if _arg.is_a?(Hash)
-        ## load _context data as local variables by eval
-        #eval _arg.keys.inject("") { |s, k| s << "#{k.to_s} = _arg[#{k.inspect}];" }
-        eval _arg.collect{|k,v| "#{k} = _arg[#{k.inspect}]; "}.join
-        _arg = binding()
+        _b = binding()
+        eval _arg.collect{|k,v| "#{k} = _arg[#{k.inspect}]; "}.join, _b
+      elsif _arg.is_a?(Binding)
+        _b = _arg
+      elsif _arg.nil?
+        _b = binding()
+      else
+        raise ArgumentError.new("#{self.class.name}#result(): argument should be Binding or Hash but passed #{_arg.class.name} object.")
       end
-      return eval(@src, _arg, (@filename || '(erubis)'))
+      return eval(@src, _b, (@filename || '(erubis'))
     end
 
     ## invoke context.instance_eval(@src)
-    def evaluate(context=Context.new)
-      context = Context.new(context) if context.is_a?(Hash)
-      #return context.instance_eval(@src, @filename || '(erubis)')
-      @_proc ||= eval("proc { #{@src} }", Erubis::EMPTY_BINDING, @filename || '(erubis)')
-      return context.instance_eval(&@_proc)
+    def evaluate(_context=Context.new)
+      _context = Context.new(_context) if _context.is_a?(Hash)
+      #return _context.instance_eval(@src, @filename || '(erubis)')
+      #@_proc ||= eval("proc { #{@src} }", Erubis::EMPTY_BINDING, @filename || '(erubis)')
+      @_proc ||= eval("proc { #{@src} }", binding(), @filename || '(erubis)')
+      return _context.instance_eval(&@_proc)
     end
 
     ## if object is an Class or Module then define instance method to it,

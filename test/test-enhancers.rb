@@ -98,6 +98,8 @@ class EnhancersTest < Test::Unit::TestCase
   end
 
 
+  self.post_definition()
+
 end
 
 __END__

@@ -21,7 +21,7 @@ class Test::Unit::TestCase
     end
     # untabify
     unless options[:tabify] == false
-      s = s.inject('') do |sb, line|
+      s = s.split(/^/).inject('') do |sb, line|
         sb << line.gsub(/([^\t]{8})|([^\t]*)\t/n) { [$+].pack("A8") }
       end
     end
@@ -68,6 +68,17 @@ class Test::Unit::TestCase
       s  <<  "end\n"
       $stderr.puts "*** load_yaml_testdata(): eval_str=<<'END'\n#{s}END" if $DEBUG
       self.module_eval s
+    end
+  end
+
+
+  def self.post_definition
+    if ENV['TEST']
+      target = "test_#{ENV['TEST']}"
+      self.instance_methods.each do |method_name|
+        m = method_name.to_s
+        private m if m =~ /\Atest_/ && m != target
+      end
     end
   end
 

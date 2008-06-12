@@ -360,7 +360,8 @@ module Erubis
           add_expr(src, code, indicator)
         end
       end
-      rest = $' || input
+      #rest = $' || input                      # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]  # ruby1.9
       add_text(src, rest)
       add_postamble(src)
       return src
@@ -419,11 +420,14 @@ module Erubis
 
     def add_text(src, text)
       return unless text
+      m = nil
       text.scan(@bipattern_regexp) do |txt, indicator, code|
+        m = Regexp.last_match
         super(src, txt)
         add_expr(src, code, '=' + indicator)
       end
-      rest = $' || text
+      #rest = $' || text                    # ruby1.8
+      rest = m ? text[m.end(0)..-1] : text  # ruby1.9
       super(src, rest)
     end
 
@@ -465,7 +469,8 @@ module Erubis
           add_stmt(src, line)
         end
       end
-      rest = pos == 0 ? text : $'  # or $' || text
+      #rest = pos == 0 ? text : $'             # ruby1.8
+      rest = pos == 0 ? text : text[pos..-1]   # ruby1.9
       unless text2.empty?
         text2 << rest if rest
         rest = text2
@@ -535,7 +540,9 @@ module Erubis
     HEADER_FOOTER_PATTERN = /(.*?)(^[ \t]*)?<!--\#(\w+):(.*?)\#-->([ \t]*\r?\n)?/m
 
     def add_text(src, text)
+      m = nil
       text.scan(HEADER_FOOTER_PATTERN) do |txt, lspace, word, content, rspace|
+        m = Regexp.last_match
         flag_trim = @trim && lspace && rspace
         super(src, txt)
         content = "#{lspace}#{content}#{rspace}" if flag_trim
@@ -543,7 +550,8 @@ module Erubis
         instance_variable_set("@#{word}", content)
         super(src, rspace) if !flag_trim && rspace
       end
-      rest = $' || text
+      #rest = $' || text                    # ruby1.8
+      rest = m ? text[m.end(0)..-1] : text  # ruby1.9
       super(src, rest)
     end
 
@@ -636,7 +644,8 @@ module Erubis
           end
         end
       end
-      rest = $' || input     # add input when no matched
+      #rest = $' || input                       # ruby1.8
+      rest = pos == 0 ? input : input[pos..-1]  # ruby1.9
       _add_text_to_str(str, rest)
       add_text(src, str)
     end
