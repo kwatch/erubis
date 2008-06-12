@@ -1,6 +1,19 @@
+# -*- coding: utf-8 -*-
 # $Rev$
 # $Release:$
 # $Copyright$
+
+- release:   2.6.2
+  date:	2008-06-12
+  enhancements:
+
+    - |
+	Ruby 1.9 support.
+
+  bugfixes:
+
+    - |
+	Remove empty file ('lib/erubis/convert.rb:'). (Thanks to Tim Morgan)
 
 
 - release:   2.6.1

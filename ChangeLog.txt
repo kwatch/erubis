@@ -3,6 +3,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.116 (2008-06-12)
+	.- [update] README.txt, users-guide, CHANGES.txt
+
 : Rev.115 (2008-06-12)
 	.- [enhance] test/testutil.rb: add TestCase::post_definition
 	.- [enhance] Ruby 1.9 support

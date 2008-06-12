@@ -20,6 +20,7 @@ Erubis is an implementation of eRuby. It has the following features.
 * Ruby on Rails support
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+Erubis now supports Ruby 1.9.
 
 See doc/users-guide.html for details.
 

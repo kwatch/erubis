@@ -38,6 +38,7 @@ It has the following features.
 .#.* {{<mod_ruby support|#topcs-modruby>}}
 
 Erubis is implemented in pure Ruby.  It requires Ruby 1.8 or higher.
+Erubis now supports Ruby 1.9.
 
 
 
