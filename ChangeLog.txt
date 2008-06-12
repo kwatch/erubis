@@ -3,8 +3,15 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
-: Rev.116 (2008-06-12)
+: Rev.118 (2008-06-13)
+	.- [update] users-guide
+	.- [release] preparation for 2.6.2
+
+: Rev.117 (2008-06-12)
 	.- [update] README.txt, users-guide, CHANGES.txt
+
+: Rev.116 (2008-06-12)
+	.- [change] use "#{ENV['_']} -wc" instead of 'ruby -wc' to check syntax (-z) if ENV['_'] is not nil
 
 : Rev.115 (2008-06-12)
 	.- [enhance] test/testutil.rb: add TestCase::post_definition

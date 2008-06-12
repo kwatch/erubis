@@ -13,7 +13,8 @@
   bugfixes:
 
     - |
-	Remove empty file ('lib/erubis/convert.rb:'). (Thanks to Tim Morgan)
+	Fixed a bug that it is not able to install Erubis on windows
+	(Thanks to Tim Morgan and Allen).
 
 
 - release:   2.6.1

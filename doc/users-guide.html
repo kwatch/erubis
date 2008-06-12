@@ -257,6 +257,7 @@ puts <strong>eruby.src</strong>                      # print script source
 puts "---------- result ----------"
 list = ['aaa', 'bbb', 'ccc']
 puts <strong>eruby.result(binding())</strong>        # get result
+## or puts eruby.result(<strong>:list=&gt;list</strong>)  # or pass Hash instead of Binding
 
 ## # or
 ## eruby = Erubis::Eruby.new
@@ -621,22 +622,22 @@ This means that data is passed into eRuby script via local variables when Eruby:
 </p>
 <div class="program_caption">
 definition of result(binding) and evaluate(context)</div>
-<pre class="program">def result(_binding)
+<pre class="program">def result(_binding=TOPLEVEL_BINDING)
   if _binding.is_a?(Hash)
     # load hash data as local variable
     _h = _binding
-    eval _h.keys.inject("") {|s,k| s &lt;&lt; "#{k} = _h[#{k.inspect}];"}
     _binding = binding()
+    eval _h.collect{|k,v| "#{k} = _h[#{k.inspect}];"}.join, _binding
   end
   return <strong>eval(@src, _binding)</strong>
 end
 
-def evaluate(_context)
+def evaluate(_context=Erubis::Context.new)
   if _context.is_a?(Hash)
     # convert hash object to Context object
     _hash = _context
     _context = Erubis::Context.new
-    _hash.each { |key, val| _context[key] = val }
+    _hash.each {|k, v| _context[k] = v }
   end
   return <strong>_context.instance_eval(@src)</strong>
 end
