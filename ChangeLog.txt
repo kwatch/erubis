@@ -1,7 +1,13 @@
-.=document:	ChangeLog
+ l.=document:	ChangeLog
 .# -*- coding: utf-8 -*-
 .?lastupdate:	$Date$
 .?version:	$Rev$
+
+: Rev.120 (2008-06-13)
+	.- [update] ReleasNote, CHANGES
+
+: Rev.119 (2008-06-13)
+	.- [release] 2.6.2
 
 : Rev.118 (2008-06-13)
 	.- [update] users-guide

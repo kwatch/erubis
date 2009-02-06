@@ -1,6 +1,33 @@
 .# -*- coding: utf-8 -*-
 
 
+$ [ANN] Erubis 2.6.2 released - a fast and extensible eRuby
+
+I have released Erubis 2.6.2.
+http://www.kuwata-lab.com/erubis/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+
+Enhancements from 2.6.1:
+
+  * Ruby 1.9 support
+
+Bugfixes from 2.6.1:
+
+  * Fixed installation problem on Windows (Thanks to Tim Morgan and Allen).
+    
+
+
+If you have got any errors or problems, please tell me.
+
+--
+regards,
+makoto kuwata
+
+
+.#--------------------------------------------------------------------------------
+
+
 $ [ANN] Erubis 2.6.1 released - a fast and extensible eRuby
 
 I have released Erubis 2.6.1.
