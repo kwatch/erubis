@@ -326,7 +326,7 @@ module Erubis
             elsif arg_required.include?(optchar)
               arg = optstr.empty? ? argv.shift : optstr
               unless arg
-                mesg = "-#{optchar.chr}: #{@option_args[optchar]} required."
+                mesg = "-#{optchar}: #{@option_args[optchar]} required."
                 raise CommandOptionError.new(mesg)
               end
               options[optchar] = arg
@@ -336,7 +336,7 @@ module Erubis
               options[optchar] = arg
               optstr = nil
             else
-              raise CommandOptionError.new("-#{optchar.chr}: unknown option.")
+              raise CommandOptionError.new("-#{optchar}: unknown option.")
             end
           end
         end
@@ -399,7 +399,7 @@ module Erubis
           enhancers << Erubis.const_get("#{shortname}Enhancer")
         end
       rescue NameError
-        raise CommandOptionError.new("#{shortname}: no such Enhancer (try '-E' to show all enhancers).")
+        raise CommandOptionError.new("#{shortname}: no such Enhancer (try '-h' to show all enhancers).")
       end
       return enhancers
     end

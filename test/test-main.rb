@@ -617,6 +617,30 @@ END
   end
 
 
+  def test_invalid_option  # -1 (invalid option)
+    @input = INPUT
+    @options = '-1'
+    ex = assert_raise(Erubis::CommandOptionError) { _test() }
+    assert_equal("-1: unknown option.", ex.message)
+  end
+
+
+  def test_invalid_enhancer  # -E hoge
+    @options = '-E hoge'
+    errmsg = "hoge: no such Enhancer (try '-h' to show all enhancers)."
+    ex = assert_raise(Erubis::CommandOptionError) { _test() }
+    assert_equal(errmsg, ex.message)
+  end
+
+
+  def test_invalid_lang  # -l hoge
+    @options = '-l hoge'
+    errmsg = "-l hoge: invalid language name (class Erubis::Ehoge not found)."
+    ex = assert_raise(Erubis::CommandOptionError) { _test() }
+    assert_equal(errmsg, ex.message)
+  end
+
+
   def test_pi1  # --pi -x
     @input = PI_INPUT
     @expected = PI_SRC

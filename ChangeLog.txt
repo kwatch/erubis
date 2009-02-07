@@ -1,7 +1,10 @@
- l.=document:	ChangeLog
-.# -*- coding: utf-8 -*-
+.=document:	ChangeLog
 .?lastupdate:	$Date$
 .?version:	$Rev$
+
+: Rev.121 (2009-02-07)
+	.- [change] change '#!/usr/bin/ruby' to '#!/usr/bin/env ruby' in 'bin/erubis'
+	.- [bugfix] change 'optchar.chr' to 'optchar' in 'main.rb'.
 
 : Rev.120 (2008-06-13)
 	.- [update] ReleasNote, CHANGES
