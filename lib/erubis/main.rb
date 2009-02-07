@@ -326,7 +326,7 @@ module Erubis
             elsif arg_required.include?(optchar)
               arg = optstr.empty? ? argv.shift : optstr
               unless arg
-                mesg = "-#{optchar}: #{@option_args[optchar]} required."
+                mesg = "-#{optchar}: #{@option_names[optchar]} required."
                 raise CommandOptionError.new(mesg)
               end
               options[optchar] = arg
@@ -395,7 +395,8 @@ module Erubis
       enhancers = []
       shortname = nil
       begin
-        enhancer_names.split(/,/).each do |shortname|
+        enhancer_names.split(/,/).each do |name|
+          shortname = name
           enhancers << Erubis.const_get("#{shortname}Enhancer")
         end
       rescue NameError

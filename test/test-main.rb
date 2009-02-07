@@ -152,17 +152,8 @@ END
     end
     File.open(@filename, 'w') { |f| f.write(@input) } if @filename
     begin
-      #if @options.is_a?(Array)
-      #  command = "ruby #{$script} #{@options.join(' ')} #{@filename}"
-      #else
-      #  command = "ruby #{$script} #{@options} #{@filename}"
-      #end
-      #output = `#{command}`
-      if @options.is_a?(Array)
-        argv = @options + [ @filename ]
-      else
-        argv = "#{@options} #{@filename}".split
-      end
+      argv = @options.is_a?(Array) ? @options.dup : @options.split
+      argv << @filename if @filename
       $stdout = output = StringWriter.new
       Erubis::Main.new.execute(argv)
     ensure
@@ -171,6 +162,12 @@ END
     end
     assert_text_equal(@expected, output)
   end
+
+  def _error_test(errclass, errmsg)
+    ex = assert_raise(errclass) { _test() }
+    assert_equal(errmsg, ex.message)
+  end
+
 
   def test_help      # -h
     @options = '-h'
@@ -242,7 +239,7 @@ END
 -:7: syntax error, unexpected $end, expecting ')'
 END
       errmsgs << <<'END'
-7: syntax error, unexpected $end, expecting keyword_end or keyword_endfor
+7: syntax error, unexpected $end, expecting keyword_end
 END
     else
       errmsgs << <<'END'
@@ -620,24 +617,30 @@ END
   def test_invalid_option  # -1 (invalid option)
     @input = INPUT
     @options = '-1'
-    ex = assert_raise(Erubis::CommandOptionError) { _test() }
-    assert_equal("-1: unknown option.", ex.message)
+    _error_test(Erubis::CommandOptionError, "-1: unknown option.")
   end
 
 
   def test_invalid_enhancer  # -E hoge
     @options = '-E hoge'
     errmsg = "hoge: no such Enhancer (try '-h' to show all enhancers)."
-    ex = assert_raise(Erubis::CommandOptionError) { _test() }
-    assert_equal(errmsg, ex.message)
+    _error_test(Erubis::CommandOptionError, errmsg)
   end
 
 
   def test_invalid_lang  # -l hoge
     @options = '-l hoge'
     errmsg = "-l hoge: invalid language name (class Erubis::Ehoge not found)."
-    ex = assert_raise(Erubis::CommandOptionError) { _test() }
-    assert_equal(errmsg, ex.message)
+    _error_test(Erubis::CommandOptionError, errmsg)
+  end
+
+
+  def test_missing_argument  # -E
+    @filename = false
+    @options = '-E'
+    _error_test(Erubis::CommandOptionError, "-E: enhancers required.")
+    @options = '-l'
+    _error_test(Erubis::CommandOptionError, "-l: lang required.")
   end
 
 

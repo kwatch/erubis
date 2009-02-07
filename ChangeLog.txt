@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.122 (2009-02-07)
+	.- [bugfix] report argument name when option argument is missing
+	.- [bugfix] enhacner class name was not reported when not found (Ruby 1.9.1)
+	.- [change] add _error_test() to 'test-main.rb'
+
 : Rev.121 (2009-02-07)
 	.- [change] change '#!/usr/bin/ruby' to '#!/usr/bin/env ruby' in 'bin/erubis'
 	.- [bugfix] change 'optchar.chr' to 'optchar' in 'main.rb'.
