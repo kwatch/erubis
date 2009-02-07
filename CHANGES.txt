@@ -3,6 +3,18 @@
 # $Release:$
 # $Copyright$
 
+
+- release:   2.6.3
+  date: 2009-02-07
+  bugfixes:
+
+    - Enhancer name was not displayed in Ruby 1.9.1 when it was missing.
+
+    - Command option argument name was not displayed correctly as a part of error message.
+
+    - MethoNotFound error was raised when invalid option was specified.
+	
+
 - release:   2.6.2
   date:	2008-06-12
   enhancements:

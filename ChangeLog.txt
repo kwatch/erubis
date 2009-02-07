@@ -2,6 +2,11 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.123 (2009-02-07)
+	.- [change] packages are now built under 'build' directory
+	.- [change] year of copyright is changed to '2006-2009'.
+	.- [update] CHANGES.txt, ReleaseNote.txt
+
 : Rev.122 (2009-02-07)
 	.- [bugfix] report argument name when option argument is missing
 	.- [bugfix] enhacner class name was not reported when not found (Ruby 1.9.1)

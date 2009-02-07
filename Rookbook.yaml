@@ -5,8 +5,8 @@
 ###
 
 properties:
-  - release    :  2.6.0
-  - copyright  :  copyright(c) 2006-2008 kuwata-lab all rights reserved.
+  - release    :  2.6.3
+  - copyright  :  copyright(c) 2006-2009 kuwata-lab all rights reserved.
 
 
 parameters:
@@ -33,7 +33,7 @@ recipes:
 
   - product:	:packages
     desc:       create packages
-    ingreds:	[ $(base).tar.gz, $(base).tar.bz2, $(base).zip, $(base2).gem ]
+    ingreds:	[ :clean, build/$(base).tar.gz, build/$(base).tar.bz2, build/$(base).zip, build/$(base2).gem ]
 
   - product:	:doc
     method*: |
@@ -49,7 +49,7 @@ recipes:
 
   - product:	:clean
     method*: |
-	rm_rf '$(project)-*.*', '$(project)-*.gem', 'lib/**/*.rbc', apidocdir
+	rm_rf '$(project)-*.*', '$(project)-*.gem', '{lib,test}/**/*.rbc', apidocdir
 
   - product:	:apidoc
     desc:	create api document by RDoc
@@ -76,53 +76,53 @@ recipes:
 	chmod 0755, 'bin/*'
 
 
-  - product:    $(project)-*.tar.bz2
+  - product:    build/$(project)-*.tar.bz2
     desc:	create *.tar.bz2
-    ingreds:    [ $(project)-$(1) ]
+    ingreds:    [ build/$(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #tar_cjf @product, @ingred
 	sys "tar cjf #{@product} #{@ingred}"
 
-  - product:	$(project)-*.tar.gz
+  - product:	build/$(project)-*.tar.gz
     desc:	create *.tar.gz
-    ingreds:	[ $(project)-$(1) ]
+    ingreds:	[ build/$(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #tar_czf @product, @ingred
 	sys "tar czf #{@product} #{@ingred}"
 
-  - product:	$(project)-*.zip
+  - product:	build/$(project)-*.zip
     desc:	create *.zip
-    ingreds:	[ $(project)-$(1) ]
+    ingreds:	[ build/$(project)-$(1) ]
     method*: |
         rm_f @product if test(?f, @product)
         #zip_r @product, @ingred
         sys "zip -qr9 #{@product} #{@ingred}"
 
 
-  - product:    $(project)-*.gem
+  - product:    build/$(project)-*.gem
     desc:	create *.gem
-    ingreds:	[ $(project)-$(1) ]
+    ingreds:	[ build/$(project)-$(1) ]
     method*: |
         dir = @ingred
 	cd dir do
-          Gem.manage_gems
+	  #Gem.manage_gems
 	  require 'rubygems/gem_runner'
           Gem::GemRunner.new.run ['build', '$(project).gemspec']
 	end
-	mv "#{dir}/#{@product}", "."
+	mv "#{dir}/#{File.basename(@product)}", "build"
 
   - product:	$(guide)
     method*: |
 	chdir "doc" do sys "rook :all" end
 
-  - product:    $(project)-*
+  - product:    build/$(project)-*
     ingreds:	[ $(text_files), $(doc_files), :apidoc ]
     method*: |
         comment 'delete and create directory'
 	release = '$(1)'      # @matches[1]
-	dir = "$(project)-#{release}"
+	dir = "build/$(project)-#{release}"
 	rm_rf dir if test(?d, dir)
 	mkdir_p dir
 	#

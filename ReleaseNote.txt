@@ -1,5 +1,30 @@
 .# -*- coding: utf-8 -*-
 
+$ [ANN] Erubis 2.6.3 released - a fast and extensible eRuby
+
+I have released Erubis 2.6.3.
+http://www.kuwata-lab.com/erubis/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+This is just bug fix release.
+
+Bugfixes from 2.6.2:
+
+  * Enhancer name was not displayed in Ruby 1.9.1 when it was missing.
+
+  * Command option argument name was not displayed correctly as a part of error message.
+
+  * MethoNotFound error was raised when invalid option was specified.
+
+
+I'll support '<% =%>' (used in Merb) in the next release of Erubis.
+
+--
+regards,
+makoto kuwata
+
+.#--------------------------------------------------------------------------------
+
 
 $ [ANN] Erubis 2.6.2 released - a fast and extensible eRuby
 
