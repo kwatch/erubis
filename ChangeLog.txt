@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.125 (2009-02-08)
+	.- [enhance] Rails 2.2 support
+
+: Rev.124 (2009-02-07)
+	.- [release] 2.6.3
+
 : Rev.123 (2009-02-07)
 	.- [change] packages are now built under 'build' directory
 	.- [change] year of copyright is changed to '2006-2009'.
