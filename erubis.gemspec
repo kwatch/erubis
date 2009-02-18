@@ -6,7 +6,7 @@
 ### $Copyright$
 ###
 
-require 'rubygems'
+require 'rubygems' unless defined?(Gem)
 
 spec = Gem::Specification.new do |s|
   ## package information
@@ -61,6 +61,10 @@ if (RUBY_VERSION == '1.8.3')
 end
 
 if $0 == __FILE__
-  Gem::manage_gems
-  Gem::Builder.new(spec).build
+  #Gem::manage_gems
+  #Gem::Builder.new(spec).build
+  require 'rubygems/gem_runner'
+  Gem::GemRunner.new.run ['build', '$(project).gemspec']
 end
+
+spec

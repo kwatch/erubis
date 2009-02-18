@@ -2,6 +2,10 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.128 (2009-02-18)
+	.- [change] update gemspec file
+	.- [release] preparation for 2.6.4
+
 : Rev.127 (2009-02-18)
 	.- [change] rails_helper.rb changed to use ActionController::Base.new.logger
 
