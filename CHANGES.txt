@@ -4,6 +4,15 @@
 # $Copyright$
 
 
+- release:   2.6.4
+  date: 2009-02-18
+  enhancemens:
+
+    - |
+	Rails 2.2 and 2.3 support.
+
+
+
 - release:   2.6.3
   date: 2009-02-07
   bugfixes:

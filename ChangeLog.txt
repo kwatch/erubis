@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.129 (2009-02-18)
+	.- [update] CHANGES.txt, ReleaseNote.txt
+
 : Rev.128 (2009-02-18)
 	.- [change] update gemspec file
 	.- [release] preparation for 2.6.4

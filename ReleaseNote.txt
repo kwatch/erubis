@@ -1,5 +1,25 @@
 .# -*- coding: utf-8 -*-
 
+$ [ANN] Erubis 2.6.4 released - Rails 2.2 and 2.3 support
+
+I have released Erubis 2.6.4.
+http://www.kuwata-lab.com/erubis/
+Erubis is another eRuby implementation which is very fast and
+extensible than ERB and eruby.
+
+Enhancement since 2.6.3:
+
+  * Ruby on Rails 2.2 and 2.3 support.
+
+
+Have fun!
+
+--
+regards,
+makoto kuwata
+
+.#--------------------------------------------------------------------------------
+
 $ [ANN] Erubis 2.6.3 released - a fast and extensible eRuby
 
 I have released Erubis 2.6.3.
