@@ -163,7 +163,8 @@ if ActionPack::VERSION::MAJOR >= 2             ### Rails 2.X
     end
     module Erubis::Helpers::RailsHelper::TemplateConverter
       def _logger_info(message)
-        $stderr.puts message   # logger.info seems not available in Rails 2.2
+        #logger.info message   # logger.info seems not available in Rails 2.2
+        ActionController::Base.new.logger.info message
       end
     end
 
@@ -349,6 +350,5 @@ end   ###
 
 
 ## finish
-ac = ActionController::Base.new
-ac.logger.info "** Erubis #{::Erubis::VERSION}"
+ActionController::Base.new.logger.info "** Erubis #{::Erubis::VERSION}"
 $stdout.puts "** Erubis #{::Erubis::VERSION}" if rails22

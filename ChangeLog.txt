@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.127 (2009-02-18)
+	.- [change] rails_helper.rb changed to use ActionController::Base.new.logger
+
 : Rev.126 (2009-02-18)
 	.- [enhance] confirmed that erubis works fine on Rails 2.3
 
