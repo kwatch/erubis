@@ -142,7 +142,7 @@ rails22 = false
 if ActionPack::VERSION::MAJOR >= 2             ### Rails 2.X
 
 
-  if ActionPack::VERSION::MINOR >=2            ### Rails 2.2 or higher
+  if ActionPack::VERSION::MINOR >=2            ### Rails 2.2, 2.3 or higher
 
     rails22 = true
     module ActionView

@@ -2,6 +2,9 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.126 (2009-02-18)
+	.- [enhance] confirmed that erubis works fine on Rails 2.3
+
 : Rev.125 (2009-02-08)
 	.- [enhance] Rails 2.2 support
 
