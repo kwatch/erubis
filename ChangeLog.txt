@@ -2,6 +2,12 @@
 .?lastupdate:	$Date$
 .?version:	$Rev$
 
+: Rev.131 (2009-07-12)
+	.- [update] ReleaseNote.txt, ChangeLog.txt
+
+: Rev.130 (2009-02-18)
+	.- [release] 2.6.4
+
 : Rev.129 (2009-02-18)
 	.- [update] CHANGES.txt, ReleaseNote.txt
 
