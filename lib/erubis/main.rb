@@ -1,5 +1,4 @@
 ###
-### $Rev$
 ### $Release:$
 ### $Copyright$
 ###

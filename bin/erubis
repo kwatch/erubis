@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 ###
-### $Rev$
 ### $Release:$
 ### $Copyright$
 ###

@@ -1,5 +1,4 @@
 ###
-### $Rev$
 ### $Release$
 ### $Copyright$
 ###
@@ -189,3 +188,14 @@ recipes:
 	  tar_xzf archive
 	end
 
+  - product:	:svn2git
+    method*: |
+	edit 'lib/**/*', 'bin/**/*', 'doc/**/*', 'test/**/*', text_files do |cont|
+	  cont.gsub!(/^\#+ *\$Rev: \d+ \$\n/, '')
+	  cont.gsub!(/^\#+ *\$Date: \d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d .*?\$/, '$Date$')
+	  cont.gsub!(/\$Date: \d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d .*?\$/, '$Date$')
+	  cont.gsub!(/last update: \$Date: \d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d .*\$<br>/, 'release: $Release$')
+	  cont.gsub!(/\.\?lastupdate:(\s+)\$Date: \d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d .*\$<br>/, '.?lastupdate:\1$Date$')
+	  cont.gsub!(/^(\#+ \$Rev:) \d+ \$/, '\1 $')
+	  cont
+	end

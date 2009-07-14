@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 
 ###
-### $Rev$
 ### $Release: $
 ### $Copyright$
 ###
