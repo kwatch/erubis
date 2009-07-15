@@ -89,7 +89,7 @@ module Erubis
       filenames = argv
       options['h'] = true if properties[:help]
       opts = Object.new
-      arr = @option_names.collect { |ch, name| "def #{name}; @#{name}; end\n" }
+      arr = @option_names.collect {|ch, name| "def #{name}; @#{name}; end\n" }
       opts.instance_eval arr.join
       options.each do |ch, val|
         name = @option_names[ch]
@@ -165,7 +165,8 @@ module Erubis
       msg = "Syntax OK\n"
       if filenames && !filenames.empty?
         filenames.each do |filename|
-          test(?f, filename)  or raise CommandOptionError.new("#{filename}: file not found.")
+          File.file?(filename)  or
+            raise CommandOptionError.new("#{filename}: file not found.")
           engine.filename = filename
           engine.convert!(File.read(filename))
           val = do_action(action, engine, context, filename, opts)
@@ -283,14 +284,13 @@ module Erubis
     end
 
     def show_enhancers
+      dict = {}
+      ObjectSpace.each_object(Module) do |mod|
+        dict[$1] = mod if mod.name =~ /\AErubis::(.*)Enhancer\z/
+      end
       s = "enhancers:\n"
-      list = []
-      ObjectSpace.each_object(Module) do |m| list << m end
-      list.sort_by { |m| m.name.to_s }.each do |m|
-        next unless m.name =~ /\AErubis::(.*)Enhancer\z/
-        name = $1
-        desc = m.desc
-        s << ("  %-13s : %s\n" % [name, desc])
+      dict.sort_by {|name, mod| name }.each do |name, mod|
+        s << ("  %-13s : %s\n" % [name, mod.desc])
       end
       return s
     end
@@ -307,10 +307,9 @@ module Erubis
         optstr = optstr[1, optstr.length-1]
         #
         if optstr[0] == ?-    # context
-          unless optstr =~ /\A\-([-\w]+)(?:=(.*))?/
+          optstr =~ /\A\-([-\w]+)(?:=(.*))?/  or
             raise CommandOptionError.new("-#{optstr}: invalid context value.")
-          end
-          name = $1;  value = $2
+          name, value = $1, $2
           name  = name.gsub(/-/, '_').intern
           #value = value.nil? ? true : YAML.load(value)   # error, why?
           value = value.nil? ? true : YAML.load("---\n#{value}\n")
@@ -319,15 +318,12 @@ module Erubis
         else                  # options
           while optstr && !optstr.empty?
             optchar = optstr[0].chr
-            optstr[0,1] = ""
+            optstr = optstr[1..-1]
             if arg_none.include?(optchar)
               options[optchar] = true
             elsif arg_required.include?(optchar)
-              arg = optstr.empty? ? argv.shift : optstr
-              unless arg
-                mesg = "-#{optchar}: #{@option_names[optchar]} required."
-                raise CommandOptionError.new(mesg)
-              end
+              arg = optstr.empty? ? argv.shift : optstr  or
+                raise CommandOptionError.new("-#{optchar}: #{@option_names[optchar]} required.")
               options[optchar] = arg
               optstr = nil
             elsif arg_optional.include?(optchar)
