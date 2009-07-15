@@ -141,16 +141,12 @@ END
 END
 
   def _test()
-    if $target
-      name = (caller()[0] =~ /in `test_(.*?)'/) && $1
-      return unless name == $target
-    end
     if @filename.nil?
       method = (caller[0] =~ /in `(.*)'/) && $1    #'
       method =~ /block in (.*)/ and method = $1    # for Ruby 1.9
       @filename = "tmp.#{method}"
     end
-    File.open(@filename, 'w') { |f| f.write(@input) } if @filename
+    File.open(@filename, 'w') {|f| f.write(@input) } if @filename
     begin
       argv = @options.is_a?(Array) ? @options.dup : @options.split
       argv << @filename if @filename
@@ -290,7 +286,7 @@ END
     #
     begin
       (0...max).each do |i|
-        File.open(filenames[i], 'w') { |f| f.write(inputs[i]) }
+        File.open(filenames[i], 'w') {|f| f.write(inputs[i]) }
       end
       @input = '<ok/>'
       @expected = ''
@@ -389,7 +385,7 @@ END
     user:  Hello
     password:  world
     END
-    File.open(datafile, 'w') { |f| f.write(str) }
+    File.open(datafile, 'w') {|f| f.write(str) }
     begin
       _test()
     ensure
@@ -408,7 +404,7 @@ END
     @user = 'Hello'
     @password = 'world'
     END
-    File.open(datafile, 'w') { |f| f.write(str) }
+    File.open(datafile, 'w') {|f| f.write(str) }
     begin
       _test()
     ensure
@@ -427,7 +423,7 @@ END
     user:	Hello
     password:	world
     END
-    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    File.open(yamlfile, 'w') {|f| f.write(yaml) }
     begin
       _test()
     ensure
@@ -449,11 +445,11 @@ END
 	- bbb
 	- ccc
     END
-    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    File.open(yamlfile, 'w') {|f| f.write(yaml) }
     assert_raise(ArgumentError) do
       _test()
     end
-    File.open(yamlfile, 'w') { |f| f.write(yaml.gsub(/\t/, ' '*8)) }
+    File.open(yamlfile, 'w') {|f| f.write(yaml.gsub(/\t/, ' '*8)) }
     _test()
   ensure
       File.unlink(yamlfile) if test(?f, yamlfile)
@@ -519,7 +515,7 @@ list:
   - bbb
   - ccc
 END
-    File.open(yamlfile, 'w') { |f| f.write(yaml) }
+    File.open(yamlfile, 'w') {|f| f.write(yaml) }
     begin
       _test()
     ensure
