@@ -201,11 +201,35 @@ END
   end
 
 
+  def _with_dummy_file
+    bindir = File.join(File.dirname(File.dirname(__FILE__)), 'bin')
+    env_path = ENV['PATH']
+    env__    = ENV['_']
+    begin
+      ENV['PATH'] = bindir + File::PATH_SEPARATOR + ENV['PATH']
+      ENV['_'] = 'erubis'
+      Tempfile.open(self.name.gsub(/[^\w]/,'_')) do |f|
+        f.write(INPUT)
+        f.flush
+        yield(f.path)
+      end
+    ensure
+      ENV['PATH'] = env_path
+      ENV['_']    = env__    if env__
+    end
+  end
+
+
   def test_syntax1    # -z (syntax ok)
     @input    = INPUT
     @expected = "Syntax OK\n"
     @options  = '-z'
     _test()
+    #
+    _with_dummy_file do |filepath|
+      actual = `erubis #{@options} #{filepath}`
+      assert_equal @expected, actual
+    end
   end
 
 
