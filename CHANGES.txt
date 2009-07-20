@@ -3,6 +3,14 @@
 # $Copyright$
 
 
+- release:   2.6.5
+  date: 2009-07-20
+  bugfixes:
+
+    - |
+	Fixed bug around '-z' option.
+
+
 - release:   2.6.4
   date: 2009-02-18
   enhancemens:
