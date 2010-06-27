@@ -10,7 +10,7 @@ require 'erubis'
 include Erubis::XmlHelper
 
 ERUBY = Erubis::Eruby   # or Erubis::EscapeEruby
-encoding = 'utf-8'
+@encoding = nil
 
 ## helper class to represent http error
 class HttpError < Exception
@@ -23,7 +23,6 @@ end
 
 
 ## main
-content_type_header = "Content-Type: text/html; charset=#{encoding}\r\n"
 begin
 
   ## check environment variables
@@ -42,7 +41,9 @@ begin
   eruby = ERUBY.load_file(filepath)         # or ERUBY.new(File.read(filepath))
   html  = eruby.result()
   ## send response
-  print content_type_header
+  print @encoding \
+      ? "Content-Type: text/html; charset=#{@encoding}\r\n" \
+      : "Content-Type: text/html\r\n"
   print "Content-Length: #{html.length}\r\n"
   print "\r\n"
   print html
@@ -50,7 +51,7 @@ begin
 rescue HttpError => ex
   ## handle http error (such as 404 Not Found)
   print "Status: #{ex.status}\r\n"
-  print content_type_header
+  print "Content-Type: text/html\r\n"
   print "\r\n"
   print "<h2>#{h(ex.status)}</h2>\n"
   print "<p>#{h(ex.message)}</p>"
@@ -58,7 +59,7 @@ rescue HttpError => ex
 rescue Exception => ex
   ## print exception backtrace
   print "Status: 500 Internal Server Error\r\n"
-  print content_type_header
+  print "Content-Type: text/html\r\n"
   print "\r\n"
   arr = ex.backtrace
   print   "<pre>\n"
