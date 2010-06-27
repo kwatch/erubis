@@ -567,4 +567,31 @@ __END__
       _buf.to_s
   output: *basic1_output
 
-
+- name:  interpolation2
+  desc:  sharp, back-quote, and backslash should be escaped, but other quotes should not be escaped (reported by andrewj)
+  class: InterpolationEruby
+  options:
+  testopt:
+  input: |
+      <p>`back-quote`</p>
+      <p><%= `echo back-tick operator` %></p>
+      <p>#{sharp}</p>
+      <p>'single quote'</p>
+      <p>"double quote"</p>
+      <p>backslash\n\t</p>
+  src: |
+      _buf = ''; _buf << %Q`<p>\`back-quote\`</p>
+      <p>#{ `echo back-tick operator` }</p>
+      <p>\#{sharp}</p>
+      <p>'single quote'</p>
+      <p>"double quote"</p>
+      <p>backslash\\n\\t</p>\n`
+      _buf.to_s
+  output: |
+      <p>`back-quote`</p>
+      <p>back-tick operator
+      </p>
+      <p>#{sharp}</p>
+      <p>'single quote'</p>
+      <p>"double quote"</p>
+      <p>backslash\n\t</p>

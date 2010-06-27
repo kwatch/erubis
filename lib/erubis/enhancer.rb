@@ -662,7 +662,7 @@ module Erubis
 
     def _add_text_to_str(str, text)
       return if !text || text.empty?
-      text.gsub!(/['\#\\]/, '\\\\\&')
+      text.gsub!(/[`\#\\]/, '\\\\\&')
       str << text
     end
 
