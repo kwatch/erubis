@@ -4,8 +4,8 @@
 ###
 
 properties:
-  - release    :  2.6.3
-  - copyright  :  copyright(c) 2006-2009 kuwata-lab all rights reserved.
+  - release    :  0.0.0
+  - copyright  :  copyright(c) 2006-2010 kuwata-lab all rights reserved.
 
 
 parameters:
