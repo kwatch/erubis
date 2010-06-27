@@ -6,7 +6,6 @@
 ### Licsense: same as Erubis
 ###
 
-require 'cgi'
 require 'erubis'
 include Erubis::XmlHelper
 
@@ -24,8 +23,7 @@ end
 
 
 ## main
-cgi = CGI.new
-content_type = "text/html; charset=#{encoding}"
+content_type_header = "Content-Type: text/html; charset=#{encoding}\r\n"
 begin
 
   ## check environment variables
@@ -44,18 +42,24 @@ begin
   eruby = ERUBY.load_file(filepath)         # or ERUBY.new(File.read(filepath))
   html  = eruby.result()
   ## send response
-  print cgi.header('Content-Type'=>content_type, 'Content-Length'=>html.length)
+  print content_type_header
+  print "Content-Length: #{html.length}\r\n"
+  print "\r\n"
   print html
 
 rescue HttpError => ex
   ## handle http error (such as 404 Not Found)
-  print cgi.header('Content-Type'=>content_type, 'Status'=>ex.status)
+  print "Status: #{ex.status}\r\n"
+  print content_type_header
+  print "\r\n"
   print "<h2>#{h(ex.status)}</h2>\n"
   print "<p>#{h(ex.message)}</p>"
 
 rescue Exception => ex
   ## print exception backtrace
-  print cgi.header('Content-Type'=>content_type, 'Status'=>'500 Internal Error')
+  print "Status: 500 Internal Server Error\r\n"
+  print content_type_header
+  print "\r\n"
   arr = ex.backtrace
   print   "<pre>\n"
   print   "<b>#{h(arr[0])}: #{h(ex.message)} (#{h(ex.class.name)})</b>\n"
