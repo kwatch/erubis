@@ -11,6 +11,7 @@ include Erubis::XmlHelper
 
 ERUBY = Erubis::Eruby   # or Erubis::EscapeEruby
 @encoding = nil
+@layout = '_layout.rhtml'
 
 ## helper class to represent http error
 class HttpError < Exception
@@ -40,6 +41,11 @@ begin
   ## process as eRuby file
   eruby = ERUBY.load_file(filepath)         # or ERUBY.new(File.read(filepath))
   html  = eruby.result()
+  ## use layout template
+  if @layout && File.file?(@layout)
+    @content = html
+    html = ERUBY.load_file(@layout).result()
+  end
   ## send response
   print @encoding \
       ? "Content-Type: text/html; charset=#{@encoding}\r\n" \
