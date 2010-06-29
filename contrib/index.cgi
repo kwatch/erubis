@@ -49,7 +49,9 @@ begin
   request_uri   = ENV['REQUEST_URI']    or raise "ENV['REQUEST_URI'] is not set."
   ## get filepath
   basepath = request_uri.split(/\?/, 2).first
-  filepath = File.join(document_root, basepath)
+  filepath = basepath =~ /\A\/(~[-.\w]+)/ \
+           ? File.join(File.expand_path($1), "public_html", $') \
+           : File.join(document_root, basepath)
   filepath.gsub!(/\.html\z/, '.rhtml')  or  # expected '*.html'
     raise HttpError.new('500 Internal Error', 'invalid .htaccess configuration.')
   File.file?(filepath)  or                  # file not found
