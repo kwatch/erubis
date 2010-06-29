@@ -12,14 +12,19 @@
 ## load Erubis
 begin
   require 'erubis'
-  include Erubis::XmlHelper
 rescue LoadError => ex
-  print "Status: 500 Internal Server Error\r\n"
-  print "Content-Type: text/plain\r\n"
-  print "\r\n"
-  print "ERROR: #{ex.message}"
-  exit
+  begin
+    require 'rubygems'
+    require 'erubis'
+  rescue LoadError => ex
+    print "Status: 500 Internal Server Error\r\n"
+    print "Content-Type: text/plain\r\n"
+    print "\r\n"
+    print "ERROR: #{ex.message}"
+    exit
+  end
 end
+include Erubis::XmlHelper
 
 ## configuration
 ERUBY = Erubis::Eruby   # or Erubis::EscapeEruby
