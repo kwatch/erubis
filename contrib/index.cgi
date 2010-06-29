@@ -6,9 +6,22 @@
 ### Licsense: same as Erubis
 ###
 
-require 'erubis'
-include Erubis::XmlHelper
+## add directory path where Erubis installed
+#$LOAD_PATH << "/home/yourname/lib/ruby"
 
+## load Erubis
+begin
+  require 'erubis'
+  include Erubis::XmlHelper
+rescue LoadError => ex
+  print "Status: 500 Internal Server Error\r\n"
+  print "Content-Type: text/plain\r\n"
+  print "\r\n"
+  print "ERROR: #{ex.message}"
+  exit
+end
+
+## configuration
 ERUBY = Erubis::Eruby   # or Erubis::EscapeEruby
 @encoding = nil
 @layout = '_layout.rhtml'
