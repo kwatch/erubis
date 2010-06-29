@@ -59,7 +59,8 @@ begin
   basepath != ENV['SCRIPT_NAME']  or        # can't access to index.cgi
     raise HttpError.new('403 Forbidden', "#{basepath}: not accessable.")
   ## process as eRuby file
-  eruby = ERUBY.load_file(filepath)         # or ERUBY.new(File.read(filepath))
+  #eruby = ERUBY.new(File.read(filepath))   # not create cache file (slower)
+  eruby = ERUBY.load_file(filepath)         # create cache file (faster)
   html  = eruby.result()
   ## use layout template
   if @layout && File.file?(@layout)
