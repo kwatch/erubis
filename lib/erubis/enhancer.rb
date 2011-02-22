@@ -481,6 +481,60 @@ module Erubis
 
 
   ##
+  ## regards lines starting with '^[ \t]*%' as program code
+  ##
+  ## in addition you can specify prefix character (default '%')
+  ##
+  ## this is language-independent.
+  ##
+  module PrefixedLineEnhancer
+
+    def self.desc   # :nodoc:
+      "regard lines matched to '^[ \t]*%' as program code"
+    end
+
+    def init_generator(properties={})
+      super
+      @prefixchar = properties[:prefixchar] || '%'
+      @prefixrexp = Regexp.compile("^([ \\t]*)\\#{@prefixchar}(.*?\\r?\\n)")
+    end
+
+    def add_text(src, text)
+      pos = 0
+      text2 = ''
+      text.scan(@prefixrexp) do
+        space = $1
+        line  = $2
+        match = Regexp.last_match
+        len   = match.begin(0) - pos
+        str   = text[pos, len]
+        pos   = match.end(0)
+        if text2.empty?
+          text2 = str
+        else
+          text2 << str
+        end
+        if line[0, 1] == @prefixchar
+          text2 << space << line
+        else
+          super(src, text2)
+          text2 = ''
+          add_stmt(src, space + line)
+        end
+      end
+      #rest = pos == 0 ? text : $'             # ruby1.8
+      rest = pos == 0 ? text : text[pos..-1]   # ruby1.9
+      unless text2.empty?
+        text2 << rest if rest
+        rest = text2
+      end
+      super(src, rest)
+    end
+
+  end
+
+
+  ##
   ## [experimental] allow header and footer in eRuby script
   ##
   ## ex.

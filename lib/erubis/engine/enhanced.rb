@@ -103,6 +103,11 @@ module Erubis
   end
 
 
+  class PrefixedLineEruby < Eruby
+    include PrefixedLineEnhancer
+  end
+
+
   class HeaderFooterEruby < Eruby
     include HeaderFooterEnhancer
   end

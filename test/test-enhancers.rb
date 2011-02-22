@@ -498,6 +498,55 @@ __END__
       </pre>
 
 ##
+- name:  prefixedline1
+  class: PrefixedLineEruby
+  options: { :prefixchar: '!' }
+  input: |
+      <table>
+        ! for item in list
+        <tr>
+          <td><%= item %></td>
+          <td><%== item %></td>
+        </tr>
+        ! end
+      </table>
+      <pre>
+        !! doubled characters
+      </pre>
+  src: |
+      _buf = ''; _buf << '<table>
+      ';   for item in list
+       _buf << '  <tr>
+          <td>'; _buf << ( item ).to_s; _buf << '</td>
+          <td>'; _buf << Erubis::XmlHelper.escape_xml( item ); _buf << '</td>
+        </tr>
+      ';   end
+       _buf << '</table>
+      <pre>
+        ! doubled characters
+      </pre>
+      ';
+      _buf.to_s
+  output: |
+      <table>
+        <tr>
+          <td><aaa></td>
+          <td>&lt;aaa&gt;</td>
+        </tr>
+        <tr>
+          <td>b&b</td>
+          <td>b&amp;b</td>
+        </tr>
+        <tr>
+          <td>"ccc"</td>
+          <td>&quot;ccc&quot;</td>
+        </tr>
+      </table>
+      <pre>
+        ! doubled characters
+      </pre>
+
+##
 - name:  headerfooter1
   class: HeaderFooterEruby
   options:
