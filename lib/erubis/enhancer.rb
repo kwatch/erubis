@@ -434,53 +434,6 @@ module Erubis
 
 
   ##
-  ## regards lines starting with '%' as program code
-  ##
-  ## this is for compatibility to eruby and ERB.
-  ##
-  ## this is language-independent.
-  ##
-  module PercentLineEnhancer
-
-    def self.desc   # :nodoc:
-      "regard lines starting with '%' as program code"
-    end
-
-    def add_text(src, text)
-      pos = 0
-      text2 = ''
-      text.scan(/^\%(.*?\r?\n)/) do
-        line  = $1
-        match = Regexp.last_match
-        len   = match.begin(0) - pos
-        str   = text[pos, len]
-        pos   = match.end(0)
-        if text2.empty?
-          text2 = str
-        else
-          text2 << str
-        end
-        if line[0] == ?%
-          text2 << line
-        else
-          super(src, text2)
-          text2 = ''
-          add_stmt(src, line)
-        end
-      end
-      #rest = pos == 0 ? text : $'             # ruby1.8
-      rest = pos == 0 ? text : text[pos..-1]   # ruby1.9
-      unless text2.empty?
-        text2 << rest if rest
-        rest = text2
-      end
-      super(src, rest)
-    end
-
-  end
-
-
-  ##
   ## regards lines starting with '^[ \t]*%' as program code
   ##
   ## in addition you can specify prefix character (default '%')
@@ -505,6 +458,7 @@ module Erubis
       text.scan(@prefixrexp) do
         space = $1
         line  = $2
+        space, line = '', $1 unless $2
         match = Regexp.last_match
         len   = match.begin(0) - pos
         str   = text[pos, len]
@@ -529,6 +483,37 @@ module Erubis
         rest = text2
       end
       super(src, rest)
+    end
+
+  end
+
+
+  ##
+  ## regards lines starting with '%' as program code
+  ##
+  ## this is for compatibility to eruby and ERB.
+  ##
+  ## this is language-independent.
+  ##
+  module PercentLineEnhancer
+    include PrefixedLineEnhancer
+
+    def self.desc   # :nodoc:
+      "regard lines starting with '%' as program code"
+    end
+
+    #--
+    #def init_generator(properties={})
+    #  super
+    #  @prefixchar = '%'
+    #  @prefixrexp = /^\%(.*?\r?\n)/
+    #end
+    #++
+
+    def add_text(src, text)
+      @prefixchar = '%'
+      @prefixrexp = /^\%(.*?\r?\n)/
+      super
     end
 
   end
