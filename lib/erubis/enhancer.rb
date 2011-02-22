@@ -67,7 +67,7 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_buf = $stdout;"
+      src << "#{@bufname} = $stdout;"
     end
 
     def add_postamble(src)
@@ -162,12 +162,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_buf = [];"
+      src << "#{@bufname} = [];"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_buf\n"
+      src << "#{@bufname}\n"
     end
 
   end
@@ -208,12 +208,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_buf = '';"
+      src << "#{@bufname} = '';"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_buf.to_s\n"
+      src << "#{@bufname}.to_s\n"
     end
 
   end
@@ -231,12 +231,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_buf = StringIO.new;"
+      src << "#{@bufname} = StringIO.new;"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_buf.string\n"
+      src << "#{@bufname}.string\n"
     end
 
   end
@@ -254,12 +254,12 @@ module Erubis
     end
 
     def add_preamble(src)
-      src << "_erbout = _buf = '';"
+      src << "_erbout = #{@bufname} = '';"
     end
 
     def add_postamble(src)
       src << "\n" unless src[-1] == ?\n
-      src << "_buf.to_s\n"
+      src << "#{@bufname}.to_s\n"
     end
 
   end
@@ -654,9 +654,9 @@ module Erubis
       #src << " _buf << %Q`" << text << "`;"
       if text[-1] == ?\n
         text[-1] = "\\n"
-        src << " _buf << %Q`" << text << "`\n"
+        src << " #{@bufname} << %Q`" << text << "`\n"
       else
-        src << " _buf << %Q`" << text << "`;"
+        src << " #{@bufname} << %Q`" << text << "`;"
       end
     end
 

@@ -67,6 +67,31 @@ __END__
       ';
       _buf.to_s
 ##
+- name:  ruby2_options
+  lang:  ruby
+  class: Eruby
+  options: { :bufname: '@_out_buf' }
+  input: |
+      <table>
+        <% for item in @items %>
+        <tr>
+          <td><%= i+1 %></td>
+          <td><%== list %></td>
+        </tr>
+        <% end %>
+      </table>
+  expected: |
+      @_out_buf = ''; @_out_buf << '<table>
+      ';   for item in @items 
+       @_out_buf << '  <tr>
+          <td>'; @_out_buf << ( i+1 ).to_s; @_out_buf << '</td>
+          <td>'; @_out_buf << Erubis::XmlHelper.escape_xml( list ); @_out_buf << '</td>
+        </tr>
+      ';   end 
+       @_out_buf << '</table>
+      ';
+      @_out_buf.to_s
+##
 - name:  php1
   lang:  php
   class: Ephp
