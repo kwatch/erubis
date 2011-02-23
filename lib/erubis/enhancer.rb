@@ -92,15 +92,15 @@ module Erubis
     end
 
     def add_text(src, text)
-      src << " print '" << escape_text(text) << "';" unless text.empty?
+      src << " print '#{escape_text(text)}';" unless text.empty?
     end
 
     def add_expr_literal(src, code)
-      src << ' print((' << code << ').to_s);'
+      src << " print((#{code}).to_s);"
     end
 
     def add_expr_escaped(src, code)
-      src << ' print ' << escaped_expr(code) << ';'
+      src << " print #{escaped_expr(code)};"
     end
 
     def add_postamble(src)
@@ -698,9 +698,9 @@ module Erubis
       #src << " _buf << %Q`" << text << "`;"
       if text[-1] == ?\n
         text[-1] = "\\n"
-        src << " #{@bufname} << %Q`" << text << "`\n"
+        src << " #{@bufname} << %Q`#{text}`\n"
       else
-        src << " #{@bufname} << %Q`" << text << "`;"
+        src << " #{@bufname} << %Q`#{text}`;"
       end
     end
 
