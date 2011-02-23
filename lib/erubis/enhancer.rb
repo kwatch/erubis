@@ -706,8 +706,7 @@ module Erubis
 
     def _add_text_to_str(str, text)
       return if !text || text.empty?
-      text.gsub!(/[`\#\\]/, '\\\\\&')
-      str << text
+      str << text.gsub(/[`\#\\]/, '\\\\\&')
     end
 
     def add_expr_escaped(str, code)
