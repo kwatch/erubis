@@ -448,11 +448,14 @@ module Erubis
 
     def init_generator(properties={})
       super
-      @prefixchar = properties[:prefixchar] || '%'
-      @prefixrexp = Regexp.compile("^([ \\t]*)\\#{@prefixchar}(.*?\\r?\\n)")
+      @prefixchar = properties[:prefixchar]
     end
 
     def add_text(src, text)
+      unless @prefixrexp
+        @prefixchar ||= '%'
+        @prefixrexp = Regexp.compile("^([ \\t]*)\\#{@prefixchar}(.*?\\r?\\n)")
+      end
       pos = 0
       text2 = ''
       text.scan(@prefixrexp) do
@@ -511,9 +514,11 @@ module Erubis
     #++
 
     def add_text(src, text)
-      @prefixchar = '%'
-      @prefixrexp = /^\%(.*?\r?\n)/
-      super
+      unless @prefixrexp
+        @prefixchar = '%'
+        @prefixrexp = /^\%(.*?\r?\n)/
+      end
+      super(src, text)
     end
 
   end
