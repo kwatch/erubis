@@ -5,4 +5,4 @@ RewriteRule \.(rhtml|cache)$ - [R=404,L]
 ## rewrite only if requested file is not found
 RewriteCond %{SCRIPT_FILENAME} !-f
 ## handle request to *.html by index.cgi
-RewriteRule ^.*\.html$ index.cgi
+RewriteRule ^.*\.html$ /~yourname/index.cgi
