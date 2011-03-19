@@ -7,7 +7,7 @@ require "#{File.dirname(__FILE__)}/test.rb"
 
 require 'stringio'
 
-load "#{File.dirname(__FILE__)}/../contrib/index.cgi"
+load "#{File.dirname(__FILE__)}/../public_html/index.cgi"
 
 
 def spec(desc)
