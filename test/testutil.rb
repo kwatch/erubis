@@ -30,11 +30,7 @@ class Test::Unit::TestCase
       s = $'
     end
     # untabify
-    unless options[:tabify] == false
-      s = s.split(/^/).inject('') do |sb, line|
-        sb << line.gsub(/([^\t]{8})|([^\t]*)\t/n) { [$+].pack("A8") }
-      end
-    end
+    s = _untabify(s) unless options[:tabify] == false
     # load yaml document
     testdata_list = []
     YAML.load_documents(s) do |ydoc|
@@ -90,6 +86,21 @@ class Test::Unit::TestCase
         private m if m =~ /\Atest_/ && m != target
       end
     end
+  end
+
+
+  def self._untabify(str, width=8)
+      return str if str.nil?
+      list = str.split(/\t/, -1)   # if 2nd arg is negative then split() doesn't remove tailing empty strings
+      last = list.pop
+      sb = ''
+      list.each do |s|
+        column = (n = s.rindex(?\n)) ? s.length - n - 1 : s.length
+        n = width - (column % width)
+        sb << s << (' ' * n)
+      end
+      sb << last if last
+      return sb
   end
 
 
