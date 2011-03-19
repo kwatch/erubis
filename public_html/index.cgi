@@ -12,6 +12,7 @@
 ## configuration
 $ENCODING = nil
 $LAYOUT   = '_layout.rhtml'
+$ERUBIS_CLASS = Erubis::Eruby   # or Erubis::EscapeEruby
 
 ## load Erubis
 begin
@@ -43,8 +44,6 @@ end
 class ErubisHandler
   include Erubis::XmlHelper
 
-  ERUBY = Erubis::Eruby   # or Erubis::EscapeEruby
-
   def initialize
     @encoding = $ENCODING
     @layout   = $LAYOUT
@@ -68,13 +67,13 @@ class ErubisHandler
     basepath != env['SCRIPT_NAME']  or        # can't access to index.cgi
       raise HttpError.new(403, "#{basepath}: not accessable.")
     ## process as eRuby file
-    #eruby = ERUBY.new(File.read(filepath))  # not create cache file (slower)
-    eruby = ERUBY.load_file(filepath)        # create cache file (faster)
+    #eruby = $ERUBIS_CLASS.new(File.read(filepath))  # not create cache file (slower)
+    eruby = $ERUBIS_CLASS.load_file(filepath)        # create cache file (faster)
     html  = eruby.evaluate(self)
     ## use layout template
     if @layout && File.file?(@layout)
       @content = html
-      html = ERUBY.load_file(@layout).evaluate(self)
+      html = $ERUBIS_CLASS.load_file(@layout).evaluate(self)
     end
     return html
   end
