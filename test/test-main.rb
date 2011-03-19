@@ -7,6 +7,7 @@
 require  "#{File.dirname(__FILE__)}/test.rb"
 
 require 'tempfile'
+require 'fileutils'
 require 'erubis/main'
 
 
@@ -24,6 +25,17 @@ class StringWriter < String
   end
   def flush(*args)
     # pass
+  end
+  def puts(arg)
+    case arg
+    when Array
+      arg.each do |item|
+        self << item << "\n"
+      end
+    else
+      self << arg.to_s
+      self << "\n" unless arg =~ /\n$/
+    end
   end
 end
 
@@ -261,6 +273,17 @@ END
       errmsgs << <<'END'
 7: syntax error, unexpected $end, expecting keyword_end
 END
+    elsif rubinius?
+      errmsgs << <<'END'
+3: expecting ')'
+ _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
+                                        ^
+END
+      errmsgs << <<'END'
+7: missing 'end' for 'for' started on line 2
+_buf.to_s
+         ^
+END
     else
       errmsgs << <<'END'
 3: syntax error, unexpected ']', expecting ')'
@@ -281,6 +304,10 @@ END
       @input    = inputs[i]
       @expected = "tmp.test_syntax2:#{errmsgs[i]}"
       @options  = '-z'
+      if rubinius?
+        @expected.sub! /unexpected kEND/, 'unexpected keyword_end'
+        @expected.sub! /expecting kEND/, 'expecting keyword_end'
+      end
       _test()
     end
     #
@@ -294,6 +321,10 @@ END
       (0...max).each do |i|
         @expected << "#{filenames[i]}:#{errmsgs[i]}"
         @options << " #{filenames[i]}"
+      end
+      if rubinius?
+        @expected.sub! /unexpected kEND/, 'unexpected keyword_end'
+        @expected.sub! /expecting kEND/, 'expecting keyword_end'
       end
       _test()
     ensure
@@ -566,7 +597,7 @@ END
       _test()
     ensure
       File.unlink filename if test(?f, filename)
-      Dir.rmdir dir if test(?d, dir)
+      FileUtils.rm_r dir if test(?d, dir)
     end
   end
 
@@ -592,7 +623,7 @@ END
       _test()
     ensure
       File.unlink filename if test(?f, filename)
-      Dir.rmdir dir if test(?d, dir)
+      FileUtils.rm_r dir if test(?d, dir)
     end
   end
 

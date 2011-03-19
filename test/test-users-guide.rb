@@ -28,12 +28,20 @@ class KwarkUsersGuideTest < Test::Unit::TestCase
     s =~ /\A\$ (.*?)\n/
     command = $1
     expected = $'
-    ruby19 do
+    if ruby19?
       case @name
       when 'test_main_program1_result'
         expected.sub!('["eruby", "items", "x", "_buf"]', '[:_buf, :eruby, :items, :x]')
       when 'test_main_program2_result'
         expected.sub!('["_context", "x", "_buf"]', '[:_buf, :x, :_context]')
+      end
+    elsif rubinius?
+      command.sub!(/^ruby\b/, 'rbx')
+      case @name
+      when 'test_main_program1_result'
+        expected.sub!('["eruby", "items", "x", "_buf"]', '["_buf", "eruby", "items", "x"]')
+      when 'test_main_program2_result'
+        expected.sub!('["_context", "x", "_buf"]', '["_buf", "x", "_context"]')
       end
     end
     result = `#{command}`
