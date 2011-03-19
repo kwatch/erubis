@@ -484,6 +484,32 @@ module Erubis
       return "#{filename}:#{linenum}: #{message}"
     end
 
+    if defined?(RUBY_ENGINE) && RUBY_ENGINE == "rbx"
+      def check_syntax(filename, src)
+        require 'compiler'
+        verbose = $VERBOSE
+        msg = nil
+        begin
+          $VERBOSE = true
+          Rubinius::Compiler.compile_string(src, filename)
+        rescue SyntaxError => ex
+          ex_linenum = ex.line
+          linenum = 0
+          srcline = src.each_line do |line|
+            linenum += 1
+            break line if linenum == ex_linenum
+          end
+          msg = "#{ex.message}\n"
+          msg << srcline
+          msg << "\n" unless srcline =~ /\n\z/
+          msg << (" " * (ex.column-1)) << "^\n"
+        ensure
+          $VERBOSE = verbose
+        end
+        return msg
+      end
+    end
+
   end
 
 end
