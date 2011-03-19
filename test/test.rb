@@ -20,6 +20,22 @@ require 'testutil'
 require 'erubis'
 
 
+Test::Unit::TestCase.class_eval do
+  if RUBY_VERSION >= "1.9"
+    ## minitest doesn't have 'name()' method
+    def name
+      @name || @__name__
+    end
+    def ruby19
+      yield
+    end
+  else
+    def ruby19
+    end
+  end
+end
+
+
 if $0 == __FILE__
   require "#{TESTDIR}/test-erubis.rb"
   require "#{TESTDIR}/test-engines.rb"
