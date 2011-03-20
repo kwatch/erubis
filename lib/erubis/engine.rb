@@ -54,11 +54,9 @@ module Erubis
       else
         input = File.open(filename, 'rb') {|f| f.read }
         engine = self.new(input, properties)
-        File.open(cachename, 'wb') do |f|
-          f.flock(File::LOCK_EX)
-          f.write(engine.src)
-          f.flush()
-        end
+        tmpname = cachename + rand().to_s[1,8]
+        File.open(tmpname, 'wb') {|f| f.write(engine.src) }
+        File.rename(tmpname, cachename)
       end
       engine.src.untaint   # ok?
       return engine
