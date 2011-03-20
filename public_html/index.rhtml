@@ -1,0 +1,54 @@
+<%
+  page_title = 'Erubis Example Page'
+%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title><%== page_title %></title>
+    <style type="text/css">
+      table.list {
+        border-collapse: collapse;
+      }
+      table.list td, table.list th {
+        border: solid 1px #999;
+        padding: 2px 5px;
+      }
+      table.list th {
+        background: #CCF;
+        text-align: left;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><%== page_title %></h1>
+
+    <h2>Ruby Information</h2>
+    <table class="list">
+      <% cont_names = ['RUBY_VERSION', 'RUBY_PATCHLEVEL', 'RUBY_PLATFORM', 'RUBY_RELEASE_DATE', 'RUBY_ENGINE'] %>
+      <% cont_names.each do |name| %>
+      <%   if Object.const_defined?(name) %>
+      <tr>
+        <th><%== name %></th><td><%== Object.const_get(name).inspect %></td>
+      </tr>
+      <%   end %>
+      <% end %>
+      <tr>
+        <th>Erubis::VERSION</th><td><%== Erubis::VERSION.inspect %></td>
+      </tr>
+    </table>
+
+    <h2>Environment Variables</h2>
+    <table class="list">
+      <% odd = false %>
+      <% ENV.keys.sort.each do |k| %>
+      <%   odd != odd %>
+      <tr class="<%== odd ? 'odd' : 'even' %>">
+        <th><%== k %></th><td><%== ENV[k].inspect %></td>
+      </tr>
+      <% end %>
+    </table>
+
+  </body>
+</html>
