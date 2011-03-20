@@ -60,8 +60,13 @@ class ErubisHandler
     filepath = basepath =~ /\A\/(~[-.\w]+)/ \
              ? File.join(File.expand_path($1), "public_html", $') \
              : File.join(document_root, basepath)
-    filepath.gsub!(/\.html\z/, '.rhtml')  or  # expected '*.html'
+    if filepath =~ /\.html\z/                 # expected '*.html'
+      filepath.gsub!(/\.html\z/, '.rhtml')
+    elsif filepath[-1] == ?/                  # directory index
+      filepath += 'index.rhtml'
+    else
       raise HttpError.new(500, 'invalid .htaccess configuration.')
+    end
     File.file?(filepath)  or                  # file not found
       raise HttpError.new(404, "#{basepath}: not found.")
     basepath != env['SCRIPT_NAME']  or        # can't access to index.cgi
