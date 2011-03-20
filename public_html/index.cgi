@@ -57,21 +57,43 @@ class ErubisHandler
     request_uri   = env['REQUEST_URI']    or raise "ENV['REQUEST_URI'] is not set."
     ## get filepath
     basepath = request_uri.split(/\?/, 2).first
-    filepath = basepath =~ /\A\/(~[-.\w]+)/ \
-             ? File.join(File.expand_path($1), "public_html", $') \
-             : File.join(document_root, basepath)
-    if filepath =~ /\.html\z/                 # expected '*.html'
-      filepath.gsub!(/\.html\z/, '.rhtml')
-    elsif filepath[-1] == ?/                  # directory index
-      filepath += 'index.rhtml'
+    validate_basepath(basepath, env)
+    filepath = get_filepath(basepath, document_root)
+    validate_filepath(filepath, basepath)
+    ## process as eRuby file
+    html = render_html(filepath)
+    html
+  end
+
+  private
+
+  def get_filepath(basepath, document_root)
+    if basepath =~ /\A\/(~[-.\w]+)/
+      filepath = File.join(File.expand_path($1), "public_html", $')
     else
-      raise HttpError.new(500, 'invalid .htaccess configuration.')
+      filepath = File.join(document_root, basepath)
     end
-    File.file?(filepath)  or                  # file not found
-      raise HttpError.new(404, "#{basepath}: not found.")
+    case filepath
+    when /\.html\z/ ; filepath.sub!(/\.html\z/, '.rhtml')   # html file
+    when /\/\z/     ; filepath += 'index.rhtml'             # directory
+    else            ; filepath = nil                        # unexpected
+    end
+    filepath
+  end
+
+  def validate_basepath(basepath, env)
     basepath != env['SCRIPT_NAME']  or        # can't access to index.cgi
       raise HttpError.new(403, "#{basepath}: not accessable.")
-    ## process as eRuby file
+  end
+
+  def validate_filepath(filepath, basepath)
+    filepath  or                              # unexpected
+      raise HttpError.new(500, 'invalid .htaccess configuration.')
+    File.file?(filepath)  or                  # file not found
+      raise HttpError.new(404, "#{basepath}: not found.")
+  end
+
+  def render_html(filepath)
     #eruby = $ERUBIS_CLASS.new(File.read(filepath))  # not create cache file (slower)
     eruby = $ERUBIS_CLASS.load_file(filepath)        # create cache file (faster)
     html  = eruby.evaluate(self)
@@ -80,7 +102,7 @@ class ErubisHandler
       @content = html
       html = $ERUBIS_CLASS.load_file(@layout).evaluate(self)
     end
-    return html
+    html
   end
 
 end
