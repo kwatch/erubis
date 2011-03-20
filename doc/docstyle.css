@@ -27,7 +27,7 @@ pre {
 	white-space:pre;
 }
 
-.program {
+pre.program {
 	border-style:solid;
 	border-width:1px;
 	border-color:#6699FF;
@@ -38,7 +38,7 @@ pre {
 	word-break:break-all;
 }
 
-.terminal {
+pre.terminal {
 	border-style:solid;
 	border-width:1;
 	border-color:#999999;
@@ -49,7 +49,7 @@ pre {
 	word-break:break-all;
 }
 
-.output {
+pre.output {
 	border-style:solid;
 	border-width:1px;
 	border-color:#CCCCCC;
@@ -58,6 +58,12 @@ pre {
 	padding:8px 9px 8px 9px;
 	margin:0px;
 	word-break:break-all;
+}
+
+
+pre strong {
+	color: #990000;
+	font-weight: bold;
 }
 
 
@@ -168,7 +174,7 @@ h3, .subsection {
 	font-size:small;
 }
 
-.note {
+div.note, div.tips {
 	background-color:#FFFFDD;
 	border-style:solid;
 	border-width:0px 1px 0px 1px;
@@ -176,7 +182,12 @@ h3, .subsection {
 	color:#333300;
 	/* font-size:small; */
 	line-height:120%;
+	margin-top: 10px;
 	padding: 5px 20px 5px 20px;
+}
+
+div.note span.caption, div.tips span.caption {
+	color: #C60;
 }
 
 .figure {
@@ -185,4 +196,14 @@ h3, .subsection {
 	border-color:#DDDD66;
 	white-space:pre;
 	*/
+}
+
+strong {
+	color: #630;
+	font-weight; bold;
+}
+
+
+em {
+	font-style: italic;
 }
