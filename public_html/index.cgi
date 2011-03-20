@@ -52,45 +52,43 @@ class ErubisHandler
   attr_accessor :encoding, :layout
 
   def handle(env)
-    ## check environment variables
-    document_root = env['DOCUMENT_ROOT']  or raise "ENV['DOCUMENT_ROOT'] is not set."
-    request_uri   = env['REQUEST_URI']    or raise "ENV['REQUEST_URI'] is not set."
-    ## get filepath
-    basepath = request_uri.split(/\?/, 2).first
-    validate_basepath(basepath, env)
-    filepath = get_filepath(basepath, document_root)
-    validate_filepath(filepath, basepath)
-    ## process as eRuby file
-    html = render_html(filepath)
+    validate_env(env)
+    request_path = get_request_path(env)
+    file_path = get_file_path(request_path, env)
+    html = render_html(file_path)
     html
   end
 
   private
 
-  def get_filepath(basepath, document_root)
-    if basepath =~ /\A\/(~[-.\w]+)/
-      filepath = File.join(File.expand_path($1), "public_html", $')
-    else
-      filepath = File.join(document_root, basepath)
-    end
-    case filepath
-    when /\.html\z/ ; filepath.sub!(/\.html\z/, '.rhtml')   # html file
-    when /\/\z/     ; filepath += 'index.rhtml'             # directory
-    else            ; filepath = nil                        # unexpected
-    end
-    filepath
+  def validate_env(env)
+    env['DOCUMENT_ROOT']  or raise "ENV['DOCUMENT_ROOT'] is not set."
+    env['REQUEST_URI']    or raise "ENV['REQUEST_URI'] is not set."
   end
 
-  def validate_basepath(basepath, env)
-    basepath != env['SCRIPT_NAME']  or        # can't access to index.cgi
+  def get_request_path(env)
+    req_path = env['REQUEST_URI'].split(/\?/, 2).first
+    if req_path == env['SCRIPT_NAME']  # can't access to index.cgi
       raise HttpError.new(403, "#{basepath}: not accessable.")
+    end
+    req_path
   end
 
-  def validate_filepath(filepath, basepath)
-    filepath  or                              # unexpected
+  def get_file_path(request_path, env)
+    if request_path =~ /\A\/(~[-.\w]+)/
+      file_path = File.join(File.expand_path($1), "public_html", $')
+    else
+      file_path = File.join(env['DOCUMENT_ROOT'], request_path)
+    end
+    case file_path
+    when /\.html\z/ ; file_path.sub!(/\.html\z/, '.rhtml')   # html file
+    when /\/\z/     ; file_path += 'index.rhtml'             # directory
+    else                                                     # unexpected
       raise HttpError.new(500, 'invalid .htaccess configuration.')
-    File.file?(filepath)  or                  # file not found
-      raise HttpError.new(404, "#{basepath}: not found.")
+    end
+    File.file?(file_path)  or                        # file not found
+      raise HttpError.new(404, "#{request_path}: not found.")
+    file_path
   end
 
   def render_html(filepath)
