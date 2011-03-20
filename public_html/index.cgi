@@ -9,11 +9,6 @@
 ## add directory path where Erubis installed
 #$LOAD_PATH << "/home/yourname/lib/ruby"
 
-## configuration
-$ENCODING = nil
-$LAYOUT   = '_layout.rhtml'
-$ERUBIS_CLASS = Erubis::Eruby   # or Erubis::EscapeEruby
-
 ## load Erubis
 begin
   require 'erubis'
@@ -29,6 +24,11 @@ rescue LoadError => ex
     exit
   end
 end
+
+## configuration
+$ENCODING = nil
+$LAYOUT   = '_layout.rhtml'
+$ERUBIS_CLASS = Erubis::Eruby   # or Erubis::EscapeEruby
 
 
 ## helper class to represent http error
