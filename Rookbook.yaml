@@ -133,6 +133,8 @@ recipes:
 	end
 	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#
+	store 'public_html/{index.cgi,index.rhtml,_htaccess}', dir
+	#
 	store 'benchmark/{bench.rb,bench_context.yaml}',
 	      'benchmark/templates/*', 'benchmark/Makefile', dir
 	#
@@ -172,6 +174,7 @@ recipes:
 	chmod 0644, "#{dir}/**/*", :filetype=>'file'
 	chmod 0755, "#{dir}/bin/*", :filetype=>'file'
 	chmod 0755, "#{dir}/contrib/{erubis,inline-require}", :filetype=>'file'
+	chmod 0755, "#{dir}/public_html/index.cgi"
 
   - product:	:duplicate
     method*: |
