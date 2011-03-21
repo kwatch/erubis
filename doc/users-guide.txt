@@ -1,7 +1,7 @@
 .=title:	Erubis Users' Guide
-.?version:	$Release$
-.?release:	$Release$
-.?lastupdate:	$Date$
+.#.?version:	$Release$
+.#.?release:	$Release$
+.#.?lastupdate:	$Date$
 .?stylesheet:	docstyle.css
 
 release: $Release$
@@ -1661,10 +1661,12 @@ This is for compatibility with eruby and ERB.
 
 .? percentline-example.rhtml
 .-------------------- percentline-example.rhtml
+<ul>
 {{*% for item in list*}}
-  <b><%= item %></b>
+  <li><%= item %></li>
 {{*% end*}}
-%% lines with '%%'
+</ul>
+{{*%% lines with '%%'*}}
 .--------------------
 
 .#.? percentline-example.rb
@@ -1689,15 +1691,66 @@ This is for compatibility with eruby and ERB.
 .==================== percentline_example.result
 $ erubis -xE PercentLine percentline-example.rhtml
 .#.<<<:! erubis -xE PercentLine guide.d/percentline-example.rhtml | ruby -pe 'sub! /for.*?list|end/, "{{*\\&*}}"'
-_buf = ''; {{*for item in list*}}
- _buf << '  <b>'; _buf << ( item ).to_s; _buf << '</b>
+_buf = ''; _buf << '<ul>
+'; {{*for item in list*}}
+ _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
 '; {{*end*}}
- _buf << '% lines with \'%%\'
+ _buf << '</ul>
+{{*% lines with \'%%\'*}}
 ';
 _buf.to_s
 .====================
 
 PercentLineEnhancer is language-independent.
+
+
+
+.$$ PrefixedLineEnhancer	| prefixedline-enhancer
+
+PrefixedlineEnhancer regards lines starting with '%' as Ruby code.
+It is similar to {{<PercentLineEnhancer|#percentline-enhancer>}}, but there are some differences.
+
+.* PrefixedlineEnhancer allows to indent lines starting with '%', but PercentLineEnhancer doesn't.
+.* PrefixedlineEnhancer allows to change prefixed character (default '%'), but PercentLineEnhancer doesn't.
+
+
+.? prefixedline-example.rhtml
+.-------------------- prefixedline-example.rhtml
+<ul>
+  {{*! for item in list*}}
+  <li><%= item %></li>
+  {{*! end*}}
+</ul>
+  {{*!! lines with '!!'*}}
+.--------------------
+
+.? prefixedline-example.rb
+.-------------------- prefixedline-example.rb
+require 'erubis'
+
+class PrefixedLineEruby < Erubis::Eruby
+  include Erubis::PrefixedLineEnhancer
+end
+
+input = File.read('prefixedline-example.rhtml')
+eruby = PrefixedLineEruby.new(input, :prefixchar=>'!')  # default '%'
+print eruby.src
+.--------------------
+
+.? compiled source code
+.==================== prefixedline_example.result
+$ ruby prefixedline-example.rb
+_buf = ''; _buf << '<ul>
+';   {{*for item in list*}}
+ _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+';   {{*end*}}
+ _buf << '</ul>
+  {{*! lines with \'!!\'*}}
+';
+_buf.to_s
+.====================
+
+PrefixedLineEnhancer is language-independent.
 
 
 
@@ -2291,7 +2344,7 @@ $ erubis -l scheme --func=display example.escheme
 
 .$$ Perl	| lang-perl
 
-.? example.eprl
+.? example.eperl
 .-------------------- example.eperl
 {{*<%
    my $user = 'Erubis';
@@ -2417,6 +2470,8 @@ Notice that default value of 'docwrite' property will be false in the future rel
 
 
 .$ Ruby on Rails Support	| rails
+
+{{!NOTICE: Rails 3 adopts Erubis as default default engine. You don't need to do anything at all when using Rails 3. This section is for Rails 2.!}}
 
 Erubis supports Ruby on Rails. 
 This section describes how to use Erubis with Ruby on Rails.
@@ -2729,7 +2784,88 @@ Notice that pp_form_for() is not provided.
 .$ Other Topics	| topics
 
 
-.$$ '<%= =%>' and '<%= -%>'
+.$$ {{,Erubis::FastEruby,}} Class	| topics-fasteruby
+
+{{,Erubis::FastEruby,}} class generates more effective code than {{,Erubis::Eruby,}}.
+
+.? fasteruby-example.rb
+.-------------------- fasteruby-example.rb
+require 'erubis'
+input = File.read('example.eruby')
+
+puts "----- Erubis::Eruby -----"
+print Erubis::Eruby.new(input).src
+
+puts "----- Erubis::FastEruby -----"
+print {{*Erubis::FastEruby*}}.new(input).src
+.--------------------
+
+.? result
+.==================== fasteruby-example.result
+$ ruby fasteruby-example.rb
+----- Erubis::Eruby -----
+_buf = ''; _buf << '<div>
+'; for item in list 
+ _buf << '  <p>'; {{*_buf << ( item ).to_s;*}} _buf << '</p>
+  <p>'; {{*_buf << Erubis::XmlHelper.escape_xml( item );*}} _buf << '</p>
+'; end 
+ _buf << '</div>
+';
+_buf.to_s
+----- Erubis::FastEruby -----
+_buf = ''; _buf << %Q`<div>\n`
+ for item in list 
+ _buf << %Q`  <p>{{*#{ item }*}}</p>
+  <p>{{*#{Erubis::XmlHelper.escape_xml( item )}*}}</p>\n`
+ end 
+ _buf << %Q`</div>\n`
+_buf.to_s
+.====================
+
+Technically, {{,Erubis::FastEruby,}} is just a subclass of {{,Erubis::Eruby,}} and includes {{,{{<InterpolationEnhancer|#interpolation-enhancer>}},}}. {{,Erubis::FastEruby,}} is faster than {{,Erubis::Eruby,}} but is not extensible compared to {{,Erubis::Eruby,}}. This is the reason why {{,Erubis::FastEruby,}} is not the default class of Erubis.
+
+
+.$$ {{,:bufname,}} Option	| topics-bufname
+
+Since 2.7.0, Erubis supports {{,:bufname,}} option which allows you to change buffer variable name (default '{{,_buf,}}').
+
+.? bufname-example.rb
+.-------------------- bufname-example.rb
+require 'erubis'
+input = File.read('example.eruby')
+
+puts "----- default -----"
+eruby = Erubis::FastEruby.new(input)
+puts eruby.src
+
+puts "----- with :bufname option -----"
+eruby = Erubis::FastEruby.new(input, {{*:bufname=>'@_out_buf'*}})
+print eruby.src
+.--------------------
+
+.? result
+.==================== bufname-example.result
+$ ruby bufname-example.rb
+----- default -----
+_buf = ''; _buf << %Q`<div>\n`
+ for item in list 
+ _buf << %Q`  <p>#{ item }</p>
+  <p>#{Erubis::XmlHelper.escape_xml( item )}</p>\n`
+ end 
+ _buf << %Q`</div>\n`
+_buf.to_s
+----- with :bufname option -----
+{{*@_out_buf*}} = ''; {{*@_out_buf*}} << %Q`<div>\n`
+ for item in list 
+ {{*@_out_buf*}} << %Q`  <p>#{ item }</p>
+  <p>#{Erubis::XmlHelper.escape_xml( item )}</p>\n`
+ end 
+ {{*@_out_buf*}} << %Q`</div>\n`
+{{*@_out_buf*}}.to_s
+.====================
+
+
+.$$ '<%= =%>' and '<%= -%>'	| topics-trimspaces
 
 Since 2.6.0, '<%= -%>' remove tail spaces and newline.
 This is for compatibiliy with ERB when trim mode is '-'.
@@ -2761,7 +2897,7 @@ AAA
 .====================
 
 
-.$$ '<%% %>' and '<%%= %>'
+.$$ '<%% %>' and '<%%= %>'	| topics-doublepercent
 
 Since 2.6.0, '<%% %>' and '<%%= %>' are converted into '<% %>' and '<%= %>' respectively.
 This is for compatibility with ERB.
@@ -3147,6 +3283,48 @@ You must set your directories to be writable by web server process, because
 Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
 in the same directory in which '*.rhtml' file exists.
 
+
+.$$ Helper CGI Script for Apache	| topics-index-cgi
+
+Erubis provides helper CGI script for Apache.
+Using this script, it is very easy to publish *.rhtml files as *.html.
+
+.====================
+### install Erubis
+$ tar xzf erubis-X.X.X.tar.gz
+$ cd erubis-X.X.X/
+$ ruby setup.py install
+### copy files to ~/public_html
+$ mkdir -p ~/public_html
+$ cp public_html/_htaccess   ~/public_html/.htaccess
+$ cp public_html/index.cgi   ~/public_html/
+$ cp public_html/index.rhtml ~/public_html/
+### add executable permission to index.cgi
+$ chmod a+x ~/public_html/index.cgi
+### edit .htaccess
+$ vi ~/public_html/.htaccess
+### (optional) edit index.cgi to configure
+$ vi ~/public_html/index.cgi
+.====================
+
+Edit ~/public_html/.htaccess and modify user name.
+
+.? ~/public_html/.htaccess
+.--------------------
+## enable mod_rewrie
+RewriteEngine on
+## deny access to *.rhtml and *.cache
+#RewriteRule \.(rhtml|cache)$ - [R=404,L]
+RewriteRule \.(rhtml|cache)$ - [F,L]
+## rewrite only if requested file is not found
+RewriteCond %{SCRIPT_FILENAME} !-f
+## handle request to *.html and directories by index.cgi
+RewriteRule (\.html|/|^)$ /~{{*username*}}/index.cgi
+#RewriteRule (\.html|/|^)$ index.cgi
+.--------------------
+
+After these steps, *.rhtml will be published as *.html.
+For example, if you access to {{,http://{{/host/}}.{{/domain/}}/~{{/username/}}/index.html,}} (or {{,http://{{/host/}}.{{/domain/}}/~{{/username/}}/,}}), file {{,~/public_html/index.rhtml,}} will be displayed.
 
 
 .$$ Define method	| topics-defmethod

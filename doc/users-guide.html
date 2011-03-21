@@ -13,11 +13,6 @@
    <div class="mainbody">
 
     <div align="left"><h1>Erubis Users' Guide</h1></div>
-    <div align="left">
-      release:     $Release$<br>
-      last update: $Date$<br>
-    </div>
-
 <p>release: $Release$
 </p>
 <a name="preface"></a>
@@ -117,6 +112,8 @@ Erubis now supports Ruby 1.9.
     </li>
     <li><a href="#percentline-enhancer">PercentLineEnhancer</a>
     </li>
+    <li><a href="#prefixedline-enhancer">PrefixedLineEnhancer</a>
+    </li>
     <li><a href="#headerfooter-enhancer">HeaderFooterEnhancer</a>
     </li>
     <li><a href="#interpolation-enhancer">InterpolationEnhancer</a>
@@ -155,9 +152,13 @@ Erubis now supports Ruby 1.9.
   </li>
   <li><a href="#topics">Other Topics</a>
   <ul>
-    <li><a href="#'&lt;%= =%&gt;' and '&lt;%= -%&gt;'">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</a>
+    <li><a href="#topics-fasteruby"><code>Erubis::FastEruby</code> Class</a>
     </li>
-    <li><a href="#'&lt;%% %&gt;' and '&lt;%%= %&gt;'">'&lt;%% %&gt;' and '&lt;%%= %&gt;'</a>
+    <li><a href="#topics-bufname"><code>:bufname</code> Option</a>
+    </li>
+    <li><a href="#topics-trimspaces">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</a>
+    </li>
+    <li><a href="#topics-doublepercent">'&lt;%% %&gt;' and '&lt;%%= %&gt;'</a>
     </li>
     <li><a href="#topics-context-vs-binding">evaluate(context) v.s. result(binding)</a>
     </li>
@@ -172,6 +173,8 @@ Erubis now supports Ruby 1.9.
     <li><a href="#topics-php">NoTextEnhancer and NoCodeEnhancer in PHP</a>
     </li>
     <li><a href="#topcs-modruby">Helper Class for mod_ruby</a>
+    </li>
+    <li><a href="#topics-index-cgi">Helper CGI Script for Apache</a>
     </li>
     <li><a href="#topics-defmethod">Define method</a>
     </li>
@@ -1638,23 +1641,79 @@ This is for compatibility with eruby and ERB.
 <a name="percentline-example.rhtml"></a>
 <div class="program_caption">
 percentline-example.rhtml</div>
-<pre class="program"><strong>% for item in list</strong>
-  &lt;b&gt;&lt;%= item %&gt;&lt;/b&gt;
+<pre class="program">&lt;ul&gt;
+<strong>% for item in list</strong>
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
 <strong>% end</strong>
-%% lines with '%%'
+&lt;/ul&gt;
+<strong>%% lines with '%%'</strong>
 </pre>
 <a name="percentline_example.result"></a>
 <div class="terminal_caption">
 compiled source code</div>
 <pre class="terminal">$ erubis -xE PercentLine percentline-example.rhtml
-_buf = ''; <strong>for item in list</strong>
- _buf &lt;&lt; '  &lt;b&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/b&gt;
+_buf = ''; _buf &lt;&lt; '&lt;ul&gt;
+'; <strong>for item in list</strong>
+ _buf &lt;&lt; '  &lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
 '; <strong>end</strong>
- _buf &lt;&lt; '% lines with \'%%\'
+ _buf &lt;&lt; '&lt;/ul&gt;
+<strong>% lines with \'%%\'</strong>
 ';
 _buf.to_s
 </pre>
 <p>PercentLineEnhancer is language-independent.
+</p>
+<br>
+
+
+<a name="prefixedline-enhancer"></a>
+<h3 class="section2">PrefixedLineEnhancer</h3>
+<p>PrefixedlineEnhancer regards lines starting with '%' as Ruby code.
+It is similar to <a href="#percentline-enhancer">PercentLineEnhancer</a>, but there are some differences.
+</p>
+<ul type="disc">
+<li>PrefixedlineEnhancer allows to indent lines starting with '%', but PercentLineEnhancer doesn't.
+</li>
+<li>PrefixedlineEnhancer allows to change prefixed character (default '%'), but PercentLineEnhancer doesn't.
+</li>
+</ul>
+<a name="prefixedline-example.rhtml"></a>
+<div class="program_caption">
+prefixedline-example.rhtml</div>
+<pre class="program">&lt;ul&gt;
+  <strong>! for item in list</strong>
+  &lt;li&gt;&lt;%= item %&gt;&lt;/li&gt;
+  <strong>! end</strong>
+&lt;/ul&gt;
+  <strong>!! lines with '!!'</strong>
+</pre>
+<a name="prefixedline-example.rb"></a>
+<div class="program_caption">
+prefixedline-example.rb</div>
+<pre class="program">require 'erubis'
+
+class PrefixedLineEruby &lt; Erubis::Eruby
+  include Erubis::PrefixedLineEnhancer
+end
+
+input = File.read('prefixedline-example.rhtml')
+eruby = PrefixedLineEruby.new(input, :prefixchar=&gt;'!')  # default '%'
+print eruby.src
+</pre>
+<a name="prefixedline_example.result"></a>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ ruby prefixedline-example.rb
+_buf = ''; _buf &lt;&lt; '&lt;ul&gt;
+';   <strong>for item in list</strong>
+ _buf &lt;&lt; '  &lt;li&gt;'; _buf &lt;&lt; ( item ).to_s; _buf &lt;&lt; '&lt;/li&gt;
+';   <strong>end</strong>
+ _buf &lt;&lt; '&lt;/ul&gt;
+  <strong>! lines with \'!!\'</strong>
+';
+_buf.to_s
+</pre>
+<p>PrefixedLineEnhancer is language-independent.
 </p>
 <br>
 
@@ -2206,7 +2265,7 @@ compiled source code (with <code>--func=display</code> property)</div>
 <h3 class="section2">Perl</h3>
 <a name="example.eperl"></a>
 <div class="program_caption">
-example.eprl</div>
+example.eperl</div>
 <pre class="program"><strong>&lt;%
    my $user = 'Erubis';
    my @list = ('&lt;aaa&gt;', 'b&amp;b', '"ccc"');
@@ -2326,6 +2385,8 @@ engine = Erubis::Ejavascript.new(s, <code>:docwrite=&gt;false</code>)
 
 <a name="rails"></a>
 <h2 class="section1">Ruby on Rails Support</h2>
+<p><span style="color:#FF0000">NOTICE: Rails 3 adopts Erubis as default default engine. You don't need to do anything at all when using Rails 3. This section is for Rails 2.</span>
+</p>
 <p>Erubis supports Ruby on Rails. 
 This section describes how to use Erubis with Ruby on Rails.
 </p>
@@ -2613,7 +2674,92 @@ This means that pp_text_field() with preprocessing makes view layer very fast.
 
 <a name="topics"></a>
 <h2 class="section1">Other Topics</h2>
-<a name="'&lt;%= =%&gt;' and '&lt;%= -%&gt;'"></a>
+<a name="topics-fasteruby"></a>
+<h3 class="section2"><code>Erubis::FastEruby</code> Class</h3>
+<p><code>Erubis::FastEruby</code> class generates more effective code than <code>Erubis::Eruby</code>.
+</p>
+<a name="fasteruby-example.rb"></a>
+<div class="program_caption">
+fasteruby-example.rb</div>
+<pre class="program">require 'erubis'
+input = File.read('example.eruby')
+
+puts "----- Erubis::Eruby -----"
+print Erubis::Eruby.new(input).src
+
+puts "----- Erubis::FastEruby -----"
+print <strong>Erubis::FastEruby</strong>.new(input).src
+</pre>
+<a name="fasteruby-example.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ ruby fasteruby-example.rb
+----- Erubis::Eruby -----
+_buf = ''; _buf &lt;&lt; '&lt;div&gt;
+'; for item in list 
+ _buf &lt;&lt; '  &lt;p&gt;'; <strong>_buf &lt;&lt; ( item ).to_s;</strong> _buf &lt;&lt; '&lt;/p&gt;
+  &lt;p&gt;'; <strong>_buf &lt;&lt; Erubis::XmlHelper.escape_xml( item );</strong> _buf &lt;&lt; '&lt;/p&gt;
+'; end 
+ _buf &lt;&lt; '&lt;/div&gt;
+';
+_buf.to_s
+----- Erubis::FastEruby -----
+_buf = ''; _buf &lt;&lt; %Q`&lt;div&gt;\n`
+ for item in list 
+ _buf &lt;&lt; %Q`  &lt;p&gt;<strong>#{ item }</strong>&lt;/p&gt;
+  &lt;p&gt;<strong>#{Erubis::XmlHelper.escape_xml( item )}</strong>&lt;/p&gt;\n`
+ end 
+ _buf &lt;&lt; %Q`&lt;/div&gt;\n`
+_buf.to_s
+</pre>
+<p>Technically, <code>Erubis::FastEruby</code> is just a subclass of <code>Erubis::Eruby</code> and includes <code><a href="#interpolation-enhancer">InterpolationEnhancer</a></code>. <code>Erubis::FastEruby</code> is faster than <code>Erubis::Eruby</code> but is not extensible compared to <code>Erubis::Eruby</code>. This is the reason why <code>Erubis::FastEruby</code> is not the default class of Erubis.
+</p>
+<br>
+
+
+<a name="topics-bufname"></a>
+<h3 class="section2"><code>:bufname</code> Option</h3>
+<p>Since 2.7.0, Erubis supports <code>:bufname</code> option which allows you to change buffer variable name (default '<code>_buf</code>').
+</p>
+<a name="bufname-example.rb"></a>
+<div class="program_caption">
+bufname-example.rb</div>
+<pre class="program">require 'erubis'
+input = File.read('example.eruby')
+
+puts "----- default -----"
+eruby = Erubis::FastEruby.new(input)
+puts eruby.src
+
+puts "----- with :bufname option -----"
+eruby = Erubis::FastEruby.new(input, <strong>:bufname=&gt;'@_out_buf'</strong>)
+print eruby.src
+</pre>
+<a name="bufname-example.result"></a>
+<div class="terminal_caption">
+result</div>
+<pre class="terminal">$ ruby bufname-example.rb
+----- default -----
+_buf = ''; _buf &lt;&lt; %Q`&lt;div&gt;\n`
+ for item in list 
+ _buf &lt;&lt; %Q`  &lt;p&gt;#{ item }&lt;/p&gt;
+  &lt;p&gt;#{Erubis::XmlHelper.escape_xml( item )}&lt;/p&gt;\n`
+ end 
+ _buf &lt;&lt; %Q`&lt;/div&gt;\n`
+_buf.to_s
+----- with :bufname option -----
+<strong>@_out_buf</strong> = ''; <strong>@_out_buf</strong> &lt;&lt; %Q`&lt;div&gt;\n`
+ for item in list 
+ <strong>@_out_buf</strong> &lt;&lt; %Q`  &lt;p&gt;#{ item }&lt;/p&gt;
+  &lt;p&gt;#{Erubis::XmlHelper.escape_xml( item )}&lt;/p&gt;\n`
+ end 
+ <strong>@_out_buf</strong> &lt;&lt; %Q`&lt;/div&gt;\n`
+<strong>@_out_buf</strong>.to_s
+</pre>
+<br>
+
+
+<a name="topics-trimspaces"></a>
 <h3 class="section2">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</h3>
 <p>Since 2.6.0, '&lt;%= -%&gt;' remove tail spaces and newline.
 This is for compatibiliy with ERB when trim mode is '-'.
@@ -2646,7 +2792,7 @@ AAA
 <br>
 
 
-<a name="'&lt;%% %&gt;' and '&lt;%%= %&gt;'"></a>
+<a name="topics-doublepercent"></a>
 <h3 class="section2">'&lt;%% %&gt;' and '&lt;%%= %&gt;'</h3>
 <p>Since 2.6.0, '&lt;%% %&gt;' and '&lt;%%= %&gt;' are converted into '&lt;% %&gt;' and '&lt;%= %&gt;' respectively.
 This is for compatibility with ERB.
@@ -3035,6 +3181,48 @@ $ sudo chmod 775 .
 <p>You must set your directories to be writable by web server process, because
 Apache::ErubisRun calls Erubis::Eruby.load_file() internally which creates cache files
 in the same directory in which '*.rhtml' file exists.
+</p>
+<br>
+
+
+<a name="topics-index-cgi"></a>
+<h3 class="section2">Helper CGI Script for Apache</h3>
+<p>Erubis provides helper CGI script for Apache.
+Using this script, it is very easy to publish *.rhtml files as *.html.
+</p>
+<pre class="terminal">### install Erubis
+$ tar xzf erubis-X.X.X.tar.gz
+$ cd erubis-X.X.X/
+$ ruby setup.py install
+### copy files to ~/public_html
+$ mkdir -p ~/public_html
+$ cp public_html/_htaccess   ~/public_html/.htaccess
+$ cp public_html/index.cgi   ~/public_html/
+$ cp public_html/index.rhtml ~/public_html/
+### add executable permission to index.cgi
+$ chmod a+x ~/public_html/index.cgi
+### edit .htaccess
+$ vi ~/public_html/.htaccess
+### (optional) edit index.cgi to configure
+$ vi ~/public_html/index.cgi
+</pre>
+<p>Edit ~/public_html/.htaccess and modify user name.
+</p>
+<div class="program_caption">
+~/public_html/.htaccess</div>
+<pre class="program">## enable mod_rewrie
+RewriteEngine on
+## deny access to *.rhtml and *.cache
+#RewriteRule \.(rhtml|cache)$ - [R=404,L]
+RewriteRule \.(rhtml|cache)$ - [F,L]
+## rewrite only if requested file is not found
+RewriteCond %{SCRIPT_FILENAME} !-f
+## handle request to *.html and directories by index.cgi
+RewriteRule (\.html|/|^)$ /~<strong>username</strong>/index.cgi
+#RewriteRule (\.html|/|^)$ index.cgi
+</pre>
+<p>After these steps, *.rhtml will be published as *.html.
+For example, if you access to <code>http://<em>host</em>.<em>domain</em>/~<em>username</em>/index.html</code> (or <code>http://<em>host</em>.<em>domain</em>/~<em>username</em>/</code>), file <code>~/public_html/index.rhtml</code> will be displayed.
 </p>
 <br>
 
