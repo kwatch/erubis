@@ -47,7 +47,7 @@ spec = Gem::Specification.new do |s|
   s.executables = ['erubis']
   s.bindir      = 'bin'
   s.test_file   = 'test/test.rb'
-  s.add_dependency('abstract', ['>= 1.0.0'])
+  #s.add_dependency('abstract', ['>= 1.0.0'])
 end
 
 # Quick fix for Ruby 1.8.3 / YAML bug   (thanks to Ross Bamford)

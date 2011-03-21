@@ -3,7 +3,7 @@
 ## $Copyright$
 ##
 
-require 'abstract'
+require 'erubis/util'
 
 module Erubis
 
