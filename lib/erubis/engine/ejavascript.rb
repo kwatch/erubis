@@ -16,7 +16,7 @@ module Erubis
     def self.supported_properties()   # :nodoc:
       list = []
       #list << [:indent,   '',       "indent spaces (ex. '  ')"]
-      #list << [:buf,      '_buf',   "output buffer name"]
+      #list << [:bufvar,      '_buf',   "output buffer variable name"]
       list << [:docwrite, true,     "use 'document.write()' when true"]
       return list
     end
@@ -25,12 +25,12 @@ module Erubis
       super
       @escapefunc ||= 'escape'
       @indent = properties[:indent] || ''
-      @buf = properties[:out] || '_buf'
+      @bufvar = properties[:bufvar] || '_buf'
       @docwrite = properties[:docwrite] != false  # '!= false' will be removed in the next release
     end
 
     def add_preamble(src)
-      src << "#{@indent}var #{@buf} = [];"
+      src << "#{@indent}var #{@bufvar} = [];"
     end
 
     def escape_text(text)
@@ -45,7 +45,7 @@ module Erubis
     def add_text(src, text)
       return if text.empty?
       add_indent(src, @indent)
-      src << @buf << '.push("'
+      src << @bufvar << '.push("'
       s = escape_text(text)
       if s[-1] == ?\n
         s[-2, 2] = ''
@@ -62,7 +62,7 @@ module Erubis
     def add_expr_literal(src, code)
       add_indent(src, @indent)
       code.strip!
-      src << "#{@buf}.push(#{code});"
+      src << "#{@bufvar}.push(#{code});"
     end
 
     def add_expr_escaped(src, code)
@@ -78,9 +78,9 @@ module Erubis
     def add_postamble(src)
       src << "\n" if src[-1] == ?;
       if @docwrite
-        src << @indent << 'document.write(' << @buf << ".join(\"\"));\n"
+        src << @indent << 'document.write(' << @bufvar << ".join(\"\"));\n"
       else
-        src << @indent << @buf << ".join(\"\");\n"
+        src << @indent << @bufvar << ".join(\"\");\n"
       end
     end
 
