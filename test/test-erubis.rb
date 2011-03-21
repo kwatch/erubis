@@ -119,32 +119,36 @@ END
     filename = 'tmp.load_file_timestamp1'
     cachename = filename + '.cache'
     begin
+      ## when cache doesn't exist then it is created automatically
       File.open(filename, 'w') { |f| f.write(@input) }
-      assert_block() { !test(?f, cachename) }
+      mtime = Time.now - 2.0
+      File.utime(mtime, mtime, filename)
+      !test(?f, cachename)  or raise "** failed"
       engine = @klass.load_file(filename)
       assert_block() { test(?f, cachename) }
       assert_block() { File.mtime(filename) <= File.mtime(cachename) }
       assert_text_equal(@src, engine.src)
-      #
+      ## when cache has different timestamp then it is recreated
       input2 = @input.gsub(/ul>/, 'ol>')
       src2   = @src.gsub(/ul>/, 'ol>')
-      mtime = File.mtime(filename)
       File.open(filename, 'w') { |f| f.write(input2) }
       t1 = Time.now()
       sleep(1)
       t2 = Time.now()
+      #
       File.utime(t1, t1, filename)
       File.utime(t2, t2, cachename)
-      assert_block('cache should be newer') { File.mtime(filename) < File.mtime(cachename) }
+      File.mtime(filename) < File.mtime(cachename)  or raise "** failed"
       engine = @klass.load_file(filename)
-      assert_block('cache should be newer') { File.mtime(filename) < File.mtime(cachename) }
-      assert_text_equal(@src, engine.src)
+      assert_block('cache should have same timestamp') { File.mtime(filename) == File.mtime(cachename) }
+      #assert_text_equal(@src, engine.src)
+      assert_text_equal(src2, engine.src)
       #
       File.utime(t2, t2, filename)
       File.utime(t1, t1, cachename)
-      assert_block('cache should be older') { File.mtime(filename) > File.mtime(cachename) }
+      File.mtime(filename) > File.mtime(cachename)  or raise "** failed"
       engine = @klass.load_file(filename)
-      assert_block('cache should be newer') { File.mtime(filename) <= File.mtime(cachename) }
+      assert_block('cache should have same timestamp') { File.mtime(filename) == File.mtime(cachename) }
       assert_text_equal(src2, engine.src)
     ensure
       File.unlink(cachename) if File.file?(cachename)

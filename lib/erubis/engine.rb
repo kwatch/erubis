@@ -48,7 +48,8 @@ module Erubis
     def self.load_file(filename, properties={})
       cachename = properties[:cachename] || (filename + '.cache')
       properties[:filename] = filename
-      if test(?f, cachename) && File.mtime(filename) <= File.mtime(cachename)
+      timestamp = File.mtime(filename)
+      if test(?f, cachename) && timestamp == File.mtime(cachename)
         engine = self.new(nil, properties)
         engine.src = File.read(cachename)
       else
@@ -57,6 +58,7 @@ module Erubis
         tmpname = cachename + rand().to_s[1,8]
         File.open(tmpname, 'wb') {|f| f.write(engine.src) }
         File.rename(tmpname, cachename)
+        File.utime(timestamp, timestamp, cachename)
       end
       engine.src.untaint   # ok?
       return engine
