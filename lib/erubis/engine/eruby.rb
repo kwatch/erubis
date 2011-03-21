@@ -21,7 +21,7 @@ module Erubis
     def init_generator(properties={})
       super
       @escapefunc ||= "Erubis::XmlHelper.escape_xml"
-      @bufname    = properties[:bufname] || "_buf"
+      @bufvar     = properties[:bufvar] || "_buf"
     end
 
     def self.supported_properties()  # :nodoc:
@@ -38,12 +38,12 @@ module Erubis
 
     #--
     #def add_preamble(src)
-    #  src << "#{@bufname} = [];"
+    #  src << "#{@bufvar} = [];"
     #end
     #++
 
     def add_text(src, text)
-      src << " #{@bufname} << '" << escape_text(text) << "';" unless text.empty?
+      src << " #{@bufvar} << '" << escape_text(text) << "';" unless text.empty?
     end
 
     def add_stmt(src, code)
@@ -53,11 +53,11 @@ module Erubis
     end
 
     def add_expr_literal(src, code)
-      src << " #{@bufname} << (" << code << ').to_s;'
+      src << " #{@bufvar} << (" << code << ').to_s;'
     end
 
     def add_expr_escaped(src, code)
-      src << " #{@bufname} << " << escaped_expr(code) << ';'
+      src << " #{@bufvar} << " << escaped_expr(code) << ';'
     end
 
     def add_expr_debug(src, code)
@@ -68,7 +68,7 @@ module Erubis
 
     #--
     #def add_postamble(src)
-    #  src << "\n#{@bufname}.join\n"
+    #  src << "\n#{@bufvar}.join\n"
     #end
     #++
 

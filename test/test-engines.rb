@@ -70,7 +70,7 @@ __END__
 - name:  ruby2_options
   lang:  ruby
   class: Eruby
-  options: { :bufname: '@_out_buf' }
+  options: { :bufvar: '@_out_buf' }
   input: |
       <table>
         <% for item in @items %>
