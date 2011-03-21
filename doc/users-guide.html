@@ -154,7 +154,7 @@ Erubis now supports Ruby 1.9.
   <ul>
     <li><a href="#topics-fasteruby"><code>Erubis::FastEruby</code> Class</a>
     </li>
-    <li><a href="#topics-bufname"><code>:bufname</code> Option</a>
+    <li><a href="#topics-bufvar"><code>:bufvar</code> Option</a>
     </li>
     <li><a href="#topics-trimspaces">'&lt;%= =%&gt;' and '&lt;%= -%&gt;'</a>
     </li>
@@ -2717,13 +2717,13 @@ _buf.to_s
 <br>
 
 
-<a name="topics-bufname"></a>
-<h3 class="section2"><code>:bufname</code> Option</h3>
-<p>Since 2.7.0, Erubis supports <code>:bufname</code> option which allows you to change buffer variable name (default '<code>_buf</code>').
+<a name="topics-bufvar"></a>
+<h3 class="section2"><code>:bufvar</code> Option</h3>
+<p>Since 2.7.0, Erubis supports <code>:bufvar</code> option which allows you to change buffer variable name (default '<code>_buf</code>').
 </p>
-<a name="bufname-example.rb"></a>
+<a name="bufvar-example.rb"></a>
 <div class="program_caption">
-bufname-example.rb</div>
+bufvar-example.rb</div>
 <pre class="program">require 'erubis'
 input = File.read('example.eruby')
 
@@ -2731,14 +2731,14 @@ puts "----- default -----"
 eruby = Erubis::FastEruby.new(input)
 puts eruby.src
 
-puts "----- with :bufname option -----"
-eruby = Erubis::FastEruby.new(input, <strong>:bufname=&gt;'@_out_buf'</strong>)
+puts "----- with :bufvar option -----"
+eruby = Erubis::FastEruby.new(input, <strong>:bufvar=&gt;'@_out_buf'</strong>)
 print eruby.src
 </pre>
-<a name="bufname-example.result"></a>
+<a name="bufvar-example.result"></a>
 <div class="terminal_caption">
 result</div>
-<pre class="terminal">$ ruby bufname-example.rb
+<pre class="terminal">$ ruby bufvar-example.rb
 ----- default -----
 _buf = ''; _buf &lt;&lt; %Q`&lt;div&gt;\n`
  for item in list 
@@ -2747,7 +2747,7 @@ _buf = ''; _buf &lt;&lt; %Q`&lt;div&gt;\n`
  end 
  _buf &lt;&lt; %Q`&lt;/div&gt;\n`
 _buf.to_s
------ with :bufname option -----
+----- with :bufvar option -----
 <strong>@_out_buf</strong> = ''; <strong>@_out_buf</strong> &lt;&lt; %Q`&lt;div&gt;\n`
  for item in list 
  <strong>@_out_buf</strong> &lt;&lt; %Q`  &lt;p&gt;#{ item }&lt;/p&gt;

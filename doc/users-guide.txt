@@ -2825,12 +2825,12 @@ _buf.to_s
 Technically, {{,Erubis::FastEruby,}} is just a subclass of {{,Erubis::Eruby,}} and includes {{,{{<InterpolationEnhancer|#interpolation-enhancer>}},}}. {{,Erubis::FastEruby,}} is faster than {{,Erubis::Eruby,}} but is not extensible compared to {{,Erubis::Eruby,}}. This is the reason why {{,Erubis::FastEruby,}} is not the default class of Erubis.
 
 
-.$$ {{,:bufname,}} Option	| topics-bufname
+.$$ {{,:bufvar,}} Option	| topics-bufvar
 
-Since 2.7.0, Erubis supports {{,:bufname,}} option which allows you to change buffer variable name (default '{{,_buf,}}').
+Since 2.7.0, Erubis supports {{,:bufvar,}} option which allows you to change buffer variable name (default '{{,_buf,}}').
 
-.? bufname-example.rb
-.-------------------- bufname-example.rb
+.? bufvar-example.rb
+.-------------------- bufvar-example.rb
 require 'erubis'
 input = File.read('example.eruby')
 
@@ -2838,14 +2838,14 @@ puts "----- default -----"
 eruby = Erubis::FastEruby.new(input)
 puts eruby.src
 
-puts "----- with :bufname option -----"
-eruby = Erubis::FastEruby.new(input, {{*:bufname=>'@_out_buf'*}})
+puts "----- with :bufvar option -----"
+eruby = Erubis::FastEruby.new(input, {{*:bufvar=>'@_out_buf'*}})
 print eruby.src
 .--------------------
 
 .? result
-.==================== bufname-example.result
-$ ruby bufname-example.rb
+.==================== bufvar-example.result
+$ ruby bufvar-example.rb
 ----- default -----
 _buf = ''; _buf << %Q`<div>\n`
  for item in list 
@@ -2854,7 +2854,7 @@ _buf = ''; _buf << %Q`<div>\n`
  end 
  _buf << %Q`</div>\n`
 _buf.to_s
------ with :bufname option -----
+----- with :bufvar option -----
 {{*@_out_buf*}} = ''; {{*@_out_buf*}} << %Q`<div>\n`
  for item in list 
  {{*@_out_buf*}} << %Q`  <p>#{ item }</p>
