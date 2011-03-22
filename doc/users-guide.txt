@@ -2112,6 +2112,79 @@ fputs("   </tbody>\n"
 .====================
 
 
+.$$ C++		| lang-cpp
+
+.? example.ecpp
+.-------------------- example.ecpp
+{{*<%
+#include <string>
+#include <iostream>
+#include <sstream>
+
+int main(int argc, char *argv[])
+{
+    std::stringstream _buf;
+%>*}}
+<html>
+ <body>
+  <p>Hello {{*<%= argv[0] %>*}}!</p>
+  <table>
+   <tbody>
+    {{*<% for (int i = 1; i < argc; i++) { %>*}}
+    <tr bgcolor="{{*<%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %>*}}">
+      <td>{{*<%= i %>*}}</td>
+      <td>{{*<%= argv[i] %>*}}</td>
+    </tr>
+    {{*<% } %>*}}
+   </tbody>
+  </table>
+ </body>
+</html>
+{{*<%
+    std::string output = _buf.str();
+    std::cout << output;
+    return 0; 
+}
+%>*}}
+.--------------------
+
+.? compiled source code
+.==================== example_c.result
+$ erubis -l cpp example.ecpp
+.#.<<<:! (cd guide.d; erubis -l cpp example.ecpp)
+#line 1 "example.ecpp"
+
+#include <string>
+#include <iostream>
+#include <sstream>
+
+int main(int argc, char *argv[])
+{
+    std::stringstream _buf;
+
+_buf << "<html>\n"
+        " <body>\n"
+        "  <p>Hello "; _buf << (argv[0]); _buf << "!</p>\n"
+        "  <table>\n"
+        "   <tbody>\n";
+     for (int i = 1; i < argc; i++) { 
+_buf << "    <tr bgcolor=\""; _buf << (i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _buf << "\">\n"
+        "      <td>"; _buf << (i); _buf << "</td>\n"
+        "      <td>"; _buf << (argv[i]); _buf << "</td>\n"
+        "    </tr>\n";
+     } 
+_buf << "   </tbody>\n"
+        "  </table>\n"
+        " </body>\n"
+        "</html>\n";
+
+    std::string output = _buf.str();
+    std::cout << output;
+    return 0; 
+}
+
+.====================
+
 
 .$$ Java	| lang-java
 

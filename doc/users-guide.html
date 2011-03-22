@@ -128,6 +128,8 @@ Erubis now supports Ruby 1.9.
     </li>
     <li><a href="#lang-c">C</a>
     </li>
+    <li><a href="#lang-cpp">C++</a>
+    </li>
     <li><a href="#lang-java">Java</a>
     </li>
     <li><a href="#lang-scheme">Scheme</a>
@@ -2026,6 +2028,81 @@ fputs("   &lt;/tbody&gt;\n"
       " &lt;/body&gt;\n"
       "&lt;/html&gt;\n", stdout);
 
+    return 0; 
+}
+
+</pre>
+<br>
+
+
+<a name="lang-cpp"></a>
+<h3 class="section2">C++</h3>
+<a name="example.ecpp"></a>
+<div class="program_caption">
+example.ecpp</div>
+<pre class="program"><strong>&lt;%
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+
+int main(int argc, char *argv[])
+{
+    std::stringstream _buf;
+%&gt;</strong>
+&lt;html&gt;
+ &lt;body&gt;
+  &lt;p&gt;Hello <strong>&lt;%= argv[0] %&gt;</strong>!&lt;/p&gt;
+  &lt;table&gt;
+   &lt;tbody&gt;
+    <strong>&lt;% for (int i = 1; i &lt; argc; i++) { %&gt;</strong>
+    &lt;tr bgcolor="<strong>&lt;%= i % 2 == 0 ? "#FFCCCC" : "#CCCCFF" %&gt;</strong>"&gt;
+      &lt;td&gt;<strong>&lt;%= i %&gt;</strong>&lt;/td&gt;
+      &lt;td&gt;<strong>&lt;%= argv[i] %&gt;</strong>&lt;/td&gt;
+    &lt;/tr&gt;
+    <strong>&lt;% } %&gt;</strong>
+   &lt;/tbody&gt;
+  &lt;/table&gt;
+ &lt;/body&gt;
+&lt;/html&gt;
+<strong>&lt;%
+    std::string output = _buf.str();
+    std::cout &lt;&lt; output;
+    return 0; 
+}
+%&gt;</strong>
+</pre>
+<a name="example_c.result"></a>
+<div class="terminal_caption">
+compiled source code</div>
+<pre class="terminal">$ erubis -l cpp example.ecpp
+#line 1 "example.ecpp"
+
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+
+int main(int argc, char *argv[])
+{
+    std::stringstream _buf;
+
+_buf &lt;&lt; "&lt;html&gt;\n"
+        " &lt;body&gt;\n"
+        "  &lt;p&gt;Hello "; _buf &lt;&lt; (argv[0]); _buf &lt;&lt; "!&lt;/p&gt;\n"
+        "  &lt;table&gt;\n"
+        "   &lt;tbody&gt;\n";
+     for (int i = 1; i &lt; argc; i++) { 
+_buf &lt;&lt; "    &lt;tr bgcolor=\""; _buf &lt;&lt; (i % 2 == 0 ? "#FFCCCC" : "#CCCCFF"); _buf &lt;&lt; "\"&gt;\n"
+        "      &lt;td&gt;"; _buf &lt;&lt; (i); _buf &lt;&lt; "&lt;/td&gt;\n"
+        "      &lt;td&gt;"; _buf &lt;&lt; (argv[i]); _buf &lt;&lt; "&lt;/td&gt;\n"
+        "    &lt;/tr&gt;\n";
+     } 
+_buf &lt;&lt; "   &lt;/tbody&gt;\n"
+        "  &lt;/table&gt;\n"
+        " &lt;/body&gt;\n"
+        "&lt;/html&gt;\n";
+
+    std::string output = _buf.str();
+    std::cout &lt;&lt; output;
     return 0; 
 }
 
