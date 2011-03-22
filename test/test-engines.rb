@@ -9,6 +9,7 @@ require 'erubis'
 require 'erubis/engine/eruby'
 require 'erubis/engine/ephp'
 require 'erubis/engine/ec'
+require 'erubis/engine/ecpp'
 require 'erubis/engine/ejava'
 require 'erubis/engine/escheme'
 require 'erubis/engine/eperl'
@@ -162,6 +163,36 @@ __END__
         fputs(" </tbody>\n"
               "</table>\n", stdout);
          fprintf(stderr, "*** debug: i=" "%d", i); fputs("\n", stdout);
+##
+- name:  cpp1
+  lang:  cpp
+  class: Ecpp
+  options: { :filename: foo.html, :indent: '  ' }
+  input: |4
+      <table>
+       <tbody>
+      <%  for (i = 0; i < n; i++) { %>
+        <tr>
+         <td><%= i %></td>
+         <td><%== list[i] %></td>
+        </tr>
+      <%  } %>
+       </tbody>
+      </table>
+      <%=== i %>
+  expected: |
+      #line 1 "foo.html"
+        _buf << "<table>\n"
+                " <tbody>\n";
+        for (i = 0; i < n; i++) { 
+        _buf << "  <tr>\n"
+                "   <td>"; _buf << (i); _buf << "</td>\n"
+                "   <td>"; escape(list[i]); _buf << "</td>\n"
+                "  </tr>\n";
+        } 
+        _buf << " </tbody>\n"
+                "</table>\n";
+         std::cerr << "*** debug: i=" << (i); _buf << "\n";
 ##
 - name:  java1
   lang:  java

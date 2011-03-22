@@ -11,6 +11,7 @@ require 'erubis/engine/optimized'
 require 'erubis/engine/eruby'
 require 'erubis/engine/ephp'
 require 'erubis/engine/ec'
+require 'erubis/engine/ecpp'
 require 'erubis/engine/ejava'
 require 'erubis/engine/escheme'
 require 'erubis/engine/eperl'
@@ -231,7 +232,7 @@ module Erubis
       buf << "  -z            : syntax checking"
       buf << "  -e            : escape (equal to '--E Escape')"
       buf << "  -p pattern    : embedded pattern (default '<% %>')"
-      buf << "  -l lang       : convert but no execute (ruby/php/c/java/scheme/perl/js)"
+      buf << "  -l lang       : convert but no execute (ruby/php/c/cpp/java/scheme/perl/js)"
       buf << "  -E e1,e2,...  : enhancer names (Escape, PercentLine, BiPattern, ...)"
       buf << "  -I path       : library include path"
       buf << "  -K kanji      : kanji code (euc/sjis/utf8) (default none)"
@@ -269,7 +270,7 @@ module Erubis
       list << ['(common)', common_props]
       list << ['(basic)',  basic_props - common_props]
       list << ['(pi)',     pi_props    - common_props]
-      %w[ruby php c java scheme perl javascript].each do |lang|
+      %w[ruby php c cpp java scheme perl javascript].each do |lang|
         klass = Erubis.const_get("E#{lang}")
         list << [lang, collect_supported_properties(klass) - basic_props]
       end
