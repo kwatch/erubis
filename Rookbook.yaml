@@ -133,7 +133,7 @@ recipes:
 	end
 	rm_f "#{dir}/test/Rookbook.yaml", "#{dir}/test/test.log"
 	#
-	store 'public_html/{index.cgi,index.rhtml,_htaccess}', dir
+	store 'public_html/{index.cgi,index.rhtml,_htaccess,README.txt}', dir
 	#
 	store 'benchmark/{bench.rb,bench_context.yaml}',
 	      'benchmark/templates/*', 'benchmark/Makefile', dir
