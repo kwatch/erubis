@@ -2,6 +2,82 @@
 # $Release:$
 # $Copyright$
 
+- release:   2.7.0
+  date: 2011-03-20
+  enhancements:
+
+    - |
+	New option ':bufvar' supported to specify buffer variable name.
+
+	ex:
+	    input = "Hello <%= name %>!"
+	    eruby = Erubis::Eruby.new(input)
+	    puts eruby.src
+	       #=>  _buf = ''; _buf << "Hello "; _buf << ( name ).to_s; _buf << '!';
+
+	    eruby = Erubis::Eruby.new(input, :bufvar=>'@_out')
+	    puts eruby.src
+	       #=>  @_out = ''; @_out << 'Hello '; @_out << ( name ).to_s; @_out << '!';
+
+    - |
+	New enhancer 'PrefixedLineEnhancer' which is a customizable version
+	of PercentLineEnhancer.
+	The difference between PrefixedLineEnhancer and PercentLineEnhancer is:
+	* You can indent Ruby statetment lines starting with '%'
+	* You can specify prefix character by :prefixchar option.
+
+	ex:
+	    class MyEruby < Erubis::Eruby
+	      include Erubis::PrefixedLineEnhancer
+	    end
+	    input = <<END
+	    <ul>
+	      % for item in @items
+	      <li><%= item %></li>
+	      % end
+	      %% you can indent '%' lines
+	    </ul>
+	    END
+	    eruby = MyEruby.new(input, :prefixchar=>'%')   # default '%'
+	    puts eruby.src
+
+	output:
+	    _buf = ''; _buf << '<ul>
+	    ';   for item in @items
+	     _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
+	    ';   end
+	      % you can indent '%' lines
+	     _buf << '</ul>
+	    ';
+	    _buf.to_s
+
+    - |
+	Add helper CGI script. See 'public_html/README.txt' for details.
+
+    - |
+	Rubinius is supported as first-class Ruby implementation.
+
+    - |
+	C++ support. Try '-l cpp' command-line option.
+
+	
+  changes:
+
+    - |
+	Remove dependency to 'abstract' library.
+	You don't need to install 'abstract' gem.
+
+    - |
+	Erubis::Eruby#load_file() now sets cache file timestamp to the same
+	value as original eRuby file. For example, if you restore eRuby files
+	from backup, Erubis::Eruby#load_file() can detect it and generate
+	cache file again.
+
+	    ## generates cache file (A.rhtml.cache).
+	    eruby = Erubis::Eruby.load_file('A.rhtml')
+	    p File.mtime('A.rhtml') == File.mtime('A.rhtml.cache')  #=> true
+
+	    
 
 - release:   2.6.6
   date: 2010-06-27
@@ -21,7 +97,7 @@
 
 - release:   2.6.4
   date: 2009-02-18
-  enhancemens:
+  enhancements:
 
     - |
 	Rails 2.2 and 2.3 support.
