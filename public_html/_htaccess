@@ -1,7 +1,7 @@
 ## enable mod_rewrie
 RewriteEngine on
 ## deny access to *.rhtml and *.cache
-#RewriteRule \.(rhtml|cache)$ - [R=404,L]   # not work on sakura internet
+#RewriteRule \.(rhtml|cache)$ - [R=404,L]   # not work on Apache 2
 RewriteRule \.(rhtml|cache)$ - [F,L]
 ## rewrite only if requested file is not found
 RewriteCond %{SCRIPT_FILENAME} !-f
