@@ -3,7 +3,7 @@
 # $Copyright$
 
 - release:   2.7.0
-  date: 2011-03-20
+  date: 2011-04-01
   enhancements:
 
     - |
