@@ -273,6 +273,19 @@ END
       errmsgs << <<'END'
 7: syntax error, unexpected $end, expecting keyword_end
 END
+    elsif ruby20?
+      errmsgs << <<'END'
+3: syntax error, unexpected ']', expecting ')'
+ _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
+                                         ^
+-:4: syntax error, unexpected keyword_end, expecting ')'
+'; end 
+      ^
+-:7: syntax error, unexpected end-of-input, expecting ')'
+END
+      errmsgs << <<'END'
+7: syntax error, unexpected end-of-input, expecting keyword_end
+END
     elsif rubinius?
       errmsgs << <<'END'
 3: expecting ')'
