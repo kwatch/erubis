@@ -71,7 +71,8 @@ __END__
 - name:  ruby2_options
   lang:  ruby
   class: Eruby
-  options: { :bufvar: '@_out_buf' }
+  options:
+    :bufvar: '@_out_buf'
   input: |
       <table>
         <% for item in @items %>
@@ -137,7 +138,9 @@ __END__
 - name:  c1
   lang:  c
   class: Ec
-  options: { :filename: foo.html, :indent: '  ' }
+  options:
+    :filename: foo.html
+    :indent: '  '
   input: |4
       <table>
        <tbody>
@@ -167,7 +170,9 @@ __END__
 - name:  cpp1
   lang:  cpp
   class: Ecpp
-  options: { :filename: foo.html, :indent: '  ' }
+  options:
+    :filename: foo.html
+    :indent: '  '
   input: |4
       <table>
        <tbody>
@@ -197,7 +202,10 @@ __END__
 - name:  java1
   lang:  java
   class: Ejava
-  options: { :buf: _buf, :bufclass: StringBuilder, :indent: '    ' }
+  options:
+    :buf: _buf,
+    :bufclass: StringBuilder
+    :indent: '    '
   input: |
       <table>
        <tbody>
@@ -220,19 +228,19 @@ __END__
   expected: |4
           StringBuilder _buf = new StringBuilder(); _buf.append("<table>\n"
                     + " <tbody>\n");
-           
+      
           int i = 0;
           for (Iterator it = list.iterator(); it.hasNext(); ) {
               String s = (String)it.next();
               i++;
-             
+      
           _buf.append("  <tr class=\""); _buf.append(i%2==0 ? "even" : "odd"); _buf.append("\">\n"
                     + "   <td>"); _buf.append(i); _buf.append("</td>\n"
                     + "   <td>"); _buf.append(escape(s)); _buf.append("</td>\n"
                     + "  </tr>\n");
-           
+      
           }
-          
+      
           _buf.append(" <tbody>\n"
                     + "</table>\n");
            System.err.println("*** debug: i="+(i)); _buf.append("\n");
@@ -242,7 +250,7 @@ __END__
   lang:  scheme
   class: Escheme
   options:
-  input: &scheme1_input|
+  input: &scheme1_input |
       <% (let ((i 0)) %>
       <table>
        <tbody>
@@ -290,7 +298,8 @@ __END__
 - name:  scheme2
   lang:  scheme
   class: Escheme
-  options: { :func: 'display' }
+  options:
+    :func: 'display'
   input: *scheme1_input
   expected: |4
        (let ((i 0)) 
@@ -401,7 +410,8 @@ __END__
 - name:  javascript2
   lang:  javascript
   class: Ejavascript
-  options: { :docwrite: false }
+  options:
+    :docwrite: false
   input: *javascript_input
   expected: |4
       var _buf = [];
