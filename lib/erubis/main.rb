@@ -487,12 +487,12 @@ module Erubis
 
     if defined?(RUBY_ENGINE) && RUBY_ENGINE == "rbx"
       def check_syntax(filename, src)
-        require 'compiler'
+        require 'rubinius/compiler'
         verbose = $VERBOSE
         msg = nil
         begin
           $VERBOSE = true
-          Rubinius::Compiler.compile_string(src, filename)
+          Rubinius::ToolSet.current::TS::Compiler.compile_string(src, filename)
         rescue SyntaxError => ex
           ex_linenum = ex.line
           linenum = 0
