@@ -273,7 +273,7 @@ END
       errmsgs << <<'END'
 7: syntax error, unexpected $end, expecting keyword_end
 END
-    elsif ruby20?
+    elsif ruby20? || ruby21?
       errmsgs << <<'END'
 3: syntax error, unexpected ']', expecting ')'
  _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
