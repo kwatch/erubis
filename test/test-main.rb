@@ -216,7 +216,7 @@ END
     begin
       ENV['PATH'] = bindir + File::PATH_SEPARATOR + ENV['PATH']
       ENV['_'] = 'erubis'
-      Tempfile.open(self.name.gsub(/[^\w]/,'_')) do |f|
+      Tempfile.open(self.method_name.gsub(/[^\w]/,'_')) do |f|
         f.write(INPUT)
         f.flush
         yield(f.path)
@@ -273,7 +273,7 @@ END
       errmsgs << <<'END'
 7: syntax error, unexpected $end, expecting keyword_end
 END
-    elsif ruby20? || ruby21?
+    elsif ruby20? || ruby21? || ruby22?
       errmsgs << <<'END'
 3: syntax error, unexpected ']', expecting ')'
  _buf << '  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
