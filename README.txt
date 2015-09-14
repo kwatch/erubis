@@ -1,7 +1,7 @@
 = README
 
 release::	$Release$
-copyright::	$Copyright$
+copyright::	copyright(c) 2006-2011 kuwata-lab.com all rights reserved.
 
 
 
