@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 ###
-### $Release:$
 ### copyright(c) 2006-2011 kuwata-lab.com all rights reserved.
 ###
 

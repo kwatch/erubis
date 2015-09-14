@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# $Release:$
 # copyright(c) 2006-2011 kuwata-lab.com all rights reserved.
 
 - release:   2.7.0
