@@ -55,16 +55,6 @@ Erubis now supports Ruby 1.9.
 	$ sudo gem install --remote erubis
 	.====================
 
-.#.* Or if you can be root user, download erubis_X.X.X.tar.bz2 and install by setup.rb.
-.#	.====================
-.#	$ tar xjf erubis-X.X.X.tar.bz2
-.#	$ cd erubis_X.X.X/
-.#	$ ruby setup.rb
-.#	.#$ ruby setup.rb config
-.#	.#$ ruby setup.rb setup
-.#	.#$ sudo ruby setup.rb install
-.#	.====================
-.#
 .#.* Else you should copy 'lib/erubis.rb', 'lib/erubis/', and 'bin/erubis' into proper directory manually.
 .#	.====================
 .#	$ tar xjf erubis-X.X.X.tar.bz2

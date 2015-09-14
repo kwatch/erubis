@@ -10,7 +10,7 @@ properties:
 
 parameters:
   - project    :  erubis
-  - text_files :  [CHANGES.txt, README.txt, MIT-LICENSE, setup.rb, erubis.gemspec]
+  - text_files :  [CHANGES.txt, README.txt, MIT-LICENSE, erubis.gemspec]
   - guide      :  doc/users-guide.html
   - doc_files  :  [$(guide), doc/docstyle.css]
   - apidocdir  :  doc-api
