@@ -186,7 +186,7 @@ END
 
   def test_version    # -v
     @options = '-v'
-    @expected = (("$Release: 0.0.0 $" =~ /[.\d]+/) && $&) + "\n"
+    @expected = "2.7.0\n"
     @filename = false
     _test()
   end

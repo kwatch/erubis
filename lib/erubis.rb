@@ -46,7 +46,7 @@
 
 
 module Erubis
-  VERSION = ('$Release: 0.0.0 $' =~ /([.\d]+)/) && $1
+  VERSION = '2.7.0'
 end
 
 require 'erubis/engine'
