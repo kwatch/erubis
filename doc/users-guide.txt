@@ -55,18 +55,6 @@ Erubis now supports Ruby 1.9.
 	$ sudo gem install --remote erubis
 	.====================
 
-.* Else install {{<abstract|http://rubyforge.org/projects/erubis/>}} at first,
-   and download erubis_X.X.X.tar.bz2 and install it by setup.rb.
-	.====================
-	$ tar xjf abstract_X.X.X.tar.bz2
-	$ cd abstract_X.X.X/
-	$ sudo ruby setup.rb
-	$ cd ..
-	$ tar xjf erubis_X.X.X.tar.bz2
-	$ cd erubis_X.X.X/
-	$ sudo ruby setup.rb
-	.====================
-
 .#.* Or if you can be root user, download erubis_X.X.X.tar.bz2 and install by setup.rb.
 .#	.====================
 .#	$ tar xjf erubis-X.X.X.tar.bz2
@@ -84,14 +72,6 @@ Erubis now supports Ruby 1.9.
 .#	$ cp -r lib/erubis.rb lib/erubis /usr/local/lib/ruby/site_ruby/1.8
 .#	$ cp bin/erubis /usr/local/bin
 .#	.====================
-
-.* (Optional) 'contrib/inline-require' enables you to merge 'lib/**/*.rb' into 'bin/erubis'.
-	.====================
-	$ tar xjf erubis_X.X.X.tar.bz2
-	$ cd erubis_X.X.X/
-	$ unset RUBYLIB
-	$ contrib/inline-require -I lib bin/erubis > contrib/erubis
-	.====================
 
 
 

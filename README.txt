@@ -32,27 +32,6 @@ See doc/users-guide.html for details.
 
     $ sudo gem install erubis
 
-* Else install abstract[http://rubyforge.org/projects/abstract/] at first,
-  and download erubis_X.X.X.tar.bz2 and install it by setup.rb.
-
-    $ tar xjf abstract_X.X.X.tar.bz2
-    $ cd abstract_X.X.X/
-    $ sudo ruby setup.rb
-    $ cd ..
-    $ tar xjf erubis_X.X.X.tar.bz2
-    $ cd erubis_X.X.X/
-    $ sudo ruby setup.rb
-
-* (Optional) It is able to merge 'lib/**/*.rb' into 'bin/erubis' by
-  'contrib/inline-require' script.
-
-    $ tar xjf erubis_X.X.X.tar.bz2
-    $ cd erubis_X.X.X/
-    $ cp /tmp/abstract_X.X.X/lib/abstract.rb lib
-    $ unset RUBYLIB
-    $ contrib/inline-require -I lib bin/erubis > contrib/erubis
-
-
 
 == Ruby on Rails Support
 
