@@ -29,6 +29,10 @@ def ruby22?  # :nodoc:
   RUBY_VERSION =~ /\A2.2/
 end
 
+def ruby23?  # :nodoc:
+  RUBY_VERSION =~ /\A2.3/
+end
+
 def rubinius?  # :nodoc:
   defined?(RUBY_ENGINE) && RUBY_ENGINE == "rbx"
 end
