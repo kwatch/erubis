@@ -106,13 +106,13 @@ __END__
 ##
 - name:  basic1
   class: Eruby
-  input: &basic1_input|
+  input: &basic1_input |
       <ul>
        <% for item in list %>
         <li><%= item %></li>
        <% end %>
       </ul>
-  src: &basic1_src|
+  src: &basic1_src |
       _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
@@ -120,7 +120,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.to_s
-  output: &basic1_output|
+  output: &basic1_output |
       <ul>
         <li><aaa></li>
         <li>b&b</li>
@@ -193,7 +193,7 @@ __END__
 ##
 - name:  printenabled1
   class: PrintEnabledEruby
-  input: &printenabled1_input|
+  input: &printenabled1_input |
       <ul>
        <% for item in list %>
         <li><% print item %></li>
@@ -425,7 +425,8 @@ __END__
 ##
 - name:  bipattern2
   class: BiPatternEruby
-  options:  { :bipattern: '\$\{ \}' }
+  options:
+    :bipattern: '\$\{ \}'
   input: |
       <% for item in list %>
         <%=item%> % <%==item%>
@@ -500,7 +501,8 @@ __END__
 ##
 - name:  prefixedline1
   class: PrefixedLineEruby
-  options: { :prefixchar: '!' }
+  options:
+   :prefixchar: '!'
   input: |
       <table>
         ! for item in list
