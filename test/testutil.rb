@@ -37,6 +37,10 @@ def ruby24?  # :nodoc:
   RUBY_VERSION =~ /\A2.4/
 end
 
+def ruby25?  # :nodoc:
+  RUBY_VERSION =~ /\A2.5/
+end
+
 def rubinius?  # :nodoc:
   defined?(RUBY_ENGINE) && RUBY_ENGINE == "rbx"
 end
@@ -57,7 +61,7 @@ class Test::Unit::TestCase
     s = _untabify(s) unless options[:tabify] == false
     # load yaml document
     testdata_list = []
-    YAML.load_documents(s) do |ydoc|
+    YAML.load_stream(s) do |ydoc|
       if ydoc.is_a?(Hash)
         testdata_list << ydoc
       elsif ydoc.is_a?(Array)

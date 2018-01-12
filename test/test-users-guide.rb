@@ -28,7 +28,7 @@ class KwarkUsersGuideTest < Test::Unit::TestCase
     s =~ /\A\$ (.*?)\n/
     command = $1
     expected = $'
-    if ruby19? || ruby20? || ruby21? || ruby22? || ruby23? || ruby24?
+    if ruby19? || ruby20? || ruby21? || ruby22? || ruby23? || ruby24? || ruby25?
       case @name
       when 'test_main_program1_result'
         expected.sub!('["eruby", "items", "x", "_buf"]', '[:_buf, :eruby, :items, :x]')
