@@ -36,17 +36,11 @@ spec = Gem::Specification.new do |s|
   files = []
   files += Dir.glob('lib/**/*')
   files += Dir.glob('bin/*')
-  files += Dir.glob('examples/**/*')
-  files += Dir.glob('test/**/*')
-  files += Dir.glob('doc/**/*')
-  files += %w[README.txt CHANGES.txt MIT-LICENSE setup.rb]
+  files += %w[README.txt MIT-LICENSE setup.rb]
   files += Dir.glob('contrib/**/*')
-  files += Dir.glob('benchmark/**/*')
-  files += Dir.glob('doc-api/**/*')
   s.files       = files
   s.executables = ['erubis']
   s.bindir      = 'bin'
-  s.test_file   = 'test/test.rb'
   #s.add_dependency('abstract', ['>= 1.0.0'])
 end
 
