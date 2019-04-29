@@ -220,13 +220,13 @@ y = 20
 
 __END__
 - name:  basic1
-  input: &basic1_input|
+  input: &basic1_input |
       <ul>
        <% for item in list %>
         <li><%= item %></li>
        <% end %>
       </ul>
-  src: &basic1_src|
+  src: &basic1_src |
       _buf = ''; _buf << '<ul>
       ';  for item in list 
        _buf << '  <li>'; _buf << ( item ).to_s; _buf << '</li>
@@ -234,7 +234,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.to_s
-  output: &basic1_output|
+  output: &basic1_output |
       <ul>
         <li><aaa></li>
         <li>b&b</li>
@@ -344,7 +344,7 @@ __END__
 - name:  quotation1
   desc:  single quotation and backslash
   class: Eruby
-  input: &quotation1_input|
+  input: &quotation1_input |
       a = "'"
       b = "\""
       c = '\''
@@ -451,7 +451,9 @@ __END__
 ##
 - name:  bodyonly1
   testopt:  skip_output
-  options: { :preamble: no, :postamble: no }
+  options:
+   :preamble: no
+   :postamble: no
   input: *basic1_input
   src: |4
        _buf << '<ul>
@@ -496,7 +498,7 @@ __END__
 ##
 - name:  nomatch1
   desc:  bug
-  input: &nomatch1|
+  input: &nomatch1 |
       <ul>
         <li>foo</li>
       </ul>
@@ -510,7 +512,8 @@ __END__
 
 ##
 - name:  escape1
-  options: { :escape: true }
+  options:
+   :escape: true
   input: |
       <% str = '<>&"' %>
       <%= str %>
@@ -570,7 +573,7 @@ __END__
 ##
 - name:  optimized1
   class: OptimizedEruby
-  input: &optimized1_input|
+  input: &optimized1_input |
       <table>
        <% for item in list %>
         <tr>
@@ -677,7 +680,7 @@ __END__
 - name:  optimized4
   desc:  single quotation and backslash
   class: OptimizedEruby
-  input: &optimized4_input|
+  input: &optimized4_input |
       a = "'"
       b = "\""
       c = '\''
@@ -751,14 +754,14 @@ __END__
 - name:  pi1
   class:  PI::Eruby
   testopt:  evaluate
-  input: &input_pi1|
+  input: &input_pi1 |
       <ul>
        <?rb for item in @list ?>
         <li>@{item}@ / @!{item}@</li>
         <li><%= item %> / <%== item %></li>
        <?rb end ?>
       </ul>
-  src: &src_pi1|
+  src: &src_pi1 |
       _buf = ''; _buf << '<ul>
       ';  for item in @list 
        _buf << '  <li>'; _buf << Erubis::XmlHelper.escape_xml(item); _buf << ' / '; _buf << (item).to_s; _buf << '</li>
@@ -767,7 +770,7 @@ __END__
        _buf << '</ul>
       ';
       _buf.to_s
-  output: &output_pi1|
+  output: &output_pi1 |
       <ul>
         <li>&lt;aaa&gt; / <aaa></li>
         <li><aaa> / &lt;aaa&gt;</li>
@@ -780,7 +783,8 @@ __END__
 ##
 - name:  pi2
   class:  PI::Eruby
-  options: { :escape: false }
+  options:
+   :escape: false
   testopt:  evaluate
   input: *input_pi1
   src: |
@@ -805,7 +809,9 @@ __END__
 ##
 - name:  pi3
   class:  PI::Eruby
-  options: { :pi: hoge, :embchar: '$' }
+  options:
+   :pi: hoge
+   :embchar: '$'
   testopt:  evaluate
   input: |
       <ul>
