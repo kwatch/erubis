@@ -316,6 +316,19 @@ END
 _buf.to_s
          ^
 END
+    elsif ruby26?
+      errmsgs << <<'END'
+3: syntax error, unexpected ']', expecting ')'
+...  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
+...                              ^
+-:4: syntax error, unexpected end, expecting ')'
+'; end 
+   ^~~
+-:7: syntax error, unexpected end-of-input, expecting ')'
+END
+      errmsgs << <<'END'
+7: syntax error, unexpected end-of-input, expecting end
+END
     elsif rubinius?
       errmsgs << <<'END'
 3: expecting ')'
