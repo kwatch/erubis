@@ -16,7 +16,6 @@ spec = Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.homepage    = "http://www.kuwata-lab.com/erubis/"
   s.summary     = "a fast and extensible eRuby implementation which supports multi-language"
-  s.rubyforge_project = 'erubis'
   s.description = <<-'END'
   Erubis is an implementation of eRuby and has the following features:
 
