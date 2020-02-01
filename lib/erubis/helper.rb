@@ -22,7 +22,7 @@ module Erubis
     }
 
     def escape_xml(value)
-      value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }   # or /[&<>"']/
+      value.to_s.gsub(/[&<>"']/) { |s| ESCAPE_TABLE[s] }   # or /[&<>"']/
       #value.to_s.gsub(/[&<>"]/) { ESCAPE_TABLE[$&] }
     end
 
