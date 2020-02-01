@@ -3368,7 +3368,7 @@ Erubis::StdoutEruby            11.590000   0.300000  11.890000 ( 11.886512)
 <li>Erubis::TinyEruby (at 'erubis/tiny.rb') is the fastest in all eRuby implementations when no caching.
 </li>
 </ul>
-<p>Escaping HTML characters (such as '&lt; &gt; &amp; "') makes Erubis more faster than eruby and ERB,
+<p>Escaping HTML characters (such as '&lt; &gt; &amp; " &quot;') makes Erubis more faster than eruby and ERB,
 because Erubis::XmlHelper#escape_xml() works faster than CGI.escapeHTML() and ERB::Util#h().
 The following shows that Erubis runs more than 40 percent (when no-cached) or 90 percent (when cached) faster than eruby if HTML characters are escaped.
 </p>
