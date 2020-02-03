@@ -340,7 +340,7 @@ else                                           ###  Rails 1.X
   module ERB::Util  # :nodoc:
     ESCAPE_TABLE = { '&'=>'&amp;', '<'=>'&lt;', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;', }
     def h(value)
-      value.to_s.gsub(/[&<>"]/) {|s| ESCAPE_TABLE[s] }
+      value.to_s.gsub(/[&<>"']/) {|s| ESCAPE_TABLE[s] }
     end
     module_function :h
   end
