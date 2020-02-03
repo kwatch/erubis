@@ -22,12 +22,12 @@ module Erubis
     }
 
     def escape_xml(value)
-      value.to_s.gsub(/[&<>"]/) { |s| ESCAPE_TABLE[s] }   # or /[&<>"']/
+      value.to_s.gsub(/[&<>"']/) { |s| ESCAPE_TABLE[s] }   # or /[&<>"']/
       #value.to_s.gsub(/[&<>"]/) { ESCAPE_TABLE[$&] }
     end
 
     def escape_xml2(value)
-      return value.to_s.gsub(/\&/,'&amp;').gsub(/</,'&lt;').gsub(/>/,'&gt;').gsub(/"/,'&quot;')
+      return value.to_s.gsub(/\&/,'&amp;').gsub(/</,'&lt;').gsub(/>/,'&gt;').gsub(/"/,'&quot;').gsub(/'/,'&#039;')
     end
 
     alias h escape_xml
