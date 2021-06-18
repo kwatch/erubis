@@ -17,6 +17,42 @@ def ruby19?  # :nodoc:
   RUBY_VERSION =~ /\A1.9/
 end
 
+def ruby20?  # :nodoc:
+  RUBY_VERSION =~ /\A2.0/
+end
+
+def ruby21?  # :nodoc:
+  RUBY_VERSION =~ /\A2.1/
+end
+
+def ruby22?  # :nodoc:
+  RUBY_VERSION =~ /\A2.2/
+end
+
+def ruby23?  # :nodoc:
+  RUBY_VERSION =~ /\A2.3/
+end
+
+def ruby24?  # :nodoc:
+  RUBY_VERSION =~ /\A2.4/
+end
+
+def ruby25?  # :nodoc:
+  RUBY_VERSION =~ /\A2.5/
+end
+
+def ruby26?  # :nodoc:
+  RUBY_VERSION =~ /\A2.6/
+end
+
+def ruby27?  # :nodoc:
+  RUBY_VERSION =~ /\A2.7/
+end
+
+def ruby30?  # :nodoc:
+  RUBY_VERSION =~ /\A3.0/
+end
+
 def rubinius?  # :nodoc:
   defined?(RUBY_ENGINE) && RUBY_ENGINE == "rbx"
 end
@@ -37,7 +73,7 @@ class Test::Unit::TestCase
     s = _untabify(s) unless options[:tabify] == false
     # load yaml document
     testdata_list = []
-    YAML.load_documents(s) do |ydoc|
+    YAML.load_stream(s) do |ydoc|
       if ydoc.is_a?(Hash)
         testdata_list << ydoc
       elsif ydoc.is_a?(Array)
