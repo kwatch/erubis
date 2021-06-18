@@ -60,7 +60,9 @@ module Erubis
         File.rename(tmpname, cachename)
         File.utime(timestamp, timestamp, cachename)
       end
-      engine.src.untaint   # ok?
+      if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.7')
+        engine.src.untaint   # ok?
+      end
       return engine
     end
 

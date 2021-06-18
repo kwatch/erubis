@@ -329,7 +329,7 @@ END
       errmsgs << <<'END'
 7: syntax error, unexpected end-of-input, expecting end
 END
-    elsif ruby27?
+    elsif ruby27? || ruby30?
       errmsgs << <<'END'
 3: syntax error, unexpected ']', expecting ')'
 ...  <li>'; _buf << ( item[:name]] ).to_s; _buf << '</li>
